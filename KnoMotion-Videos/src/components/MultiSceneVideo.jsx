@@ -27,10 +27,21 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
 
   console.log('Ordered scenes:', orderedScenes.length, 'scenes');
 
-  // Calculate timing for each scene
+  // Calculate timing for each scene (handle both v3 and v5 schemas)
   let currentFrame = 0;
   const sceneTimings = orderedScenes.map((scene, index) => {
-    const sceneDuration = scene.duration_s * fps;
+    // Check if v5 schema
+    const isV5 = scene.schema_version?.startsWith('5.');
+    
+    // Calculate scene duration in frames
+    let sceneDuration;
+    if (isV5) {
+      const totalSeconds = (scene.beats?.exit || 15) + 0.5; // Add tail padding for v5
+      sceneDuration = Math.round(totalSeconds * fps);
+    } else {
+      sceneDuration = scene.duration_s * fps;
+    }
+    
     const start = currentFrame;
     
     // Account for transition overlap (transition starts before scene ends)
