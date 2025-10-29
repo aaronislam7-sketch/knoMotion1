@@ -54,9 +54,9 @@ export * from './layout-resolver';
 export * from './scene-validator';
 
 // ✨ CREATIVE MAGIC - V6 Enhancements
-export * from './particleSystem';
-export * from './handwritingEffects';
-export * from './advancedEffects';
+export * from './particleSystem.jsx';
+export * from './handwritingEffects.jsx';
+export * from './advancedEffects.jsx';
 export * from './lottieLibrary';
 
 export default SDK;

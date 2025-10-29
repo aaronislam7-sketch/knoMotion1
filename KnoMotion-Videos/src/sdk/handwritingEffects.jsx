@@ -1,3 +1,4 @@
+import React from 'react';
 import { interpolate } from 'remotion';
 import { EZ } from './easing';
 
@@ -400,9 +401,10 @@ export const getBouncyLetters = (frame, config, fps) => {
 };
 
 /**
- * Render handwriting cursor (pen, highlight, etc.)
+ * Get SVG attributes for handwriting cursor (pen, highlight, etc.)
+ * Returns configuration object instead of JSX for use in any rendering context
  */
-export const renderHandwritingCursor = (cursor, color = '#FF6B35') => {
+export const getHandwritingCursorSVG = (cursor, color = '#FF6B35') => {
   if (!cursor.visible) return null;
   
   if (cursor.type === 'pen') {
@@ -414,41 +416,38 @@ export const renderHandwritingCursor = (cursor, color = '#FF6B35') => {
       Z
     `;
     
-    return (
-      <path
-        d={penPath}
-        fill={color}
-        opacity={cursor.opacity}
-        transform={`rotate(${cursor.rotation} ${cursor.x} ${cursor.y})`}
-      />
-    );
+    return {
+      type: 'path',
+      d: penPath,
+      fill: color,
+      opacity: cursor.opacity,
+      transform: `rotate(${cursor.rotation} ${cursor.x} ${cursor.y})`
+    };
   }
   
   if (cursor.type === 'underline') {
-    return (
-      <line
-        x1={cursor.x}
-        y1={cursor.y}
-        x2={cursor.x + 5}
-        y2={cursor.y}
-        stroke={color}
-        strokeWidth={cursor.width}
-        opacity={cursor.opacity}
-      />
-    );
+    return {
+      type: 'line',
+      x1: cursor.x,
+      y1: cursor.y,
+      x2: cursor.x + 5,
+      y2: cursor.y,
+      stroke: color,
+      strokeWidth: cursor.width,
+      opacity: cursor.opacity
+    };
   }
   
   if (cursor.type === 'highlight') {
-    return (
-      <rect
-        x={cursor.x}
-        y={cursor.y}
-        width={cursor.width}
-        height={cursor.height}
-        fill={color}
-        opacity={cursor.opacity}
-      />
-    );
+    return {
+      type: 'rect',
+      x: cursor.x,
+      y: cursor.y,
+      width: cursor.width,
+      height: cursor.height,
+      fill: color,
+      opacity: cursor.opacity
+    };
   }
   
   return null;

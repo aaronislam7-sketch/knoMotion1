@@ -1,3 +1,4 @@
+import React from 'react';
 import { interpolate } from 'remotion';
 import { EZ } from './easing';
 
