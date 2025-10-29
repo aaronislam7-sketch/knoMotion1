@@ -10,7 +10,10 @@ import {
   popInSpring,
   EZ,
   useSceneId,
-  toFrames 
+  toFrames,
+  createTextBoundingBox,
+  calculateSafeTimerPosition,
+  validateScene
 } from '../sdk';
 
 /**
@@ -67,6 +70,24 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
   const options = (data.options || []).slice(0, 4); // Max 4 options
   const correctIndex = data.correctIndex || 0;
   const countdownDuration = data.countdownDuration || 5.0;
+  
+  // Calculate safe timer position to avoid collision with question
+  const questionBox = createTextBoundingBox({
+    id: 'question',
+    text: data.question || '',
+    x: 960,
+    y: 180,
+    fontSize: fonts.size_question,
+    maxWidth: 900,
+    lineHeight: 1.3,
+  });
+  
+  const safeTimerPosition = calculateSafeTimerPosition(questionBox, {
+    defaultPosition: { x: 960, y: 200 },
+    minSpacing: 40,
+    canvasWidth: 1920,
+    canvasHeight: 1080,
+  });
 
   // Beats from JSON (in seconds) - Convert to frames
   const sceneBeats = scene.beats || {};
@@ -154,10 +175,10 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
       svg.removeChild(svg.firstChild);
     }
 
-    // Countdown timer circle (during countdown)
+    // Countdown timer circle (during countdown) - COLLISION-SAFE POSITION
     if (isCountingDown || countdownComplete) {
-      const centerX = 960;
-      const centerY = 200;
+      const centerX = safeTimerPosition.x;
+      const centerY = safeTimerPosition.y;
       const radius = 70;
       
       // Background circle
@@ -286,14 +307,14 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
           </div>
         )}
 
-        {/* Countdown timer */}
+        {/* Countdown timer - COLLISION-SAFE POSITION */}
         {(isCountingDown || countdownComplete) && (
           <div
             style={{
               position: 'absolute',
-              top: 130,
-              left: '50%',
-              transform: 'translateX(-50%)',
+              top: safeTimerPosition.y - 10,
+              left: safeTimerPosition.x,
+              transform: 'translate(-50%, -50%)',
               opacity: countdownComplete ? 0 : 1,
               transition: 'opacity 0.3s',
             }}
@@ -428,4 +449,66 @@ export const PRESETS_REQUIRED = [
 export const getPosterFrame = (scene, fps) => {
   // Show frame with all options visible + countdown
   return toFrames(scene.beats?.countdown || 3.5, fps) + 30;
+};
+
+// Collision detection configuration
+export const getLayoutConfig = (scene, fps) => {
+  return {
+    getBoundingBoxes: (scene) => {
+      const data = scene.fill?.quiz || {};
+      const options = data.options || [];
+      const { createTextBoundingBox, createShapeBoundingBox, calculateSafeTimerPosition } = require('../sdk');
+      
+      const boxes = [];
+      
+      // Question box
+      const questionBox = createTextBoundingBox({
+        id: 'question',
+        text: data.question || '',
+        x: 960,
+        y: 180,
+        fontSize: 52,
+        maxWidth: 900,
+        lineHeight: 1.3,
+        padding: 20,
+        priority: 10,
+        flexible: false,
+      });
+      boxes.push(questionBox);
+      
+      // Timer box (safe position)
+      const safeTimerPos = calculateSafeTimerPosition(questionBox, {
+        defaultPosition: { x: 960, y: 200 },
+        minSpacing: 40,
+      });
+      
+      boxes.push(createShapeBoundingBox({
+        id: 'timer',
+        x: safeTimerPos.x,
+        y: safeTimerPos.y,
+        width: 160,
+        height: 160,
+        padding: 20,
+        priority: 8,
+        flexible: true,
+      }));
+      
+      // Quiz options
+      options.forEach((option, i) => {
+        const y = 450 + i * 110;
+        boxes.push(createShapeBoundingBox({
+          id: `option-${i}`,
+          x: 960,
+          y: y,
+          width: 760,
+          height: 80,
+          padding: 10,
+          priority: 5,
+          flexible: false,
+        }));
+      });
+      
+      return boxes;
+    },
+  };
 };

@@ -10,7 +10,9 @@ import {
   pulseEmphasis,
   EZ,
   useSceneId,
-  toFrames 
+  toFrames,
+  calculateSafeConnectorPath,
+  validateScene
 } from '../sdk';
 
 /**
@@ -266,11 +268,17 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
       });
     }
 
-    // Connecting lines (center to parts) - ZERO WOBBLE - WITH PULSE ANIMATION
+    // Connecting lines (center to parts) - ZERO WOBBLE - WITH PULSE ANIMATION - COLLISION-SAFE
     if (frame >= beats.connections) {
-      const centerX = 960;
-      const centerY = 540;
       const positions = getAdaptiveLayout(parts.length);
+      
+      // Define center box dimensions for collision avoidance
+      const centerBox = {
+        x: 960,
+        y: 460,
+        width: 400,
+        height: 160,
+      };
 
       parts.forEach((part, i) => {
         const startFrame = beats.connections + i * 10;
@@ -278,18 +286,32 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
 
         const progress = Math.min((frame - startFrame) / 25, 1);
         const target = positions[i];
+        
+        // Define target box dimensions
+        const targetBox = {
+          x: target.x,
+          y: target.y,
+          width: 340,
+          height: 160,
+        };
+        
+        // Calculate safe connector path (avoids overlapping with boxes)
+        const safePath = calculateSafeConnectorPath(centerBox, targetBox, {
+          padding: 10, // Start/end 10px away from box edges
+          curveIntensity: 0.3,
+        });
 
         // Pulse animation after initial draw
         const isPulsing = frame >= beats.pulseConnections;
         const pulseProgress = isPulsing ? (Math.sin((frame - beats.pulseConnections + i * 10) * 0.1) + 1) / 2 : 0;
         
-        const midY = centerY + (target.y - centerY) * 0.5;
-        const pathData = `M ${centerX} ${centerY} Q ${centerX} ${midY} ${centerX + (target.x - centerX) * progress} ${centerY + (target.y - centerY) * progress}`;
+        // Animate path drawing
+        const animatedPath = `M ${safePath.start.x} ${safePath.start.y} Q ${safePath.control.x} ${safePath.control.y} ${safePath.start.x + (safePath.end.x - safePath.start.x) * progress} ${safePath.start.y + (safePath.end.y - safePath.start.y) * progress}`;
 
         const strokeWidth = isPulsing ? 3 + pulseProgress * 2 : 3;
         const opacity = isPulsing ? 0.4 + pulseProgress * 0.3 : 0.4;
 
-        const connector = rc.path(pathData, {
+        const connector = rc.path(animatedPath, {
           stroke: `${colors.ink}`,
           strokeWidth: strokeWidth,
           roughness: 0,  // ZERO WOBBLE
@@ -299,14 +321,23 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
         connector.style.opacity = opacity;
         svg.appendChild(connector);
 
-        // Arrow indicator at end of connection
+        // Arrow indicator at end of connection (positioned at edge of target box, not overlapping)
         if (progress > 0.8) {
           const arrowProgress = (progress - 0.8) / 0.2;
-          const arrowX = target.x;
-          const arrowY = target.y - 80;
-          const arrowSize = 12 * arrowProgress;
+          const arrowSize = 10 * arrowProgress;
           
-          const arrowPath = `M ${arrowX} ${arrowY} L ${arrowX - arrowSize} ${arrowY - arrowSize * 1.5} L ${arrowX + arrowSize} ${arrowY - arrowSize * 1.5} Z`;
+          // Position arrow at the connection endpoint (edge of box)
+          const arrowX = safePath.end.x;
+          const arrowY = safePath.end.y;
+          
+          // Calculate arrow direction based on path angle
+          const dx = safePath.end.x - safePath.control.x;
+          const dy = safePath.end.y - safePath.control.y;
+          const angle = Math.atan2(dy, dx);
+          
+          // Arrow points in the direction of the path
+          const arrowPath = `M ${arrowX} ${arrowY} L ${arrowX - arrowSize * Math.cos(angle - Math.PI / 6)} ${arrowY - arrowSize * Math.sin(angle - Math.PI / 6)} L ${arrowX - arrowSize * Math.cos(angle + Math.PI / 6)} ${arrowY - arrowSize * Math.sin(angle + Math.PI / 6)} Z`;
+          
           const arrow = rc.path(arrowPath, {
             stroke: colors.ink,
             strokeWidth: 2,
@@ -516,6 +547,103 @@ export const PRESETS_REQUIRED = [
 
 export const getPosterFrame = (scene, fps) => {
   return toFrames(scene.beats?.connections || 4.0, fps);
+};
+
+// Collision detection configuration
+export const getLayoutConfig = (scene, fps) => {
+  return {
+    getBoundingBoxes: (scene) => {
+      const data = scene.fill?.concept || {};
+      const parts = data.parts || [];
+      const { createTextBoundingBox, createShapeBoundingBox } = require('../sdk/collision-detection');
+      
+      const boxes = [];
+      
+      // Title
+      boxes.push(createTextBoundingBox({
+        id: 'title',
+        text: data.title || 'Breaking It Down',
+        x: 960,
+        y: 100,
+        fontSize: 56,
+        maxWidth: 1200,
+        padding: 20,
+        priority: 10,
+        flexible: false,
+      }));
+      
+      // Center concept
+      boxes.push(createShapeBoundingBox({
+        id: 'centerConcept',
+        x: 960,
+        y: 460,
+        width: 400,
+        height: 160,
+        padding: 20,
+        priority: 10,
+        flexible: false,
+      }));
+      
+      // Part boxes
+      const getAdaptiveLayout = (count) => {
+        const boxWidth = 340;
+        const totalWidth = 1920;
+        const margin = 80;
+        
+        if (count <= 4) {
+          const availableWidth = totalWidth - margin * 2;
+          const spacing = (availableWidth - boxWidth * count) / Math.max(count - 1, 1);
+          
+          return Array.from({ length: count }, (_, i) => ({
+            x: margin + (boxWidth + spacing) * i + boxWidth / 2,
+            y: 750,
+          }));
+        }
+        
+        const row1Count = Math.ceil(count / 2);
+        const row2Count = count - row1Count;
+        const positions = [];
+        
+        const availableWidth1 = totalWidth - margin * 2;
+        const spacing1 = (availableWidth1 - boxWidth * row1Count) / Math.max(row1Count - 1, 1);
+        for (let i = 0; i < row1Count; i++) {
+          positions.push({
+            x: margin + (boxWidth + spacing1) * i + boxWidth / 2,
+            y: 650,
+          });
+        }
+        
+        const availableWidth2 = totalWidth - margin * 2;
+        const spacing2 = (availableWidth2 - boxWidth * row2Count) / Math.max(row2Count - 1, 1);
+        const offsetX = (totalWidth - (boxWidth * row2Count + spacing2 * (row2Count - 1))) / 2;
+        for (let i = 0; i < row2Count; i++) {
+          positions.push({
+            x: offsetX + (boxWidth + spacing2) * i + boxWidth / 2,
+            y: 850,
+          });
+        }
+        
+        return positions;
+      };
+      
+      const positions = getAdaptiveLayout(parts.length);
+      parts.forEach((part, i) => {
+        const pos = positions[i];
+        boxes.push(createShapeBoundingBox({
+          id: `part-${i}`,
+          x: pos.x,
+          y: pos.y,
+          width: 340,
+          height: 160,
+          padding: 10,
+          priority: 5,
+          flexible: false,
+        }));
+      });
+      
+      return boxes;
+    },
+  };
 };
 
 // Legacy exports for backward compatibility
