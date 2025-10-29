@@ -1,9 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, Sequence, useVideoConfig } from 'remotion';
-import { HookTemplate } from '../templates/HookTemplate';
-import { ExplainTemplate } from '../templates/ExplainTemplate';
-import { ApplyTemplate } from '../templates/ApplyTemplate';
-import { ReflectTemplate } from '../templates/ReflectTemplate';
+import { TemplateRouter } from '../templates/TemplateRouter';
 import { SceneTransition } from './SceneTransition';
 
 /**
@@ -21,14 +18,6 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
 
   // Debug log
   console.log('MultiSceneVideo rendering with scenes:', scenes);
-
-  // Template mapping
-  const templateMap = {
-    'hook': HookTemplate,
-    'explain': ExplainTemplate,
-    'apply': ApplyTemplate,
-    'reflect': ReflectTemplate
-  };
 
   // Get scenes in order
   const sceneOrder = ['hook', 'explain', 'apply', 'reflect'];
@@ -63,8 +52,6 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: '#fafafa' }}>
       {sceneTimings.map((timing, index) => {
-        const Component = templateMap[timing.pillar] || HookTemplate;
-        
         return (
           <React.Fragment key={`scene-${timing.pillar}-${index}`}>
             {/* Scene */}
@@ -72,7 +59,7 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
               from={timing.start}
               durationInFrames={timing.duration}
             >
-              <Component scene={timing.scene} />
+              <TemplateRouter scene={timing.scene} />
             </Sequence>
 
             {/* Transition to next scene */}

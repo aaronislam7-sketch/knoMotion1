@@ -18,19 +18,19 @@ import { Apply3BScenarioChoice } from './Apply3BScenarioChoice_V5';
 import { Reflect4AKeyTakeaways } from './Reflect4AKeyTakeaways_V5';
 import { Reflect4DForwardLink } from './Reflect4DForwardLink_V5';
 
-// Legacy Templates (v3/v4)
-import { HookTemplate } from './HookTemplate';
-import { ExplainTemplate } from './ExplainTemplate';
-import { ApplyTemplate } from './ApplyTemplate';
-import { ReflectTemplate } from './ReflectTemplate';
-import { HookStoryTemplate } from './HookStoryTemplate';
-import { ExplainTimelineTemplate } from './ExplainTimelineTemplate';
-import { ApplyCompareTemplate } from './ApplyCompareTemplate';
-import { ReflectMindMapTemplate } from './ReflectMindMapTemplate';
+// Legacy Templates (v3/v4) - Removed after v5 migration
+// import { HookTemplate } from './HookTemplate';
+// import { ExplainTemplate } from './ExplainTemplate';
+// import { ApplyTemplate } from './ApplyTemplate';
+// import { ReflectTemplate } from './ReflectTemplate';
+// import { HookStoryTemplate } from './HookStoryTemplate';
+// import { ExplainTimelineTemplate } from './ExplainTimelineTemplate';
+// import { ApplyCompareTemplate } from './ApplyCompareTemplate';
+// import { ReflectMindMapTemplate } from './ReflectMindMapTemplate';
 
 /**
  * Template registry mapping template_id to component
- * Priority: v5.0 templates first, then fall back to legacy
+ * Blueprint v5.0 only - legacy templates removed
  */
 const TEMPLATE_REGISTRY = {
   // Blueprint v5.0 templates
@@ -43,15 +43,15 @@ const TEMPLATE_REGISTRY = {
   'Reflect4AKeyTakeaways': Reflect4AKeyTakeaways,
   'Reflect4DForwardLink': Reflect4DForwardLink,
   
-  // Legacy templates
-  'hook': HookTemplate,
-  'hook_story': HookStoryTemplate,
-  'explain': ExplainTemplate,
-  'explain_timeline': ExplainTimelineTemplate,
-  'apply': ApplyTemplate,
-  'apply_compare': ApplyCompareTemplate,
-  'reflect': ReflectTemplate,
-  'reflect_mindmap': ReflectMindMapTemplate,
+  // Legacy templates - Removed after v5 migration
+  // 'hook': HookTemplate,
+  // 'hook_story': HookStoryTemplate,
+  // 'explain': ExplainTemplate,
+  // 'explain_timeline': ExplainTimelineTemplate,
+  // 'apply': ApplyTemplate,
+  // 'apply_compare': ApplyCompareTemplate,
+  // 'reflect': ReflectTemplate,
+  // 'reflect_mindmap': ReflectMindMapTemplate,
 };
 
 /**
@@ -59,8 +59,8 @@ const TEMPLATE_REGISTRY = {
  */
 const getTemplateComponent = (templateId, pillar) => {
   if (!templateId) {
-    console.warn('No template_id found, using pillar fallback:', pillar);
-    return TEMPLATE_REGISTRY[pillar] || HookTemplate;
+    console.warn('No template_id found, using default v5 template');
+    return Hook1AQuestionBurst; // Default v5 fallback
   }
   
   // Direct match
@@ -68,14 +68,15 @@ const getTemplateComponent = (templateId, pillar) => {
     return TEMPLATE_REGISTRY[templateId];
   }
   
-  // Try pillar fallback
+  // Try pillar fallback (not used in v5, kept for compatibility)
   const pillarFromId = templateId.split('_')[0]?.toLowerCase();
   if (TEMPLATE_REGISTRY[pillarFromId]) {
     return TEMPLATE_REGISTRY[pillarFromId];
   }
   
-  // Final fallback based on pillar
-  return TEMPLATE_REGISTRY[pillar] || HookTemplate;
+  // Final fallback to default v5 template
+  console.warn(`Template "${templateId}" not found, using Hook1AQuestionBurst as fallback`);
+  return Hook1AQuestionBurst;
 };
 
 /**
