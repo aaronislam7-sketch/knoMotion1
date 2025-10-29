@@ -1,0 +1,57 @@
+{
+  "schema_version": "3.0",
+  "template_id": "reflect",
+  "pillar": "reflect",
+  "duration_s": 35,
+  "fps": 30,
+  "meta": {
+    "title": "Growth Mindset Reflection",
+    "description": "Consolidate learning and prompt deeper thinking",
+    "tags": ["module:psychology", "pedagogy:reflect", "topic:growth-mindset"],
+    "difficulty": "beginner",
+    "tone": "thoughtful"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#8E44AD",
+      "support": "#2E7FE4",
+      "ink": "#1A1A1A",
+      "highlight": "#F3EBFA"
+    },
+    "fonts": {
+      "title": {
+        "family": "Cabin Sketch, cursive",
+        "size": 64,
+        "weight": 700
+      },
+      "subtitle": {
+        "family": "Inter, sans-serif",
+        "size": 30,
+        "weight": 600
+      },
+      "body": {
+        "family": "Patrick Hand, cursive",
+        "size": 32,
+        "weight": 400
+      }
+    }
+  },
+  "layout": {
+    "canvas": {
+      "w": 1920,
+      "h": 1080
+    }
+  },
+  "fill": {
+    "texts": {
+      "title": "Let's Reflect",
+      "insight1": "Intelligence isn't fixed — your brain physically changes when you learn",
+      "insight2": "Challenges and mistakes are opportunities for growth, not signs of failure",
+      "insight3": "The word \"yet\" transforms how you see your abilities",
+      "question": "When was the last time you said 'I can't' about something? What would change if you added 'yet'?",
+      "nextSteps": "Try this week: Add 'yet' to one challenge you're facing"
+    }
+  },
+  "timeline": []
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "apply3a",
+  "template_id": "Apply3AMicroQuiz",
+  
+  "meta": {
+    "title": "APPLY 3A: Micro Quiz - Blueprint v5.0",
+    "description": "Quick knowledge check with countdown timer and automatic reveal",
+    "tags": ["pedagogy:apply", "variant:3A", "pattern:quiz", "tone:energetic"],
+    "tone": "energetic"
+  },
+  
+  "style_tokens": {
+    "mode": "whiteboard",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#27AE60",
+      "accent2": "#FF6B35",
+      "wrong": "#E74C3C",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.6,
+    "question": 0.6,
+    "options": 1.8,
+    "countdown": 3.5,
+    "reveal": 8.5,
+    "celebration": 9.0,
+    "explanation": 9.5,
+    "exit": 12.0
+  },
+  
+  "fill": {
+    "quiz": {
+      "question": "Which region values logic and efficiency?",
+      "options": [
+        "Empathios",
+        "Pragmatica",
+        "Innovara"
+      ],
+      "correctIndex": 1,
+      "explanation": "Pragmatica is defined by logical thinking and efficient decision-making.",
+      "countdownDuration": 5.0
+    }
+  }
+}

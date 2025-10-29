@@ -1,0 +1,35 @@
+{
+  "name": "knomotion-videos",
+  "version": "5.0.0",
+  "description": "Blueprint v5.0 - JSON-driven video templates for educational content",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@lottiefiles/react-lottie-player": "^3.6.0",
+    "@remotion/player": "^4.0.136",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.136",
+    "roughjs": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^7.1.10"
+  },
+  "keywords": [
+    "remotion",
+    "video",
+    "educational",
+    "templates",
+    "json-driven",
+    "blueprint-v5"
+  ],
+  "author": "",
+  "license": "MIT"
+}

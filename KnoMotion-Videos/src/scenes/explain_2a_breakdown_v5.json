@@ -1,0 +1,63 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "explain2a",
+  "template_id": "Explain2AConceptBreakdown",
+  
+  "meta": {
+    "title": "EXPLAIN 2A: Concept Breakdown",
+    "description": "Break complex concept into clear, digestible parts",
+    "tags": ["module:knodovia", "pedagogy:explain", "variant:2A", "pattern:breakdown", "tone:structured"],
+    "difficulty": "intermediate",
+    "tone": "clear",
+    "narrative_pattern": "X is made of Y, Z, A...",
+    "visual_archetype": "branching structure, labeled nodes, connecting paths",
+    "compatible_next": ["apply_3a", "apply_3b", "reflect_4a"]
+  },
+  
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#FF6B35",
+      "accent2": "#2ECC71",
+      "accent3": "#9B59B6",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0,
+    "title": 0.8,
+    "centerConcept": 2.0,
+    "parts": 3.5,
+    "connections": 5.5,
+    "pulseConnections": 6.5,
+    "settle": 9.5,
+    "exit": 10.0
+  },
+  
+  "fill": {
+    "concept": {
+      "title": "Understanding Knodovia's Regions",
+      "concept": "Four Mindset Regions",
+      "parts": [
+        {
+          "label": "Growth Jungle",
+          "description": "Where challenges become opportunities"
+        },
+        {
+          "label": "Fixed Peaks",
+          "description": "Mountains of rigid beliefs"
+        },
+        {
+          "label": "Curiosity Bay",
+          "description": "Waters of endless questions"
+        },
+        {
+          "label": "Resilience Valley",
+          "description": "Where setbacks strengthen resolve"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "apply3b",
+  "template_id": "Apply3BScenarioChoice",
+  
+  "meta": {
+    "title": "APPLY 3B: Scenario Application",
+    "description": "Apply learning to real-world scenario with choice paths",
+    "tags": ["module:knodovia", "pedagogy:apply", "variant:3B", "pattern:scenario-choice", "tone:practical"],
+    "difficulty": "intermediate",
+    "tone": "practical",
+    "narrative_pattern": "Here's a situation... How would you apply what you learned?",
+    "visual_archetype": "scenario setup, choice paths, celebration of best approach",
+    "compatible_next": ["reflect_4a", "reflect_4d"]
+  },
+  
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#27AE60",
+      "accent2": "#2E7FE4",
+      "accent3": "#FF6B35",
+      "wrong": "#E74C3C",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0,
+    "title": 0.5,
+    "scenario": 1.5,
+    "question": 3.5,
+    "choices": 5.0,
+    "reveal": 7.5,
+    "explanation": 9.0,
+    "settle": 11.0,
+    "exit": 11.5
+  },
+  
+  "fill": {
+    "scenario": {
+      "title": "Navigating Knodovia",
+      "scenario": "You've just arrived at the border between Growth Jungle and Fixed Peaks. A traveler tells you that reaching Curiosity Bay is impossible from here.",
+      "question": "How would you respond?",
+      "choices": [
+        "Accept their advice and turn back",
+        "Ask them to show you their map and explore alternative routes",
+        "Ignore them completely and forge ahead"
+      ],
+      "correctIndex": 1,
+      "explanation": "This approach embodies the Growth mindset—seeking information, staying curious, and finding creative solutions rather than giving up or being reckless."
+    }
+  }
+}

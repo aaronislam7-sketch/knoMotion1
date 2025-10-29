@@ -1,0 +1,55 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "reflect4d",
+  "template_id": "Reflect4DForwardLink",
+  
+  "meta": {
+    "title": "REFLECT 4D: Forward Link",
+    "description": "Anchor current learning and transition to what's next",
+    "tags": ["module:knodovia", "pedagogy:reflect", "variant:4D", "pattern:forward-link", "tone:encouraging"],
+    "difficulty": "beginner",
+    "tone": "encouraging",
+    "narrative_pattern": "You learned X... Now you're ready for Y",
+    "visual_archetype": "achievement celebration, progression path, next journey preview",
+    "compatible_next": ["hook_1a", "hook_1e"]
+  },
+  
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#27AE60",
+      "accent2": "#9B59B6",
+      "accent3": "#FF6B35",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0,
+    "title": 0.5,
+    "current": 1.5,
+    "celebrate": 3.0,
+    "moveToComplete": 4.5,
+    "steppingStones": 5.5,
+    "nextReveal": 7.0,
+    "cta": 8.5,
+    "settle": 10.0,
+    "exit": 10.5
+  },
+  
+  "fill": {
+    "forward": {
+      "title": "Your Knodovia Journey",
+      "current": {
+        "label": "You've learned:",
+        "summary": "The four regions of Knodovia and how different mindsets shape the landscape of learning"
+      },
+      "next": {
+        "label": "Coming up:",
+        "teaser": "Deep dive into the Growth Jungle—where every challenge becomes an opportunity to flourish"
+      },
+      "cta": "Ready to explore deeper?"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "hook1e",
+  "template_id": "Hook1EAmbientMystery",
+  
+  "meta": {
+    "title": "HOOK 1E: Ambient Mystery",
+    "description": "Build intrigue through atmospheric question with fog and mystery",
+    "tags": ["module:knodovia", "pedagogy:hook", "variant:1E", "pattern:ambient-mystery", "tone:mysterious"],
+    "difficulty": "beginner",
+    "tone": "mysterious",
+    "narrative_pattern": "In the shadows of...",
+    "visual_archetype": "fog particles, whisper text, dim spotlight",
+    "compatible_next": ["explain_2a", "explain_2b", "explain_2e"]
+  },
+  
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#1A1F2E",
+      "fog": "#4A5568",
+      "accent": "#8E44AD",
+      "accent2": "#6C7A89",
+      "ink": "#E8F4FD",
+      "spotlight": "#F39C12"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0,
+    "fogIn": 0.5,
+    "spotlight": 1.5,
+    "whisperText": 2.5,
+    "questionReveal": 4.0,
+    "glow1": 5.0,
+    "glow2": 5.5,
+    "wisps": 5.5,
+    "hint": 8.0,
+    "accentGlow": 7.0,
+    "settle": 9.0,
+    "exit": 12.0
+  },
+  
+  "fill": {
+    "texts": {
+      "whisper": "In the depths of Knodovia...",
+      "question": "What secrets shape the land?",
+      "hint": "Let's discover together..."
+    }
+  }
+}

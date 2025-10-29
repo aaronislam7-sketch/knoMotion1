@@ -1,0 +1,56 @@
+{
+  "schema_version": "3.0",
+  "template_id": "apply",
+  "pillar": "apply",
+  "duration_s": 35,
+  "fps": 30,
+  "meta": {
+    "title": "Growth Mindset in Action",
+    "description": "See how to apply growth mindset in real situations",
+    "tags": ["module:psychology", "pedagogy:apply", "topic:growth-mindset"],
+    "difficulty": "beginner",
+    "tone": "practical"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#27AE60",
+      "support": "#2E7FE4",
+      "ink": "#1A1A1A",
+      "highlight": "#E8F8F2"
+    },
+    "fonts": {
+      "title": {
+        "family": "Cabin Sketch, cursive",
+        "size": 58,
+        "weight": 700
+      },
+      "subtitle": {
+        "family": "Inter, sans-serif",
+        "size": 28,
+        "weight": 600
+      },
+      "body": {
+        "family": "Patrick Hand, cursive",
+        "size": 32,
+        "weight": 400
+      }
+    }
+  },
+  "layout": {
+    "canvas": {
+      "w": 1920,
+      "h": 1080
+    }
+  },
+  "fill": {
+    "texts": {
+      "scenario": "You're struggling with a difficult math problem and feel like giving up.",
+      "action1": "Reframe: \"I can't do this yet\" instead of \"I can't do this\"",
+      "action2": "Break it down: Split the problem into smaller, manageable steps",
+      "action3": "Seek help: Ask a teacher or peer to explain a tricky concept",
+      "result": "You solve the problem AND strengthen your brain's problem-solving pathways! 🎯"
+    }
+  },
+  "timeline": []
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "3.0",
+  "template_id": "hook",
+  "pillar": "hook",
+  "duration_s": 12,
+  "fps": 30,
+  "meta": {
+    "title": "The Science of Sleep - Hook",
+    "description": "Cinematic write-on introduction to sleep science",
+    "tags": ["module:neuroscience", "pedagogy:hook", "topic:sleep"],
+    "difficulty": "beginner",
+    "tone": "intriguing"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#5B47D6",
+      "ink": "#1A1A1A"
+    }
+  },
+  "layout": {
+    "canvas": {
+      "w": 1920,
+      "h": 1080
+    }
+  },
+  "fill": {
+    "texts": {
+      "questionPart1": "What if losing consciousness",
+      "questionPart2": "made you smarter?",
+      "icon": "😴",
+      "spark1": "brain clears toxins",
+      "spark2": "memories consolidate",
+      "spark3": "neurons rewire",
+      "challenge": "Sleep isn't rest. It's renovation."
+    }
+  },
+  "timeline": []
+}

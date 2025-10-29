@@ -1,0 +1,58 @@
+{
+  "schema_version": "3.0",
+  "template_id": "explain",
+  "pillar": "explain",
+  "duration_s": 35,
+  "fps": 30,
+  "meta": {
+    "title": "Growth Mindset Explained",
+    "description": "Break down the concept step by step",
+    "tags": ["module:psychology", "pedagogy:explain", "topic:growth-mindset"],
+    "difficulty": "beginner",
+    "tone": "educational"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#2E7FE4",
+      "support": "#27AE60",
+      "ink": "#1A1A1A",
+      "highlight": "#E8F4FD"
+    },
+    "fonts": {
+      "title": {
+        "family": "Cabin Sketch, cursive",
+        "size": 64,
+        "weight": 700
+      },
+      "subtitle": {
+        "family": "Inter, sans-serif",
+        "size": 32,
+        "weight": 500
+      },
+      "body": {
+        "family": "Patrick Hand, cursive",
+        "size": 32,
+        "weight": 400
+      }
+    }
+  },
+  "layout": {
+    "canvas": {
+      "w": 1920,
+      "h": 1080
+    }
+  },
+  "fill": {
+    "texts": {
+      "title": "Understanding Growth Mindset",
+      "concept": "Your abilities can develop through dedication and practice",
+      "step1": "Embrace challenges as opportunities to grow",
+      "step2": "Persist through setbacks with resilience",
+      "step3": "See effort as the path to mastery",
+      "step4": "Learn from criticism and feedback",
+      "summary": "Your brain grows stronger with every challenge!"
+    }
+  },
+  "timeline": []
+}

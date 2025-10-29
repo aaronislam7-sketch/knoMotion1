@@ -1,0 +1,53 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "explain2b",
+  "template_id": "Explain2BAnalogy",
+  
+  "meta": {
+    "title": "EXPLAIN 2B: Analogy - Blueprint v5.0",
+    "description": "Explain concept through relatable comparison with side-by-side frames and connection reveal",
+    "tags": ["pedagogy:explain", "variant:2B", "pattern:analogy", "tone:relatable"],
+    "tone": "relatable"
+  },
+  
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#FF6B35",
+      "accent2": "#2E7FE4",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.8,
+    "title": 0.8,
+    "familiar": 2.0,
+    "newConcept": 3.5,
+    "moveAway": 6.0,
+    "connection": 7.5,
+    "explanation": 9.0,
+    "exit": 12.0
+  },
+  
+  "fill": {
+    "analogy": {
+      "title": "Think of it like this...",
+      "familiar": {
+        "label": "A Compass",
+        "description": "Points you in the right direction, shows you where North is, helps you navigate unfamiliar territory.",
+        "lottie": null,
+        "image": null
+      },
+      "newConcept": {
+        "label": "A Mindset",
+        "description": "Guides your decisions, shows you what matters most, helps you navigate life's challenges.",
+        "lottie": null,
+        "image": null
+      },
+      "connection": "They work the same way!",
+      "explanation": "Both provide direction and help you navigate complexity with confidence."
+    }
+  }
+}

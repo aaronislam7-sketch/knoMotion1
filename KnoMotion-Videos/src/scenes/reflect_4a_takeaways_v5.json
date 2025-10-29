@@ -1,0 +1,54 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "reflect4a",
+  "template_id": "Reflect4AKeyTakeaways",
+  
+  "meta": {
+    "title": "REFLECT 4A: Key Takeaways - Blueprint v5.0",
+    "description": "Summarize core lessons in memorable list with stagger reveals",
+    "tags": ["pedagogy:reflect", "variant:4A", "pattern:takeaways", "tone:affirming"],
+    "tone": "affirming"
+  },
+  
+  "style_tokens": {
+    "mode": "whiteboard",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#27AE60",
+      "accent2": "#2E7FE4",
+      "accent3": "#FF6B35",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.8,
+    "title": 0.8,
+    "takeaway1": 2.2,
+    "takeaway2": 3.4,
+    "takeaway3": 4.6,
+    "emphasis": 6.0,
+    "exit": 8.0
+  },
+  
+  "fill": {
+    "reflection": {
+      "title": "Key Takeaways",
+      "takeaways": [
+        {
+          "main": "Geography can be understood through mindsets",
+          "sub": "Not just physical borders, but ways of thinking and being"
+        },
+        {
+          "main": "Each region reflects a different perspective",
+          "sub": "Pragmatica, Empathios, Innovara, and Reflectora each offer unique value"
+        },
+        {
+          "main": "Understanding these helps navigate complexity",
+          "sub": "By recognizing which mindset serves each situation best"
+        }
+      ],
+      "exitMessage": "Ready to move forward..."
+    }
+  }
+}
