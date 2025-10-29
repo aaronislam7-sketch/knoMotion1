@@ -11,11 +11,18 @@ import {
   shrinkToCorner,
   EZ,
   useSceneId,
-  toFrames 
+  toFrames,
+  // ✨ Creative Magic V6
+  generateAmbientParticles,
+  renderAmbientParticles,
+  generateSparkles,
+  renderSparkles,
+  getLiquidBlob,
+  getShimmerEffect
 } from '../sdk';
 
 /**
- * HOOK 1A: QUESTION BURST - Blueprint v5.0
+ * HOOK 1A: QUESTION BURST - Blueprint v5.0 + ✨ CREATIVE MAGIC V6
  * 
  * TEMPLATE STRATEGY:
  * - ✅ Blueprint v5.0 compliant
@@ -24,18 +31,26 @@ import {
  * - ✅ Context-based ID factory (useSceneId)
  * - ✅ Strict zero wobble (roughness: 0, bowing: 0)
  * - ✅ FPS-agnostic (seconds → frames conversion)
+ * - ✨ CREATIVE ENHANCEMENTS:
+ *   • Ambient particle system (floating depth)
+ *   • Sparkle bursts when questions appear
+ *   • Liquid blob behind map (organic energy)
+ *   • Shimmer effect on welcome text
+ *   • Enhanced depth and layering
  * 
  * CONVERSATIONAL FLOW:
- * 1. "What if geography" fades up (preset: fadeUpIn)
- * 2. Question 1 moves up (custom animation - multi-stage)
- * 3. "was measured in mindsets?" fades up (preset: fadeUpIn)
- * 4. Both pulse (preset: pulseEmphasis)
- * 5. Both wipe left (custom animation - coordinated exit)
- * 6. Map draws in center (rough.js with zero wobble)
- * 7. Map shrinks to corner (preset: shrinkToCorner)
- * 8. "Welcome to Knodovia" fades up (preset: fadeUpIn)
- * 9. Subtitle fades in (preset: fadeUpIn)
- * 10. Welcome breathes (preset: breathe)
+ * 1. Ambient particles create living background
+ * 2. "What if geography" fades up with sparkle burst
+ * 3. Question 1 moves up (custom animation - multi-stage)
+ * 4. "was measured in mindsets?" fades up with sparkles
+ * 5. Both pulse (preset: pulseEmphasis)
+ * 6. Both wipe left (custom animation - coordinated exit)
+ * 7. Liquid blob animates behind map position
+ * 8. Map draws in center (rough.js with zero wobble)
+ * 9. Map shrinks to corner (preset: shrinkToCorner)
+ * 10. "Welcome to Knodovia" fades up with shimmer effect
+ * 11. Subtitle fades in (preset: fadeUpIn)
+ * 12. Welcome breathes (preset: breathe)
  * 
  * TYPOGRAPHY:
  * - Headers: Cabin Sketch (sketchy style, NO wobble)
@@ -53,6 +68,29 @@ const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap, transitions })
   const svgRef = useRef(null);
   const mapSvgRef = useRef(null);
   const roughTextSvgRef = useRef(null);
+  const particlesRef = useRef(null);
+  const effectsRef = useRef(null);
+  
+  // ✨ Generate deterministic particles (runs once)
+  const ambientParticles = React.useMemo(
+    () => generateAmbientParticles(20, 42, 1920, 1080),
+    []
+  );
+  
+  const sparklesQ1 = React.useMemo(
+    () => generateSparkles(8, { x: 760, y: 380, width: 400, height: 200 }, 100),
+    []
+  );
+  
+  const sparklesQ2 = React.useMemo(
+    () => generateSparkles(10, { x: 760, y: 500, width: 400, height: 200 }, 200),
+    []
+  );
+  
+  const sparklesWelcome = React.useMemo(
+    () => generateSparkles(12, { x: 660, y: 480, width: 600, height: 160 }, 300),
+    []
+  );
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -317,9 +355,47 @@ const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap, transitions })
       svg.appendChild(textGroup);
     }
 
-    // "Welcome to Knodovia"
+    // "Welcome to Knodovia" - ✨ WITH SHIMMER EFFECT
     if (frame >= beats.welcome) {
       const welcomeText = texts.welcome || 'Welcome to Knodovia';
+      
+      // Create gradient for shimmer effect
+      const shimmer = getShimmerEffect(frame - beats.welcome, {
+        speed: 0.03,
+        width: 150,
+        angle: 45,
+        intensity: 0.4,
+      });
+      
+      // Gradient definition
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.setAttribute('id', id('welcome-shimmer'));
+      gradient.setAttribute('x1', `${shimmer.gradientStart}%`);
+      gradient.setAttribute('x2', `${shimmer.gradientEnd}%`);
+      gradient.setAttribute('y1', '0%');
+      gradient.setAttribute('y2', '0%');
+      
+      const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop1.setAttribute('offset', '0%');
+      stop1.setAttribute('stop-color', colors.accent2);
+      stop1.setAttribute('stop-opacity', '1');
+      
+      const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop2.setAttribute('offset', '50%');
+      stop2.setAttribute('stop-color', '#FFD700');
+      stop2.setAttribute('stop-opacity', '1');
+      
+      const stop3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop3.setAttribute('offset', '100%');
+      stop3.setAttribute('stop-color', colors.accent2);
+      stop3.setAttribute('stop-opacity', '1');
+      
+      gradient.appendChild(stop1);
+      gradient.appendChild(stop2);
+      gradient.appendChild(stop3);
+      defs.appendChild(gradient);
+      svg.appendChild(defs);
       
       const textGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       textGroup.setAttribute('id', id('welcome-group'));
@@ -333,7 +409,7 @@ const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap, transitions })
       textElement.setAttribute('font-family', "'Cabin Sketch', cursive");
       textElement.setAttribute('font-size', fonts.size_welcome);
       textElement.setAttribute('font-weight', '700');
-      textElement.setAttribute('fill', colors.accent2);
+      textElement.setAttribute('fill', `url(#${id('welcome-shimmer')})`);
       textElement.textContent = welcomeText;
       
       textGroup.appendChild(textElement);
@@ -448,6 +524,41 @@ const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap, transitions })
 
   }, [frame, beats.mapReveal, colors, id]);
 
+  // ✨ Render liquid blob behind map
+  useEffect(() => {
+    if (!effectsRef.current || frame < beats.mapReveal - 10) return;
+    
+    const svg = effectsRef.current;
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
+    }
+    
+    // Liquid blob animates behind map
+    if (frame >= beats.mapReveal - 10 && frame < beats.transformMap + 60) {
+      const blobOpacity = frame < beats.mapReveal 
+        ? interpolate(frame, [beats.mapReveal - 10, beats.mapReveal], [0, 0.15], { extrapolateRight: 'clamp' })
+        : 0.15;
+      
+      const blob = getLiquidBlob(frame, {
+        centerX: 960,
+        centerY: 540,
+        baseRadius: 200,
+        points: 6,
+        wobbleAmount: 0.15,
+        speed: 0.015,
+        seed: 500,
+      });
+      
+      const blobPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      blobPath.setAttribute('d', blob.path);
+      blobPath.setAttribute('fill', colors.accent2);
+      blobPath.setAttribute('opacity', String(blobOpacity));
+      
+      svg.appendChild(blobPath);
+    }
+    
+  }, [frame, beats, colors]);
+
   return (
     <AbsoluteFill
       style={{
@@ -458,6 +569,37 @@ const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap, transitions })
         `,
       }}
     >
+      {/* ✨ Ambient particles layer (background) */}
+      <svg
+        ref={particlesRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          opacity: 0.6,
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {renderAmbientParticles(ambientParticles, frame, fps, [colors.accent, colors.accent2, '#2E7FE4']).map(p => p.element)}
+      </svg>
+      
+      {/* ✨ Effects layer (liquid blobs, etc.) */}
+      <svg
+        ref={effectsRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      />
+      
       {/* Decorative layer */}
       <svg
         ref={svgRef}
@@ -471,7 +613,19 @@ const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap, transitions })
         }}
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
-      />
+      >
+        {/* ✨ Sparkles for question 1 */}
+        {frame >= beats.questionPart1 && frame < beats.questionPart1 + 50 &&
+          renderSparkles(sparklesQ1, frame, beats.questionPart1, colors.accent)}
+        
+        {/* ✨ Sparkles for question 2 */}
+        {frame >= beats.questionPart2 && frame < beats.questionPart2 + 50 &&
+          renderSparkles(sparklesQ2, frame, beats.questionPart2, colors.accent2)}
+        
+        {/* ✨ Sparkles for welcome text */}
+        {frame >= beats.welcome && frame < beats.welcome + 60 &&
+          renderSparkles(sparklesWelcome, frame, beats.welcome, '#FFD700')}
+      </svg>
 
       {/* Rough text layer (Cabin Sketch headers) */}
       <svg
