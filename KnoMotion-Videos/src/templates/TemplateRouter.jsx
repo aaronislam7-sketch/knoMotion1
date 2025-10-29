@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { SceneIdContext } from '../sdk/SceneIdContext';
+import { MagicLayer } from '../magic/MagicLayer';
 
 // Blueprint v5.0 Templates
 import { Hook1AQuestionBurst } from './Hook1AQuestionBurst_V5';
@@ -105,13 +106,24 @@ export const TemplateRouter = ({ scene, styles, presets, easingMap, transitions 
     // v5.0 templates require SceneIdContext wrapper
     return (
       <SceneIdContext.Provider value={sceneId}>
-        <TemplateComponent 
-          scene={scene}
-          styles={styles}
-          presets={presets}
-          easingMap={easingMap}
-          transitions={transitions}
-        />
+        <>
+          <TemplateComponent 
+            scene={scene}
+            styles={styles}
+            presets={presets}
+            easingMap={easingMap}
+            transitions={transitions}
+          />
+          {/* MagicLayer: On-brand polish without changing layout/timing */}
+          <MagicLayer 
+            scene={scene} 
+            tokens={{
+              paper: scene?.style_tokens?.texture?.paper ?? true,
+              vignette: true,
+              motifs: [],
+            }}
+          />
+        </>
       </SceneIdContext.Provider>
     );
   }
