@@ -1,9 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, Sequence, useVideoConfig } from 'remotion';
-import { HookTemplate } from '../templates/HookTemplate';
-import { ExplainTemplate } from '../templates/ExplainTemplate';
-import { ApplyTemplate } from '../templates/ApplyTemplate';
-import { ReflectTemplate } from '../templates/ReflectTemplate';
+import { TemplateRouter } from '../templates/TemplateRouter';
 import { SceneTransition } from './SceneTransition';
 
 /**
@@ -22,14 +19,6 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
   // Debug log
   console.log('MultiSceneVideo rendering with scenes:', scenes);
 
-  // Template mapping
-  const templateMap = {
-    'hook': HookTemplate,
-    'explain': ExplainTemplate,
-    'apply': ApplyTemplate,
-    'reflect': ReflectTemplate
-  };
-
   // Get scenes in order
   const sceneOrder = ['hook', 'explain', 'apply', 'reflect'];
   const orderedScenes = sceneOrder
@@ -38,10 +27,21 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
 
   console.log('Ordered scenes:', orderedScenes.length, 'scenes');
 
-  // Calculate timing for each scene
+  // Calculate timing for each scene (handle both v3 and v5 schemas)
   let currentFrame = 0;
   const sceneTimings = orderedScenes.map((scene, index) => {
-    const sceneDuration = scene.duration_s * fps;
+    // Check if v5 schema
+    const isV5 = scene.schema_version?.startsWith('5.');
+    
+    // Calculate scene duration in frames
+    let sceneDuration;
+    if (isV5) {
+      const totalSeconds = (scene.beats?.exit || 15) + 0.5; // Add tail padding for v5
+      sceneDuration = Math.round(totalSeconds * fps);
+    } else {
+      sceneDuration = scene.duration_s * fps;
+    }
+    
     const start = currentFrame;
     
     // Account for transition overlap (transition starts before scene ends)
@@ -63,8 +63,6 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: '#fafafa' }}>
       {sceneTimings.map((timing, index) => {
-        const Component = templateMap[timing.pillar] || HookTemplate;
-        
         return (
           <React.Fragment key={`scene-${timing.pillar}-${index}`}>
             {/* Scene */}
@@ -72,7 +70,7 @@ export const MultiSceneVideo = ({ scenes, transitionDuration = 20 }) => {
               from={timing.start}
               durationInFrames={timing.duration}
             >
-              <Component scene={timing.scene} />
+              <TemplateRouter scene={timing.scene} />
             </Sequence>
 
             {/* Transition to next scene */}

@@ -3,11 +3,11 @@ import { Player } from '@remotion/player';
 import { TemplateRouter } from '../templates/TemplateRouter';
 import { MultiSceneVideo } from './MultiSceneVideo';
 
-// Import default scenes
-import hookScene from '../scenes/hook_sleep_science.json';
-import explainScene from '../scenes/explain_growth_mindset.json';
-import applyScene from '../scenes/apply_growth_mindset.json';
-import reflectScene from '../scenes/reflect_growth_mindset.json';
+// Import default v5 scenes
+import hookScene from '../scenes/hook_1a_knodovia_map_v5.json';
+import explainScene from '../scenes/explain_2a_breakdown_v5.json';
+import applyScene from '../scenes/apply_3a_quiz_v5.json';
+import reflectScene from '../scenes/reflect_4a_takeaways_v5.json';
 
 const PILLAR_INFO = {
   hook: {
@@ -88,38 +88,64 @@ export const VideoWizard = () => {
     try {
       const parsed = JSON.parse(editingJSON[pillar]);
       
-      // Normalize attributes for consistency
-      if (!parsed.duration_s && parsed.duration) {
-        parsed.duration_s = parsed.duration;
-      }
-      if (!parsed.fps) parsed.fps = 30;
-      if (!parsed.layout) {
-        parsed.layout = { canvas: { w: 1920, h: 1080 } };
-      }
-      if (!parsed.meta) {
-        parsed.meta = {
-          title: parsed.fill?.texts?.title || `${pillar} scene`,
-          description: '',
-          tags: [],
-          difficulty: 'beginner',
-          tone: 'engaging'
-        };
-      }
-      if (!parsed.timeline) {
-        parsed.timeline = [];
-      }
+      // Check if v5 or legacy schema
+      const isV5 = parsed.schema_version?.startsWith('5.');
       
-      // Basic validation
-      const errors = [];
-      if (!parsed.template_id) errors.push('Missing template_id');
-      if (!parsed.duration_s) errors.push('Missing duration_s (or duration)');
-      if (!parsed.fill) errors.push('Missing fill data');
-      
-      // Note: TemplateRouter will handle template_id validation at render time
-      
-      if (errors.length > 0) {
-        setValidationErrors(prev => ({ ...prev, [pillar]: errors }));
-        return;
+      // Normalize attributes for v5 schema
+      if (isV5) {
+        // v5 uses beats, no duration_s/fps/layout needed
+        if (!parsed.meta) {
+          parsed.meta = {
+            title: parsed.fill?.texts?.title || `${pillar} scene`,
+            description: '',
+            tags: [],
+            difficulty: 'beginner',
+            tone: 'engaging'
+          };
+        }
+        
+        // Basic v5 validation
+        const errors = [];
+        if (!parsed.template_id) errors.push('Missing template_id');
+        if (!parsed.beats) errors.push('Missing beats object (v5.0 schema)');
+        if (!parsed.fill) errors.push('Missing fill data');
+        
+        if (errors.length > 0) {
+          setValidationErrors(prev => ({ ...prev, [pillar]: errors }));
+          return;
+        }
+      } else {
+        // Legacy schema normalization
+        if (!parsed.duration_s && parsed.duration) {
+          parsed.duration_s = parsed.duration;
+        }
+        if (!parsed.fps) parsed.fps = 30;
+        if (!parsed.layout) {
+          parsed.layout = { canvas: { w: 1920, h: 1080 } };
+        }
+        if (!parsed.meta) {
+          parsed.meta = {
+            title: parsed.fill?.texts?.title || `${pillar} scene`,
+            description: '',
+            tags: [],
+            difficulty: 'beginner',
+            tone: 'engaging'
+          };
+        }
+        if (!parsed.timeline) {
+          parsed.timeline = [];
+        }
+        
+        // Legacy validation
+        const errors = [];
+        if (!parsed.template_id) errors.push('Missing template_id');
+        if (!parsed.duration_s) errors.push('Missing duration_s (or duration)');
+        if (!parsed.fill) errors.push('Missing fill data');
+        
+        if (errors.length > 0) {
+          setValidationErrors(prev => ({ ...prev, [pillar]: errors }));
+          return;
+        }
       }
 
       setScenes(prev => ({ ...prev, [pillar]: parsed }));
@@ -156,9 +182,13 @@ export const VideoWizard = () => {
     }
   };
 
-  // Calculate total duration for final video
+  // Calculate total duration for final video (handle both v3 and v5 schemas)
   const totalDuration = Object.values(scenes).reduce(
-    (sum, scene) => sum + scene.duration_s, 
+    (sum, scene) => {
+      const isV5 = scene.schema_version?.startsWith('5.');
+      const duration = isV5 ? (scene.beats?.exit || 15) : (scene.duration_s || 30);
+      return sum + duration;
+    },
     0
   ) - 2; // Subtract transition overlaps
 
@@ -646,10 +676,31 @@ export const VideoWizard = () => {
                   <Player
                     component={TemplateRouter}
                     inputProps={{ scene: scenes[currentPillar] }}
-                    durationInFrames={scenes[currentPillar].duration_s * scenes[currentPillar].fps}
-                    fps={scenes[currentPillar].fps}
-                      compositionWidth={scenes[currentPillar].layout.canvas.w}
-                      compositionHeight={scenes[currentPillar].layout.canvas.h}
+                    durationInFrames={(() => {
+                      const scene = scenes[currentPillar];
+                      const isV5 = scene.schema_version?.startsWith('5.');
+                      if (isV5) {
+                        const totalSeconds = (scene.beats?.exit || 15) + 0.5;
+                        return Math.round(totalSeconds * 30);
+                      } else {
+                        return scene.duration_s * scene.fps;
+                      }
+                    })()}
+                    fps={(() => {
+                      const scene = scenes[currentPillar];
+                      const isV5 = scene.schema_version?.startsWith('5.');
+                      return isV5 ? 30 : scene.fps;
+                    })()}
+                      compositionWidth={(() => {
+                        const scene = scenes[currentPillar];
+                        const isV5 = scene.schema_version?.startsWith('5.');
+                        return isV5 ? 1920 : scene.layout.canvas.w;
+                      })()}
+                      compositionHeight={(() => {
+                        const scene = scenes[currentPillar];
+                        const isV5 = scene.schema_version?.startsWith('5.');
+                        return isV5 ? 1080 : scene.layout.canvas.h;
+                      })()}
                       controls
                       loop
                       style={{
@@ -674,7 +725,15 @@ export const VideoWizard = () => {
                     </strong>
                   </div>
                   <div style={{ fontSize: 12, color: '#999' }}>
-                    {scenes[currentPillar].duration_s}s • {scenes[currentPillar].layout.canvas.w}×{scenes[currentPillar].layout.canvas.h} • {scenes[currentPillar].fps} fps
+                    {(() => {
+                      const scene = scenes[currentPillar];
+                      const isV5 = scene.schema_version?.startsWith('5.');
+                      const duration = isV5 ? (scene.beats?.exit || 15) : scene.duration_s;
+                      const width = isV5 ? 1920 : scene.layout.canvas.w;
+                      const height = isV5 ? 1080 : scene.layout.canvas.h;
+                      const fps = isV5 ? 30 : scene.fps;
+                      return `${duration}s • ${width}×${height} • ${fps} fps`;
+                    })()}
                   </div>
                 </div>
               </div>
