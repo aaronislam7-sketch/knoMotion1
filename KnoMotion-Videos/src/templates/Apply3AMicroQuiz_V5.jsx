@@ -64,24 +64,6 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
   
   const svgRef = useRef(null);
   const effectsRef = useRef(null);
-  
-  // ✨ Generate deterministic particles
-  const celebrationBurst = React.useMemo(
-    () => generateConfettiBurst(30, 960, 640 + correctIndex * 90, 400),
-    [correctIndex]
-  );
-  
-  const questionSparkles = React.useMemo(
-    () => generateSparkles(6, { x: 660, y: 80, width: 600, height: 200 }, 500),
-    []
-  );
-  
-  const optionSparkles = React.useMemo(
-    () => options.map((_, i) => 
-      generateSparkles(4, { x: 760, y: 450 + i * 110, width: 400, height: 80 }, 600 + i * 100)
-    ),
-    [options]
-  );
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -106,6 +88,24 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
   const options = (data.options || []).slice(0, 4); // Max 4 options
   const correctIndex = data.correctIndex || 0;
   const countdownDuration = data.countdownDuration || 5.0;
+  
+  // ✨ Generate deterministic particles (after data extraction)
+  const celebrationBurst = React.useMemo(
+    () => generateConfettiBurst(30, 960, 640 + correctIndex * 90, 400),
+    [correctIndex]
+  );
+  
+  const questionSparkles = React.useMemo(
+    () => generateSparkles(6, { x: 660, y: 80, width: 600, height: 200 }, 500),
+    []
+  );
+  
+  const optionSparkles = React.useMemo(
+    () => options.map((_, i) => 
+      generateSparkles(4, { x: 760, y: 450 + i * 110, width: 400, height: 80 }, 600 + i * 100)
+    ),
+    [options.length]
+  );
   
   // Calculate safe timer position to avoid collision with question
   const questionBox = createTextBoundingBox({
