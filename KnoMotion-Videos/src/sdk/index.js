@@ -48,4 +48,9 @@ export * from './presets';
 export { SceneIdContext, useSceneId, generateSceneId } from './SceneIdContext';
 export { EZ, getEasing } from './easing';
 
+// Collision Detection & Layout Validation
+export * from './collision-detection';
+export * from './layout-resolver';
+export * from './scene-validator';
+
 export default SDK;
