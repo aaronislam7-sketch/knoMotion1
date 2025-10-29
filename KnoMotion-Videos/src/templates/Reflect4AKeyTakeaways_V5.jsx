@@ -13,11 +13,7 @@ import {
   // ✨ Creative Magic V6
   generateAmbientParticles,
   renderAmbientParticles,
-  generateFloatingShapes,
-  renderFloatingShapes,
-  getCircleDrawOn,
-  getHighlightSwipe,
-  getGlowEffect
+  getCircleDrawOn
 } from '../sdk';
 
 /**
@@ -40,15 +36,13 @@ import {
  *   • Ambient particles for depth
  * 
  * PATTERN:
- * 1. Floating shapes and particles create living background
- * 2. Title fades up with underline draw-on
+ * 1. Very subtle ambient particles add depth without distraction
+ * 2. Title fades up with decorative underline draw-on
  * 3. Takeaways stagger in (1.2s intervals) with:
- *    - Circle draws around number
- *    - Text fades up
- *    - Highlight swipe behind main point
- *    - Subtle glow effect
- * 4. Each takeaway pulses for emphasis
- * 5. Exit message fades in
+ *    - Clean fade up animation
+ *    - Simple underline draws under number
+ *    - Very subtle pulse for emphasis
+ * 4. Exit message fades in
  * 
  * Structure per takeaway:
  * - Number with circle (bold, accent color)
@@ -67,14 +61,9 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
   const particlesRef = useRef(null);
   const effectsRef = useRef(null);
   
-  // ✨ Generate deterministic particles and shapes
+  // ✨ Generate very subtle ambient particles only (no floating shapes for clean look)
   const ambientParticles = React.useMemo(
-    () => generateAmbientParticles(12, 242, 1920, 1080),
-    []
-  );
-  
-  const floatingShapes = React.useMemo(
-    () => generateFloatingShapes(5, 342, 1920, 1080),
+    () => generateAmbientParticles(8, 242, 1920, 1080),
     []
   );
 
@@ -127,7 +116,7 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
     ease: 'power3InOut'
   }, EZ, fps);
 
-  // Takeaway animations (staggered) + ✨ enhancements
+  // Takeaway animations (staggered) + ✨ subtle enhancements
   const takeawayAnims = takeaways.map((takeaway, index) => {
     const startTime = sceneBeats[`takeaway${index + 1}`] || (2.2 + index * 1.2);
     
@@ -139,54 +128,30 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
       ease: 'smooth'
     }, EZ, fps);
     
-    // Pulse emphasis after entrance
+    // Pulse emphasis after entrance (very subtle)
     const pulse = pulseEmphasis(frame, {
       start: startTime + 1.0,
       dur: 0.6,
-      scale: 1.03,
+      scale: 1.02,
       ease: 'backOut'
     }, EZ, fps);
     
-    // ✨ Circle draw-on for number
+    // ✨ Simple underline draw-on for number (cleaner than circle)
     const yPos = 320 + index * 180;
-    const circleDrawOn = getCircleDrawOn(frame, {
-      start: startTime + 0.3,
+    const underlineDrawOn = getCircleDrawOn(frame, {
+      start: startTime + 0.4,
       duration: 0.5,
-      textBounds: { x: 185, y: yPos - 25, width: 30, height: 50 },
-      padding: 15,
-      type: 'circle',
+      textBounds: { x: 170, y: yPos + 25, width: 60, height: 10 },
+      padding: 0,
+      type: 'underline',
       ease: 'smooth',
     }, fps);
-    
-    // ✨ Highlight swipe behind main text
-    const highlightSwipe = getHighlightSwipe(frame, {
-      start: startTime + 0.6,
-      duration: 0.7,
-      textBounds: { 
-        x: 280, 
-        y: yPos - 20, 
-        width: Math.min(takeaway.main.length * 15, 800), 
-        height: 40 
-      },
-      color: index === 0 ? '#27AE6020' : index === 1 ? '#2E7FE420' : '#FF6B3520',
-      ease: 'smooth',
-    }, fps);
-    
-    // ✨ Glow effect during pulse
-    const glow = getGlowEffect(frame, {
-      intensity: 6,
-      color: index === 0 ? '#27AE60' : index === 1 ? '#2E7FE4' : '#FF6B35',
-      pulse: frame >= toFrames(startTime + 1.0, fps),
-      pulseSpeed: 0.05,
-    });
     
     return {
       opacity: entrance.opacity,
       translateY: entrance.translateY || 0,
       scale: pulse.scale,
-      circleDrawOn,
-      highlightSwipe,
-      glow,
+      underlineDrawOn,
     };
   });
 
@@ -226,27 +191,7 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
       svg.appendChild(underline);
     }
 
-    // Number circles for each takeaway (after they're visible)
-    takeaways.forEach((_, index) => {
-      const takeawayBeat = takeawayBeats[index];
-      
-      if (frame >= takeawayBeat + 15) {
-        const circleProgress = Math.min((frame - (takeawayBeat + 15)) / 20, 1);
-        
-        const yPos = 320 + index * 180;
-        const radius = 35 * circleProgress;
-        
-        const circle = rc.circle(200, yPos, radius * 2, {
-          stroke: index === 0 ? colors.accent : index === 1 ? colors.accent2 : colors.accent3,
-          strokeWidth: 3,
-          roughness: 0,  // STRICT ZERO WOBBLE
-          bowing: 0,     // STRICT ZERO WOBBLE
-          fill: 'transparent',
-        });
-        
-        svg.appendChild(circle);
-      }
-    });
+    // Subtle decorative dots for visual rhythm (REMOVED circles to keep it clean)
 
   }, [frame, beats, takeaways, takeawayBeats, colors, id]);
 
@@ -260,7 +205,7 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
         `,
       }}
     >
-      {/* ✨ Floating shapes layer (background) */}
+      {/* ✨ Very subtle ambient particles only */}
       <svg
         ref={particlesRef}
         style={{
@@ -269,16 +214,15 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
           width: '100%',
           height: '100%',
           pointerEvents: 'none',
-          opacity: 0.4,
+          opacity: 0.15,
         }}
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
       >
-        {renderFloatingShapes(floatingShapes, frame, [colors.accent, colors.accent2, colors.accent3])}
         {renderAmbientParticles(ambientParticles, frame, fps, [colors.accent, colors.accent2, colors.accent3]).map(p => p.element)}
       </svg>
       
-      {/* ✨ Effects layer (highlights, draw-ons) */}
+      {/* ✨ Effects layer (underline draw-ons only) */}
       <svg
         ref={effectsRef}
         style={{
@@ -291,54 +235,31 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Circle draw-ons for numbers */}
+        {/* Simple underline draw-ons for numbers */}
         {takeaways.map((_, index) => {
           const anim = takeawayAnims[index];
           const isVisible = frame >= takeawayBeats[index];
           
-          if (!isVisible || !anim.circleDrawOn.visible) return null;
+          if (!isVisible || !anim.underlineDrawOn.visible) return null;
           
-          const circleColor = index === 0 ? colors.accent : index === 1 ? colors.accent2 : colors.accent3;
+          const underlineColor = index === 0 ? colors.accent : index === 1 ? colors.accent2 : colors.accent3;
           
-          if (anim.circleDrawOn.type === 'ellipse') {
+          if (anim.underlineDrawOn.type === 'line') {
             return (
-              <ellipse
-                key={`circle-${index}`}
-                cx={anim.circleDrawOn.cx}
-                cy={anim.circleDrawOn.cy}
-                rx={anim.circleDrawOn.rx}
-                ry={anim.circleDrawOn.ry}
-                fill="none"
-                stroke={circleColor}
+              <line
+                key={`underline-${index}`}
+                x1={anim.underlineDrawOn.x1}
+                y1={anim.underlineDrawOn.y1}
+                x2={anim.underlineDrawOn.x2}
+                y2={anim.underlineDrawOn.y2}
+                stroke={underlineColor}
                 strokeWidth={3}
-                strokeDasharray={anim.circleDrawOn.strokeDasharray}
-                strokeDashoffset={anim.circleDrawOn.strokeDashoffset}
+                strokeLinecap="round"
               />
             );
           }
           
           return null;
-        })}
-        
-        {/* Highlight swipes behind text */}
-        {takeaways.map((_, index) => {
-          const anim = takeawayAnims[index];
-          const isVisible = frame >= takeawayBeats[index];
-          
-          if (!isVisible || !anim.highlightSwipe.visible) return null;
-          
-          return (
-            <rect
-              key={`highlight-${index}`}
-              x={anim.highlightSwipe.x}
-              y={anim.highlightSwipe.y}
-              width={anim.highlightSwipe.width}
-              height={anim.highlightSwipe.height}
-              fill={anim.highlightSwipe.color}
-              opacity={anim.highlightSwipe.opacity}
-              rx={8}
-            />
-          );
         })}
       </svg>
       
@@ -445,7 +366,7 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
                 
                 {/* Content */}
                 <div style={{ flex: 1 }}>
-                  {/* Main point - ✨ WITH GLOW EFFECT */}
+                  {/* Main point - Clean and clear */}
                   <p
                     style={{
                       fontFamily: fonts.primary,
@@ -453,7 +374,6 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
                       color: colors.ink,
                       margin: '0 0 12px 0',
                       lineHeight: 1.4,
-                      filter: anim.glow.filter,
                     }}
                   >
                     {takeaway.main}
