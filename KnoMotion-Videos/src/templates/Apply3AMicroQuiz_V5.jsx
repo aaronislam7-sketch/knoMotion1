@@ -13,11 +13,18 @@ import {
   toFrames,
   createTextBoundingBox,
   calculateSafeTimerPosition,
-  validateScene
+  validateScene,
+  // ✨ Creative Magic V6
+  generateConfettiBurst,
+  renderConfettiBurst,
+  generateSparkles,
+  renderSparkles,
+  getGlowEffect,
+  getLottieByName
 } from '../sdk';
 
 /**
- * APPLY 3A: MICRO QUIZ - Blueprint v5.0
+ * APPLY 3A: MICRO QUIZ - Blueprint v5.0 + ✨ CREATIVE MAGIC V6
  * 
  * TEMPLATE STRATEGY:
  * - ✅ Blueprint v5.0 compliant
@@ -29,12 +36,22 @@ import {
  * - ✅ Uses pulseEmphasis for correct answer reveal
  * - ✅ Context-based ID factory
  * - ✅ Strict zero wobble
+ * - ✨ CREATIVE ENHANCEMENTS:
+ *   • Confetti explosion when correct answer revealed
+ *   • Sparkles around options as they appear
+ *   • Glowing effect on correct answer
+ *   • Enhanced countdown with pulsing effect
+ *   • Animated checkmark on correct answer
  * 
  * FLOW:
- * 1. Question fades up
- * 2. Options pop in (staggered)
- * 3. Countdown timer appears (5s circle animation)
- * 4. Correct answer revealed with pulse + celebration
+ * 1. Question fades up with sparkle
+ * 2. Options pop in with sparkles (staggered)
+ * 3. Countdown timer appears (5s circle animation) with pulse
+ * 4. Correct answer revealed with:
+ *    - Glow effect
+ *    - Pulse animation
+ *    - Confetti explosion
+ *    - Animated checkmark
  * 5. Explanation fades in
  * 
  * Duration: 12-15s
@@ -46,6 +63,7 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
   const id = useSceneId();
   
   const svgRef = useRef(null);
+  const effectsRef = useRef(null);
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -70,6 +88,24 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
   const options = (data.options || []).slice(0, 4); // Max 4 options
   const correctIndex = data.correctIndex || 0;
   const countdownDuration = data.countdownDuration || 5.0;
+  
+  // ✨ Generate deterministic particles (after data extraction)
+  const celebrationBurst = React.useMemo(
+    () => generateConfettiBurst(30, 960, 640 + correctIndex * 90, 400),
+    [correctIndex]
+  );
+  
+  const questionSparkles = React.useMemo(
+    () => generateSparkles(6, { x: 660, y: 80, width: 600, height: 200 }, 500),
+    []
+  );
+  
+  const optionSparkles = React.useMemo(
+    () => options.map((_, i) => 
+      generateSparkles(4, { x: 760, y: 450 + i * 110, width: 400, height: 80 }, 600 + i * 100)
+    ),
+    [options.length]
+  );
   
   // Calculate safe timer position to avoid collision with question
   const questionBox = createTextBoundingBox({
@@ -145,13 +181,21 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
     ? Math.min((frame - countdownStart) / countdownFrames, 1)
     : countdownComplete ? 1 : 0;
 
-  // Correct answer reveal pulse
+  // Correct answer reveal pulse + ✨ glow
   const correctPulse = pulseEmphasis(frame, {
     start: sceneBeats.reveal || 8.5,
     dur: 0.8,
     scale: 1.08,
     ease: 'backOut'
   }, EZ, fps);
+  
+  // ✨ Glow effect for correct answer
+  const correctGlow = getGlowEffect(frame, {
+    intensity: 12,
+    color: colors.accent,
+    pulse: frame >= beats.reveal,
+    pulseSpeed: 0.06,
+  });
 
   // Explanation animation
   const explanationAnim = fadeUpIn(frame, {
@@ -258,6 +302,36 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
         `,
       }}
     >
+      {/* ✨ Effects layer (confetti, sparkles) */}
+      <svg
+        ref={effectsRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* ✨ Question sparkles */}
+        {frame >= beats.question && frame < beats.question + 50 &&
+          renderSparkles(questionSparkles, frame, beats.question, colors.accent2)}
+        
+        {/* ✨ Option sparkles (staggered) */}
+        {optionSparkles.map((sparkles, i) => {
+          const startFrame = beats.options + i * 0.3 * fps;
+          return frame >= startFrame && frame < startFrame + 50 ? (
+            <g key={i}>{renderSparkles(sparkles, frame, startFrame, colors.accent)}</g>
+          ) : null;
+        })}
+        
+        {/* ✨ Celebration confetti burst */}
+        {frame >= beats.celebration && frame < beats.celebration + 90 &&
+          renderConfettiBurst(celebrationBurst, frame, beats.celebration, [colors.accent, colors.accent2, '#FFD700', '#9B59B6'])}
+      </svg>
+      
       {/* SVG layer for decorations */}
       <svg
         ref={svgRef}
@@ -365,6 +439,9 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
                   borderRadius: 12,
                   backgroundColor: bgColor,
                   transition: 'all 0.3s ease',
+                  // ✨ Glow effect on correct answer
+                  filter: (showAnswer && isCorrect) ? correctGlow.filter : 'none',
+                  position: 'relative',
                 }}
               >
                 <p
@@ -378,6 +455,23 @@ const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap, transitions }) =>
                 >
                   {String.fromCharCode(65 + index)}. {option}
                 </p>
+                
+                {/* ✨ Checkmark icon on correct answer */}
+                {(showAnswer && isCorrect) && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 24,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      fontSize: 36,
+                      color: colors.accent,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ✓
+                  </div>
+                )}
               </div>
             );
           })}

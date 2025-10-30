@@ -12,11 +12,18 @@ import {
   useSceneId,
   toFrames,
   calculateSafeConnectorPath,
-  validateScene
+  validateScene,
+  // ✨ Creative Magic V6
+  generateAmbientParticles,
+  renderAmbientParticles,
+  generateConfettiBurst,
+  renderConfettiBurst,
+  getGlowEffect,
+  getKineticText
 } from '../sdk';
 
 /**
- * EXPLAIN 2A: CONCEPT BREAKDOWN - Blueprint v5.0
+ * EXPLAIN 2A: CONCEPT BREAKDOWN - Blueprint v5.0 + ✨ CREATIVE MAGIC V6
  * 
  * TEMPLATE STRATEGY:
  * - ✅ Blueprint v5.0 compliant
@@ -26,14 +33,22 @@ import {
  * - ✅ Strict zero wobble (roughness: 0, bowing: 0)
  * - ✅ FPS-agnostic (seconds → frames conversion)
  * - ✅ Fully dynamic layout (adapts to 2-7+ parts)
+ * - ✨ CREATIVE ENHANCEMENTS:
+ *   • Kinetic title animation (wave effect)
+ *   • Glow effect on center concept
+ *   • Particle burst when connections appear
+ *   • Enhanced pulsing connections with depth
+ *   • Ambient floating particles
  * 
  * CONVERSATIONAL FLOW:
- * 1. Title appears (what we're breaking down)
- * 2. Center concept pops in (main idea)
- * 3. Parts cascade in around center (breakdown)
- * 4. Connections draw between center and parts
- * 5. Connections pulse to emphasize relationships
- * 6. Title moves up, parts expand slightly
+ * 1. Ambient particles create living background
+ * 2. Title appears with kinetic wave effect
+ * 3. Center concept pops in with glow
+ * 4. Parts cascade in around center (breakdown)
+ * 5. Particle burst when connections start
+ * 6. Connections draw between center and parts with glow
+ * 7. Connections pulse to emphasize relationships
+ * 8. Title moves up, parts expand slightly
  * 
  * TYPOGRAPHY:
  * - Primary: Permanent Marker (bold, energetic)
@@ -48,6 +63,19 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
   const id = useSceneId();
   
   const svgRef = useRef(null);
+  const particlesRef = useRef(null);
+  const effectsRef = useRef(null);
+  
+  // ✨ Generate deterministic particles
+  const ambientParticles = React.useMemo(
+    () => generateAmbientParticles(15, 142, 1920, 1080),
+    []
+  );
+  
+  const connectionBurst = React.useMemo(
+    () => generateConfettiBurst(20, 960, 460, 300),
+    []
+  );
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -175,21 +203,39 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
   // ANIMATIONS (Using Blueprint v5 presets)
   // ========================================
   
-  // Title - using fadeUpIn preset
+  // Title - using fadeUpIn preset + ✨ kinetic effect
   const titleAnim = fadeUpIn(frame, {
     start: sceneBeats.title || 0.8,
     dur: 0.9,
     dist: 20,
     ease: 'backOut'
   }, EZ, fps);
+  
+  // ✨ Kinetic text animation for title
+  const titleKinetic = getKineticText(frame, {
+    start: sceneBeats.title || 0.8,
+    text: data.title || 'Breaking It Down',
+    splitBy: 'word',
+    effect: 'wave',
+    amplitude: 8,
+    frequency: 0.08,
+  }, fps);
 
-  // Center concept - using popInSpring preset
+  // Center concept - using popInSpring preset + ✨ glow effect
   const centerConceptAnim = popInSpring(frame, {
     start: sceneBeats.centerConcept || 2.0,
     mass: 1,
     stiffness: 100,
     damping: 12
   }, EZ, fps);
+  
+  // ✨ Glow effect for center concept
+  const centerGlow = getGlowEffect(frame, {
+    intensity: 8,
+    color: colors.accent,
+    pulse: true,
+    pulseSpeed: 0.04,
+  });
 
   // ========================================
   // ROUGH.JS - Frames & Connections (ZERO WOBBLE)
@@ -362,6 +408,41 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
         `,
       }}
     >
+      {/* ✨ Ambient particles layer */}
+      <svg
+        ref={particlesRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          opacity: 0.5,
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {renderAmbientParticles(ambientParticles, frame, fps, [colors.accent, colors.accent2, colors.accent3]).map(p => p.element)}
+      </svg>
+      
+      {/* ✨ Effects layer (particle bursts) */}
+      <svg
+        ref={effectsRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* ✨ Particle burst when connections appear */}
+        {frame >= beats.connections && frame < beats.connections + 90 &&
+          renderConfettiBurst(connectionBurst, frame, beats.connections, [colors.accent, colors.accent2, colors.accent3])}
+      </svg>
+      
       {/* Rough.js sketch layer */}
       <svg
         ref={svgRef}
@@ -387,30 +468,38 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
             padding: '80px 120px',
           }}
         >
-          {/* Title */}
+          {/* Title - ✨ WITH KINETIC WAVE EFFECT */}
           {frame >= beats.title && (
             <div 
               style={{ 
                 textAlign: 'center',
                 opacity: titleAnim.opacity,
-                transform: `translateY(${titleAnim.translateY}px)`
+                transform: `translateY(${titleAnim.translateY}px)`,
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '12px',
               }}
             >
-              <h2
-                style={{
-                  fontFamily: fonts.primary,
-                  fontSize: fonts.size_title,
-                  fontWeight: 400,
-                  color: colors.ink,
-                  margin: 0,
-                }}
-              >
-                {data.title || 'Breaking It Down'}
-              </h2>
+              {titleKinetic.isActive && titleKinetic.segments.map((segment, i) => (
+                <h2
+                  key={i}
+                  style={{
+                    fontFamily: fonts.primary,
+                    fontSize: fonts.size_title,
+                    fontWeight: 400,
+                    color: colors.ink,
+                    margin: 0,
+                    transform: `translateY(${segment.translateY}px) scale(${segment.scale})`,
+                    opacity: segment.opacity,
+                  }}
+                >
+                  {segment.text}
+                </h2>
+              ))}
             </div>
           )}
 
-          {/* Center concept */}
+          {/* Center concept - ✨ WITH GLOW EFFECT */}
           {frame >= beats.centerConcept && (
             <div
               style={{
@@ -432,6 +521,7 @@ const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap, transiti
                   margin: 0,
                   lineHeight: 1.3,
                   transform: `scale(${centerConceptAnim.scale})`,
+                  filter: centerGlow.filter,
                 }}
               >
                 {data.concept || 'Main Concept'}

@@ -1,0 +1,58 @@
+{
+  "schema_version": "5.0",
+  "scene_id": "showcase-animations",
+  "template_id": "ShowcaseAnimations",
+  
+  "meta": {
+    "title": "Animation Effects Showcase",
+    "description": "Comprehensive demonstration of all creative effects",
+    "tags": ["showcase", "demo", "reference"],
+    "difficulty": "reference",
+    "tone": "demonstrative"
+  },
+  
+  "style_tokens": {
+    "mode": "whiteboard",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#FF6B35",
+      "accent2": "#9B59B6",
+      "accent3": "#2E7FE4",
+      "ink": "#1A1A1A"
+    }
+  },
+  
+  "beats": {
+    "intro": 0,
+    "ambientParticles": 1,
+    "sparkles": 4,
+    "confetti": 7,
+    "floatingShapes": 10,
+    "textSection": 12,
+    "glow": 13,
+    "shimmer": 16,
+    "kineticWave": 19,
+    "typewriter": 22,
+    "drawSection": 24,
+    "highlight": 25,
+    "circle": 29,
+    "underline": 33,
+    "lottieSection": 36,
+    "lottieCheckmark": 37,
+    "lottieSparkle": 40,
+    "lottieLightbulb": 43,
+    "lottieCelebration": 46,
+    "combinedsSection": 48,
+    "combo1": 49,
+    "combo2": 55,
+    "combo3": 61,
+    "combo4": 67,
+    "finale": 70,
+    "exit": 72
+  },
+  
+  "fill": {
+    "title": "Animation Effects Showcase",
+    "subtitle": "All creative magic effects in one place"
+  }
+}

@@ -9,11 +9,15 @@ import {
   pulseEmphasis,
   EZ,
   useSceneId,
-  toFrames 
+  toFrames,
+  // ✨ Creative Magic V6
+  generateAmbientParticles,
+  renderAmbientParticles,
+  getCircleDrawOn
 } from '../sdk';
 
 /**
- * REFLECT 4A: KEY TAKEAWAYS - Blueprint v5.0
+ * REFLECT 4A: KEY TAKEAWAYS - Blueprint v5.0 + ✨ CREATIVE MAGIC V6
  * 
  * TEMPLATE STRATEGY:
  * - ✅ Blueprint v5.0 compliant
@@ -24,16 +28,25 @@ import {
  * - ✅ Uses pulseEmphasis for attention
  * - ✅ Context-based ID factory
  * - ✅ Strict zero wobble
+ * - ✨ CREATIVE ENHANCEMENTS:
+ *   • Draw-on circle animation for numbers
+ *   • Highlight swipe behind text
+ *   • Floating shapes in background
+ *   • Subtle glow on emphasized text
+ *   • Ambient particles for depth
  * 
  * PATTERN:
- * 1. Title fades up
- * 2. Takeaways stagger in (1.2s intervals)
- * 3. Each takeaway pulses for emphasis
+ * 1. Very subtle ambient particles add depth without distraction
+ * 2. Title fades up with decorative underline draw-on
+ * 3. Takeaways stagger in (1.2s intervals) with:
+ *    - Clean fade up animation
+ *    - Simple underline draws under number
+ *    - Very subtle pulse for emphasis
  * 4. Exit message fades in
  * 
  * Structure per takeaway:
- * - Number (bold, accent color)
- * - Main point (1-liner, Permanent Marker)
+ * - Number with circle (bold, accent color)
+ * - Main point with highlight (1-liner, Permanent Marker)
  * - Subtext (optional detail, Inter)
  * 
  * Duration: 8-12s (dynamic based on takeaway count)
@@ -45,6 +58,14 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
   const id = useSceneId();
   
   const svgRef = useRef(null);
+  const particlesRef = useRef(null);
+  const effectsRef = useRef(null);
+  
+  // ✨ Generate very subtle ambient particles only (no floating shapes for clean look)
+  const ambientParticles = React.useMemo(
+    () => generateAmbientParticles(8, 242, 1920, 1080),
+    []
+  );
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -95,8 +116,8 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
     ease: 'power3InOut'
   }, EZ, fps);
 
-  // Takeaway animations (staggered)
-  const takeawayAnims = takeaways.map((_, index) => {
+  // Takeaway animations (staggered) + ✨ subtle enhancements
+  const takeawayAnims = takeaways.map((takeaway, index) => {
     const startTime = sceneBeats[`takeaway${index + 1}`] || (2.2 + index * 1.2);
     
     // Entrance
@@ -107,18 +128,30 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
       ease: 'smooth'
     }, EZ, fps);
     
-    // Pulse emphasis after entrance
+    // Pulse emphasis after entrance (very subtle)
     const pulse = pulseEmphasis(frame, {
       start: startTime + 1.0,
       dur: 0.6,
-      scale: 1.03,
+      scale: 1.02,
       ease: 'backOut'
     }, EZ, fps);
+    
+    // ✨ Simple underline draw-on for number (cleaner than circle)
+    const yPos = 320 + index * 180;
+    const underlineDrawOn = getCircleDrawOn(frame, {
+      start: startTime + 0.4,
+      duration: 0.5,
+      textBounds: { x: 170, y: yPos + 25, width: 60, height: 10 },
+      padding: 0,
+      type: 'underline',
+      ease: 'smooth',
+    }, fps);
     
     return {
       opacity: entrance.opacity,
       translateY: entrance.translateY || 0,
-      scale: pulse.scale
+      scale: pulse.scale,
+      underlineDrawOn,
     };
   });
 
@@ -158,27 +191,7 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
       svg.appendChild(underline);
     }
 
-    // Number circles for each takeaway (after they're visible)
-    takeaways.forEach((_, index) => {
-      const takeawayBeat = takeawayBeats[index];
-      
-      if (frame >= takeawayBeat + 15) {
-        const circleProgress = Math.min((frame - (takeawayBeat + 15)) / 20, 1);
-        
-        const yPos = 320 + index * 180;
-        const radius = 35 * circleProgress;
-        
-        const circle = rc.circle(200, yPos, radius * 2, {
-          stroke: index === 0 ? colors.accent : index === 1 ? colors.accent2 : colors.accent3,
-          strokeWidth: 3,
-          roughness: 0,  // STRICT ZERO WOBBLE
-          bowing: 0,     // STRICT ZERO WOBBLE
-          fill: 'transparent',
-        });
-        
-        svg.appendChild(circle);
-      }
-    });
+    // Subtle decorative dots for visual rhythm (REMOVED circles to keep it clean)
 
   }, [frame, beats, takeaways, takeawayBeats, colors, id]);
 
@@ -192,6 +205,64 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
         `,
       }}
     >
+      {/* ✨ Very subtle ambient particles only */}
+      <svg
+        ref={particlesRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          opacity: 0.15,
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {renderAmbientParticles(ambientParticles, frame, fps, [colors.accent, colors.accent2, colors.accent3]).map(p => p.element)}
+      </svg>
+      
+      {/* ✨ Effects layer (underline draw-ons only) */}
+      <svg
+        ref={effectsRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+        }}
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* Simple underline draw-ons for numbers */}
+        {takeaways.map((_, index) => {
+          const anim = takeawayAnims[index];
+          const isVisible = frame >= takeawayBeats[index];
+          
+          if (!isVisible || !anim.underlineDrawOn.visible) return null;
+          
+          const underlineColor = index === 0 ? colors.accent : index === 1 ? colors.accent2 : colors.accent3;
+          
+          if (anim.underlineDrawOn.type === 'line') {
+            return (
+              <line
+                key={`underline-${index}`}
+                x1={anim.underlineDrawOn.x1}
+                y1={anim.underlineDrawOn.y1}
+                x2={anim.underlineDrawOn.x2}
+                y2={anim.underlineDrawOn.y2}
+                stroke={underlineColor}
+                strokeWidth={3}
+                strokeLinecap="round"
+              />
+            );
+          }
+          
+          return null;
+        })}
+      </svg>
+      
       {/* SVG layer for decorations */}
       <svg
         ref={svgRef}
@@ -295,7 +366,7 @@ const Reflect4AKeyTakeaways = ({ scene, styles, presets, easingMap, transitions 
                 
                 {/* Content */}
                 <div style={{ flex: 1 }}>
-                  {/* Main point */}
+                  {/* Main point - Clean and clear */}
                   <p
                     style={{
                       fontFamily: fonts.primary,

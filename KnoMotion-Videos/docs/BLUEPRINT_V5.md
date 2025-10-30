@@ -1,6 +1,6 @@
 # Knode Scene Blueprint v5.0
 
-**Last Updated:** 2025-10-28  
+**Last Updated:** 2025-10-29  
 **Status:** Production Ready
 
 ---
@@ -13,7 +13,8 @@ Enable JSON-driven authoring: copy, timing, style, and animation presets.
 
 **Outputs:** MP4 with perfect preview-to-export parity.  
 **Modes:** Notebook-first (warm, textured) + Whiteboard-lite (clean, minimal).  
-**FPS Anchor:** All timing authored at 30fps baseline, auto-scales to other frame rates.
+**FPS Anchor:** All timing authored at 30fps baseline, auto-scales to other frame rates.  
+**Creative Layer:** ✨ Subtle microdelights and effects that enhance without overwhelming.
 
 ---
 
@@ -25,6 +26,7 @@ Enable JSON-driven authoring: copy, timing, style, and animation presets.
 - **Notebook as signature, Whiteboard as variant** — Dual modes, shared foundation
 - **JSON controls the show** — Authors write data, templates render motion
 - **Author in seconds, render in frames** — Human-readable JSON, frame-precise execution
+- **✨ Magic in moderation** — Creative effects enhance key moments, never distract from content
 
 ---
 
@@ -798,7 +800,167 @@ Before considering a template production-ready:
 
 ---
 
-## 15) Future Enhancements (Not v5.0)
+## 15) ✨ Creative Enhancement Guidelines
+
+### When to Use Creative Effects
+
+**Use sparingly and purposefully.** Effects should enhance the narrative, not compete with it.
+
+#### ✅ Appropriate Use Cases
+
+**Particle Systems:**
+- **Ambient Particles** - Use for dynamic, energetic scenes (Hook, Apply)
+  - Opacity: 0.1-0.3 (very subtle)
+  - Count: 15-20 particles max
+  - Best for: Hook templates, celebration moments
+  - Avoid: Reflect templates, dense text scenes
+
+- **Confetti Bursts** - Use for success/celebration moments only
+  - Count: 20-30 particles
+  - Duration: 60-90 frames
+  - Best for: Quiz reveals, completion states
+  - Avoid: Explanatory content, serious reflection
+
+- **Sparkles** - Use for emphasis on important reveals
+  - Count: 6-12 per burst
+  - Duration: 40-50 frames
+  - Best for: Key question reveals, "aha" moments
+  - Avoid: Every text entrance, background decoration
+
+**Text Effects:**
+- **Glow Effect** - Use for hero elements only
+  - Intensity: 6-12 (subtle to medium)
+  - Best for: Main concepts, correct answers
+  - Avoid: Body text, lists, multiple simultaneous glows
+
+- **Shimmer** - Use for special title moments
+  - Speed: 0.02-0.04 (slow, elegant)
+  - Best for: Welcome messages, chapter titles
+  - Avoid: Regular headers, repeated use
+
+- **Kinetic Text** - Use when energy matches content
+  - Wave: Playful, energetic topics
+  - Scatter: Dramatic reveals
+  - Best for: Hook templates, dynamic concepts
+  - Avoid: Professional tone, key takeaways
+
+**Draw-On Effects:**
+- **Highlight Swipe** - Use for emphasis during explanation
+  - Opacity: 0.15-0.25 (translucent)
+  - Best for: Key terms during explanation
+  - Avoid: Lists, multiple highlights, reflection content
+
+- **Circle/Underline Draw-On** - Use for visual emphasis
+  - Circle: Draw attention to important items
+  - Underline: Subtle emphasis for lists
+  - Best for: Numbers, key points
+  - Avoid: Overuse (max 3-4 per scene)
+
+**Liquid Blobs:**
+- Use as subtle background animation only
+- Opacity: 0.08-0.15 (barely visible)
+- Best for: Behind main content elements
+- Avoid: Moving content, small screens
+
+#### ❌ Inappropriate Use Cases
+
+**Don't Use Effects For:**
+- ❌ Every text entrance (save for special moments)
+- ❌ Background decoration without purpose
+- ❌ Reflection/serious content (keep clean and professional)
+- ❌ Dense information (reduces readability)
+- ❌ Multiple simultaneous effects (visual overwhelm)
+
+### Template-Specific Guidelines
+
+**Hook Templates (1A, 1E):**
+- ✅ Ambient particles (15-20, opacity 0.6)
+- ✅ Sparkles on key reveals (6-10 particles)
+- ✅ Liquid blobs (very subtle, 0.15 opacity)
+- ✅ Shimmer on welcome text
+- ❌ Too many simultaneous effects
+
+**Explain Templates (2A, 2B):**
+- ✅ Kinetic title animation (wave, subtle)
+- ✅ Glow on center concept (medium intensity)
+- ✅ Confetti burst when connections appear
+- ✅ Ambient particles (12-15, opacity 0.5)
+- ❌ Highlight swipes (reduces clarity)
+- ❌ Heavy background animation
+
+**Apply Templates (3A, 3B):**
+- ✅ Sparkles on question/options (4-6 per element)
+- ✅ Confetti explosion on success (25-30 particles)
+- ✅ Glow on correct answer (high intensity)
+- ✅ Checkmark icons
+- ❌ Background particles during interaction
+
+**Reflect Templates (4A, 4D):**
+- ✅ VERY subtle ambient particles (6-8, opacity 0.15)
+- ✅ Simple underline draw-ons (clean emphasis)
+- ✅ Subtle pulse on emphasis (scale: 1.02)
+- ❌ Highlight swipes (too distracting)
+- ❌ Glows (breaks professional tone)
+- ❌ Floating shapes (adds visual noise)
+- ❌ Kinetic text (content needs to be clear)
+
+**Key Principle for Reflect:** Content is king. Effects should be nearly invisible.
+
+### Performance Guidelines
+
+**Particle Counts:**
+- Ambient: 8-20 particles (lightweight)
+- Confetti: 20-30 particles (medium weight, short duration)
+- Sparkles: 4-12 per burst (lightweight)
+
+**Memory Budget:**
+- Keep total particles under 50 per scene
+- Generate particles once with `useMemo`
+- Clean up effects after duration
+
+**Opacity Guidelines:**
+- Background effects: 0.1-0.3
+- Emphasis effects: 0.8-1.0
+- Transitional effects: 0.4-0.7
+
+### Quality Checklist for Creative Effects
+
+Before adding effects to a template:
+
+- [ ] Does this effect serve the narrative?
+- [ ] Is the effect appropriate for this template type?
+- [ ] Is opacity appropriate (not overwhelming)?
+- [ ] Are particle counts reasonable (<50 total)?
+- [ ] Does the effect distract from the content? (If yes, remove it)
+- [ ] Would the scene work without this effect? (Effects should enhance, not define)
+- [ ] Is the effect deterministic (seeded, frame-based)?
+- [ ] Does it maintain preview-to-export parity?
+
+### Effect Timing Best Practices
+
+**Entrance Effects (Sparkles, Particles):**
+- Duration: 40-50 frames
+- Start: With or slightly after content entrance
+- Stagger: 0.2-0.3s between multiple elements
+
+**Emphasis Effects (Glow, Pulse):**
+- Duration: 18-24 frames (0.6-0.8s at 30fps)
+- Intensity: Medium (avoid extremes)
+- Timing: After content settles (0.5-1.0s after entrance)
+
+**Celebration Effects (Confetti):**
+- Duration: 60-90 frames
+- Start: Immediately on success moment
+- Scale: Proportional to achievement magnitude
+
+**Background Effects (Ambient, Blobs):**
+- Duration: Continuous (scene length)
+- Opacity: Very low (0.1-0.3)
+- Speed: Slow (0.01-0.03)
+
+---
+
+## 16) Future Enhancements (Not v5.0)
 
 - Audio sync via beat markers
 - A/B testing JSON variants
@@ -807,6 +969,8 @@ Before considering a template production-ready:
 - Template hot-reload in dev
 - JSON schema validation (Zod)
 - Migration tool (v3 → v5)
+- Toggle effects via scene JSON
+- Custom effect intensity controls
 
 ---
 
