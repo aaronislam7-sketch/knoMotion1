@@ -59,4 +59,10 @@ export * from './handwritingEffects.jsx';
 export * from './advancedEffects.jsx';
 export * from './lottieLibrary';
 
+// 🎯 AGNOSTIC TEMPLATE SYSTEM - Phase 1
+export * from './heroRegistry';
+export * from './positionSystem';
+export * from './questionRenderer';
+export * from './layoutEngine';
+
 export default SDK;
