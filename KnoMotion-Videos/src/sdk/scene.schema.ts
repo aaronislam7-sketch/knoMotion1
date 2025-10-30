@@ -56,9 +56,25 @@ export const SceneSchema = z.object({
 
     fonts: z.object({
 
-      title: z.object({family: z.string().optional(), size: z.number().optional()}).optional(),
+      // v5.0 format: object with family/size OR v5.1 format: simple strings
+      title: z.union([
+        z.object({family: z.string().optional(), size: z.number().optional()}),
+        z.string()
+      ]).optional(),
 
-      body:  z.object({family: z.string().optional(), size: z.number().optional()}).optional(),
+      body: z.union([
+        z.object({family: z.string().optional(), size: z.number().optional()}),
+        z.string()
+      ]).optional(),
+      
+      header: z.string().optional(),
+      secondary: z.string().optional(),
+      
+      // Size fields for agnostic format
+      size_title: z.number().optional(),
+      size_question: z.number().optional(),
+      size_welcome: z.number().optional(),
+      size_subtitle: z.number().optional(),
 
     }).optional(),
 
