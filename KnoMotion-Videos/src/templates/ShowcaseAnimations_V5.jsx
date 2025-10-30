@@ -88,32 +88,40 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
   
   // Beats for sections (in seconds)
   const beats = {
-    // Section 1: Particles (0-15s)
+    // Section 1: Particles (0-12s)
     intro: toFrames(0, fps),
     ambientParticles: toFrames(1, fps),
     sparkles: toFrames(4, fps),
     confetti: toFrames(7, fps),
     floatingShapes: toFrames(10, fps),
     
-    // Section 2: Text Effects (15-30s)
-    textSection: toFrames(15, fps),
-    glow: toFrames(16, fps),
-    shimmer: toFrames(19, fps),
-    kineticWave: toFrames(22, fps),
-    kineticScatter: toFrames(25, fps),
-    typewriter: toFrames(28, fps),
+    // Section 2: Text Effects (12-24s)
+    textSection: toFrames(12, fps),
+    glow: toFrames(13, fps),
+    shimmer: toFrames(16, fps),
+    kineticWave: toFrames(19, fps),
+    typewriter: toFrames(22, fps),
     
-    // Section 3: Draw-On (30-45s)
-    drawSection: toFrames(30, fps),
-    highlight: toFrames(31, fps),
-    circle: toFrames(35, fps),
-    underline: toFrames(39, fps),
+    // Section 3: Draw-On (24-36s)
+    drawSection: toFrames(24, fps),
+    highlight: toFrames(25, fps),
+    circle: toFrames(29, fps),
+    underline: toFrames(33, fps),
     
-    // Section 4: Advanced (45-60s)
-    advancedSection: toFrames(45, fps),
-    liquidBlob: toFrames(46, fps),
-    combined: toFrames(50, fps),
-    finale: toFrames(55, fps),
+    // Section 4: Lottie Animations (36-48s)
+    lottieSection: toFrames(36, fps),
+    lottieCheckmark: toFrames(37, fps),
+    lottieSparkle: toFrames(40, fps),
+    lottieLightbulb: toFrames(43, fps),
+    lottieCelebration: toFrames(46, fps),
+    
+    // Section 5: Combined Effects (48-72s)
+    combinedsSection: toFrames(48, fps),
+    combo1: toFrames(49, fps),
+    combo2: toFrames(55, fps),
+    combo3: toFrames(61, fps),
+    combo4: toFrames(67, fps),
+    finale: toFrames(70, fps),
   };
   
   // Generate all particles
@@ -152,9 +160,10 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
   
   // Section title animations
   const section1Title = fadeUpIn(frame, { start: 0.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
-  const section2Title = fadeUpIn(frame, { start: 15.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
-  const section3Title = fadeUpIn(frame, { start: 30.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
-  const section4Title = fadeUpIn(frame, { start: 45.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
+  const section2Title = fadeUpIn(frame, { start: 12.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
+  const section3Title = fadeUpIn(frame, { start: 24.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
+  const section4Title = fadeUpIn(frame, { start: 36.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
+  const section5Title = fadeUpIn(frame, { start: 48.5, dur: 1.0, dist: 40, ease: 'smooth' }, EZ, fps);
   
   // Text effects
   const glowEffect = getGlowEffect(frame, {
@@ -180,14 +189,11 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
     frequency: 0.1,
   }, fps);
   
-  const kineticScatter = getKineticText(frame, {
-    start: 25,
-    text: 'Scatter Effect',
-    splitBy: 'word',
-    effect: 'scatter',
-    amplitude: 20,
-    frequency: 0.1,
-  }, fps);
+  // Lottie animation timings
+  const showCheckmark = frame >= beats.lottieCheckmark && frame < beats.lottieSparkle;
+  const showSparkle = frame >= beats.lottieSparkle && frame < beats.lottieLightbulb;
+  const showLightbulb = frame >= beats.lottieLightbulb && frame < beats.lottieCelebration;
+  const showCelebration = frame >= beats.lottieCelebration && frame < beats.combinedsSection;
   
   const typewriterText = 'Typewriter reveals character by character...';
   const typewriter = getTypewriterProgress(frame, {
@@ -197,29 +203,30 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
     initialDelay: 0,
   }, fps);
   
-  // Draw-on effects
+  // Draw-on effects (positioned to match centered text)
+  // Positioned at vertical center (540) with offsets for each section
   const highlightSwipe = getHighlightSwipe(frame, {
-    start: 31,
+    start: 25,
     duration: 1.0,
-    textBounds: { x: 460, y: 480, width: 1000, height: 50 },
-    color: '#FFD70030',
+    textBounds: { x: 260, y: 360, width: 1400, height: 60 },
+    color: '#FFD70040',
     ease: 'smooth',
   }, fps);
   
   const circleDrawOn = getCircleDrawOn(frame, {
-    start: 35,
+    start: 29,
     duration: 1.0,
-    textBounds: { x: 760, y: 520, width: 400, height: 60 },
-    padding: 20,
+    textBounds: { x: 660, y: 460, width: 600, height: 65 },
+    padding: 25,
     type: 'circle',
     ease: 'smooth',
   }, fps);
   
   const underlineDrawOn = getCircleDrawOn(frame, {
-    start: 39,
+    start: 33,
     duration: 0.8,
-    textBounds: { x: 660, y: 540, width: 600, height: 40 },
-    padding: 0,
+    textBounds: { x: 560, y: 570, width: 800, height: 60 },
+    padding: 5,
     type: 'underline',
     ease: 'smooth',
   }, fps);
@@ -308,16 +315,32 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Sparkles */}
+        {/* Sparkles - Section 1 */}
         {frame >= beats.sparkles && frame < beats.sparkles + 60 &&
           renderSparkles(sparkles1, frame, beats.sparkles, colors.primary)}
         
         {frame >= beats.sparkles + 30 && frame < beats.sparkles + 90 &&
           renderSparkles(sparkles2, frame, beats.sparkles + 30, colors.tertiary)}
         
-        {/* Confetti burst */}
+        {/* Sparkles - Combo 1 */}
+        {frame >= beats.combo1 + 20 && frame < beats.combo1 + 80 &&
+          renderSparkles(sparkles1, frame, beats.combo1 + 20, colors.primary)}
+        
+        {/* Sparkles - Finale */}
+        {frame >= beats.combo4 + 40 && frame < beats.combo4 + 100 &&
+          renderSparkles(sparkles2, frame, beats.combo4 + 40, '#FFD700')}
+        
+        {/* Confetti burst - Section 1 */}
         {frame >= beats.confetti && frame < beats.confetti + 90 &&
           renderConfettiBurst(confettiBurst, frame, beats.confetti, [colors.primary, colors.secondary, colors.tertiary, colors.success, '#F39C12'])}
+        
+        {/* Confetti burst - Combo 3 */}
+        {frame >= beats.combo3 && frame < beats.combo3 + 90 &&
+          renderConfettiBurst(confettiBurst, frame, beats.combo3, [colors.success, colors.primary, '#FFD700'])}
+        
+        {/* Confetti burst - Finale */}
+        {frame >= beats.combo4 + 30 && frame < beats.combo4 + 120 &&
+          renderConfettiBurst(confettiBurst, frame, beats.combo4 + 30, [colors.primary, colors.secondary, colors.tertiary, colors.success, '#F39C12'])}
         
         {/* Highlight swipe */}
         {highlightSwipe.visible && (
@@ -576,7 +599,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
         )}
         
         {/* SECTION 3: DRAW-ON EFFECTS */}
-        {frame >= beats.drawSection && frame < beats.advancedSection && (
+        {frame >= beats.drawSection && frame < beats.lottieSection && (
           <div style={{ opacity: section3Title.opacity, transform: `translateY(${section3Title.translateY}px)` }}>
             <h2
               style={{
@@ -590,13 +613,13 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
               Section 3: Draw-On Effects
             </h2>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 80, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 100, alignItems: 'center', justifyContent: 'center', minHeight: 500 }}>
               {frame >= beats.highlight && (
                 <div style={{ textAlign: 'center', position: 'relative' }}>
                   <h3
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
-                      fontSize: 36,
+                      fontSize: 40,
                       color: colors.ink,
                       margin: 0,
                       position: 'relative',
@@ -613,7 +636,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
                   <h3
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
-                      fontSize: 36,
+                      fontSize: 40,
                       color: colors.ink,
                       margin: 0,
                     }}
@@ -628,7 +651,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
                   <h3
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
-                      fontSize: 36,
+                      fontSize: 40,
                       color: colors.ink,
                       margin: 0,
                     }}
@@ -641,9 +664,92 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
           </div>
         )}
         
-        {/* SECTION 4: ADVANCED EFFECTS */}
-        {frame >= beats.advancedSection && (
+        {/* SECTION 4: LOTTIE ANIMATIONS */}
+        {frame >= beats.lottieSection && frame < beats.combinedsSection && (
           <div style={{ opacity: section4Title.opacity, transform: `translateY(${section4Title.translateY}px)` }}>
+            <h2
+              style={{
+                fontFamily: THEME.fonts.marker.primary,
+                fontSize: 48,
+                color: colors.success,
+                textAlign: 'center',
+                marginBottom: 60,
+              }}
+            >
+              Section 4: Lottie Microdelights
+            </h2>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, maxWidth: 1000, margin: '0 auto' }}>
+              {/* Checkmark */}
+              {showCheckmark && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.lottieCheckmark, beats.lottieCheckmark + 20], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
+                  <div style={{ fontSize: 80, marginBottom: 16 }}>✓</div>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: colors.ink, margin: 0, fontWeight: 'bold' }}>
+                    Checkmark
+                  </p>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 16, color: `${colors.ink}70`, margin: '8px 0 0 0' }}>
+                    Success indicators
+                  </p>
+                </div>
+              )}
+              
+              {/* Sparkle */}
+              {showSparkle && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.lottieSparkle, beats.lottieSparkle + 20], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
+                  <div style={{ fontSize: 80, marginBottom: 16 }}>✨</div>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: colors.ink, margin: 0, fontWeight: 'bold' }}>
+                    Sparkle
+                  </p>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 16, color: `${colors.ink}70`, margin: '8px 0 0 0' }}>
+                    Emphasis bursts
+                  </p>
+                </div>
+              )}
+              
+              {/* Lightbulb */}
+              {showLightbulb && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.lottieLightbulb, beats.lottieLightbulb + 20], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
+                  <div style={{ fontSize: 80, marginBottom: 16 }}>💡</div>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: colors.ink, margin: 0, fontWeight: 'bold' }}>
+                    Lightbulb
+                  </p>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 16, color: `${colors.ink}70`, margin: '8px 0 0 0' }}>
+                    Aha moments
+                  </p>
+                </div>
+              )}
+              
+              {/* Celebration */}
+              {showCelebration && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.lottieCelebration, beats.lottieCelebration + 20], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
+                  <div style={{ fontSize: 80, marginBottom: 16 }}>🎉</div>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: colors.ink, margin: 0, fontWeight: 'bold' }}>
+                    Celebration
+                  </p>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 16, color: `${colors.ink}70`, margin: '8px 0 0 0' }}>
+                    Success moments
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* SECTION 5: COMBINED EFFECTS */}
+        {frame >= beats.combinedsSection && (
+          <div style={{ opacity: section5Title.opacity, transform: `translateY(${section5Title.translateY}px)` }}>
             <h2
               style={{
                 fontFamily: THEME.fonts.marker.primary,
@@ -653,43 +759,106 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
                 marginBottom: 60,
               }}
             >
-              Section 4: Advanced Effects
+              Section 5: Combined Effects
             </h2>
             
-            <div style={{ textAlign: 'center' }}>
-              {frame >= beats.liquidBlob && frame < beats.combined && (
-                <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 80, alignItems: 'center' }}>
+              {/* Combo 1: Glow + Sparkles */}
+              {frame >= beats.combo1 && frame < beats.combo2 && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.combo1, beats.combo1 + 30], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
                   <h3
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
-                      fontSize: 36,
-                      color: colors.ink,
+                      fontSize: 52,
+                      color: colors.primary,
                       margin: '0 0 16px 0',
+                      filter: getGlowEffect(frame, { intensity: 15, color: colors.primary, pulse: true, pulseSpeed: 0.08 }).filter,
                     }}
                   >
-                    Liquid Blobs
+                    Combo 1: Glow + Sparkles
                   </h3>
-                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: `${colors.ink}70`, margin: 0 }}>
-                    Organic, flowing background elements
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: `${colors.ink}80`, margin: 0 }}>
+                    Perfect for hero moments and reveals
                   </p>
                 </div>
               )}
               
-              {frame >= beats.combined && (
-                <div>
+              {/* Combo 2: Kinetic Text + Particles */}
+              {frame >= beats.combo2 && frame < beats.combo3 && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.combo2, beats.combo2 + 30], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
+                  {kineticWave.isActive && (
+                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginBottom: 16 }}>
+                      {kineticWave.segments.map((seg, i) => (
+                        <h3
+                          key={i}
+                          style={{
+                            fontFamily: THEME.fonts.marker.primary,
+                            fontSize: 52,
+                            color: colors.secondary,
+                            margin: 0,
+                            transform: `translateY(${seg.translateY}px)`,
+                          }}
+                        >
+                          {seg.text}
+                        </h3>
+                      ))}
+                    </div>
+                  )}
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: `${colors.ink}80`, margin: 0 }}>
+                    Great for energetic, playful content
+                  </p>
+                </div>
+              )}
+              
+              {/* Combo 3: Confetti + Glow + Checkmark */}
+              {frame >= beats.combo3 && frame < beats.combo4 && (
+                <div style={{ 
+                  textAlign: 'center',
+                  position: 'relative',
+                  opacity: interpolate(frame, [beats.combo3, beats.combo3 + 30], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
                   <h3
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
-                      fontSize: 48,
-                      color: colors.primary,
-                      margin: '0 0 24px 0',
-                      filter: getGlowEffect(frame, { intensity: 12, color: colors.primary, pulse: true, pulseSpeed: 0.06 }).filter,
+                      fontSize: 52,
+                      color: colors.success,
+                      margin: '0 0 16px 0',
+                      filter: getGlowEffect(frame, { intensity: 12, color: colors.success, pulse: true, pulseSpeed: 0.07 }).filter,
                     }}
                   >
-                    All Effects Combined!
+                    Combo 3: Success Pack ✓
                   </h3>
-                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 24, color: colors.ink, margin: 0, maxWidth: 700, marginLeft: 'auto', marginRight: 'auto' }}>
-                    Mix and match effects to create stunning, unique videos that would be impossible in a simple editor
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 20, color: `${colors.ink}80`, margin: 0 }}>
+                    Perfect for quiz reveals and achievements
+                  </p>
+                </div>
+              )}
+              
+              {/* Combo 4: Everything! */}
+              {frame >= beats.combo4 && (
+                <div style={{ 
+                  textAlign: 'center',
+                  opacity: interpolate(frame, [beats.combo4, beats.combo4 + 30], [0, 1], { extrapolateRight: 'clamp' })
+                }}>
+                  <h3
+                    style={{
+                      fontFamily: THEME.fonts.marker.primary,
+                      fontSize: 56,
+                      color: colors.primary,
+                      margin: '0 0 20px 0',
+                      filter: getGlowEffect(frame, { intensity: 18, color: colors.primary, pulse: true, pulseSpeed: 0.09 }).filter,
+                    }}
+                  >
+                    🎉 The Full Magic! 🎉
+                  </h3>
+                  <p style={{ fontFamily: THEME.fonts.structure.primary, fontSize: 22, color: colors.ink, margin: 0, maxWidth: 800, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+                    Combine particles, sparkles, glows, and animations to create premium videos that would take hours in traditional editors
                   </p>
                 </div>
               )}
@@ -711,11 +880,11 @@ export const TEMPLATE_ID = 'ShowcaseAnimations';
 export const TEMPLATE_VERSION = '5.0.0';
 
 export const getDuration = (scene, fps) => {
-  return toFrames(60, fps); // 60 seconds
+  return toFrames(72, fps); // 72 seconds
 };
 
-export const DURATION_MIN_FRAMES = 1800;  // 60s @ 30fps
-export const DURATION_MAX_FRAMES = 1800;  // 60s @ 30fps
+export const DURATION_MIN_FRAMES = 2160;  // 72s @ 30fps
+export const DURATION_MAX_FRAMES = 2160;  // 72s @ 30fps
 
 export const SUPPORTED_MODES = ['notebook', 'whiteboard'];
 
