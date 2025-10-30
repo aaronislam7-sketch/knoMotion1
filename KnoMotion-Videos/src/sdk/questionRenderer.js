@@ -56,18 +56,21 @@ const calculateLinePosition = (lines, index, layout, viewport) => {
     centerStack
   } = { ...DEFAULT_QUESTION_LAYOUT, ...layout };
   
+  // Normalize arrangement: 'stacked' means 'vertical'
+  const normalizedArrangement = arrangement === 'stacked' ? 'vertical' : arrangement;
+  
   // Calculate centered base if requested
   let base;
   if (centerStack) {
-    const spacing = arrangement === 'vertical' ? verticalSpacing : horizontalSpacing;
-    base = getCenteredStackBase(basePosition, lines.length, spacing, arrangement, viewport);
+    const spacing = normalizedArrangement === 'vertical' ? verticalSpacing : horizontalSpacing;
+    base = getCenteredStackBase(basePosition, lines.length, spacing, normalizedArrangement, viewport);
   } else {
     base = resolvePosition(basePosition, { x: 0, y: 0 }, viewport);
   }
   
   // Get stacked position
-  const spacing = arrangement === 'vertical' ? verticalSpacing : horizontalSpacing;
-  const direction = arrangement === 'vertical' ? 'vertical' : 'horizontal';
+  const spacing = normalizedArrangement === 'vertical' ? verticalSpacing : horizontalSpacing;
+  const direction = normalizedArrangement === 'vertical' ? 'vertical' : 'horizontal';
   
   return getStackedPosition(
     { x: base.x, y: base.y },

@@ -51,7 +51,7 @@
     "layout": {
       "arrangement": "stacked",
       "stagger": 0.4,
-      "verticalSpacing": 70,
+      "verticalSpacing": 90,
       "basePosition": "center",
       "centerStack": true
     },
