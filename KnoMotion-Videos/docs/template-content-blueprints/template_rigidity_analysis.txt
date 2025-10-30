@@ -10,3 +10,17 @@ All component positions fixed	Rigid	High 	"Include position tokens in JSON from 
 Attach to all rendered components in the scene (header, subtitle, images etc) "
 Question Exit hardcoded	Somewhat	Low 	All question exit animations will exit left. Allow customisation based on preset exit options and configure in JSON. 
 Font Scaling Manual	Low 	Low 	Long strings need manual size tweaks, but we should be able to add config to do this outside of this review.
+Hook1E - Atmospheric layers anchored to fixed coordinates	Rigid	High	"Expose fog/wisp/halo spawn points as relative tokens (eg. percentages of viewport) so JSON can reposition atmosphere for alternate focal points; compute drift from those anchors instead of absolute px."
+Hook1E - Single-line question pipeline	Rigid	Medium	"Allow `fill.texts.question` to accept an array of lines with auto leading + sparkle bounding boxes per line; maintain backwards compatibility by coercing strings -> [string]."
+Explain2A - Card geometry locked to 340px	Rigid	High	"Move card width/height and row strategy into JSON-driven layout config (eg. `layout.mode`, `card.width`, `row.capacity`), then derive adaptive spacing from those inputs." 
+Explain2A - Connector palette + pulse hardcoded	Somewhat	Medium	"Surface connector stroke color + pulse amplitude in JSON so authors can dial hierarchy; default to accent but allow overrides without editing JSX." 
+Explain2B - Exactly-two-cards assumption	Very Rigid	High	"Shift `fill.analogy` to accept an array of comparisons with `layout.variant` (two-up, three-up, stacked) and iterate instead of naming `familiar/newConcept`."
+Explain2B - Shrink targets fixed to {±500,-280}	Rigid	Medium	"Expose shrink target positions + scales in JSON (eg. `layout.cornerTargets`) so we can support different aspect ratios or off-centre reveals." 
+Apply3A - Option stack capped at four	Rigid	High	"Support variable option arrays by reading `optionsPerRow` + `maxOptions` from JSON; auto-build grid layout and responsive spacing so templates handle >4 choices." 
+Apply3A - Countdown badge position implicit	Somewhat	Medium	"Provide timer placement tokens (anchor, offsets) rather than relying on collision helper so scenes can intentionally pin timer left/right or replace with progress bar." 
+Apply3B - Choice layout only for 2 or 3 entries	Rigid	High	"Generalise choice positioning via JSON map (eg. `layout.rows`) so we can render 1–4 options, stacked or grid, without editing JSX." 
+Apply3B - Scenario visual slot fixed height	Somewhat	Medium	"Let JSON specify media type + target height/ratio (lottie, image, video) and scale container dynamically instead of clamping to 120px." 
+Reflect4A - Takeaways capped at four	Somewhat	Medium	"Introduce pagination / multi-column variants when `takeaways.length > 4`, driven by layout tokens rather than code branch." 
+Reflect4A - Accent cycle fixed to three colors	Low	Low	"Allow optional `style_tokens.colors.list[]` array so authors can provide longer color palettes (or monochrome) without code edits." 
+Reflect4D - Stepping stone path hardcoded	Rigid	High	"Move stepping stone coordinates, counts, and easing into JSON (eg. `path.nodes`) and interpolate runtime so journeys can show more/fewer milestones." 
+Reflect4D - CTA arrow style fixed	Somewhat	Medium	"Surface CTA style tokens (font, arrow length, presence) in JSON to support button variants or toned-down endings." 
