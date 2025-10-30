@@ -60,7 +60,7 @@ export * from './advancedEffects.jsx';
 export * from './lottieLibrary';
 
 // 🎯 AGNOSTIC TEMPLATE SYSTEM - Phase 1
-export * from './heroRegistry';
+export * from './heroRegistry.jsx';
 export * from './positionSystem';
 export * from './questionRenderer';
 export * from './layoutEngine';

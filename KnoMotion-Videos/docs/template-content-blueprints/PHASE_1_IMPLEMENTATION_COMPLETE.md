@@ -14,8 +14,8 @@ Phase 1 (SDK Foundations) and the Hook1A pilot have been successfully implemente
 
 ### Phase 1: SDK Foundations
 
-#### 1. **heroRegistry.js** ✅
-**Location:** `/workspace/KnoMotion-Videos/src/sdk/heroRegistry.js`
+#### 1. **heroRegistry.jsx** ✅
+**Location:** `/workspace/KnoMotion-Videos/src/sdk/heroRegistry.jsx`
 
 **Features:**
 - Type registry for polymorphic hero rendering
@@ -288,7 +288,7 @@ The template detects legacy format and automatically converts it to the new syst
 /workspace/KnoMotion-Videos/
 ├── src/
 │   ├── sdk/
-│   │   ├── heroRegistry.js ✨ NEW
+│   │   ├── heroRegistry.jsx ✨ NEW
 │   │   ├── positionSystem.js ✨ NEW
 │   │   ├── questionRenderer.js ✨ NEW
 │   │   ├── layoutEngine.js ✨ NEW

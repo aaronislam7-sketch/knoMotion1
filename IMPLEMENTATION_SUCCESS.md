@@ -29,7 +29,7 @@ Implemented **6 Agnostic Template Principals**:
 ### SDK Modules (Phase 1)
 4 new modules in `/workspace/KnoMotion-Videos/src/sdk/`:
 
-1. **heroRegistry.js** (400 lines)
+1. **heroRegistry.jsx** (400 lines)
    - Type-based hero rendering system
    - Supports: image, svg, roughSVG, lottie, custom
    - Animation calculator, registration API
@@ -293,7 +293,7 @@ Implemented **6 Agnostic Template Principals**:
 ### SDK (New)
 ```
 /workspace/KnoMotion-Videos/src/sdk/
-├── heroRegistry.js ✨
+├── heroRegistry.jsx ✨
 ├── positionSystem.js ✨
 ├── questionRenderer.js ✨
 ├── layoutEngine.js ✨
