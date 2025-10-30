@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
+import { annotate } from 'rough-notation';
 import { THEME } from '../utils/theme';
 
 // Blueprint v5.0 imports + ALL Creative Magic
@@ -23,8 +24,6 @@ import {
   getGlowEffect,
   getShimmerEffect,
   getKineticText,
-  getHighlightSwipe,
-  getCircleDrawOn,
   getLiquidBlob,
   getTypewriterProgress,
   getBouncyLetters
@@ -195,6 +194,12 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
   const showLightbulb = frame >= beats.lottieLightbulb && frame < beats.lottieCelebration;
   const showCelebration = frame >= beats.lottieCelebration && frame < beats.combinedsSection;
   
+  // Refs for rough-notation annotations
+  const highlightRef = useRef(null);
+  const circleRef = useRef(null);
+  const underlineRef = useRef(null);
+  const annotationsRef = useRef({ highlight: null, circle: null, underline: null });
+  
   const typewriterText = 'Typewriter reveals character by character...';
   const typewriter = getTypewriterProgress(frame, {
     start: 28,
@@ -203,33 +208,69 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
     initialDelay: 0,
   }, fps);
   
-  // Draw-on effects (positioned to match centered text)
-  // Positioned at vertical center (540) with offsets for each section
-  const highlightSwipe = getHighlightSwipe(frame, {
-    start: 25,
-    duration: 1.0,
-    textBounds: { x: 260, y: 360, width: 1400, height: 60 },
-    color: '#FFD70040',
-    ease: 'smooth',
-  }, fps);
-  
-  const circleDrawOn = getCircleDrawOn(frame, {
-    start: 29,
-    duration: 1.0,
-    textBounds: { x: 660, y: 460, width: 600, height: 65 },
-    padding: 25,
-    type: 'circle',
-    ease: 'smooth',
-  }, fps);
-  
-  const underlineDrawOn = getCircleDrawOn(frame, {
-    start: 33,
-    duration: 0.8,
-    textBounds: { x: 560, y: 570, width: 800, height: 60 },
-    padding: 5,
-    type: 'underline',
-    ease: 'smooth',
-  }, fps);
+  // Rough-notation annotations - handle draw-on effects
+  useEffect(() => {
+    const highlightStart = toFrames(25, fps);
+    const highlightEnd = toFrames(29, fps);
+    const circleStart = toFrames(29, fps);
+    const circleEnd = toFrames(33, fps);
+    const underlineStart = toFrames(33, fps);
+    const underlineEnd = toFrames(37, fps);
+    
+    // Highlight annotation
+    if (frame >= highlightStart && frame < highlightEnd && highlightRef.current && !annotationsRef.current.highlight) {
+      const annotation = annotate(highlightRef.current, {
+        type: 'highlight',
+        color: '#FFD700',
+        iterations: 1,
+        animationDuration: 600,
+      });
+      annotation.show();
+      annotationsRef.current.highlight = annotation;
+    } else if (frame >= highlightEnd && annotationsRef.current.highlight) {
+      annotationsRef.current.highlight.hide();
+      annotationsRef.current.highlight = null;
+    }
+    
+    // Circle annotation
+    if (frame >= circleStart && frame < circleEnd && circleRef.current && !annotationsRef.current.circle) {
+      const annotation = annotate(circleRef.current, {
+        type: 'circle',
+        color: '#E74C3C',
+        iterations: 1,
+        animationDuration: 600,
+        padding: 20,
+      });
+      annotation.show();
+      annotationsRef.current.circle = annotation;
+    } else if (frame >= circleEnd && annotationsRef.current.circle) {
+      annotationsRef.current.circle.hide();
+      annotationsRef.current.circle = null;
+    }
+    
+    // Underline annotation
+    if (frame >= underlineStart && frame < underlineEnd && underlineRef.current && !annotationsRef.current.underline) {
+      const annotation = annotate(underlineRef.current, {
+        type: 'underline',
+        color: '#3498DB',
+        iterations: 1,
+        animationDuration: 500,
+        padding: 5,
+      });
+      annotation.show();
+      annotationsRef.current.underline = annotation;
+    } else if (frame >= underlineEnd && annotationsRef.current.underline) {
+      annotationsRef.current.underline.hide();
+      annotationsRef.current.underline = null;
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (annotationsRef.current.highlight) annotationsRef.current.highlight.remove();
+      if (annotationsRef.current.circle) annotationsRef.current.circle.remove();
+      if (annotationsRef.current.underline) annotationsRef.current.underline.remove();
+    };
+  }, [frame, fps]);
   
   // Liquid blob
   const liquidBlob = getLiquidBlob(frame, {
@@ -341,47 +382,6 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
         {/* Confetti burst - Finale */}
         {frame >= beats.combo4 + 30 && frame < beats.combo4 + 120 &&
           renderConfettiBurst(confettiBurst, frame, beats.combo4 + 30, [colors.primary, colors.secondary, colors.tertiary, colors.success, '#F39C12'])}
-        
-        {/* Highlight swipe */}
-        {highlightSwipe.visible && (
-          <rect
-            x={highlightSwipe.x}
-            y={highlightSwipe.y}
-            width={highlightSwipe.width}
-            height={highlightSwipe.height}
-            fill={highlightSwipe.color}
-            opacity={highlightSwipe.opacity}
-            rx={8}
-          />
-        )}
-        
-        {/* Circle draw-on */}
-        {circleDrawOn.visible && circleDrawOn.type === 'ellipse' && (
-          <ellipse
-            cx={circleDrawOn.cx}
-            cy={circleDrawOn.cy}
-            rx={circleDrawOn.rx}
-            ry={circleDrawOn.ry}
-            fill="none"
-            stroke={colors.primary}
-            strokeWidth={4}
-            strokeDasharray={circleDrawOn.strokeDasharray}
-            strokeDashoffset={circleDrawOn.strokeDashoffset}
-          />
-        )}
-        
-        {/* Underline draw-on */}
-        {underlineDrawOn.visible && underlineDrawOn.type === 'line' && (
-          <line
-            x1={underlineDrawOn.x1}
-            y1={underlineDrawOn.y1}
-            x2={underlineDrawOn.x2}
-            y2={underlineDrawOn.y2}
-            stroke={colors.tertiary}
-            strokeWidth={4}
-            strokeLinecap="round"
-          />
-        )}
       </svg>
       
       {/* Liquid blob layer */}
@@ -617,6 +617,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
               {frame >= beats.highlight && (
                 <div style={{ textAlign: 'center', position: 'relative' }}>
                   <h3
+                    ref={highlightRef}
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
                       fontSize: 40,
@@ -634,6 +635,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
               {frame >= beats.circle && (
                 <div style={{ textAlign: 'center' }}>
                   <h3
+                    ref={circleRef}
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
                       fontSize: 40,
@@ -649,6 +651,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
               {frame >= beats.underline && (
                 <div style={{ textAlign: 'center' }}>
                   <h3
+                    ref={underlineRef}
                     style={{
                       fontFamily: THEME.fonts.marker.primary,
                       fontSize: 40,
