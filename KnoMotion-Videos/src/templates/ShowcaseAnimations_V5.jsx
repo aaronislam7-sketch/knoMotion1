@@ -189,10 +189,11 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
     frequency: 0.1,
   }, fps);
   
+  const typewriterText = 'Typewriter reveals character by character...';
   const typewriter = getTypewriterProgress(frame, {
     start: 28,
     charDelay: 0.05,
-    text: 'Typewriter reveals character by character...',
+    text: typewriterText,
     initialDelay: 0,
   }, fps);
   
@@ -517,7 +518,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
                     }}
                   >
                     <span style={{
-                      background: `linear-gradient(90deg, 
+                      backgroundImage: `linear-gradient(90deg, 
                         ${colors.tertiary} ${shimmerEffect.gradientStart}%, 
                         #FFD700 ${shimmerEffect.position}%, 
                         ${colors.tertiary} ${shimmerEffect.gradientEnd}%)`,
@@ -565,7 +566,7 @@ const ShowcaseAnimations = ({ scene, styles, presets, easingMap, transitions }) 
                       maxWidth: 700,
                     }}
                   >
-                    {typewriter.text.substring(0, typewriter.visibleChars)}
+                    {typewriterText.substring(0, typewriter.visibleChars)}
                     {!typewriter.isComplete && <span style={{ opacity: Math.sin(frame * 0.3) * 0.5 + 0.5 }}>|</span>}
                   </p>
                 </div>
