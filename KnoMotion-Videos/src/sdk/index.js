@@ -52,6 +52,8 @@ export { EZ, getEasing } from './easing';
 export * from './collision-detection';
 export * from './layout-resolver';
 export * from './scene-validator';
+export { SceneSchema, detectSchemaVersion, isAgnosticScene, isLegacyScene } from './scene.schema';
+export * from './sceneCompatibility';
 
 // ✨ CREATIVE MAGIC - V6 Enhancements
 export * from './particleSystem.jsx';
