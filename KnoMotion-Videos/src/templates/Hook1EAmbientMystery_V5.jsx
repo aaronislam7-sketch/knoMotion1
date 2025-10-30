@@ -10,11 +10,17 @@ import {
   pulseEmphasis,
   EZ,
   useSceneId,
-  toFrames 
+  toFrames,
+  // ✨ Creative Magic V6
+  generateAmbientParticles,
+  renderAmbientParticles,
+  generateSparkles,
+  renderSparkles,
+  getGlowEffect
 } from '../sdk';
 
 /**
- * HOOK 1E: AMBIENT MYSTERY - Blueprint v5.0
+ * HOOK 1E: AMBIENT MYSTERY - Blueprint v5.0 + ✨ CREATIVE MAGIC V6
  * 
  * TEMPLATE STRATEGY:
  * - ✅ Blueprint v5.0 compliant
@@ -23,14 +29,20 @@ import {
  * - ✅ Context-based ID factory (useSceneId)
  * - ✅ Strict zero wobble (roughness: 0, bowing: 0)
  * - ✅ FPS-agnostic (seconds → frames conversion)
+ * - ✨ CREATIVE ENHANCEMENTS (HOOK APPROPRIATE):
+ *   • Ambient particles (floating, mysterious)
+ *   • Sparkles on question reveal
+ *   • Glow effect on spotlight
+ *   • Atmospheric depth
  * 
  * CONVERSATIONAL FLOW:
- * 1. Fog drifts in (atmospheric setup)
- * 2. Whisper text fades up ("In the depths of...")
- * 3. Question reveals with mystery ("What secrets...")
- * 4. Glow elements pulse (atmospheric depth)
- * 5. Hint cascades in late
- * 6. Mysterious settle and exit
+ * 1. Ambient particles create mysterious atmosphere
+ * 2. Fog drifts in (atmospheric setup)
+ * 3. Whisper text fades up ("In the depths of...")
+ * 4. Question reveals with sparkles ("What secrets...")
+ * 5. Glow elements pulse with enhanced glow (atmospheric depth)
+ * 6. Hint cascades in late
+ * 7. Mysterious settle and exit
  * 
  * TYPOGRAPHY:
  * - Primary: Cabin Sketch (mysterious headers)
@@ -45,6 +57,19 @@ const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap, transitions }
   const id = useSceneId();
   
   const svgRef = useRef(null);
+  const particlesRef = useRef(null);
+  const effectsRef = useRef(null);
+  
+  // ✨ Generate deterministic particles (mysterious atmosphere)
+  const ambientParticles = React.useMemo(
+    () => generateAmbientParticles(18, 542, 1920, 1080),
+    []
+  );
+  
+  const questionSparkles = React.useMemo(
+    () => generateSparkles(8, { x: 760, y: 380, width: 400, height: 240 }, 600),
+    []
+  );
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -99,6 +124,14 @@ const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap, transitions }
     [0.9, 0.7, 0.5, 0.6],
     { extrapolateRight: 'clamp' }
   );
+  
+  // ✨ Glow effect for spotlight
+  const spotlightGlow = getGlowEffect(frame, {
+    intensity: 15,
+    color: colors.spotlight,
+    pulse: frame >= beats.spotlight,
+    pulseSpeed: 0.03,
+  });
 
   // ========================================
   // ANIMATIONS (Using Blueprint v5 presets)

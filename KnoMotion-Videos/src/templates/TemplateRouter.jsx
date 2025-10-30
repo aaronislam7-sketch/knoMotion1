@@ -17,6 +17,7 @@ import { Apply3AMicroQuiz } from './Apply3AMicroQuiz_V5';
 import { Apply3BScenarioChoice } from './Apply3BScenarioChoice_V5';
 import { Reflect4AKeyTakeaways } from './Reflect4AKeyTakeaways_V5';
 import { Reflect4DForwardLink } from './Reflect4DForwardLink_V5';
+import { ShowcaseAnimations } from './ShowcaseAnimations_V5';
 
 // Legacy Templates (v3/v4) - Removed after v5 migration
 // import { HookTemplate } from './HookTemplate';
@@ -42,6 +43,7 @@ const TEMPLATE_REGISTRY = {
   'Apply3BScenarioChoice': Apply3BScenarioChoice,
   'Reflect4AKeyTakeaways': Reflect4AKeyTakeaways,
   'Reflect4DForwardLink': Reflect4DForwardLink,
+  'ShowcaseAnimations': ShowcaseAnimations,  // ✨ Creative Effects Showcase
   
   // Legacy templates - Removed after v5 migration
   // 'hook': HookTemplate,
