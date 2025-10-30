@@ -52,11 +52,19 @@ export { EZ, getEasing } from './easing';
 export * from './collision-detection';
 export * from './layout-resolver';
 export * from './scene-validator';
+export { SceneSchema, detectSchemaVersion, isAgnosticScene, isLegacyScene } from './scene.schema';
+export * from './sceneCompatibility';
 
 // ✨ CREATIVE MAGIC - V6 Enhancements
 export * from './particleSystem.jsx';
 export * from './handwritingEffects.jsx';
 export * from './advancedEffects.jsx';
 export * from './lottieLibrary';
+
+// 🎯 AGNOSTIC TEMPLATE SYSTEM - Phase 1
+export * from './heroRegistry.jsx';
+export * from './positionSystem';
+export * from './questionRenderer';
+export * from './layoutEngine';
 
 export default SDK;

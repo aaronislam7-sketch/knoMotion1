@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Player } from '@remotion/player';
 import { TemplateRouter } from '../templates/TemplateRouter';
 import { MultiSceneVideo } from './MultiSceneVideo';
+import { validateSceneCompat, detectSchemaVersion } from '../sdk';
 
 // Import default v5 scenes
 import hookScene from '../scenes/hook_1a_knodovia_map_v5.json';
@@ -104,15 +105,25 @@ export const VideoWizard = () => {
           };
         }
         
-        // Basic v5 validation
+        // Basic v5 validation using new schema system
         const errors = [];
         if (!parsed.template_id) errors.push('Missing template_id');
-        if (!parsed.beats) errors.push('Missing beats object (v5.0 schema)');
-        if (!parsed.fill) errors.push('Missing fill data');
+        if (!parsed.beats) errors.push('Missing beats object (v5.x schema)');
+        
+        // Use new schema validation (supports both v5.0 and v5.1)
+        const validation = validateSceneCompat(parsed);
+        if (!validation.valid) {
+          errors.push(...validation.errors);
+        }
         
         if (errors.length > 0) {
           setValidationErrors(prev => ({ ...prev, [pillar]: errors }));
           return;
+        }
+        
+        // Log info for v5.1 agnostic scenes
+        if (validation.valid && detectSchemaVersion(parsed) === '5.1') {
+          console.info(`✅ ${pillar} scene using v5.1 agnostic format`);
         }
       } else {
         // Legacy schema normalization
