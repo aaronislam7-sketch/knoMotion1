@@ -1,0 +1,12 @@
+Concern	Rigity Level	Impact	Resolution 
+Hardcoded Map SVG	Very Rigid	Critical 	"Pivot this to a ""hero"" approach that is configureable by JSON.
+Use type: "".."" to power approach (inside JSON) 
+options for ""type"": [""image"", ""svg"", ""roughSVG"", ""lottie""
+Conder how we can ensure all 'types' animate correctly (maybe step back from current drawOn mechnaic in this instance) "
+Two-line question format	Rigid	High	"Render question structure dynamic 
+Loop through lines array (1-4max) and calculate stagger based on length
+Choregraph smooth animations dynamically"
+All component positions fixed	Rigid	High 	"Include position tokens in JSON from all  pre-calculated positions on a 9 point square  (top left -> centre -> bottom right)
+Attach to all rendered components in the scene (header, subtitle, images etc) "
+Question Exit hardcoded	Somewhat	Low 	All question exit animations will exit left. Allow customisation based on preset exit options and configure in JSON. 
+Font Scaling Manual	Low 	Low 	Long strings need manual size tweaks, but we should be able to add config to do this outside of this review.
