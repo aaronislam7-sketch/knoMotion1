@@ -4,6 +4,7 @@ import { Player } from '@remotion/player';
 import { TemplateRouter } from './templates/TemplateRouter';
 import { StyleTokensProvider } from './sdk/StyleTokensProvider';
 import { DebugOverlay } from './components/DebugOverlay';
+import { validateSceneCompat, detectSchemaVersion } from './sdk';
 
 // Import v5 scene examples
 import hookSleepScienceScene from './scenes/hook_sleep_science.json';
@@ -73,24 +74,29 @@ const validateScene = (scene) => {
   const errors = [];
   
   try {
-    const schemaVersion = scene.schema_version || '5.0';
-    const isV5 = schemaVersion.startsWith('5.');
-    
     // Check required fields
     if (!scene.template_id) {
       errors.push('Missing required field: template_id');
     }
     
-    // v5.0 uses beats, v4 uses duration_s/fps/timeline
+    // Use new schema validation that supports both v5.0 and v5.1
+    const validation = validateSceneCompat(scene);
+    
+    if (!validation.valid) {
+      errors.push(...validation.errors);
+    }
+    
+    const schemaVersion = detectSchemaVersion(scene);
+    const isV5 = schemaVersion === '5.0' || schemaVersion === '5.1';
+    
+    // v5.0/v5.1 use beats, v4 uses duration_s/fps/timeline
     if (isV5) {
       if (!scene.beats) {
-        errors.push('Missing required field: beats (v5.0 schema)');
+        errors.push('Missing required field: beats (v5.x schema)');
       }
-      if (!scene.fill) {
-        errors.push('Missing required field: fill (v5.0 schema)');
-      }
+      // Note: fill is now optional in v5.1 - validation handled by validateSceneCompat
     } else {
-      // Legacy schema validation
+      // Legacy schema validation (v4 and older)
       if (!scene.duration_s) {
         errors.push('Missing required field: duration_s');
       }
@@ -102,6 +108,12 @@ const validateScene = (scene) => {
     // Check if template exists
     if (scene.template_id && !templateMap[scene.template_id]) {
       errors.push(`Unknown template_id: ${scene.template_id}. Valid v5 templates: Hook1AQuestionBurst, Hook1EAmbientMystery, Explain2AConceptBreakdown, Explain2BAnalogy, Apply3AMicroQuiz, Apply3BScenarioChoice, Reflect4AKeyTakeaways, Reflect4DForwardLink`);
+    }
+    
+    // Add info messages for agnostic scenes
+    if (validation.valid && schemaVersion === '5.1') {
+      // Informational only - don't add to errors
+      console.info('✅ Using v5.1 agnostic format');
     }
     
   } catch (e) {
