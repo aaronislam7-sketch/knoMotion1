@@ -19,8 +19,7 @@ import {
   renderAmbientParticles,
   generateConfettiBurst,
   renderConfettiBurst,
-  getGlowEffect,
-  getCircleDrawOn
+  getGlowEffect
 } from '../sdk';
 
 /**
@@ -208,22 +207,11 @@ const Show5A_StepByStep = ({ scene, styles, presets, easingMap, transitions }) =
       ease: 'backOut'
     }, EZ, fps);
     
-    // Checkpoint draw-on
-    const checkpointDraw = step.checkpoint ? getCircleDrawOn(frame, {
-      start: checkpointStart + 0.2,
-      duration: 0.6,
-      textBounds: { x: 100, y: 800, width: 1720, height: 60 },
-      padding: 10,
-      type: 'underline',
-      ease: 'smooth',
-    }, fps) : null;
-    
     return {
       numberPop,
       actionFade,
       detailsFade,
       checkpointFade,
-      checkpointDraw,
     };
   });
 
@@ -249,31 +237,36 @@ const Show5A_StepByStep = ({ scene, styles, presets, easingMap, transitions }) =
       svg.removeChild(svg.firstChild);
     }
 
-    // Progress bar background
+    // Progress bar with improved quality and rounded corners
     if (frame >= beats.overview) {
+      // Background track (rounded)
       const progressBarBg = rc.rectangle(160, 60, 1600, 40, {
         stroke: colors.inkLight,
-        strokeWidth: 3,
+        strokeWidth: 2,
         roughness: 0,
         bowing: 0,
-        fill: `${colors.inkLight}15`,
+        fill: `${colors.inkLight}10`,
         fillStyle: 'solid',
       });
+      progressBarBg.setAttribute('rx', '20');
+      progressBarBg.setAttribute('ry', '20');
       svg.appendChild(progressBarBg);
       
-      // Progress bar fill (animated)
+      // Progress fill (rounded, smooth animation)
       const fillWidth = (1600 * progressPercent) / 100;
       const fillProgress = Math.min((frame - beats.overview) / 20, 1);
       
-      if (fillWidth > 0) {
+      if (fillWidth > 5) {
         const progressBarFill = rc.rectangle(160, 60, fillWidth * fillProgress, 40, {
           stroke: isCompletion ? colors.accent2 : colors.accent,
-          strokeWidth: 3,
+          strokeWidth: 2,
           roughness: 0,
           bowing: 0,
           fill: isCompletion ? colors.accent2 : colors.accent,
           fillStyle: 'solid',
         });
+        progressBarFill.setAttribute('rx', '20');
+        progressBarFill.setAttribute('ry', '20');
         svg.appendChild(progressBarFill);
       }
     }
@@ -304,41 +297,9 @@ const Show5A_StepByStep = ({ scene, styles, presets, easingMap, transitions }) =
       });
     }
 
-    // Current step number circle background
-    if (currentStep >= 0 && !isCompletion) {
-      const numberBgSize = 140;
-      const numberBg = rc.circle(960, 320, numberBgSize * 2, {
-        stroke: colors.accent,
-        strokeWidth: 6,
-        roughness: 0,
-        bowing: 0,
-        fill: `${colors.accent}15`,
-        fillStyle: 'hachure',
-        hachureGap: 8,
-      });
-      svg.appendChild(numberBg);
-    }
+    // Removed unnecessary center circle - cleaner, more focused design
 
-    // Checkpoint check mark (rough.js)
-    if (currentStep >= 0 && !isCompletion) {
-      const step = steps[currentStep];
-      const anim = stepAnims[currentStep];
-      
-      if (step.checkpoint && anim.checkpointFade.opacity > 0) {
-        const checkProgress = Math.min((frame - (stepBeats[currentStep] + Math.min(stepDurations[currentStep] - 1.5, 3.0) * fps + 0.2 * fps)) / (0.6 * fps), 1);
-        
-        if (checkProgress > 0) {
-          const checkPath = `M 80 830 L ${80 + 30 * checkProgress} ${830 + 25 * checkProgress} L ${80 + 60 * checkProgress} ${830 - 30 * checkProgress}`;
-          const check = rc.path(checkPath, {
-            stroke: colors.accent2,
-            strokeWidth: 6,
-            roughness: 0,
-            bowing: 0,
-          });
-          svg.appendChild(check);
-        }
-      }
-    }
+    // Removed rough.js checkmark - using emoji checkmark instead for cleaner look
 
   }, [frame, beats, colors, currentStep, isCompletion, progressPercent, steps, stepBeats, stepDurations, stepAnims]);
 
@@ -584,40 +545,43 @@ const Show5A_StepByStep = ({ scene, styles, presets, easingMap, transitions }) =
                 </div>
               )}
 
-              {/* Checkpoint (validation message) */}
+              {/* Checkpoint (validation message) - improved positioning */}
               {steps[currentStep].checkpoint && (
                 <div
                   style={{
                     position: 'absolute',
-                    bottom: 120,
-                    left: 120,
+                    bottom: 80,
+                    left: '50%',
+                    transform: `translateX(-50%) translateY(${stepAnims[currentStep].checkpointFade.translateY || 0}px)`,
                     opacity: stepAnims[currentStep].checkpointFade.opacity || 0,
-                    transform: `translateY(${stepAnims[currentStep].checkpointFade.translateY || 0}px)`,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 16,
-                    padding: '16px 24px',
-                    backgroundColor: `${colors.accent2}15`,
-                    borderRadius: 12,
-                    border: `2px solid ${colors.accent2}40`,
+                    gap: 12,
+                    padding: '12px 24px',
+                    backgroundColor: `${colors.accent2}08`,
+                    borderRadius: 8,
+                    border: `2px solid ${colors.accent2}`,
+                    maxWidth: 800,
                   }}
                 >
-                  <div style={{ width: 60, height: 60, position: 'relative' }}>
-                    {/* Checkmark rendered by rough.js */}
+                  <div style={{
+                    fontSize: 24,
+                    color: colors.accent2,
+                    fontWeight: 'bold'
+                  }}>
+                    ✓
                   </div>
-                  <div>
-                    <p
-                      style={{
-                        fontFamily: fonts.secondary,
-                        fontSize: fonts.size_checkpoint,
-                        color: colors.ink,
-                        margin: 0,
-                        fontWeight: 600,
-                      }}
-                    >
-                      ✓ {steps[currentStep].checkpoint}
-                    </p>
-                  </div>
+                  <p
+                    style={{
+                      fontFamily: fonts.secondary,
+                      fontSize: fonts.size_checkpoint,
+                      color: colors.ink,
+                      margin: 0,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {steps[currentStep].checkpoint}
+                  </p>
                 </div>
               )}
 
