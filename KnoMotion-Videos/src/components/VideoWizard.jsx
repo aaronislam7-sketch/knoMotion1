@@ -9,8 +9,10 @@ import hook1AScene from '../scenes/hook_1a_knodovia_map_v5.json';
 import explain2AScene from '../scenes/explain_2a_breakdown_v5.json';
 import apply3AScene from '../scenes/apply_3a_quiz_v5.json';
 import reflect4AScene from '../scenes/reflect_4a_takeaways_v5.json';
-import show5AScene from '../scenes/Show5A_Example_GCP_VPC.json';
+import show5BScene from '../scenes/Show5B_Example_CloudFunction_Config.json';
 import compare3AScene from '../scenes/Compare3A_Example_GCP_Compute.json';
+import compare3BScene from '../scenes/Compare3B_Example_GCP_Compute_Decision.json';
+import build6AScene from '../scenes/Build6A_Example_VPC_Architecture.json';
 
 /**
  * PILLAR CONFIGURATION
@@ -45,16 +47,23 @@ const ALL_PILLARS = {
     color: '#9B59B6',
     defaultScene: compare3AScene,
     recommended: false,
-    duration: '35-50s'
+    duration: '25-50s',
+    variants: [
+      { id: 'compare_3a_v5', name: 'Feature Matrix', scene: compare3AScene },
+      { id: 'compare_3b_v5', name: 'Decision Tree', scene: compare3BScene }
+    ]
   },
   show: {
     title: 'Show',
-    icon: '📝',
-    description: 'Demonstrate how-to procedures',
+    icon: '⚙️',
+    description: 'Show configs & how systems work',
     color: '#F39C12',
-    defaultScene: show5AScene,
+    defaultScene: show5BScene,
     recommended: false,
-    duration: '45-70s'
+    duration: '30-45s',
+    variants: [
+      { id: 'show_5b_v5', name: 'Configuration Flow', scene: show5BScene }
+    ]
   },
   apply: {
     title: 'Apply',
@@ -74,16 +83,14 @@ const ALL_PILLARS = {
     recommended: true,
     duration: '25-35s'
   },
-  // Build pillar coming soon
   build: {
     title: 'Build',
     icon: '🏗️',
-    description: 'Show system evolution (Coming Soon)',
+    description: 'Show system evolution layer-by-layer',
     color: '#1ABC9C',
-    defaultScene: null,
+    defaultScene: build6AScene,
     recommended: false,
-    disabled: true,
-    duration: '40-60s'
+    duration: '35-50s'
   }
 };
 
@@ -119,10 +126,10 @@ export const VideoWizard = () => {
     hook: hook1AScene,
     explain: explain2AScene,
     compare: compare3AScene,
-    show: show5AScene,
+    show: show5BScene,
     apply: apply3AScene,
     reflect: reflect4AScene,
-    build: null
+    build: build6AScene
   });
   
   // Approval status

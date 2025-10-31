@@ -1,0 +1,38 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Build6A_ProgressiveLayers",
+  "fill": {
+    "build": {
+      "title": "Building a Secure VPC",
+      "concept": "Production-Ready Network",
+      "layers": [
+        {
+          "label": "Base: VPC",
+          "description": "Virtual Private Cloud - your isolated network space",
+          "why": "Foundation for all networking"
+        },
+        {
+          "label": "Layer 1: Subnets",
+          "description": "Regional subnets for organizing resources",
+          "why": "Organize by region and purpose"
+        },
+        {
+          "label": "Layer 2: Firewall Rules",
+          "description": "Control traffic with security rules",
+          "why": "Security! Block unwanted traffic"
+        },
+        {
+          "label": "Layer 3: Cloud NAT",
+          "description": "Private VMs can reach internet via NAT",
+          "why": "Security best practice"
+        }
+      ],
+      "finalSummary": "Production-ready VPC with subnets, security, and NAT!"
+    }
+  },
+  "beats": {
+    "title": 0.5,
+    "baseLayer": 2.0,
+    "exit": 28.0
+  }
+}

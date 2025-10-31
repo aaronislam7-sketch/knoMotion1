@@ -22,9 +22,12 @@ import apply3BV5Scene from './scenes/apply_3b_scenario_v5.json';
 import reflect4AV5Scene from './scenes/reflect_4a_takeaways_v5.json';
 import reflect4DV5Scene from './scenes/reflect_4d_forward_v5.json';
 
-// Import NEW templates (COMPARE & SHOW pillars)
+// Import NEW templates (COMPARE & SHOW & BUILD pillars)
 import show5AV5Scene from './scenes/Show5A_Example_GCP_VPC.json';
+import show5BV5Scene from './scenes/Show5B_Example_CloudFunction_Config.json';
 import compare3AV5Scene from './scenes/Compare3A_Example_GCP_Compute.json';
+import compare3BV5Scene from './scenes/Compare3B_Example_GCP_Compute_Decision.json';
+import build6AV5Scene from './scenes/Build6A_Example_VPC_Architecture.json';
 
 // Template mapping - all v5 templates route through TemplateRouter
 const templateMap = {
@@ -47,9 +50,12 @@ const templateMap = {
   'Apply3BScenarioChoice': TemplateRouter,
   'Reflect4AKeyTakeaways': TemplateRouter,
   'Reflect4DForwardLink': TemplateRouter,
-  // NEW: COMPARE & SHOW pillars
+  // NEW: COMPARE & SHOW & BUILD pillars
   'Show5A_StepByStep': TemplateRouter,
+  'Show5B_ConfigurationFlow': TemplateRouter,
   'Compare3A_FeatureMatrix': TemplateRouter,
+  'Compare3B_DecisionTree': TemplateRouter,
+  'Build6A_ProgressiveLayers': TemplateRouter,
   
   // Legacy fallbacks (for old scenes)
   'hook': TemplateRouter,
@@ -69,9 +75,12 @@ const sampleScenes = {
   'reflect_4a_v5': reflect4AV5Scene,
   'reflect_4d_v5': reflect4DV5Scene,
   
-  // NEW: COMPARE & SHOW pillars
+  // NEW: COMPARE & SHOW & BUILD pillars
   'show_5a_v5': show5AV5Scene,
+  'show_5b_v5': show5BV5Scene,
   'compare_3a_v5': compare3AV5Scene,
+  'compare_3b_v5': compare3BV5Scene,
+  'build_6a_v5': build6AV5Scene,
   
   // Example scenes
   'hook_example': hookSleepScienceScene,
@@ -309,9 +318,16 @@ export default function App() {
             <option value="reflect_4a_v5">💡 Reflect 4A: Key Takeaways (8s)</option>
             <option value="reflect_4d_v5">➡️ Reflect 4D: Forward Link (10s)</option>
           </optgroup>
-          <optgroup label="🆕 NEW Pillars (COMPARE & SHOW)">
+          <optgroup label="🆕 NEW: SHOW Pillar">
             <option value="show_5a_v5">📝 Show 5A: Step-by-Step (45-70s)</option>
+            <option value="show_5b_v5">⚙️ Show 5B: Configuration Flow (30-45s)</option>
+          </optgroup>
+          <optgroup label="🆕 NEW: COMPARE Pillar">
             <option value="compare_3a_v5">⚖️ Compare 3A: Feature Matrix (35-50s)</option>
+            <option value="compare_3b_v5">🌳 Compare 3B: Decision Tree (25-40s)</option>
+          </optgroup>
+          <optgroup label="🆕 NEW: BUILD Pillar">
+            <option value="build_6a_v5">🏗️ Build 6A: Progressive Layers (35-50s)</option>
           </optgroup>
           <optgroup label="📚 Example Scenes">
             <option value="hook_example">Hook Example: Sleep Science</option>

@@ -1,0 +1,58 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Show5B_ConfigurationFlow",
+  "fill": {
+    "config": {
+      "title": "Configure Cloud Function",
+      "stages": [
+        {
+          "label": "Choose Runtime",
+          "question": "Which language?",
+          "options": [
+            {
+              "label": "Python 3.11",
+              "description": "Most popular, great libraries",
+              "impact": "Fast cold starts, easy debugging",
+              "recommended": true
+            },
+            {
+              "label": "Node.js 18",
+              "description": "Async-native, npm ecosystem",
+              "impact": "Lowest cold start times"
+            },
+            {
+              "label": "Go 1.21",
+              "description": "Compiled, high performance",
+              "impact": "Fastest execution"
+            }
+          ]
+        },
+        {
+          "label": "Set Memory",
+          "question": "How much RAM?",
+          "options": [
+            {
+              "label": "256 MB",
+              "description": "Minimal, low cost",
+              "impact": "$0.000000463/100ms"
+            },
+            {
+              "label": "512 MB",
+              "description": "Balanced default",
+              "impact": "$0.000000925/100ms",
+              "recommended": true
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "message": "Configuration Complete!",
+        "estimate": "Est. cost: $0.40/million invocations"
+      }
+    }
+  },
+  "beats": {
+    "title": 0.5,
+    "exit": 15.0
+  }
+}

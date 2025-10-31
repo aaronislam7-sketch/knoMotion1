@@ -1,0 +1,71 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Compare3B_DecisionTree",
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#2E7FE4",
+      "accent2": "#27AE60",
+      "accent3": "#E74C3C",
+      "highlight": "#9B59B6",
+      "ink": "#1A1A1A",
+      "inkLight": "#95A5A6"
+    }
+  },
+  "fill": {
+    "decision": {
+      "title": "Choose Your Compute Service",
+      "tree": {
+        "root": {
+          "question": "Need full OS control?",
+          "yes": "outcome_vm",
+          "no": {
+            "question": "Containerized app?",
+            "yes": {
+              "question": "Need Kubernetes?",
+              "yes": "outcome_gke",
+              "no": "outcome_cloudrun"
+            },
+            "no": "outcome_appengine"
+          }
+        }
+      },
+      "outcomes": {
+        "outcome_vm": {
+          "label": "Compute Engine",
+          "description": "Full VM control, manage everything",
+          "icon": "🖥️"
+        },
+        "outcome_gke": {
+          "label": "Google Kubernetes Engine",
+          "description": "Managed K8s orchestration",
+          "icon": "☸️"
+        },
+        "outcome_cloudrun": {
+          "label": "Cloud Run",
+          "description": "Serverless containers",
+          "icon": "📦"
+        },
+        "outcome_appengine": {
+          "label": "App Engine",
+          "description": "Fully managed platform",
+          "icon": "🚀"
+        }
+      }
+    }
+  },
+  "beats": {
+    "title": 0.5,
+    "rootQuestion": 1.5,
+    "traverse": 3.0,
+    "exit": 12.0
+  },
+  "meta": {
+    "title": "GCP Compute Decision Tree",
+    "description": "Choose the right compute service",
+    "tags": ["compare", "decision", "gcp", "compute"],
+    "difficulty": "beginner",
+    "tone": "helpful"
+  }
+}
