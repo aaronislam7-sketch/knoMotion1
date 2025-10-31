@@ -19,6 +19,10 @@ import { Reflect4AKeyTakeaways } from './Reflect4AKeyTakeaways_V5';
 import { Reflect4DForwardLink } from './Reflect4DForwardLink_V5';
 import { ShowcaseAnimations } from './ShowcaseAnimations_V5';
 
+// NEW: COMPARE & SHOW Pillar Templates
+import { Show5A_StepByStep } from './Show5A_StepByStep_V5';
+import { Compare3A_FeatureMatrix } from './Compare3A_FeatureMatrix_V5';
+
 // Blueprint v5.1 Agnostic Templates
 import { Hook1AQuestionBurst_Agnostic } from './Hook1AQuestionBurst_V5_Agnostic';
 
@@ -50,6 +54,10 @@ const TEMPLATE_REGISTRY = {
   'Reflect4AKeyTakeaways': Reflect4AKeyTakeaways,
   'Reflect4DForwardLink': Reflect4DForwardLink,
   'ShowcaseAnimations': ShowcaseAnimations,  // ✨ Creative Effects Showcase
+  
+  // NEW: COMPARE & SHOW Pillar Templates
+  'Show5A_StepByStep': Show5A_StepByStep,
+  'Compare3A_FeatureMatrix': Compare3A_FeatureMatrix,
 };
 
 /**

@@ -1,0 +1,107 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Compare3A_FeatureMatrix",
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#2E7FE4",
+      "accent2": "#27AE60",
+      "accent3": "#E74C3C",
+      "ink": "#1A1A1A",
+      "inkLight": "#95A5A6"
+    },
+    "fonts": {
+      "primary": "'Permanent Marker', cursive",
+      "secondary": "Inter, sans-serif",
+      "size_title": 52,
+      "size_optionHeader": 32,
+      "size_featureLabel": 24,
+      "size_featureValue": 22,
+      "size_tradeoffLabel": 20,
+      "size_guidance": 28
+    }
+  },
+  "fill": {
+    "comparison": {
+      "title": "Choose Your Compute Service",
+      "recommendedIndex": 2,
+      "options": [
+        {
+          "name": "Compute Engine",
+          "icon": "🖥️"
+        },
+        {
+          "name": "App Engine",
+          "icon": "🚀"
+        },
+        {
+          "name": "Cloud Run",
+          "icon": "📦"
+        },
+        {
+          "name": "Cloud Functions",
+          "icon": "⚡"
+        }
+      ],
+      "features": [
+        {
+          "label": "Use case",
+          "type": "text",
+          "values": ["Full VMs", "Managed apps", "Containers", "Functions"]
+        },
+        {
+          "label": "Infrastructure control",
+          "type": "text",
+          "values": ["Full", "Minimal", "None", "None"]
+        },
+        {
+          "label": "Auto-scaling",
+          "type": "boolean",
+          "values": [false, true, true, true]
+        },
+        {
+          "label": "Pay per use",
+          "type": "boolean",
+          "values": [false, false, true, true]
+        },
+        {
+          "label": "Cold start",
+          "type": "boolean",
+          "values": [false, false, true, true]
+        },
+        {
+          "label": "Container support",
+          "type": "boolean",
+          "values": [true, false, true, false]
+        }
+      ],
+      "tradeoffs": {
+        "metrics": [
+          {
+            "label": "Control",
+            "values": [100, 40, 20, 10],
+            "highIsBetter": true
+          },
+          {
+            "label": "Ease of use",
+            "values": [20, 70, 90, 100],
+            "highIsBetter": true
+          },
+          {
+            "label": "Cost efficiency",
+            "values": [30, 60, 90, 95],
+            "highIsBetter": true
+          }
+        ]
+      },
+      "guidance": "Use Compute Engine for full control. App Engine for managed web apps. Cloud Run for containers. Cloud Functions for event-driven microservices."
+    }
+  },
+  "beats": {
+    "entrance": 0.5,
+    "title": 0.5,
+    "optionHeaders": 2.5,
+    "exit": 26.0
+  }
+}

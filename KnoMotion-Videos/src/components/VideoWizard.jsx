@@ -4,349 +4,611 @@ import { TemplateRouter } from '../templates/TemplateRouter';
 import { MultiSceneVideo } from './MultiSceneVideo';
 import { validateSceneCompat, detectSchemaVersion } from '../sdk';
 
-// Import default v5 scenes
-import hookScene from '../scenes/hook_1a_knodovia_map_v5.json';
-import explainScene from '../scenes/explain_2a_breakdown_v5.json';
-import applyScene from '../scenes/apply_3a_quiz_v5.json';
-import reflectScene from '../scenes/reflect_4a_takeaways_v5.json';
+// Import default v5 scenes for each pillar
+import hook1AScene from '../scenes/hook_1a_knodovia_map_v5.json';
+import explain2AScene from '../scenes/explain_2a_breakdown_v5.json';
+import apply3AScene from '../scenes/apply_3a_quiz_v5.json';
+import reflect4AScene from '../scenes/reflect_4a_takeaways_v5.json';
+import show5AScene from '../scenes/Show5A_Example_GCP_VPC.json';
+import compare3AScene from '../scenes/Compare3A_Example_GCP_Compute.json';
 
-const PILLAR_INFO = {
+/**
+ * PILLAR CONFIGURATION
+ * 
+ * Updated to support all 7 pedagogical pillars:
+ * - Core HEAR: Hook, Explain, Apply, Reflect
+ * - NEW: Compare, Show, Build
+ */
+const ALL_PILLARS = {
   hook: {
     title: 'Hook',
     icon: '🎯',
-    description: 'Grab attention and spark curiosity',
-    color: '#e74c3c',
-    defaultScene: hookScene
+    description: 'Create curiosity & grab attention',
+    color: '#E74C3C',
+    defaultScene: hook1AScene,
+    recommended: true,
+    duration: '15-18s'
   },
   explain: {
     title: 'Explain',
     icon: '📚',
     description: 'Teach core concepts clearly',
-    color: '#3498db',
-    defaultScene: explainScene
+    color: '#3498DB',
+    defaultScene: explain2AScene,
+    recommended: true,
+    duration: '20-40s'
+  },
+  compare: {
+    title: 'Compare',
+    icon: '⚖️',
+    description: 'Evaluate options for decisions',
+    color: '#9B59B6',
+    defaultScene: compare3AScene,
+    recommended: false,
+    duration: '35-50s'
+  },
+  show: {
+    title: 'Show',
+    icon: '📝',
+    description: 'Demonstrate how-to procedures',
+    color: '#F39C12',
+    defaultScene: show5AScene,
+    recommended: false,
+    duration: '45-70s'
   },
   apply: {
     title: 'Apply',
     icon: '🛠️',
-    description: 'Practice and implement',
+    description: 'Practice & implement knowledge',
     color: '#86BC25',
-    defaultScene: applyScene
+    defaultScene: apply3AScene,
+    recommended: true,
+    duration: '30-50s'
   },
   reflect: {
     title: 'Reflect',
     icon: '🤔',
-    description: 'Consolidate and plan ahead',
+    description: 'Consolidate & plan next steps',
     color: '#732282',
-    defaultScene: reflectScene
+    defaultScene: reflect4AScene,
+    recommended: true,
+    duration: '25-35s'
+  },
+  // Build pillar coming soon
+  build: {
+    title: 'Build',
+    icon: '🏗️',
+    description: 'Show system evolution (Coming Soon)',
+    color: '#1ABC9C',
+    defaultScene: null,
+    recommended: false,
+    disabled: true,
+    duration: '40-60s'
   }
 };
 
-const STEPS = ['hook', 'explain', 'apply', 'reflect', 'final'];
-
 /**
- * Video Creation Wizard
+ * Flexible Video Creation Wizard
  * 
- * Multi-step interface for creating a complete video:
- * 1. Define Hook scene -> Preview -> Approve
- * 2. Define Explain scene -> Preview -> Approve
- * 3. Define Apply scene -> Preview -> Approve
- * 4. Define Reflect scene -> Preview -> Approve
- * 5. Final: Preview complete video with all scenes stitched
+ * Allows users to:
+ * 1. Select which pillars to include (not forced to use all 4)
+ * 2. Configure each selected pillar
+ * 3. Preview individual scenes
+ * 4. Preview final stitched video
  */
 export const VideoWizard = () => {
-  const [currentStep, setCurrentStep] = useState(0);
+  // Step 1: Pillar selection
+  const [step, setStep] = useState('select'); // 'select' | 'configure' | 'final'
+  
+  // Selected pillars (true = included in video)
+  const [selectedPillars, setSelectedPillars] = useState({
+    hook: true,
+    explain: true,
+    compare: false,
+    show: false,
+    apply: true,
+    reflect: true,
+    build: false
+  });
+  
+  // Current pillar being configured
+  const [currentPillarIndex, setCurrentPillarIndex] = useState(0);
+  
+  // Scene data for each pillar
   const [scenes, setScenes] = useState({
-    hook: hookScene,
-    explain: explainScene,
-    apply: applyScene,
-    reflect: reflectScene
+    hook: hook1AScene,
+    explain: explain2AScene,
+    compare: compare3AScene,
+    show: show5AScene,
+    apply: apply3AScene,
+    reflect: reflect4AScene,
+    build: null
   });
-  const [approvedScenes, setApprovedScenes] = useState({
-    hook: false,
-    explain: false,
-    apply: false,
-    reflect: false
-  });
+  
+  // Approval status
+  const [approvedPillars, setApprovedPillars] = useState({});
+  
+  // JSON editing
   const [editingJSON, setEditingJSON] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
-  const [showPreviewHelper, setShowPreviewHelper] = useState(true);
-
-  const currentPillar = STEPS[currentStep];
-  const isFinalStep = currentPillar === 'final';
-  const pillarInfo = PILLAR_INFO[currentPillar];
-
+  
+  // Get array of selected pillar keys in order
+  const selectedPillarKeys = Object.keys(selectedPillars).filter(k => selectedPillars[k]);
+  const currentPillarKey = selectedPillarKeys[currentPillarIndex];
+  const currentPillarInfo = ALL_PILLARS[currentPillarKey];
+  
   // Initialize editing JSON for current pillar
   React.useEffect(() => {
-    if (!isFinalStep && !editingJSON[currentPillar]) {
+    if (step === 'configure' && currentPillarKey && !editingJSON[currentPillarKey]) {
       setEditingJSON(prev => ({
         ...prev,
-        [currentPillar]: JSON.stringify(scenes[currentPillar], null, 2)
+        [currentPillarKey]: JSON.stringify(scenes[currentPillarKey], null, 2)
       }));
     }
-  }, [currentPillar, isFinalStep]);
+  }, [currentPillarKey, step]);
 
-  const handleApplyJSON = (pillar) => {
+  // Toggle pillar selection
+  const togglePillar = (pillarKey) => {
+    if (ALL_PILLARS[pillarKey].disabled) return;
+    setSelectedPillars(prev => ({
+      ...prev,
+      [pillarKey]: !prev[pillarKey]
+    }));
+  };
+
+  // Start configuration flow
+  const handleStartConfiguration = () => {
+    if (selectedPillarKeys.length === 0) {
+      alert('Please select at least one pillar');
+      return;
+    }
+    setStep('configure');
+    setCurrentPillarIndex(0);
+  };
+
+  // Apply JSON changes
+  const handleApplyJSON = () => {
     try {
-      const parsed = JSON.parse(editingJSON[pillar]);
+      const parsed = JSON.parse(editingJSON[currentPillarKey]);
       
-      // Check if v5 or legacy schema
-      const isV5 = parsed.schema_version?.startsWith('5.');
+      // Validate using new schema system
+      const errors = [];
+      if (!parsed.template_id) errors.push('Missing template_id');
       
-      // Normalize attributes for v5 schema
-      if (isV5) {
-        // v5 uses beats, no duration_s/fps/layout needed
-        if (!parsed.meta) {
-          parsed.meta = {
-            title: parsed.fill?.texts?.title || `${pillar} scene`,
-            description: '',
-            tags: [],
-            difficulty: 'beginner',
-            tone: 'engaging'
-          };
-        }
-        
-        // Basic v5 validation using new schema system
-        const errors = [];
-        if (!parsed.template_id) errors.push('Missing template_id');
-        if (!parsed.beats) errors.push('Missing beats object (v5.x schema)');
-        
-        // Use new schema validation (supports both v5.0 and v5.1)
-        const validation = validateSceneCompat(parsed);
-        if (!validation.valid) {
-          errors.push(...validation.errors);
-        }
-        
-        if (errors.length > 0) {
-          setValidationErrors(prev => ({ ...prev, [pillar]: errors }));
-          return;
-        }
-        
-        // Log info for v5.1 agnostic scenes
-        if (validation.valid && detectSchemaVersion(parsed) === '5.1') {
-          console.info(`✅ ${pillar} scene using v5.1 agnostic format`);
-        }
-      } else {
-        // Legacy schema normalization
-        if (!parsed.duration_s && parsed.duration) {
-          parsed.duration_s = parsed.duration;
-        }
-        if (!parsed.fps) parsed.fps = 30;
-        if (!parsed.layout) {
-          parsed.layout = { canvas: { w: 1920, h: 1080 } };
-        }
-        if (!parsed.meta) {
-          parsed.meta = {
-            title: parsed.fill?.texts?.title || `${pillar} scene`,
-            description: '',
-            tags: [],
-            difficulty: 'beginner',
-            tone: 'engaging'
-          };
-        }
-        if (!parsed.timeline) {
-          parsed.timeline = [];
-        }
-        
-        // Legacy validation
-        const errors = [];
-        if (!parsed.template_id) errors.push('Missing template_id');
-        if (!parsed.duration_s) errors.push('Missing duration_s (or duration)');
-        if (!parsed.fill) errors.push('Missing fill data');
-        
-        if (errors.length > 0) {
-          setValidationErrors(prev => ({ ...prev, [pillar]: errors }));
-          return;
-        }
+      const validation = validateSceneCompat(parsed);
+      if (!validation.valid) {
+        errors.push(...validation.errors);
       }
-
-      setScenes(prev => ({ ...prev, [pillar]: parsed }));
-      setValidationErrors(prev => ({ ...prev, [pillar]: [] }));
+      
+      if (errors.length > 0) {
+        setValidationErrors(prev => ({ ...prev, [currentPillarKey]: errors }));
+        return;
+      }
+      
+      // Success - update scene
+      setScenes(prev => ({ ...prev, [currentPillarKey]: parsed }));
+      setValidationErrors(prev => ({ ...prev, [currentPillarKey]: [] }));
+      
     } catch (e) {
-      setValidationErrors(prev => ({ 
-        ...prev, 
-        [pillar]: [`Invalid JSON: ${e.message}`] 
+      setValidationErrors(prev => ({
+        ...prev,
+        [currentPillarKey]: [`Invalid JSON: ${e.message}`]
       }));
     }
   };
 
-  const handleApproveScene = () => {
-    setApprovedScenes(prev => ({ ...prev, [currentPillar]: true }));
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+  // Approve current pillar
+  const handleApprovePillar = () => {
+    setApprovedPillars(prev => ({ ...prev, [currentPillarKey]: true }));
+    
+    // Move to next pillar or final step
+    if (currentPillarIndex < selectedPillarKeys.length - 1) {
+      setCurrentPillarIndex(prev => prev + 1);
+    } else {
+      setStep('final');
     }
   };
 
-  const handleEditScene = (pillar) => {
-    setApprovedScenes(prev => ({ ...prev, [pillar]: false }));
-    setCurrentStep(STEPS.indexOf(pillar));
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  // Go back to previous pillar
+  const handlePreviousPillar = () => {
+    if (currentPillarIndex > 0) {
+      setCurrentPillarIndex(prev => prev - 1);
+    } else {
+      setStep('select');
     }
   };
 
-  const handleNext = () => {
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  // Calculate total duration for final video (handle both v3 and v5 schemas)
-  const totalDuration = Object.values(scenes).reduce(
-    (sum, scene) => {
-      const isV5 = scene.schema_version?.startsWith('5.');
-      const duration = isV5 ? (scene.beats?.exit || 15) : (scene.duration_s || 30);
-      return sum + duration;
-    },
-    0
-  ) - 2; // Subtract transition overlaps
-
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: '#f5f5f5',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      
-      {/* Header */}
-      <header style={{
-        backgroundColor: '#fff',
-        borderBottom: '1px solid #e0e0e0',
-        padding: '20px 40px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-      }}>
-        <h1 style={{
-          margin: 0,
-          fontSize: 28,
-          fontWeight: 700,
-          color: '#732282'
-        }}>
-          🎬 Video Creation Wizard
-        </h1>
-        <p style={{
-          margin: '8px 0 0 0',
-          fontSize: 14,
-          color: '#666'
-        }}>
-          Create your complete {totalDuration}s educational video
-        </p>
-      </header>
-
-      {/* Progress Indicator */}
+  // ==============================================
+  // STEP 1: PILLAR SELECTION
+  // ==============================================
+  
+  if (step === 'select') {
+    return (
       <div style={{
-        backgroundColor: '#fff',
-        borderBottom: '1px solid #e0e0e0',
-        padding: '20px 40px'
+        minHeight: '100vh',
+        backgroundColor: '#F5F7FA',
+        padding: '40px 20px',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: 1200,
-          margin: '0 auto',
-          position: 'relative'
-        }}>
-          {/* Quick Jump to Final Button */}
-          {currentStep < 4 && (
-            <button
-              onClick={() => setCurrentStep(4)}
-              style={{
-                position: 'absolute',
-                right: -10,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                padding: '8px 16px',
-                fontSize: 12,
-                fontWeight: 600,
-                backgroundColor: '#2ecc71',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(46, 204, 113, 0.3)',
-                zIndex: 10,
-                whiteSpace: 'nowrap'
-              }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-50%) scale(1.05)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(-50%) scale(1)'}
-            >
-              ⚡ Skip to Final Video
-            </button>
-          )}
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h1 style={{
+              fontSize: 42,
+              fontWeight: 700,
+              color: '#732282',
+              margin: '0 0 16px 0'
+            }}>
+              🎬 Create Your Learning Video
+            </h1>
+            <p style={{
+              fontSize: 18,
+              color: '#666',
+              margin: 0,
+              lineHeight: 1.6
+            }}>
+              Select which pedagogical pillars to include in your video.<br/>
+              Mix and match based on your content needs.
+            </p>
+          </div>
 
-          {STEPS.map((step, index) => {
-            const info = step === 'final' 
-              ? { title: 'Final Video', icon: '🎥', color: '#2ecc71' }
-              : PILLAR_INFO[step];
-            const isActive = index === currentStep;
-            const isCompleted = index < currentStep || approvedScenes[step];
-            
-            return (
-              <div
-                key={step}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  opacity: isActive ? 1 : isCompleted ? 0.8 : 0.4
-                }}
-              >
-                <div style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: '50%',
-                  backgroundColor: isCompleted ? info.color : '#e0e0e0',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 28,
-                  fontWeight: 700,
-                  border: isActive ? `4px solid ${info.color}` : 'none',
-                  boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-                  transition: 'all 0.3s ease'
-                }}>
-                  {isCompleted ? '✓' : info.icon}
-                </div>
-                <div style={{
-                  marginTop: 8,
-                  fontSize: 14,
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? info.color : '#666'
-                }}>
-                  {info.title}
-                </div>
-                {index < STEPS.length - 1 && (
+          {/* Pillar Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 24,
+            marginBottom: 48
+          }}>
+            {Object.entries(ALL_PILLARS).map(([key, pillar]) => {
+              const isSelected = selectedPillars[key];
+              const isDisabled = pillar.disabled;
+              
+              return (
+                <div
+                  key={key}
+                  onClick={() => !isDisabled && togglePillar(key)}
+                  style={{
+                    backgroundColor: isSelected ? `${pillar.color}10` : '#fff',
+                    border: isSelected ? `3px solid ${pillar.color}` : '2px solid #E0E0E0',
+                    borderRadius: 12,
+                    padding: 24,
+                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                    opacity: isDisabled ? 0.5 : 1,
+                    transition: 'all 0.2s',
+                    position: 'relative',
+                    transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                    boxShadow: isSelected ? `0 4px 12px ${pillar.color}30` : '0 2px 8px rgba(0,0,0,0.08)'
+                  }}
+                >
+                  {/* Checkmark */}
+                  {isSelected && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      backgroundColor: pillar.color,
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 16,
+                      fontWeight: 'bold'
+                    }}>
+                      ✓
+                    </div>
+                  )}
+                  
+                  {/* Recommended badge */}
+                  {pillar.recommended && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 12,
+                      left: 12,
+                      backgroundColor: '#86BC25',
+                      color: '#fff',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      textTransform: 'uppercase'
+                    }}>
+                      Recommended
+                    </div>
+                  )}
+                  
                   <div style={{
-                    position: 'absolute',
-                    top: 30,
-                    left: `${(index + 1) * (100 / STEPS.length)}%`,
-                    width: `${100 / STEPS.length}%`,
-                    height: 4,
-                    backgroundColor: isCompleted ? info.color : '#e0e0e0',
-                    zIndex: -1
-                  }} />
+                    fontSize: 48,
+                    marginBottom: 12,
+                    marginTop: pillar.recommended ? 28 : 0
+                  }}>
+                    {pillar.icon}
+                  </div>
+                  
+                  <h3 style={{
+                    fontSize: 24,
+                    fontWeight: 700,
+                    color: pillar.color,
+                    margin: '0 0 8px 0'
+                  }}>
+                    {pillar.title}
+                  </h3>
+                  
+                  <p style={{
+                    fontSize: 15,
+                    color: '#666',
+                    margin: '0 0 12px 0',
+                    lineHeight: 1.5
+                  }}>
+                    {pillar.description}
+                  </p>
+                  
+                  <div style={{
+                    fontSize: 13,
+                    color: '#999',
+                    fontWeight: 500
+                  }}>
+                    Duration: {pillar.duration}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Summary & CTA */}
+          <div style={{
+            backgroundColor: '#fff',
+            border: '2px solid #E0E0E0',
+            borderRadius: 12,
+            padding: 32,
+            textAlign: 'center'
+          }}>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{
+                fontSize: 20,
+                fontWeight: 600,
+                color: '#333',
+                margin: '0 0 12px 0'
+              }}>
+                Selected Pillars: {selectedPillarKeys.length}
+              </h3>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 12,
+                flexWrap: 'wrap'
+              }}>
+                {selectedPillarKeys.length === 0 ? (
+                  <span style={{ color: '#999', fontSize: 14 }}>
+                    No pillars selected
+                  </span>
+                ) : (
+                  selectedPillarKeys.map(key => {
+                    const pillar = ALL_PILLARS[key];
+                    return (
+                      <div
+                        key={key}
+                        style={{
+                          backgroundColor: `${pillar.color}15`,
+                          color: pillar.color,
+                          padding: '8px 16px',
+                          borderRadius: 20,
+                          fontSize: 14,
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8
+                        }}
+                      >
+                        <span>{pillar.icon}</span>
+                        <span>{pillar.title}</span>
+                      </div>
+                    );
+                  })
                 )}
               </div>
-            );
-          })}
+            </div>
+            
+            <button
+              onClick={handleStartConfiguration}
+              disabled={selectedPillarKeys.length === 0}
+              style={{
+                padding: '16px 48px',
+                fontSize: 18,
+                fontWeight: 700,
+                backgroundColor: selectedPillarKeys.length === 0 ? '#ccc' : '#732282',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: selectedPillarKeys.length === 0 ? 'not-allowed' : 'pointer',
+                boxShadow: selectedPillarKeys.length === 0 ? 'none' : '0 4px 16px rgba(115, 34, 130, 0.3)',
+                transition: 'all 0.2s'
+              }}
+            >
+              {selectedPillarKeys.length === 0 
+                ? 'Select Pillars to Continue'
+                : `Configure ${selectedPillarKeys.length} Scene${selectedPillarKeys.length > 1 ? 's' : ''}`
+              }
+            </button>
+            
+            <p style={{
+              fontSize: 13,
+              color: '#999',
+              margin: '16px 0 0 0'
+            }}>
+              💡 Tip: Start with the recommended pillars (Hook → Explain → Apply → Reflect)
+            </p>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Main Content */}
+  // ==============================================
+  // STEP 2: CONFIGURE EACH PILLAR
+  // ==============================================
+  
+  if (step === 'configure' && currentPillarKey) {
+    const fps = 30;
+    const currentScene = scenes[currentPillarKey];
+    const durationInFrames = currentScene?.beats?.exit 
+      ? Math.round((currentScene.beats.exit + 0.5) * fps)
+      : 15 * fps;
+    
+    const errors = validationErrors[currentPillarKey] || [];
+    
+    return (
       <div style={{
-        flex: 1,
         display: 'flex',
-        overflow: 'hidden'
+        flexDirection: 'column',
+        height: '100vh',
+        backgroundColor: '#F5F7FA',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
-        
-        {isFinalStep ? (
-          // Final Step: Show complete video
+        {/* Header with Progress */}
+        <div style={{
+          backgroundColor: '#fff',
+          borderBottom: '2px solid #E0E0E0',
+          padding: '20px 40px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 16 }}>
+            <h2 style={{
+              fontSize: 28,
+              fontWeight: 700,
+              color: currentPillarInfo.color,
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}>
+              <span style={{ fontSize: 36 }}>{currentPillarInfo.icon}</span>
+              {currentPillarInfo.title}
+            </h2>
+            
+            <div style={{ flex: 1 }} />
+            
+            <div style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#666'
+            }}>
+              Scene {currentPillarIndex + 1} of {selectedPillarKeys.length}
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div style={{
+            height: 6,
+            backgroundColor: '#E0E0E0',
+            borderRadius: 3,
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${((currentPillarIndex + 1) / selectedPillarKeys.length) * 100}%`,
+              backgroundColor: currentPillarInfo.color,
+              transition: 'width 0.3s'
+            }} />
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {/* Left Panel - JSON Editor */}
+          <div style={{
+            width: '45%',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: '#fff',
+            borderRight: '2px solid #E0E0E0'
+          }}>
+            <div style={{
+              padding: '16px 24px',
+              borderBottom: '1px solid #E0E0E0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: 16,
+                fontWeight: 600,
+                color: '#333'
+              }}>
+                Scene JSON
+              </h3>
+              <button
+                onClick={handleApplyJSON}
+                style={{
+                  padding: '8px 20px',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  backgroundColor: currentPillarInfo.color,
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer'
+                }}
+              >
+                Apply Changes
+              </button>
+            </div>
+            
+            <textarea
+              value={editingJSON[currentPillarKey] || ''}
+              onChange={(e) => setEditingJSON(prev => ({
+                ...prev,
+                [currentPillarKey]: e.target.value
+              }))}
+              style={{
+                flex: 1,
+                padding: 20,
+                fontSize: 13,
+                fontFamily: 'Monaco, Consolas, monospace',
+                border: 'none',
+                outline: 'none',
+                resize: 'none',
+                lineHeight: 1.6
+              }}
+              spellCheck={false}
+            />
+            
+            {/* Validation Messages */}
+            {errors.length > 0 ? (
+              <div style={{
+                borderTop: '1px solid #E0E0E0',
+                padding: 20,
+                backgroundColor: '#FFF3CD',
+                maxHeight: 150,
+                overflowY: 'auto'
+              }}>
+                {errors.map((error, i) => (
+                  <div key={i} style={{
+                    color: '#856404',
+                    fontSize: 13,
+                    marginBottom: 6
+                  }}>
+                    ⚠️ {error}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{
+                borderTop: '1px solid #E0E0E0',
+                padding: '12px 20px',
+                backgroundColor: '#D4EDDA',
+                color: '#155724',
+                fontSize: 13
+              }}>
+                ✅ Scene validated successfully
+              </div>
+            )}
+          </div>
+          
+          {/* Right Panel - Preview */}
           <div style={{
             flex: 1,
             display: 'flex',
@@ -354,452 +616,169 @@ export const VideoWizard = () => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 40,
-            backgroundColor: '#f8f8f8'
+            backgroundColor: '#F8F8F8'
           }}>
             <div style={{
-              marginBottom: 30,
-              textAlign: 'center'
-            }}>
-              <h2 style={{
-                fontSize: 36,
-                fontWeight: 700,
-                color: '#2ecc71',
-                margin: '0 0 10px 0'
-              }}>
-                🎉 Your Complete Video is Ready!
-              </h2>
-              <p style={{
-                fontSize: 18,
-                color: '#666',
-                margin: 0
-              }}>
-                All {STEPS.length - 1} scenes stitched together • {totalDuration} seconds
-              </p>
-            </div>
-
-            {/* Video Player with Frame */}
-            <div style={{
-              backgroundColor: '#2d3436',
-              borderRadius: 16,
-              padding: 6,
-              boxShadow: '0 16px 48px rgba(0,0,0,0.3)',
-              maxWidth: 1200,
-              width: '100%'
-            }}>
-              <div style={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                overflow: 'hidden'
-              }}>
-                <Player
-                  component={MultiSceneVideo}
-                  inputProps={{ scenes }}
-                  durationInFrames={Math.floor(totalDuration * 30)}
-                  fps={30}
-                  compositionWidth={1920}
-                  compositionHeight={1080}
-                  controls
-                  loop
-                  clickToPlay
-                  style={{
-                    width: '100%'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Playback Info */}
-            <div style={{
-              marginTop: 20,
-              padding: '15px 30px',
               backgroundColor: '#fff',
               borderRadius: 8,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              textAlign: 'center'
+              overflow: 'hidden',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              marginBottom: 24
             }}>
-              <div style={{ fontSize: 13, color: '#666', marginBottom: 8 }}>
-                Complete Video
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 600, color: '#2ecc71' }}>
-                {Math.floor(totalDuration)}s • 1920×1080 • 30 fps
-              </div>
-              <div style={{ fontSize: 12, color: '#999', marginTop: 5 }}>
-                Click play button or anywhere on video to watch
-              </div>
+              <Player
+                component={TemplateRouter}
+                inputProps={{ scene: currentScene }}
+                durationInFrames={durationInFrames}
+                fps={fps}
+                compositionWidth={1920}
+                compositionHeight={1080}
+                controls
+                style={{
+                  width: '100%',
+                  maxWidth: 640,
+                  aspectRatio: '16/9'
+                }}
+              />
             </div>
-
-            {/* Scene Summary */}
+            
             <div style={{
-              marginTop: 30,
               display: 'flex',
-              gap: 20,
-              maxWidth: 1200,
-              width: '100%'
+              gap: 16
             }}>
-              {Object.entries(PILLAR_INFO).map(([pillar, info]) => (
-                <div
-                  key={pillar}
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#fff',
-                    borderLeft: `6px solid ${info.color}`,
-                    borderRadius: 8,
-                    padding: '15px 20px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                  }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    marginBottom: 8
-                  }}>
-                    <span style={{ fontSize: 24 }}>{info.icon}</span>
-                    <strong style={{ fontSize: 16 }}>{info.title}</strong>
-                  </div>
-                  <p style={{
-                    fontSize: 13,
-                    color: '#666',
-                    margin: '0 0 8px 0'
-                  }}>
-                    {scenes[pillar].meta.title}
-                  </p>
-                  <button
-                    onClick={() => handleEditScene(pillar)}
-                    style={{
-                      padding: '6px 14px',
-                      fontSize: 12,
-                      backgroundColor: 'transparent',
-                      color: info.color,
-                      border: `1px solid ${info.color}`,
-                      borderRadius: 4,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => {
-                      e.target.style.backgroundColor = info.color;
-                      e.target.style.color = '#fff';
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
-                      e.target.style.color = info.color;
-                    }}
-                  >
-                    Edit Scene
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          // Individual Pillar Steps
-          <>
-            {/* Left Panel - JSON Editor */}
-            <div style={{
-              width: '45%',
-              display: 'flex',
-              flexDirection: 'column',
-              backgroundColor: '#fff',
-              borderRight: '1px solid #e0e0e0'
-            }}>
-              <div style={{
-                padding: '16px 24px',
-                borderBottom: '1px solid #e0e0e0',
-                backgroundColor: pillarInfo.color,
-                color: '#fff'
-              }}>
-                <h2 style={{
-                  margin: 0,
-                  fontSize: 24,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12
-                }}>
-                  <span style={{ fontSize: 32 }}>{pillarInfo.icon}</span>
-                  Step {currentStep + 1}: Define {pillarInfo.title}
-                </h2>
-                <p style={{
-                  margin: '8px 0 0 0',
-                  fontSize: 14,
-                  opacity: 0.95
-                }}>
-                  {pillarInfo.description}
-                </p>
-              </div>
-
-              <div style={{
-                padding: '16px 24px',
-                borderBottom: '1px solid #e0e0e0',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <h3 style={{
-                  margin: 0,
+              <button
+                onClick={handlePreviousPillar}
+                style={{
+                  padding: '12px 24px',
                   fontSize: 16,
                   fontWeight: 600,
-                  color: '#333'
-                }}>
-                  Scene JSON
-                </h3>
-                <button
-                  onClick={() => handleApplyJSON(currentPillar)}
-                  style={{
-                    padding: '8px 20px',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    backgroundColor: pillarInfo.color,
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s'
-                  }}
-                  onMouseOver={(e) => e.target.style.opacity = '0.9'}
-                  onMouseOut={(e) => e.target.style.opacity = '1'}
-                >
-                  Apply Changes
-                </button>
-              </div>
-
-              <textarea
-                value={editingJSON[currentPillar] || ''}
-                onChange={(e) => setEditingJSON(prev => ({
-                  ...prev,
-                  [currentPillar]: e.target.value
-                }))}
-                style={{
-                  flex: 1,
-                  padding: 20,
-                  fontSize: 13,
-                  fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                  border: 'none',
-                  outline: 'none',
-                  resize: 'none',
-                  lineHeight: 1.6
-                }}
-                spellCheck={false}
-              />
-
-              {/* Validation Messages */}
-              {validationErrors[currentPillar]?.length > 0 ? (
-                <div style={{
-                  borderTop: '1px solid #e0e0e0',
-                  padding: 20,
-                  backgroundColor: '#fff3cd',
-                  maxHeight: 150,
-                  overflowY: 'auto'
-                }}>
-                  {validationErrors[currentPillar].map((error, i) => (
-                    <div key={i} style={{
-                      color: '#856404',
-                      fontSize: 13,
-                      marginBottom: 6
-                    }}>
-                      ⚠ {error}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{
-                  borderTop: '1px solid #e0e0e0',
-                  padding: '12px 20px',
-                  backgroundColor: '#d4edda',
-                  color: '#155724',
-                  fontSize: 13
-                }}>
-                  <span style={{ marginRight: 8 }}>✓</span>
-                  Scene validated successfully
-                </div>
-              )}
-            </div>
-
-            {/* Right Panel - Preview */}
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 40,
-              backgroundColor: '#f8f8f8',
-              position: 'relative'
-            }}>
-              {/* Helper Banner */}
-              {showPreviewHelper && currentStep === 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: 20,
-                  left: 20,
-                  right: 20,
-                  backgroundColor: '#4a9c3b',
-                  color: '#fff',
-                  padding: '15px 20px',
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  zIndex: 10
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <strong style={{ fontSize: 15 }}>👋 Welcome!</strong>
-                    <div style={{ fontSize: 13, marginTop: 5, opacity: 0.95 }}>
-                      Watch the preview below, then click "Apply Changes" to update, or "Approve & Continue" to move forward!
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowPreviewHelper(false)}
-                    style={{
-                      marginLeft: 15,
-                      padding: '5px 10px',
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(255,255,255,0.4)',
-                      borderRadius: 4,
-                      color: '#fff',
-                      cursor: 'pointer',
-                      fontSize: 12
-                    }}
-                  >
-                    Got it!
-                  </button>
-                </div>
-              )}
-
-              <div style={{
-                marginTop: showPreviewHelper && currentStep === 0 ? 100 : 0,
-                marginBottom: 30,
-                width: '100%',
-                maxWidth: 960
-              }}>
-                <div style={{
-                  backgroundColor: '#2d3436',
-                  borderRadius: 12,
-                  padding: 4,
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.25)'
-                }}>
-                  <div style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 8,
-                    overflow: 'hidden'
-                  }}>
-                  <Player
-                    component={TemplateRouter}
-                    inputProps={{ scene: scenes[currentPillar] }}
-                    durationInFrames={(() => {
-                      const scene = scenes[currentPillar];
-                      const isV5 = scene.schema_version?.startsWith('5.');
-                      if (isV5) {
-                        const totalSeconds = (scene.beats?.exit || 15) + 0.5;
-                        return Math.round(totalSeconds * 30);
-                      } else {
-                        return scene.duration_s * scene.fps;
-                      }
-                    })()}
-                    fps={(() => {
-                      const scene = scenes[currentPillar];
-                      const isV5 = scene.schema_version?.startsWith('5.');
-                      return isV5 ? 30 : scene.fps;
-                    })()}
-                      compositionWidth={(() => {
-                        const scene = scenes[currentPillar];
-                        const isV5 = scene.schema_version?.startsWith('5.');
-                        return isV5 ? 1920 : scene.layout.canvas.w;
-                      })()}
-                      compositionHeight={(() => {
-                        const scene = scenes[currentPillar];
-                        const isV5 = scene.schema_version?.startsWith('5.');
-                        return isV5 ? 1080 : scene.layout.canvas.h;
-                      })()}
-                      controls
-                      loop
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
-                </div>
-                <div style={{
-                  marginTop: 15,
-                  textAlign: 'center',
-                  fontSize: 14,
-                  color: '#666',
-                  padding: '10px 20px',
                   backgroundColor: '#fff',
-                  borderRadius: 8,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                }}>
-                  <div style={{ marginBottom: 5 }}>
-                    <strong style={{ color: pillarInfo.color, fontSize: 16 }}>
-                      {pillarInfo.icon} {scenes[currentPillar].meta.title}
-                    </strong>
-                  </div>
-                  <div style={{ fontSize: 12, color: '#999' }}>
-                    {(() => {
-                      const scene = scenes[currentPillar];
-                      const isV5 = scene.schema_version?.startsWith('5.');
-                      const duration = isV5 ? (scene.beats?.exit || 15) : scene.duration_s;
-                      const width = isV5 ? 1920 : scene.layout.canvas.w;
-                      const height = isV5 ? 1080 : scene.layout.canvas.h;
-                      const fps = isV5 ? 30 : scene.fps;
-                      return `${duration}s • ${width}×${height} • ${fps} fps`;
-                    })()}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: 15
-              }}>
-                {currentStep > 0 && (
-                  <button
-                    onClick={handlePrevious}
-                    style={{
-                      padding: '12px 30px',
-                      fontSize: 16,
-                      fontWeight: 600,
-                      backgroundColor: '#fff',
-                      color: '#666',
-                      border: '2px solid #ddd',
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => e.target.style.borderColor = '#999'}
-                    onMouseOut={(e) => e.target.style.borderColor = '#ddd'}
-                  >
-                    ← Previous
-                  </button>
-                )}
-
-                <button
-                  onClick={handleApproveScene}
-                  style={{
-                    padding: '12px 50px',
-                    fontSize: 18,
-                    fontWeight: 700,
-                    backgroundColor: pillarInfo.color,
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    transition: 'transform 0.2s'
-                  }}
-                  onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                  onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-                >
-                  {currentStep === STEPS.length - 2 ? '✓ Approve & Finish' : '✓ Approve & Continue'}
-                </button>
-              </div>
+                  color: '#666',
+                  border: '2px solid #E0E0E0',
+                  borderRadius: 6,
+                  cursor: 'pointer'
+                }}
+              >
+                ← Back
+              </button>
+              
+              <button
+                onClick={handleApprovePillar}
+                disabled={errors.length > 0}
+                style={{
+                  padding: '12px 32px',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  backgroundColor: errors.length > 0 ? '#ccc' : currentPillarInfo.color,
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: errors.length > 0 ? 'not-allowed' : 'pointer',
+                  boxShadow: errors.length > 0 ? 'none' : `0 4px 12px ${currentPillarInfo.color}40`
+                }}
+              >
+                {currentPillarIndex < selectedPillarKeys.length - 1
+                  ? `Approve & Continue →`
+                  : `Approve & Finish`
+                }
+              </button>
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
 
-export default VideoWizard;
+  // ==============================================
+  // STEP 3: FINAL PREVIEW
+  // ==============================================
+  
+  if (step === 'final') {
+    const approvedScenesList = selectedPillarKeys
+      .filter(key => approvedPillars[key])
+      .map(key => scenes[key]);
+    
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#F5F7FA',
+        padding: '40px 20px',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h1 style={{
+              fontSize: 42,
+              fontWeight: 700,
+              color: '#732282',
+              margin: '0 0 16px 0'
+            }}>
+              🎉 Video Complete!
+            </h1>
+            <p style={{
+              fontSize: 18,
+              color: '#666',
+              margin: 0
+            }}>
+              Preview your complete learning video with all {approvedScenesList.length} scenes.
+            </p>
+          </div>
+
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            overflow: 'hidden',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            marginBottom: 32
+          }}>
+            <MultiSceneVideo scenes={approvedScenesList} fps={30} />
+          </div>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 16
+          }}>
+            <button
+              onClick={() => {
+                setStep('select');
+                setCurrentPillarIndex(0);
+                setApprovedPillars({});
+              }}
+              style={{
+                padding: '12px 24px',
+                fontSize: 16,
+                fontWeight: 600,
+                backgroundColor: '#fff',
+                color: '#666',
+                border: '2px solid #E0E0E0',
+                borderRadius: 6,
+                cursor: 'pointer'
+              }}
+            >
+              ← Start Over
+            </button>
+            
+            <button
+              onClick={() => setStep('configure')}
+              style={{
+                padding: '12px 24px',
+                fontSize: 16,
+                fontWeight: 600,
+                backgroundColor: '#732282',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(115, 34, 130, 0.3)'
+              }}
+            >
+              Edit Scenes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};

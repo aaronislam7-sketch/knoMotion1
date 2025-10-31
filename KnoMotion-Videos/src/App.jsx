@@ -22,6 +22,10 @@ import apply3BV5Scene from './scenes/apply_3b_scenario_v5.json';
 import reflect4AV5Scene from './scenes/reflect_4a_takeaways_v5.json';
 import reflect4DV5Scene from './scenes/reflect_4d_forward_v5.json';
 
+// Import NEW templates (COMPARE & SHOW pillars)
+import show5AV5Scene from './scenes/Show5A_Example_GCP_VPC.json';
+import compare3AV5Scene from './scenes/Compare3A_Example_GCP_Compute.json';
+
 // Template mapping - all v5 templates route through TemplateRouter
 const templateMap = {
   // v5 template keys
@@ -43,6 +47,9 @@ const templateMap = {
   'Apply3BScenarioChoice': TemplateRouter,
   'Reflect4AKeyTakeaways': TemplateRouter,
   'Reflect4DForwardLink': TemplateRouter,
+  // NEW: COMPARE & SHOW pillars
+  'Show5A_StepByStep': TemplateRouter,
+  'Compare3A_FeatureMatrix': TemplateRouter,
   
   // Legacy fallbacks (for old scenes)
   'hook': TemplateRouter,
@@ -52,7 +59,7 @@ const templateMap = {
 };
 
 const sampleScenes = {
-  // Blueprint v5.0 scenes
+  // Blueprint v5.0 scenes - Core HEAR
   'hook_1a_v5': hook1AV5Scene,
   'hook_1e_v5': hook1EV5Scene,
   'explain_2a_v5': explain2AV5Scene,
@@ -61,6 +68,10 @@ const sampleScenes = {
   'apply_3b_v5': apply3BV5Scene,
   'reflect_4a_v5': reflect4AV5Scene,
   'reflect_4d_v5': reflect4DV5Scene,
+  
+  // NEW: COMPARE & SHOW pillars
+  'show_5a_v5': show5AV5Scene,
+  'compare_3a_v5': compare3AV5Scene,
   
   // Example scenes
   'hook_example': hookSleepScienceScene,
@@ -288,7 +299,7 @@ export default function App() {
             outline: 'none'
           }}
         >
-          <optgroup label="🌟 Blueprint v5.0 Templates">
+          <optgroup label="🌟 Core HEAR Templates">
             <option value="hook_1a_v5">🎯 Hook 1A: Question Burst (15s)</option>
             <option value="hook_1e_v5">🌫️ Hook 1E: Ambient Mystery (12s)</option>
             <option value="explain_2a_v5">📊 Explain 2A: Concept Breakdown (10s)</option>
@@ -297,6 +308,10 @@ export default function App() {
             <option value="apply_3b_v5">🛤️ Apply 3B: Scenario Choice (11s)</option>
             <option value="reflect_4a_v5">💡 Reflect 4A: Key Takeaways (8s)</option>
             <option value="reflect_4d_v5">➡️ Reflect 4D: Forward Link (10s)</option>
+          </optgroup>
+          <optgroup label="🆕 NEW Pillars (COMPARE & SHOW)">
+            <option value="show_5a_v5">📝 Show 5A: Step-by-Step (45-70s)</option>
+            <option value="compare_3a_v5">⚖️ Compare 3A: Feature Matrix (35-50s)</option>
           </optgroup>
           <optgroup label="📚 Example Scenes">
             <option value="hook_example">Hook Example: Sleep Science</option>

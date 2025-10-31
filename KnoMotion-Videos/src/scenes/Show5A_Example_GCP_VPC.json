@@ -1,0 +1,82 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Show5A_StepByStep",
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#2E7FE4",
+      "accent2": "#27AE60",
+      "accent3": "#FF6B35",
+      "inkLight": "#95A5A6",
+      "ink": "#1A1A1A"
+    },
+    "fonts": {
+      "primary": "'Permanent Marker', cursive",
+      "secondary": "Inter, sans-serif",
+      "size_title": 48,
+      "size_context": 24,
+      "size_number": 72,
+      "size_action": 32,
+      "size_details": 22,
+      "size_checkpoint": 20
+    }
+  },
+  "fill": {
+    "procedure": {
+      "title": "Create a VPC in GCP",
+      "context": "Set up a secure network for your project",
+      "steps": [
+        {
+          "action": "Open VPC console",
+          "details": "Navigate to VPC Networks in Cloud Console under Networking section",
+          "checkpoint": "You should see existing VPCs listed",
+          "duration": 5.0
+        },
+        {
+          "action": "Click Create VPC",
+          "details": "Select 'Create VPC Network' button in top toolbar",
+          "duration": 4.0
+        },
+        {
+          "action": "Name your VPC",
+          "details": "Enter a descriptive name like 'prod-vpc-us'. Use lowercase and hyphens only.",
+          "checkpoint": "Name field shows green checkmark if valid",
+          "duration": 5.5
+        },
+        {
+          "action": "Configure subnets",
+          "details": "Choose Custom mode to create subnets manually. Auto mode creates one per region.",
+          "duration": 6.0
+        },
+        {
+          "action": "Add first subnet",
+          "details": "Click 'Add Subnet', name it (e.g. 'subnet-us-west1'), select region, set IP range (10.0.0.0/24)",
+          "checkpoint": "Subnet appears in list below",
+          "duration": 6.5
+        },
+        {
+          "action": "Set firewall rules",
+          "details": "Keep default firewall rules enabled for now (allow-internal, allow-ssh)",
+          "duration": 4.5
+        },
+        {
+          "action": "Review and create",
+          "details": "Verify all settings, then click 'Create'. This takes 30-60 seconds.",
+          "checkpoint": "Status shows 'Creating...' then 'Active'",
+          "duration": 5.0
+        }
+      ],
+      "completion": {
+        "message": "VPC created successfully!",
+        "nextSteps": "Now you can launch VMs into this network."
+      }
+    }
+  },
+  "beats": {
+    "entrance": 0.5,
+    "title": 0.5,
+    "overview": 2.5,
+    "exit": 40.0
+  }
+}
