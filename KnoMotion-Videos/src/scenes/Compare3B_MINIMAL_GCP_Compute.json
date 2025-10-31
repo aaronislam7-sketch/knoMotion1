@@ -1,0 +1,96 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Compare3B_DecisionTree_MINIMAL",
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#2E7FE4",
+      "accent2": "#27AE60",
+      "accent3": "#E74C3C",
+      "highlight": "#9B59B6",
+      "ink": "#1A1A1A",
+      "inkLight": "#95A5A6"
+    }
+  },
+  "fill": {
+    "decision": {
+      "graph": {
+        "nodes": [
+          {"id": "root", "label": "OS control needed?"},
+          {"id": "n1", "label": "Yes"},
+          {"id": "n2", "label": "No"},
+          {"id": "n1a", "label": "Bare metal"},
+          {"id": "n1b", "label": "VMs"},
+          {"id": "n2a", "label": "Containers"},
+          {"id": "n2b", "label": "Fully managed"}
+        ],
+        "edges": [
+          {"from": "root", "to": "n1"},
+          {"from": "root", "to": "n2"},
+          {"from": "n1", "to": "n1a"},
+          {"from": "n1", "to": "n1b"},
+          {"from": "n2", "to": "n2a"},
+          {"from": "n2", "to": "n2b"}
+        ]
+      },
+      "layout": {
+        "engine": "elk",
+        "node_spacing": 80,
+        "rank_spacing": 96,
+        "direction": "TB"
+      }
+    }
+  },
+  "beats": [
+    {
+      "id": "b1",
+      "start_s": 0,
+      "end_s": 5,
+      "focus_node": "root",
+      "show": ["root"],
+      "ghost": []
+    },
+    {
+      "id": "b2",
+      "start_s": 5,
+      "end_s": 10,
+      "focus_node": "root",
+      "show": ["root", "n1", "n2"],
+      "ghost": []
+    },
+    {
+      "id": "b3",
+      "start_s": 10,
+      "end_s": 18,
+      "focus_node": "n1",
+      "show": ["root", "n1", "n1a", "n1b"],
+      "ghost": ["n2"]
+    },
+    {
+      "id": "b4",
+      "start_s": 18,
+      "end_s": 26,
+      "focus_node": "n2",
+      "show": ["root", "n2", "n2a", "n2b"],
+      "ghost": ["n1", "n1a", "n1b"]
+    },
+    {
+      "id": "b5",
+      "start_s": 26,
+      "end_s": 30,
+      "focus_node": "n2b",
+      "show": ["root", "n2", "n2b"],
+      "ghost": ["n1", "n1a", "n1b", "n2a"],
+      "outcome_node": "n2b"
+    }
+  ],
+  "meta": {
+    "title": "GCP Compute Decision Tree - MINIMAL",
+    "description": "Minimal decision tree: OS control choice",
+    "tags": ["compare", "decision", "gcp", "minimal"],
+    "difficulty": "beginner",
+    "tone": "clear",
+    "vo_scaffold": "Big question: How much OS control do you actually need? If it's a yes, you're choosing control over convenience — think bare metal or VMs. If it's a no, you're optimising for speed — containers or fully managed. Let's trace the 'no' path… and land on a managed option you can ship with tomorrow."
+  }
+}

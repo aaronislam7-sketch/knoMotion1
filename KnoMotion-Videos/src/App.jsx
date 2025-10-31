@@ -28,6 +28,7 @@ import show5BV5Scene from './scenes/Show5B_Example_CloudFunction_Config.json';
 import compare3AV5Scene from './scenes/Compare3A_Example_GCP_Compute.json';
 import compare3BV5Scene from './scenes/Compare3B_Example_GCP_Compute_Decision.json';
 import compare3BTeachingScene from './scenes/Compare3B_Example_GCP_Compute_TEACHING.json';
+import compare3BMinimalScene from './scenes/Compare3B_MINIMAL_GCP_Compute.json';
 import build6AV5Scene from './scenes/Build6A_Example_VPC_Architecture.json';
 
 // Template mapping - all v5 templates route through TemplateRouter
@@ -82,6 +83,7 @@ const sampleScenes = {
   'compare_3a_v5': compare3AV5Scene,
   'compare_3b_v5': compare3BV5Scene,
   'compare_3b_teaching': compare3BTeachingScene,
+  'compare_3b_minimal': compare3BMinimalScene,
   'build_6a_v5': build6AV5Scene,
   
   // Example scenes
@@ -327,7 +329,8 @@ export default function App() {
           <optgroup label="🆕 NEW: COMPARE Pillar">
             <option value="compare_3a_v5">⚖️ Compare 3A: Feature Matrix (35-50s)</option>
             <option value="compare_3b_v5">🌳 Compare 3B: Decision Tree (OLD)</option>
-            <option value="compare_3b_teaching">🎓 Compare 3B: Decision Tree - TEACHING (20s) ⭐</option>
+            <option value="compare_3b_teaching">🎓 Compare 3B: Decision Tree - TEACHING (BROKEN)</option>
+            <option value="compare_3b_minimal">✨ Compare 3B: Decision Tree - MINIMAL (30s) ⭐ NEW</option>
           </optgroup>
           <optgroup label="🆕 NEW: BUILD Pillar">
             <option value="build_6a_v5">🏗️ Build 6A: Progressive Layers (35-50s)</option>
