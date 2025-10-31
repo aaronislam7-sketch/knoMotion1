@@ -97,7 +97,7 @@ const Compare3B_DecisionTree_TEACHING = ({ scene, styles, presets, easingMap, tr
   const fonts = style.fonts || {
     primary: THEME.fonts.marker.primary,
     secondary: THEME.fonts.structure.primary,
-    mono: THEME.fonts.code.primary,
+    mono: "'Courier New', 'Monaco', monospace",
     size_title: 52,
     size_question: 26,
     size_context: 18,
