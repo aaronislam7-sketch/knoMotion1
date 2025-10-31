@@ -454,6 +454,43 @@ export const VideoWizard = () => {
   if (step === 'configure' && currentPillarKey) {
     const fps = 30;
     const currentScene = scenes[currentPillarKey];
+    
+    // Safety check - if scene is null/undefined, show error
+    if (!currentScene) {
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ fontSize: 24, color: '#E74C3C' }}>⚠️ Scene Not Available</h2>
+            <p style={{ fontSize: 16, color: '#666' }}>
+              The {currentPillarInfo?.title} template is not yet implemented.
+            </p>
+            <button
+              onClick={() => setStep('select')}
+              style={{
+                marginTop: 20,
+                padding: '12px 24px',
+                fontSize: 16,
+                fontWeight: 600,
+                backgroundColor: '#732282',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer'
+              }}
+            >
+              ← Back to Selection
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
     const durationInFrames = currentScene?.beats?.exit 
       ? Math.round((currentScene.beats.exit + 0.5) * fps)
       : 15 * fps;
@@ -616,29 +653,34 @@ export const VideoWizard = () => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 40,
-            backgroundColor: '#F8F8F8'
+            backgroundColor: '#F8F8F8',
+            overflow: 'auto'
           }}>
             <div style={{
               backgroundColor: '#fff',
               borderRadius: 8,
               overflow: 'hidden',
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-              marginBottom: 24
+              marginBottom: 24,
+              width: '100%',
+              maxWidth: 640
             }}>
-              <Player
-                component={TemplateRouter}
-                inputProps={{ scene: currentScene }}
-                durationInFrames={durationInFrames}
-                fps={fps}
-                compositionWidth={1920}
-                compositionHeight={1080}
-                controls
-                style={{
-                  width: '100%',
-                  maxWidth: 640,
-                  aspectRatio: '16/9'
-                }}
-              />
+              {currentScene && (
+                <Player
+                  component={TemplateRouter}
+                  inputProps={{ scene: currentScene }}
+                  durationInFrames={durationInFrames}
+                  fps={fps}
+                  compositionWidth={1920}
+                  compositionHeight={1080}
+                  controls
+                  style={{
+                    width: '100%',
+                    aspectRatio: '16/9'
+                  }}
+                  clickToPlay
+                />
+              )}
             </div>
             
             <div style={{

@@ -511,24 +511,40 @@ export default function App() {
             backgroundColor: '#fff',
             borderRadius: 8,
             overflow: 'hidden',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            width: '100%',
+            maxWidth: 960
           }}>
             {/* Main Player */}
-            <Player
-              key={playerKey}
-              component={Component}
-              inputProps={{ scene: currentScene }}
-              durationInFrames={durationInFrames}
-              fps={fps}
-              compositionWidth={1920}
-              compositionHeight={1080}
-              controls
-              style={{
+            {Component && currentScene ? (
+              <Player
+                key={playerKey}
+                component={Component}
+                inputProps={{ scene: currentScene }}
+                durationInFrames={durationInFrames}
+                fps={fps}
+                compositionWidth={1920}
+                compositionHeight={1080}
+                controls
+                clickToPlay
+                style={{
+                  width: '100%',
+                  aspectRatio: '16/9'
+                }}
+              />
+            ) : (
+              <div style={{
                 width: '100%',
-                maxWidth: 960,
-                aspectRatio: '16/9'
-              }}
-            />
+                aspectRatio: '16/9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5',
+                color: '#999'
+              }}>
+                Loading scene...
+              </div>
+            )}
 
             {/* Debug Overlay */}
             <DebugOverlay 
