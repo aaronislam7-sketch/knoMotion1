@@ -23,7 +23,7 @@ import { ShowcaseAnimations } from './ShowcaseAnimations_V5';
 import { Show5A_StepByStep } from './Show5A_StepByStep_V5';
 import { Show5B_ConfigurationFlow } from './Show5B_ConfigurationFlow_V5';
 import { Compare3A_FeatureMatrix } from './Compare3A_FeatureMatrix_V5';
-import { Compare3B_DecisionTree } from './Compare3B_DecisionTree_V5';
+import { Compare3B_DecisionTree_TEACHING } from './Compare3B_DecisionTree_V5_TEACHING';
 
 // NEW: BUILD Pillar Templates
 import { Build6A_ProgressiveLayers } from './Build6A_ProgressiveLayers_V5';
@@ -64,7 +64,8 @@ const TEMPLATE_REGISTRY = {
   'Show5A_StepByStep': Show5A_StepByStep,
   'Show5B_ConfigurationFlow': Show5B_ConfigurationFlow,
   'Compare3A_FeatureMatrix': Compare3A_FeatureMatrix,
-  'Compare3B_DecisionTree': Compare3B_DecisionTree,
+  'Compare3B_DecisionTree': Compare3B_DecisionTree_TEACHING,
+  'Compare3B_DecisionTree_TEACHING': Compare3B_DecisionTree_TEACHING,
   
   // NEW: BUILD Pillar Templates
   'Build6A_ProgressiveLayers': Build6A_ProgressiveLayers,

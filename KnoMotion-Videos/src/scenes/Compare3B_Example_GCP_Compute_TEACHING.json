@@ -1,0 +1,121 @@
+{
+  "schema_version": "5.0",
+  "template_id": "Compare3B_DecisionTree_TEACHING",
+  "style_tokens": {
+    "mode": "notebook",
+    "colors": {
+      "bg": "#FAFBFC",
+      "accent": "#2E7FE4",
+      "accent2": "#27AE60",
+      "accent3": "#E74C3C",
+      "highlight": "#9B59B6",
+      "ink": "#1A1A1A",
+      "inkLight": "#95A5A6",
+      "warning": "#F39C12"
+    }
+  },
+  "fill": {
+    "decision": {
+      "title": "Choose Your Compute Service",
+      "stakes": {
+        "cost": "$5-500/month",
+        "time": "5min-4hrs setup",
+        "impact": "Performance & scalability"
+      },
+      "tradeoffs": {
+        "yes": ["Full control", "Custom configs", "SSH access"],
+        "no": ["Auto-scaling", "Zero ops", "Fast deploy"]
+      },
+      "tree": {
+        "root": {
+          "question": "Need full OS control?",
+          "context": "OS control means you can install any software, configure kernel params, and manage the entire stack.",
+          "yes": "outcome_vm",
+          "no": {
+            "question": "Containerized app?",
+            "context": "Containers package your app with dependencies, making deployment consistent across environments.",
+            "yes": {
+              "question": "Need Kubernetes?",
+              "context": "Kubernetes orchestrates containers, handling scaling, load balancing, and self-healing automatically.",
+              "yes": "outcome_gke",
+              "no": "outcome_cloudrun"
+            },
+            "no": "outcome_appengine"
+          }
+        }
+      },
+      "outcomes": {
+        "outcome_vm": {
+          "label": "Compute Engine",
+          "description": "Full VM control, manage everything",
+          "icon": "🖥️",
+          "useCase": "When you need complete control over the OS, custom kernel modules, or legacy applications that require specific system configurations.",
+          "metrics": {
+            "Cost": "$24-500/mo",
+            "Setup": "30min-4hrs",
+            "Maintenance": "High (you manage)"
+          },
+          "pitfall": "Over-provisioning. You pay for idle VMs. Consider autoscaling or serverless if traffic is variable."
+        },
+        "outcome_gke": {
+          "label": "Google Kubernetes Engine",
+          "description": "Managed K8s orchestration",
+          "icon": "☸️",
+          "useCase": "When you have multiple microservices that need orchestration, service mesh, and advanced deployment strategies (blue/green, canary).",
+          "metrics": {
+            "Cost": "$75-300/mo",
+            "Setup": "1-2hrs",
+            "Maintenance": "Medium (managed control plane)"
+          },
+          "pitfall": "Over-engineering. Don't use K8s for a single stateless app. Cloud Run is simpler and cheaper."
+        },
+        "outcome_cloudrun": {
+          "label": "Cloud Run",
+          "description": "Serverless containers",
+          "icon": "📦",
+          "useCase": "When you want to run containerized apps without managing infrastructure. Perfect for APIs, web apps, and batch jobs with variable traffic.",
+          "metrics": {
+            "Cost": "$0-50/mo (pay per request)",
+            "Setup": "5-15min",
+            "Maintenance": "Zero (fully managed)"
+          },
+          "pitfall": "Cold starts. First request after idle can take 1-3s. Use min instances if latency-critical."
+        },
+        "outcome_appengine": {
+          "label": "App Engine",
+          "description": "Fully managed platform",
+          "icon": "🚀",
+          "useCase": "When you want to deploy code directly (no containers needed) with automatic scaling. Great for standard web apps, APIs, and backends.",
+          "metrics": {
+            "Cost": "$0-100/mo",
+            "Setup": "10-30min",
+            "Maintenance": "Zero (fully managed)"
+          },
+          "pitfall": "Runtime limitations. Only supports specific languages/versions. Check compatibility before committing."
+        }
+      },
+      "keyTakeaway": "Choose based on your operational maturity and control needs. Start simple (Cloud Run/App Engine), add complexity only when needed."
+    }
+  },
+  "beats": {
+    "entrance": 0.3,
+    "title": 0.6,
+    "stakes": 1.2,
+    "rootQuestion": 2.0,
+    "definition": 2.5,
+    "tradeoffs": 4.0,
+    "branches": 5.0,
+    "traverse": 7.0,
+    "outcome": 12.5,
+    "context": 14.0,
+    "summary": 16.5,
+    "exit": 19.0
+  },
+  "meta": {
+    "title": "GCP Compute Decision Framework - TEACHING VERSION",
+    "description": "Learn how to choose the right GCP compute service based on your needs",
+    "tags": ["compare", "decision", "gcp", "compute", "teaching"],
+    "difficulty": "intermediate",
+    "tone": "educational"
+  }
+}
