@@ -218,34 +218,34 @@ const Compare3A_FeatureMatrix = ({ scene, styles, presets, easingMap, transition
       svg.removeChild(svg.firstChild);
     }
 
-    // Grid background with hand-drawn rough border
+    // Grid background - ZERO WOBBLE (roughness: 0, bowing: 0)
     if (frame >= beats.optionHeaders) {
       const gridBg = rc.rectangle(gridX, gridY, gridWidth, gridHeight, {
         stroke: colors.ink,
         strokeWidth: 3,
-        roughness: 1.5,
-        bowing: 1,
-        fill: `${colors.inkLight}05`,
+        roughness: 0,
+        bowing: 0,
+        fill: `${colors.inkLight}08`,
         fillStyle: 'solid',
       });
       svg.appendChild(gridBg);
     }
 
-    // Vertical grid lines (column separators) - hand-drawn style
+    // Vertical grid lines (column separators) - ZERO WOBBLE
     if (frame >= beats.optionHeaders + 15) {
       for (let i = 1; i <= optionCount; i++) {
         const x = gridX + i * colWidth;
         const line = rc.line(x, gridY, x, gridY + gridHeight, {
           stroke: colors.inkLight,
           strokeWidth: 2,
-          roughness: 1.2,
-          bowing: 0.8,
+          roughness: 0,
+          bowing: 0,
         });
         svg.appendChild(line);
       }
     }
 
-    // Horizontal grid lines (row separators) - hand-drawn style
+    // Horizontal grid lines (row separators) - ZERO WOBBLE
     if (frame >= beats.features[0]) {
       for (let i = 1; i <= featureCount; i++) {
         if (frame >= featureBeats[i - 1] + 10) {
@@ -253,15 +253,15 @@ const Compare3A_FeatureMatrix = ({ scene, styles, presets, easingMap, transition
           const line = rc.line(gridX, y, gridX + gridWidth, y, {
             stroke: colors.inkLight,
             strokeWidth: 2,
-            roughness: 1.2,
-            bowing: 0.8,
+            roughness: 0,
+            bowing: 0,
           });
           svg.appendChild(line);
         }
       }
     }
 
-    // Recommended option spotlight with hand-drawn border
+    // Recommended option spotlight - ZERO WOBBLE
     if (frame >= beats.decision && recommendedIndex >= 0) {
       const recX = gridX + (recommendedIndex + 1) * colWidth;
       const spotlightProgress = Math.min((frame - beats.decision) / 30, 1);
@@ -274,15 +274,15 @@ const Compare3A_FeatureMatrix = ({ scene, styles, presets, easingMap, transition
         gridHeight - 20,
         {
           stroke: colors.accent2,
-          strokeWidth: 3,
-          roughness: 1.5,
-          bowing: 1.2,
+          strokeWidth: 4,
+          roughness: 0,
+          bowing: 0,
           fill: colors.accent2,
           fillStyle: 'solid',
           fillWeight: 0.5,
         }
       );
-      spotlight.setAttribute('opacity', spotlightProgress * 0.12);
+      spotlight.setAttribute('opacity', spotlightProgress * 0.15);
       svg.appendChild(spotlight);
     }
 
