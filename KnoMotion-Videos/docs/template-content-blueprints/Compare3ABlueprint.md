@@ -797,6 +797,151 @@ export const AGNOSTIC_FEATURES = {
 
 ---
 
+## Continuous Improvement
+
+### Known Limitations & Future Enhancements
+
+#### 1. **Voiceover Synchronization (HIGH PRIORITY)**
+
+**Current State:**
+- Grid reveals are fixed timing (row-by-row, 3.5s per feature)
+- No fine-grained control over stagger timing
+- All cells in a row animate together
+- Difficult to sync with voiceover pacing
+
+**Needed Improvements:**
+```json
+// Future: Per-cell timing control
+{
+  "features": [
+    {
+      "label": "Cost",
+      "values": [...],
+      "timing": {
+        "labelDelay": 0.3,
+        "cellDelays": [0.5, 0.8, 1.1, 1.4],  // Per-option delays
+        "cellDuration": 0.4
+      }
+    }
+  ],
+  "voiceover": {
+    "syncMode": "manual",  // vs "auto"
+    "featureTimings": [
+      { "start": 2.5, "cellStagger": 0.3 },
+      { "start": 6.2, "cellStagger": 0.2 },
+      // etc.
+    ]
+  }
+}
+```
+
+**Why It Matters:**
+- VO: "Let's compare cost... Standard is $20, Nearline $10, Coldline $4..."
+- Need cells to pop in sync with VO mentions (not auto-timed)
+- Different features need different pacing (simple vs. complex)
+
+**Implementation Complexity:** Medium (2-3 hours)
+
+---
+
+#### 2. **Flexible Cell Reveal Patterns**
+
+**Current:** Sequential row-by-row only
+
+**Needed:**
+- Column-by-column (per option)
+- Diagonal reveals
+- Custom cell order
+- "Highlight then fade others" pattern
+
+```json
+{
+  "revealPattern": "column-by-column",  // Focus one option at a time
+  // OR
+  "revealPattern": "custom",
+  "customOrder": [
+    { "row": 0, "col": 0, "delay": 0.5 },
+    { "row": 1, "col": 0, "delay": 0.8 },
+    // etc.
+  ]
+}
+```
+
+---
+
+#### 3. **Group/Batch Feature Reveals**
+
+**Use Case:** "Now let's look at cost-related features together..."
+
+```json
+{
+  "featureGroups": [
+    {
+      "label": "Cost Factors",
+      "features": [0, 2, 4],  // Feature indices
+      "revealTogether": true,
+      "timing": { "start": 5.0, "duration": 2.0 }
+    },
+    {
+      "label": "Performance",
+      "features": [1, 3, 5],
+      "revealTogether": true,
+      "timing": { "start": 8.0, "duration": 2.0 }
+    }
+  ]
+}
+```
+
+---
+
+#### 4. **Pause/Hold States**
+
+**Need:** Hold on specific features while VO explains in detail
+
+```json
+{
+  "features": [
+    {
+      "label": "Cost",
+      "values": [...],
+      "holdDuration": 5.0,  // Hold visible for 5s before next
+      "highlight": true  // Keep emphasized during hold
+    }
+  ]
+}
+```
+
+---
+
+### Workaround (Current)
+
+**Until enhanced timing is implemented:**
+
+1. **Manual Beat Timing:**
+   - Calculate exact VO timestamps
+   - Override `beats.features[]` array manually
+   - Set per-feature durations in JSON
+
+2. **Split Into Multiple Videos:**
+   - Video 1: Show first 3 features
+   - Video 2: Show remaining features
+   - Gives more VO control per segment
+
+3. **Use Transitions:**
+   - Add transition scenes between feature reveals
+   - Gives natural pause points for VO
+
+---
+
+### Priority Ranking
+
+1. 🔴 **HIGH:** VO sync with per-cell timing control
+2. 🟡 **MEDIUM:** Flexible reveal patterns
+3. 🟡 **MEDIUM:** Feature grouping/batching
+4. 🟢 **LOW:** Advanced animations (optional)
+
+---
+
 **Version:** 1.0  
-**Status:** Design Phase  
+**Status:** Production Ready (with VO sync limitations noted)  
 **Last Updated:** 2025-10-30

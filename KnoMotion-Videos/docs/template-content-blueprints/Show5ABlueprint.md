@@ -673,6 +673,98 @@ export const AGNOSTIC_FEATURES = {
 
 ---
 
+## ⚠️ Platform Fit Assessment
+
+### ❌ NOT RECOMMENDED for Certification Learning Platforms
+
+**Why This Template May Not Be Suitable:**
+
+1. **Assumes Hands-On Access During Video**
+   - Step-by-step procedures require learner to follow along
+   - Users may not have GCP/MS Dynamics access while watching
+   - Creates blocker if they can't replicate steps immediately
+
+2. **Better Suited for External Resources**
+   - "Cheat sheets" or exercise books are better for hands-on practice
+   - Video should teach concepts, not replace hands-on labs
+   - Procedural tasks work better as downloadable guides
+
+3. **Conflicts with "Bite-Sized" Promise**
+   - Step-by-step videos can be 45-70s (too long for micro-learning)
+   - Harder to watch casually without doing
+   - Requires context-switching to tools
+
+### ✅ Alternative Approach
+
+**Instead of Step-by-Step, Consider:**
+
+#### **Show5B: Concept Visualization** (Not Yet Built)
+- **Purpose:** Show how systems work conceptually (not how to do it)
+- **Example:** "How VPC Subnetting Works" (diagram-based, no hands-on)
+- **Duration:** 25-35s
+- **Value:** Understanding WHY, not HOW TO
+
+#### **Show5C: Best Practice Pattern** (Not Yet Built)
+- **Purpose:** Show recommended patterns/architectures
+- **Example:** "Production-Ready VPC Architecture" (show the end result, not steps)
+- **Duration:** 30-40s
+- **Value:** Learn patterns to recognize, not replicate immediately
+
+#### **Use Cheat Sheets Instead**
+- Video: Teach the concept ("What is a VPC?")
+- Cheat Sheet: Provide step-by-step procedure ("Create a VPC")
+- Learner does hands-on when they have access (not during video)
+
+---
+
+### When Show5A IS Useful
+
+**Outside certification learning platforms:**
+- Internal training where all users have live access
+- Workshop/lab sessions with guided practice
+- Tutorial content where hands-on is expected immediately
+- Software demos for products users already have
+
+---
+
+## Continuous Improvement
+
+### If This Template Were Adapted for Cert Platforms
+
+**Would Need:**
+
+1. **Decouple from Hands-On Requirement**
+   - Focus on "what happens when" not "you do this"
+   - Passive observation, not active participation
+   - Visual representation of outcomes, not instructions
+
+2. **Shorten Duration**
+   - 3-4 key moments (not 7+ steps)
+   - Each moment: 5-8s max
+   - Total: 20-30s (not 45-70s)
+
+3. **Add Conceptual Context**
+   - Why this step matters
+   - What goes wrong if skipped
+   - How it fits into bigger picture
+
+**But at that point, it's a different template entirely (Show5B/5C).**
+
+---
+
+### Recommendation
+
+**For Certification Platforms:**
+- ❌ **Don't use Show5A** (step-by-step procedures)
+- ✅ **Use Compare3A** (decision-making)
+- ✅ **Use Explain templates** (concept understanding)
+- ✅ **Build Show5B** (concept visualization) if needed
+- ✅ **Create cheat sheets** for hands-on procedures (separate from videos)
+
+**Priority:** PARK this template. Focus effort on templates that support passive learning (Compare, Explain, Build concepts).
+
+---
+
 **Version:** 1.0  
-**Status:** Design Phase  
+**Status:** Design Phase - NOT RECOMMENDED FOR CERT PLATFORMS  
 **Last Updated:** 2025-10-30
