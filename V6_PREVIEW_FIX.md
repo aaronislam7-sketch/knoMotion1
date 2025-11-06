@@ -183,6 +183,40 @@ Uncaught Error: Objects are not valid as a React child
 - ✅ Add colors, EZ, and fps to Guide10 renderHero call
 - ✅ Add EZ and fps to Compare11 before/after renderHero calls
 
+### Commit 4: `fix: Fix renderAmbientParticles usage in V6 templates` (CRITICAL)
+**Problem**: The `renderAmbientParticles()` function returns an array of objects with structure:
+```javascript
+[{ key: 'particle-1', element: <circle ... /> }, ...]
+```
+
+But V6 templates were rendering this array directly:
+```javascript
+const particleElements = renderAmbientParticles(...);
+return <>{particleElements}</>;  // ❌ Renders {key, element} objects!
+```
+
+This caused React to try rendering plain objects, triggering the error:
+```
+Objects are not valid as a React child (found: object with keys {key, element})
+```
+
+**Fix**: Extract the `.element` property from each particle object and wrap in SVG:
+
+```javascript
+// Generate particles
+const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
+
+// Render correctly
+<svg style={{...}} viewBox="0 0 1920 1080">
+  {particleElements.map(p => p.element)}  // ✅ Extract .element
+</svg>
+```
+
+**Files Fixed**:
+- ✅ `Reveal9ProgressiveUnveil_V6.jsx`: Added SVG wrapper + `.map(p => p.element)`
+- ✅ `Guide10StepSequence_V6.jsx`: Added particle system with proper rendering + imports
+- ✅ `Compare11BeforeAfter_V6.jsx`: Added SVG wrapper + `.map(p => p.element)`
+
 ## Next Steps
 
 When adding new V6 templates, remember to:
