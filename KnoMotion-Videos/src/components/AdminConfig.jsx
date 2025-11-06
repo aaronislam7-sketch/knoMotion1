@@ -1254,10 +1254,18 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#333',
-                marginBottom: 8
+                marginBottom: 4
               }}>
                 Question Text Effect
               </label>
+              <div style={{
+                fontSize: 11,
+                color: '#666',
+                marginBottom: 8,
+                fontStyle: 'italic'
+              }}>
+                Affects: Question lines when they appear
+              </div>
               <select
                 value={scene.question?.effects?.entrance || 'sparkles'}
                 onChange={(e) => updateQuestion({
@@ -1287,10 +1295,18 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#333',
-                marginBottom: 8
+                marginBottom: 4
               }}>
                 Scene Exit Transition
               </label>
+              <div style={{
+                fontSize: 11,
+                color: '#666',
+                marginBottom: 8,
+                fontStyle: 'italic'
+              }}>
+                Affects: How the entire scene exits at the end
+              </div>
               <select
                 value={scene.transition?.type || 'wipe-left'}
                 onChange={(e) => updateContent({
@@ -1322,10 +1338,18 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#333',
-                marginBottom: 8
+                marginBottom: 4
               }}>
                 Hero Transform Effect
               </label>
+              <div style={{
+                fontSize: 11,
+                color: '#666',
+                marginBottom: 8,
+                fontStyle: 'italic'
+              }}>
+                Affects: Hero element (map/image) rotation during transformation
+              </div>
               <Slider
                 label="Rotation (degrees)"
                 value={hero.transforms?.[0]?.rotation || 0}
@@ -1353,10 +1377,18 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#333',
-                marginBottom: 8
+                marginBottom: 4
               }}>
-                Element Entrance Style
+                Question Lines Entrance
               </label>
+              <div style={{
+                fontSize: 11,
+                color: '#666',
+                marginBottom: 8,
+                fontStyle: 'italic'
+              }}>
+                Affects: How question lines enter (animation style)
+              </div>
               <select
                 value={scene.animations?.entrance || 'fade-up'}
                 onChange={(e) => updateContent({
@@ -1407,9 +1439,17 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#333',
-                marginBottom: 12
+                marginBottom: 4
               }}>
                 Question Position Offset
+              </div>
+              <div style={{
+                fontSize: 11,
+                color: '#666',
+                marginBottom: 12,
+                fontStyle: 'italic'
+              }}>
+                Affects: Shifts ALL question lines left/right/up/down
               </div>
               <Slider
                 label="Horizontal (X)"
@@ -1447,9 +1487,17 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#333',
-                marginBottom: 12
+                marginBottom: 4
               }}>
                 Hero Position Offset
+              </div>
+              <div style={{
+                fontSize: 11,
+                color: '#666',
+                marginBottom: 12,
+                fontStyle: 'italic'
+              }}>
+                Affects: Shifts hero element (map/image) position
               </div>
               <Slider
                 label="Horizontal (X)"

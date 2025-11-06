@@ -79,10 +79,16 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
       scene.fill.texts.questionPart2
     );
   } else {
+    // Read entrance style from scene.animations.entrance and apply to question animation
+    const entranceStyle = scene.animations?.entrance || 'fade-up';
     questionConfig = {
       lines: scene.question?.lines || [],
       layout: { ...DEFAULT_QUESTION_LAYOUT, ...(scene.question?.layout || {}) },
-      animation: { ...DEFAULT_QUESTION_ANIMATION, ...(scene.question?.animation || {}) }
+      animation: { 
+        ...DEFAULT_QUESTION_ANIMATION, 
+        ...(scene.question?.animation || {}),
+        entrance: entranceStyle  // Override with user-selected style
+      }
     };
   }
   
@@ -107,6 +113,10 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
   const textEffect = scene.question?.effects?.entrance || 'sparkles';
   const transitionType = scene.transition?.type || 'wipe-left';
   const entranceStyle = scene.animations?.entrance || 'fade-up';
+  
+  // Layout offsets
+  const questionOffset = questionConfig.layout?.offset || { x: 0, y: 0 };
+  const heroOffset = heroConfig.offset || { x: 0, y: 0 };
   
   // ✨ Generate deterministic particles
   const ambientParticles = React.useMemo(
@@ -533,7 +543,13 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
           pointerEvents: 'none',
           transform: `translate(${cameraDrift.x}px, ${cameraDrift.y}px)`,
           filter: textEffect === 'glow' ? 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 20px rgba(255, 107, 53, 0.5))' :
-                  textEffect === 'shimmer' ? 'brightness(1.2) saturate(1.3)' : 'none'
+                  textEffect === 'shimmer' ? (() => {
+                    // Animated shimmer effect
+                    const shimmerCycle = ((frame % 60) / 60) * Math.PI * 2;
+                    const brightness = 1.2 + Math.sin(shimmerCycle) * 0.3; // oscillates 0.9-1.5
+                    const hue = Math.sin(shimmerCycle) * 15; // oscillates -15° to +15°
+                    return `brightness(${brightness}) saturate(1.4) hue-rotate(${hue}deg) drop-shadow(0 0 8px rgba(255, 215, 0, ${0.4 + Math.sin(shimmerCycle) * 0.3}))`;
+                  })() : 'none'
         }}
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
@@ -552,7 +568,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
               position: 'absolute',
               top: '50%',
               left: '50%',
-              transform: `translate(-50%, -50%) ${heroAnimation.transform}`,
+              transform: `translate(calc(-50% + ${heroOffset.x}px), calc(-50% + ${heroOffset.y}px)) ${heroAnimation.transform}`,
               width: 640,
               height: 400,
               display: 'flex',
@@ -602,7 +618,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
         )}
       </AbsoluteFill>
 
-      {/* Scene Transition (configurable) */}
+      {/* Scene Transition (configurable) - Always on top */}
       {frame >= beats.exit && (() => {
         const transitionProgress = interpolate(
           frame,
@@ -611,14 +627,16 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
           { extrapolateRight: 'clamp', easing: EZ.power2In }
         );
 
-        // Wipe transitions
+        // Wipe transitions - overlay slides in from edge
         if (transitionType.startsWith('wipe-')) {
           const direction = transitionType.split('-')[1]; // left, right, up, down
+          
+          // Initial position is OFF-SCREEN, slides in to cover
           const transforms = {
-            'left': `translateX(-${transitionProgress * 100}%)`,
-            'right': `translateX(${transitionProgress * 100}%)`,
-            'up': `translateY(-${transitionProgress * 100}%)`,
-            'down': `translateY(${transitionProgress * 100}%)`
+            'left': `translateX(${-100 + (transitionProgress * 100)}%)`,     // starts -100%, ends 0%
+            'right': `translateX(${100 - (transitionProgress * 100)}%)`,     // starts 100%, ends 0%
+            'up': `translateY(${-100 + (transitionProgress * 100)}%)`,       // starts -100%, ends 0%
+            'down': `translateY(${100 - (transitionProgress * 100)}%)`       // starts 100%, ends 0%
           };
           
           return (
@@ -628,6 +646,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
                 inset: 0,
                 backgroundColor: colors.bg,
                 transform: transforms[direction] || transforms['left'],
+                zIndex: 9999,
               }}
             />
           );
@@ -642,6 +661,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
                 inset: 0,
                 backgroundColor: colors.bg,
                 opacity: transitionProgress,
+                zIndex: 9999,
               }}
             />
           );
@@ -656,6 +676,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
                 inset: 0,
                 backgroundColor: colors.bg,
                 opacity: transitionProgress * 0.7,
+                zIndex: 9999,
               }}
             />
           );
@@ -669,6 +690,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
               inset: 0,
               backgroundColor: colors.bg,
               opacity: transitionProgress * 0.15,
+              zIndex: 9999,
             }}
           />
         );
