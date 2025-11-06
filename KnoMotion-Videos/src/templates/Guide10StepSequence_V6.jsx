@@ -440,7 +440,9 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                       }),
                       frame,
                       beats,
-                      colors
+                      colors,
+                      EZ,
+                      fps
                     )}
                   </div>
                 )}

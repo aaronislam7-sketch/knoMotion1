@@ -387,7 +387,9 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
                 mergeHeroConfig(config.before.visual),
                 frame,
                 beats,
-                colors
+                colors,
+                EZ,
+                fps
               )}
             </div>
           )}
@@ -460,7 +462,9 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
                 mergeHeroConfig(config.after.visual),
                 frame,
                 beats,
-                colors
+                colors,
+                EZ,
+                fps
               )}
             </div>
           )}

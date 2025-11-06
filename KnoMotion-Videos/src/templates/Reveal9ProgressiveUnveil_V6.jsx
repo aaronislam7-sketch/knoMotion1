@@ -345,7 +345,9 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
                 mergeHeroConfig(stages[currentStage].visual),
                 frame,
                 beats,
-                colors
+                colors,
+                EZ,
+                fps
               )}
             </div>
           )}
