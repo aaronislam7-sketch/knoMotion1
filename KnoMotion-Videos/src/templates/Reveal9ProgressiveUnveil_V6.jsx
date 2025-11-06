@@ -205,7 +205,14 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  console.log('🎨 Reveal9 rendering frame:', frame, 'fps:', fps, 'hasScene:', !!scene);
+  console.log('🎨 Reveal9 rendering frame:', frame, 'fps:', fps, 'hasScene:', !!scene, 'width:', width, 'height:', height);
+  
+  if (!scene) {
+    console.error('❌ Reveal9: No scene provided!');
+    return <AbsoluteFill style={{ backgroundColor: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#FFF', fontSize: 48 }}>NO SCENE DATA</div>
+    </AbsoluteFill>;
+  }
   
   // Merge with defaults
   const config = {
