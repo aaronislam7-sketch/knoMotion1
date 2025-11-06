@@ -347,7 +347,7 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
     if (onSceneUpdate) {
       onSceneUpdate(scene);
     }
-  }, [scene]);
+  }, [scene, onSceneUpdate]);
 
   const toggleSection = (section) => {
     setOpenSections(prev => ({
@@ -1289,35 +1289,65 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 40,
-          overflowY: 'auto'
+          overflowY: 'auto',
+          position: 'relative'
         }}>
+          {/* Helper Tip */}
+          <div style={{
+            marginBottom: 16,
+            padding: '10px 16px',
+            backgroundColor: '#fff3cd',
+            border: '1px solid #ffc107',
+            borderRadius: 8,
+            fontSize: 13,
+            color: '#856404',
+            textAlign: 'center',
+            maxWidth: 800
+          }}>
+            💡 <strong>Tip:</strong> Click the <strong>🔄 Reload</strong> button above after making changes to see them in the preview
+          </div>
+
           <div style={{
             backgroundColor: '#2d3436',
             borderRadius: 12,
             padding: 6,
             boxShadow: '0 12px 32px rgba(0,0,0,0.25)',
-            marginBottom: 20
+            marginBottom: 20,
+            width: '100%',
+            maxWidth: 820
           }}>
             <div style={{
               backgroundColor: '#fff',
               borderRadius: 8,
-              overflow: 'hidden'
+              overflow: 'hidden',
+              position: 'relative',
+              width: '100%',
+              paddingBottom: '56.25%' // 16:9 aspect ratio
             }}>
-              <Player
-                key={playerKey}
-                component={TemplateRouter}
-                inputProps={{ scene }}
-                durationInFrames={durationInFrames}
-                fps={fps}
-                compositionWidth={1920}
-                compositionHeight={1080}
-                controls
-                style={{
-                  width: '100%',
-                  maxWidth: 800,
-                  aspectRatio: '16/9'
-                }}
-              />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%'
+              }}>
+                <Player
+                  key={playerKey}
+                  component={TemplateRouter}
+                  inputProps={{ scene }}
+                  durationInFrames={durationInFrames}
+                  fps={fps}
+                  compositionWidth={1920}
+                  compositionHeight={1080}
+                  controls
+                  loop
+                  clickToPlay
+                  style={{
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+              </div>
             </div>
           </div>
 
