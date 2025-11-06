@@ -16,7 +16,9 @@ import {
   mergeHeroConfig,
   resolvePosition,
   positionToCSS,
-  getCircleDrawOn
+  getCircleDrawOn,
+  generateAmbientParticles,
+  renderAmbientParticles
 } from '../sdk';
 
 /**
@@ -267,8 +269,25 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
     { width, height }
   );
   
+  // Ambient particles
+  const particles = generateAmbientParticles(20, 'guide-ambient', width, height);
+  const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
+  
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+      {/* Ambient particles */}
+      <svg
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          opacity: 0.3
+        }}
+        viewBox="0 0 1920 1080"
+      >
+        {particleElements.map(p => p.element)}
+      </svg>
       {/* Title */}
       {frame >= titleStartFrame && (
         <div style={{

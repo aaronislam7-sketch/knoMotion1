@@ -251,7 +251,7 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   
   // Ambient particles
   const particles = generateAmbientParticles(25, 'reveal-ambient', width, height);
-  const particleElements = renderAmbientParticles(particles, frame, colors);
+  const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   // Title animation
   const titleAnim = fadeUpIn(frame, {
@@ -270,7 +270,18 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
       {/* Ambient particles */}
-      {particleElements}
+      <svg
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          opacity: 0.4
+        }}
+        viewBox="0 0 1920 1080"
+      >
+        {particleElements.map(p => p.element)}
+      </svg>
       
       {/* Title */}
       {frame >= titleStartFrame && (
