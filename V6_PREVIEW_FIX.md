@@ -228,6 +228,17 @@ When adding new V6 templates, remember to:
    renderHero(config, frame, beats, colors, EZ, fps)
    ```
 3. Import EZ from SDK: `import { EZ } from '../sdk'`
+4. When using `renderAmbientParticles()`, always extract `.element`:
+   ```javascript
+   // Generate particles
+   const particles = generateAmbientParticles(20, 'template-ambient', width, height);
+   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
+   
+   // Render in SVG
+   <svg style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0, opacity: 0.3 }} viewBox="0 0 1920 1080">
+     {particleElements.map(p => p.element)}
+   </svg>
+   ```
 
 ### In UnifiedAdminConfig.jsx:
 1. Import the template module at the top
