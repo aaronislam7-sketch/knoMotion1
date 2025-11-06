@@ -5,6 +5,12 @@ import { TemplateGallery } from './TemplateGallery';
 import { Reveal9Config } from './configs/Reveal9Config';
 import { Guide10Config } from './configs/Guide10Config';
 import { Compare11Config } from './configs/Compare11Config';
+import { EZ } from '../sdk';
+
+// Import templates directly to access their getDuration functions
+import * as Reveal9Module from '../templates/Reveal9ProgressiveUnveil_V6';
+import * as Guide10Module from '../templates/Guide10StepSequence_V6';
+import * as Compare11Module from '../templates/Compare11BeforeAfter_V6';
 
 // Import example scenes
 import reveal9Example from '../scenes/reveal_9_progressive_unveil_example.json';
@@ -131,12 +137,26 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
     }
   };
   
-  // Calculate duration for player
+  // Calculate duration for player using template-specific getDuration
   const fps = 30;
   const getDurationInFrames = () => {
-    if (!scene || !scene.beats) return 450; // 15s default
-    const totalSeconds = (scene.beats.exit || 15) + 1.0; // Add buffer
-    return Math.ceil(totalSeconds * fps);
+    if (!scene) return 450; // 15s default
+    
+    // Use template-specific duration calculation
+    switch (selectedTemplateId) {
+      case 'Reveal9ProgressiveUnveil':
+        return getReveal9Duration ? getReveal9Duration(scene, fps) : 450;
+      case 'Guide10StepSequence':
+        return getGuide10Duration ? getGuide10Duration(scene, fps) : 450;
+      case 'Compare11BeforeAfter':
+        return getCompare11Duration ? getCompare11Duration(scene, fps) : 450;
+      default:
+        // Fallback: try to calculate from beats
+        if (scene.beats && scene.beats.exit) {
+          return Math.ceil((scene.beats.exit + 1.0) * fps);
+        }
+        return 450;
+    }
   };
   
   return (
@@ -275,7 +295,12 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             <Player
               key={playerKey}
               component={TemplateRouter}
-              inputProps={{ scene }}
+              inputProps={{ 
+                scene,
+                easingMap: EZ,
+                styles: {},
+                presets: {}
+              }}
               durationInFrames={getDurationInFrames()}
               compositionWidth={1920}
               compositionHeight={1080}
