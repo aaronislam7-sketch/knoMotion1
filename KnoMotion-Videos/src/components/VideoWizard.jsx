@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Player } from '@remotion/player';
 import { TemplateRouter } from '../templates/TemplateRouter';
 import { MultiSceneVideo } from './MultiSceneVideo';
+import { AdminConfig } from './AdminConfig';
 import { validateSceneCompat, detectSchemaVersion } from '../sdk';
 
 // Import default v5 scenes
@@ -9,6 +10,9 @@ import hookScene from '../scenes/hook_1a_knodovia_map_v5.json';
 import explainScene from '../scenes/explain_2a_breakdown_v5.json';
 import applyScene from '../scenes/apply_3a_quiz_v5.json';
 import reflectScene from '../scenes/reflect_4a_takeaways_v5.json';
+
+// Import agnostic scenes for Admin Config
+import hook1AKnodoviaAgnostic from '../scenes/hook_1a_knodovia_agnostic_v5.json';
 
 const PILLAR_INFO = {
   hook: {
@@ -54,6 +58,7 @@ const STEPS = ['hook', 'explain', 'apply', 'reflect', 'final'];
  * 5. Final: Preview complete video with all scenes stitched
  */
 export const VideoWizard = () => {
+  const [mode, setMode] = useState('wizard'); // 'wizard' or 'admin'
   const [currentStep, setCurrentStep] = useState(0);
   const [scenes, setScenes] = useState({
     hook: hookScene,
@@ -71,9 +76,17 @@ export const VideoWizard = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [showPreviewHelper, setShowPreviewHelper] = useState(true);
 
+  // Admin Config state
+  const [adminScene, setAdminScene] = useState(hook1AKnodoviaAgnostic);
+
   const currentPillar = STEPS[currentStep];
   const isFinalStep = currentPillar === 'final';
   const pillarInfo = PILLAR_INFO[currentPillar];
+
+  // Handle Admin Config scene updates
+  const handleAdminSceneUpdate = (updatedScene) => {
+    setAdminScene(updatedScene);
+  };
 
   // Initialize editing JSON for current pillar
   React.useEffect(() => {
@@ -203,6 +216,79 @@ export const VideoWizard = () => {
     0
   ) - 2; // Subtract transition overlaps
 
+  // Render Admin Config Mode
+  if (mode === 'admin') {
+    return (
+      <div style={{ position: 'relative', height: '100vh' }}>
+        {/* Mode Toggle Header */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          backgroundColor: '#fff',
+          borderBottom: '2px solid #e0e0e0',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button
+              onClick={() => setMode('wizard')}
+              style={{
+                padding: '10px 20px',
+                fontSize: 14,
+                fontWeight: 600,
+                backgroundColor: '#fff',
+                color: '#666',
+                border: '2px solid #ddd',
+                borderRadius: 8,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              🎬 Wizard Mode
+            </button>
+            <button
+              style={{
+                padding: '10px 20px',
+                fontSize: 14,
+                fontWeight: 600,
+                backgroundColor: '#732282',
+                color: '#fff',
+                border: '2px solid #732282',
+                borderRadius: 8,
+                cursor: 'default',
+                boxShadow: '0 2px 8px rgba(115, 34, 130, 0.3)'
+              }}
+            >
+              ⚙️ Admin Config (HOOK1A)
+            </button>
+          </div>
+          <div style={{
+            fontSize: 13,
+            color: '#666',
+            fontStyle: 'italic'
+          }}>
+            Interactive Configuration Tool
+          </div>
+        </div>
+
+        {/* Admin Config Component */}
+        <div style={{ paddingTop: 60, height: '100%' }}>
+          <AdminConfig
+            initialScene={adminScene}
+            onSceneUpdate={handleAdminSceneUpdate}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Render Wizard Mode
   return (
     <div style={{
       display: 'flex',
@@ -217,23 +303,51 @@ export const VideoWizard = () => {
         backgroundColor: '#fff',
         borderBottom: '1px solid #e0e0e0',
         padding: '20px 40px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        <h1 style={{
-          margin: 0,
-          fontSize: 28,
-          fontWeight: 700,
-          color: '#732282'
-        }}>
-          🎬 Video Creation Wizard
-        </h1>
-        <p style={{
-          margin: '8px 0 0 0',
-          fontSize: 14,
-          color: '#666'
-        }}>
-          Create your complete {totalDuration}s educational video
-        </p>
+        <div>
+          <h1 style={{
+            margin: 0,
+            fontSize: 28,
+            fontWeight: 700,
+            color: '#732282'
+          }}>
+            🎬 Video Creation Wizard
+          </h1>
+          <p style={{
+            margin: '8px 0 0 0',
+            fontSize: 14,
+            color: '#666'
+          }}>
+            Create your complete {totalDuration}s educational video
+          </p>
+        </div>
+        <button
+          onClick={() => setMode('admin')}
+          style={{
+            padding: '12px 24px',
+            fontSize: 14,
+            fontWeight: 600,
+            backgroundColor: '#732282',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(115, 34, 130, 0.3)',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+          onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+          onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+        >
+          <span style={{ fontSize: 20 }}>⚙️</span>
+          Admin Config (HOOK1A)
+        </button>
       </header>
 
       {/* Progress Indicator */}
