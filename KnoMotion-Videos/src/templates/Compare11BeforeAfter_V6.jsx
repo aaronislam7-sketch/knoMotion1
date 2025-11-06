@@ -497,6 +497,10 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
 // Required exports
 export const TEMPLATE_ID = 'Compare11BeforeAfter';
 export const TEMPLATE_VERSION = '6.0.0';
+
+// Attach version to component for TemplateRouter detection
+Compare11BeforeAfter.TEMPLATE_VERSION = '6.0.0';
+Compare11BeforeAfter.TEMPLATE_ID = 'Compare11BeforeAfter';
 export const LEARNING_INTENTIONS = {
   primary: ['compare'],
   secondary: ['inspire', 'reveal'],

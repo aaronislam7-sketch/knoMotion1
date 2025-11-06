@@ -382,6 +382,10 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
 // Required exports
 export const TEMPLATE_ID = 'Reveal9ProgressiveUnveil';
 export const TEMPLATE_VERSION = '6.0.0';
+
+// Attach version to component for TemplateRouter detection
+Reveal9ProgressiveUnveil.TEMPLATE_VERSION = '6.0.0';
+Reveal9ProgressiveUnveil.TEMPLATE_ID = 'Reveal9ProgressiveUnveil';
 export const LEARNING_INTENTIONS = {
   primary: ['reveal'],
   secondary: ['question', 'breakdown'],

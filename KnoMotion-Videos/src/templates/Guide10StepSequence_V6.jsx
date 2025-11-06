@@ -477,6 +477,10 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
 // Required exports
 export const TEMPLATE_ID = 'Guide10StepSequence';
 export const TEMPLATE_VERSION = '6.0.0';
+
+// Attach version to component for TemplateRouter detection
+Guide10StepSequence.TEMPLATE_VERSION = '6.0.0';
+Guide10StepSequence.TEMPLATE_ID = 'Guide10StepSequence';
 export const LEARNING_INTENTIONS = {
   primary: ['guide'],
   secondary: ['breakdown', 'connect'],
