@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { VideoWizard } from './components/VideoWizard';
+import { UnifiedAdminConfig } from './components/UnifiedAdminConfig';
 import { Player } from '@remotion/player';
 import { TemplateRouter } from './templates/TemplateRouter';
 import { StyleTokensProvider } from './sdk/StyleTokensProvider';
@@ -124,7 +125,7 @@ const validateScene = (scene) => {
 };
 
 export default function App() {
-  const [mode, setMode] = useState('wizard'); // 'wizard' or 'preview'
+  const [mode, setMode] = useState('wizard'); // 'wizard', 'preview', or 'unified-config'
   const [selectedTemplate, setSelectedTemplate] = useState('hook_1a_v5');
   const [sceneJSON, setSceneJSON] = useState(JSON.stringify(hook1AV5Scene, null, 2));
   const [currentScene, setCurrentScene] = useState(hook1AV5Scene);
@@ -196,31 +197,104 @@ export default function App() {
     setPlayerKey(prev => prev + 1);
   };
 
+  // Render unified config mode
+  if (mode === 'unified-config') {
+    return (
+      <div style={{ position: 'relative' }}>
+        <UnifiedAdminConfig />
+        {/* Mode toggle buttons */}
+        <div style={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          display: 'flex',
+          gap: 10,
+          zIndex: 9999
+        }}>
+          <button
+            onClick={() => setMode('wizard')}
+            style={{
+              padding: '10px 20px',
+              fontSize: 13,
+              backgroundColor: '#3498db',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(52, 152, 219, 0.3)'
+            }}
+          >
+            ← Wizard Mode
+          </button>
+          <button
+            onClick={() => setMode('preview')}
+            style={{
+              padding: '10px 20px',
+              fontSize: 13,
+              backgroundColor: '#732282',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(115, 34, 130, 0.3)'
+            }}
+          >
+            Scene Preview
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   // Render wizard mode by default
   if (mode === 'wizard') {
     return (
       <div style={{ position: 'relative' }}>
         <VideoWizard />
-        {/* Mode toggle button */}
-        <button
-          onClick={() => setMode('preview')}
-          style={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-            padding: '10px 20px',
-            fontSize: 13,
-            backgroundColor: '#732282',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(115, 34, 130, 0.3)',
-            zIndex: 9999
-          }}
-        >
-          Switch to Scene Preview
-        </button>
+        {/* Mode toggle buttons */}
+        <div style={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          display: 'flex',
+          gap: 10,
+          zIndex: 9999
+        }}>
+          <button
+            onClick={() => setMode('unified-config')}
+            style={{
+              padding: '12px 24px',
+              fontSize: 14,
+              fontWeight: 700,
+              backgroundColor: '#4CAF50',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+          >
+            🎛️ NEW: Template Gallery & Config
+          </button>
+          <button
+            onClick={() => setMode('preview')}
+            style={{
+              padding: '10px 20px',
+              fontSize: 13,
+              backgroundColor: '#732282',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(115, 34, 130, 0.3)'
+            }}
+          >
+            Scene Preview
+          </button>
+        </div>
       </div>
     );
   }
@@ -309,6 +383,23 @@ export default function App() {
         <div style={{ flex: 1 }} />
 
         <button
+          onClick={() => setMode('unified-config')}
+          style={{
+            padding: '8px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            backgroundColor: '#4CAF50',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer',
+            marginRight: 10
+          }}
+        >
+          🎛️ Template Config
+        </button>
+        
+        <button
           onClick={() => setMode('wizard')}
           style={{
             padding: '8px 16px',
@@ -321,7 +412,7 @@ export default function App() {
             cursor: 'pointer'
           }}
         >
-          Switch to Wizard Mode
+          Wizard Mode
         </button>
         
         <div style={{
