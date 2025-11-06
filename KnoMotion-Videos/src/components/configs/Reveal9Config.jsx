@@ -133,7 +133,7 @@ export const Reveal9Config = ({ scene, onUpdate }) => {
       >
         {/* Title Text */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Title Text
           </label>
           <input
@@ -155,7 +155,7 @@ export const Reveal9Config = ({ scene, onUpdate }) => {
           <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
             Reveal Style
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 8, lineHeight: 1.4 }}>
             How the curtain/overlay reveals each stage
           </div>
           <select
@@ -203,7 +203,7 @@ export const Reveal9Config = ({ scene, onUpdate }) => {
           >
             + Add Stage
           </button>
-          <span style={{ fontSize: 11, color: '#666' }}>
+          <span style={{ fontSize: 13, color: '#5A6C7D', fontWeight: 500 }}>
             (Min: 2, Max: 5, Current: {stages.length})
           </span>
         </div>
@@ -246,7 +246,7 @@ export const Reveal9Config = ({ scene, onUpdate }) => {
             </div>
             
             <div style={{ marginBottom: 8 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 4, color: '#1A1A1A' }}>
                 Headline
               </label>
               <input
@@ -366,7 +366,7 @@ export const Reveal9Config = ({ scene, onUpdate }) => {
         isOpen={openSections.timing}
         onToggle={() => toggleSection('timing')}
       >
-        <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 12 }}>
+        <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 12, lineHeight: 1.4 }}>
           Control when each animation happens (in seconds)
         </div>
         

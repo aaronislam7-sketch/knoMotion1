@@ -132,7 +132,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
       >
         {/* Title */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Title Text
           </label>
           <input
@@ -151,10 +151,10 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         
         {/* Split Orientation */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Split Orientation
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 8 }}>
             How the screen is divided
           </div>
           <select
@@ -175,10 +175,10 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         
         {/* Transition Style */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Transition Style
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 8 }}>
             How the transition reveals the after state
           </div>
           <select
@@ -208,7 +208,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         onToggle={() => toggleSection('before')}
       >
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Label
           </label>
           <input
@@ -227,7 +227,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Headline
           </label>
           <input
@@ -246,7 +246,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Description
           </label>
           <textarea
@@ -266,7 +266,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Background Color
           </label>
           <input
@@ -292,7 +292,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         onToggle={() => toggleSection('after')}
       >
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Label
           </label>
           <input
@@ -311,7 +311,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Headline
           </label>
           <input
@@ -330,7 +330,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Description
           </label>
           <textarea
@@ -350,7 +350,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Background Color
           </label>
           <input
@@ -377,7 +377,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
       >
         {['bg', 'accent', 'accent2', 'ink', 'divider'].map(colorKey => (
           <div key={colorKey} style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
               {colorKey === 'bg' ? 'Overall Background' : 
                colorKey === 'accent' ? 'Accent (Before)' :
                colorKey === 'accent2' ? 'Accent 2 (After)' :
@@ -428,7 +428,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
           { key: 'size_description', label: 'Description Size', min: 16, max: 36, default: 24 }
         ].map(font => (
           <div key={font.key} style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
               {font.label}: {fonts[font.key] || font.default}px
             </label>
             <input
@@ -459,7 +459,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
           { key: 'exit', label: 'Exit Delay', min: 0.5, max: 4, step: 0.5, default: 2.0 }
         ].map(beat => (
           <div key={beat.key} style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
               {beat.label}: {beats[beat.key] || beat.default}s
             </label>
             <input
@@ -484,7 +484,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
       >
         {/* Before Entrance */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Before State Entrance
           </label>
           <select
@@ -506,7 +506,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
         
         {/* After Entrance */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             After State Entrance
           </label>
           <select
@@ -539,7 +539,7 @@ export const Compare11Config = ({ scene, onUpdate }) => {
               Pulse After State
             </span>
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginTop: 4, marginLeft: 24 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginTop: 4, marginLeft: 24 }}>
             Add emphasis pulse to the after state when revealed
           </div>
         </div>

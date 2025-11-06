@@ -365,9 +365,9 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                     {template.name}
                   </h3>
                   <div style={{
-                    fontSize: 11,
-                    color: '#666',
-                    fontWeight: 600
+          fontSize: 12,
+          color: '#5A6C7D',
+          fontWeight: 600
                   }}>
                     {template.version} • {template.duration}
                   </div>
@@ -376,10 +376,11 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
               
               {/* Description */}
               <p style={{
-                fontSize: 13,
-                color: '#555',
-                lineHeight: 1.5,
-                margin: '0 0 12px 0'
+              fontSize: 14,
+              color: '#2C3E50',
+              lineHeight: 1.6,
+              margin: '0 0 12px 0',
+              fontWeight: 400
               }}>
                 {template.description}
               </p>
@@ -392,7 +393,7 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                   backgroundColor: INTENTION_COLORS[template.intentions.primary],
                   color: '#FFFFFF',
                   borderRadius: 12,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: 0.5
                 }}>
@@ -409,7 +410,7 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                       color: INTENTION_COLORS[intention],
                       border: `1.5px solid ${INTENTION_COLORS[intention]}`,
                       borderRadius: 12,
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 600,
                       letterSpacing: 0.5
                     }}
@@ -427,7 +428,7 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                   backgroundColor: '#E3F2FD',
                   color: '#1976D2',
                   borderRadius: 6,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 700,
                   textAlign: 'center',
                   border: '1px solid #BBDEFB'

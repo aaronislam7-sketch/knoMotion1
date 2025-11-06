@@ -131,6 +131,14 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
     }
   };
   
+  // Calculate duration for player
+  const fps = 30;
+  const getDurationInFrames = () => {
+    if (!scene || !scene.beats) return 450; // 15s default
+    const totalSeconds = (scene.beats.exit || 15) + 1.0; // Add buffer
+    return Math.ceil(totalSeconds * fps);
+  };
+  
   return (
     <div style={{
       display: 'grid',
@@ -138,7 +146,8 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
       gap: 24,
       padding: 24,
       minHeight: '100vh',
-      backgroundColor: '#F0F2F5'
+      backgroundColor: '#F0F2F5',
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
     }}>
       {/* LEFT COLUMN: Template Gallery + Config */}
       <div style={{
@@ -167,10 +176,11 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             🎛️ Interactive Template Config
           </h1>
           <p style={{
-            fontSize: 14,
-            color: '#666',
-            margin: 0,
-            lineHeight: 1.5
+              fontSize: 15,
+              color: '#4A5568',
+              margin: 0,
+              lineHeight: 1.6,
+              fontWeight: 400
           }}>
             Select a template, configure it visually, and see real-time changes.
             <br />
@@ -266,16 +276,17 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
               key={playerKey}
               component={TemplateRouter}
               inputProps={{ scene }}
-              durationInFrames={300}
+              durationInFrames={getDurationInFrames()}
               compositionWidth={1920}
               compositionHeight={1080}
-              fps={30}
+              fps={fps}
               style={{
                 width: '100%',
                 height: 'auto'
               }}
               controls
               loop
+              clickToPlay
             />
           </div>
           
@@ -285,14 +296,15 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             padding: 12,
             backgroundColor: '#F5F5F5',
             borderRadius: 8,
-            fontSize: 12,
-            color: '#666'
+            fontSize: 13,
+            color: '#2C3E50',
+            lineHeight: 1.6
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div><strong>Template:</strong> {selectedTemplateId}</div>
-              <div><strong>Schema:</strong> {scene.schema_version || 'N/A'}</div>
-              <div><strong>Dimensions:</strong> 1920×1080</div>
-              <div><strong>FPS:</strong> 30</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>Template:</strong> <span style={{ color: '#4CAF50', fontWeight: 600 }}>{selectedTemplateId}</span></div>
+              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>Schema:</strong> {scene.schema_version || 'v6.0'}</div>
+              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>Duration:</strong> {(getDurationInFrames() / fps).toFixed(1)}s</div>
+              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>FPS:</strong> {fps} fps</div>
             </div>
           </div>
         </div>

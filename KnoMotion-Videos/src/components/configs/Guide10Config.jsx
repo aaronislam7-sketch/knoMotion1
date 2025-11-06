@@ -142,7 +142,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
       >
         {/* Title */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Title Text
           </label>
           <input
@@ -161,10 +161,10 @@ export const Guide10Config = ({ scene, onUpdate }) => {
         
         {/* Layout */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Layout Style
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 8 }}>
             How steps are arranged on screen
           </div>
           <select
@@ -186,10 +186,10 @@ export const Guide10Config = ({ scene, onUpdate }) => {
         
         {/* Connection Style */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Connection Style
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 8 }}>
             Visual connections between steps
           </div>
           <select
@@ -236,7 +236,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
           >
             + Add Step
           </button>
-          <span style={{ fontSize: 11, color: '#666' }}>
+          <span style={{ fontSize: 13, color: '#5A6C7D' }}>
             (Min: 2, Max: 8, Current: {steps.length})
           </span>
         </div>
@@ -295,7 +295,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
             </div>
             
             <div style={{ marginBottom: 8 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
                 Step Title
               </label>
               <input
@@ -313,7 +313,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
             </div>
             
             <div style={{ marginBottom: 8 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
                 Description
               </label>
               <textarea
@@ -343,7 +343,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
       >
         {['bg', 'accent', 'accent2', 'ink', 'stepBg', 'connectionColor'].map(colorKey => (
           <div key={colorKey} style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
               {colorKey === 'bg' ? 'Background' : 
                colorKey === 'accent' ? 'Accent (Number Badge)' :
                colorKey === 'accent2' ? 'Accent 2 (Box Border)' :
@@ -395,7 +395,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
           { key: 'size_stepNumber', label: 'Number Badge Size', min: 30, max: 70, default: 48 }
         ].map(font => (
           <div key={font.key} style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
               {font.label}: {fonts[font.key] || font.default}px
             </label>
             <input
@@ -425,7 +425,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
           { key: 'exit', label: 'Exit Delay', min: 0.5, max: 4, step: 0.5, default: 2.0 }
         ].map(beat => (
           <div key={beat.key} style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
               {beat.label}: {beats[beat.key] || beat.default}s
             </label>
             <input
@@ -450,10 +450,10 @@ export const Guide10Config = ({ scene, onUpdate }) => {
       >
         {/* Step Entrance */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#1A1A1A' }}>
             Step Entrance Style
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginBottom: 8 }}>
             How each step appears
           </div>
           <select
@@ -487,7 +487,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
               Animate Connection Lines
             </span>
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginTop: 4, marginLeft: 24 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginTop: 4, marginLeft: 24 }}>
             Draw connections between steps as they appear
           </div>
         </div>
@@ -505,7 +505,7 @@ export const Guide10Config = ({ scene, onUpdate }) => {
               Pulse on Entry
             </span>
           </label>
-          <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginTop: 4, marginLeft: 24 }}>
+          <div style={{ fontSize: 13, color: '#5A6C7D', fontStyle: 'italic', marginTop: 4, marginLeft: 24 }}>
             Add emphasis pulse when step appears
           </div>
         </div>
