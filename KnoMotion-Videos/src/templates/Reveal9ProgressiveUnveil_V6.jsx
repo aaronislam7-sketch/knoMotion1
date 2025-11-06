@@ -205,6 +205,8 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
+  console.log('🎨 Reveal9 rendering frame:', frame, 'fps:', fps, 'hasScene:', !!scene);
+  
   // Merge with defaults
   const config = {
     ...DEFAULT_CONFIG,
