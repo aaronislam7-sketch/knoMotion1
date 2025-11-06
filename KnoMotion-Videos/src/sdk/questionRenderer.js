@@ -53,7 +53,8 @@ const calculateLinePosition = (lines, index, layout, viewport) => {
     verticalSpacing,
     horizontalSpacing,
     basePosition,
-    centerStack
+    centerStack,
+    offset
   } = { ...DEFAULT_QUESTION_LAYOUT, ...layout };
   
   // Normalize arrangement: 'stacked' means 'vertical'
@@ -66,6 +67,12 @@ const calculateLinePosition = (lines, index, layout, viewport) => {
     base = getCenteredStackBase(basePosition, lines.length, spacing, normalizedArrangement, viewport);
   } else {
     base = resolvePosition(basePosition, { x: 0, y: 0 }, viewport);
+  }
+  
+  // Apply global offset to base position
+  if (offset) {
+    base.x += (offset.x || 0);
+    base.y += (offset.y || 0);
   }
   
   // Get stacked position
@@ -106,16 +113,30 @@ const calculateLineEntrance = (frame, beats, index, animation, easingMap, fps) =
   const lineStartFrame = toFrames(lineStartTime, fps);
   const durationFrames = toFrames(entranceDuration, fps);
   
+  // Determine entrance style
+  const entranceStyle = entrance || 'fade-up';
+  
   if (frame < lineStartFrame) {
-    return {
-      opacity: 0,
-      translateY: entranceDistance || 50,
-      translateX: 0,
-      scale: 0.88
-    };
+    // Initial state based on entrance style
+    switch (entranceStyle) {
+      case 'fade-in':
+        return { opacity: 0, translateY: 0, translateX: 0, scale: 1 };
+      case 'slide-right':
+        return { opacity: 0, translateY: 0, translateX: -100, scale: 1 };
+      case 'slide-left':
+        return { opacity: 0, translateY: 0, translateX: 100, scale: 1 };
+      case 'scale-up':
+        return { opacity: 0, translateY: 0, translateX: 0, scale: 0.5 };
+      case 'bounce':
+        return { opacity: 0, translateY: 60, translateX: 0, scale: 0.9 };
+      case 'fade-up':
+      default:
+        return { opacity: 0, translateY: entranceDistance || 50, translateX: 0, scale: 0.88 };
+    }
   }
   
   const easeFn = easingMap?.smooth || ((t) => t);
+  const bounceEase = easingMap?.bounceOut || easeFn;
   
   const opacity = interpolate(
     frame,
@@ -124,24 +145,81 @@ const calculateLineEntrance = (frame, beats, index, animation, easingMap, fps) =
     { extrapolateRight: 'clamp', easing: easeFn }
   );
   
-  const translateY = interpolate(
-    frame,
-    [lineStartFrame, lineStartFrame + durationFrames],
-    [entranceDistance || 50, 0],
-    { extrapolateRight: 'clamp', easing: easeFn }
-  );
+  // Animate based on entrance style
+  let translateY = 0;
+  let translateX = 0;
+  let scale = 1;
   
-  const scale = interpolate(
-    frame,
-    [lineStartFrame, lineStartFrame + durationFrames],
-    [0.88, 1],
-    { extrapolateRight: 'clamp', easing: easeFn }
-  );
+  switch (entranceStyle) {
+    case 'fade-in':
+      translateY = 0;
+      translateX = 0;
+      scale = 1;
+      break;
+    
+    case 'slide-right':
+      translateX = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [-100, 0],
+        { extrapolateRight: 'clamp', easing: easeFn }
+      );
+      break;
+    
+    case 'slide-left':
+      translateX = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [100, 0],
+        { extrapolateRight: 'clamp', easing: easeFn }
+      );
+      break;
+    
+    case 'scale-up':
+      scale = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [0.5, 1],
+        { extrapolateRight: 'clamp', easing: easeFn }
+      );
+      break;
+    
+    case 'bounce':
+      translateY = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [60, 0],
+        { extrapolateRight: 'clamp', easing: bounceEase }
+      );
+      scale = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [0.9, 1],
+        { extrapolateRight: 'clamp', easing: bounceEase }
+      );
+      break;
+    
+    case 'fade-up':
+    default:
+      translateY = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [entranceDistance || 50, 0],
+        { extrapolateRight: 'clamp', easing: easeFn }
+      );
+      scale = interpolate(
+        frame,
+        [lineStartFrame, lineStartFrame + durationFrames],
+        [0.88, 1],
+        { extrapolateRight: 'clamp', easing: easeFn }
+      );
+      break;
+  }
   
   return {
     opacity,
     translateY,
-    translateX: 0,
+    translateX,
     scale
   };
 };
