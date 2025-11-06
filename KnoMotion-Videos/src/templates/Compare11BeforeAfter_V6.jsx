@@ -227,7 +227,7 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   const beats = config.beats;
   
   // Ambient particles
-  const particles = generateAmbientParticles(20, 'compare-ambient', width, height);
+  const particles = generateAmbientParticles(20, 11001, width, height);
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   // Title animation

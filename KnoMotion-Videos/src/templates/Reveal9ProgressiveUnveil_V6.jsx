@@ -250,7 +250,7 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   }
   
   // Ambient particles
-  const particles = generateAmbientParticles(25, 'reveal-ambient', width, height);
+  const particles = generateAmbientParticles(25, 9001, width, height);
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   // Title animation

@@ -270,7 +270,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   );
   
   // Ambient particles
-  const particles = generateAmbientParticles(20, 'guide-ambient', width, height);
+  const particles = generateAmbientParticles(20, 10001, width, height);
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   return (
