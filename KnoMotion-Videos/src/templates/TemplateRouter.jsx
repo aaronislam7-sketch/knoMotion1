@@ -22,6 +22,11 @@ import { ShowcaseAnimations } from './ShowcaseAnimations_V5';
 // Blueprint v5.1 Agnostic Templates
 import { Hook1AQuestionBurst_Agnostic } from './Hook1AQuestionBurst_V5_Agnostic';
 
+// Blueprint v6.0 New Intention Templates
+import { Reveal9ProgressiveUnveil } from './Reveal9ProgressiveUnveil_V6';
+import { Guide10StepSequence } from './Guide10StepSequence_V6';
+import { Compare11BeforeAfter } from './Compare11BeforeAfter_V6';
+
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
 
@@ -65,12 +70,29 @@ const AGNOSTIC_TEMPLATE_REGISTRY = {
 };
 
 /**
- * Get template component from template_id with v5.0/v5.1 detection
+ * V6.0 New Intention Templates Registry
+ * Fully configurable, no hardcoded values, action-based intentions
+ */
+const V6_TEMPLATE_REGISTRY = {
+  'Reveal9ProgressiveUnveil': Reveal9ProgressiveUnveil,
+  'Guide10StepSequence': Guide10StepSequence,
+  'Compare11BeforeAfter': Compare11BeforeAfter,
+  // Future v6 templates will be added here
+};
+
+/**
+ * Get template component from template_id with v5.0/v5.1/v6.0 detection
  */
 const getTemplateComponent = (templateId, scene) => {
   if (!templateId) {
     console.warn('No template_id found, using default v5 template');
     return Hook1AQuestionBurst;
+  }
+  
+  // Check v6 templates first (new intention-based system)
+  if (V6_TEMPLATE_REGISTRY[templateId]) {
+    console.info(`🚀 Using v6.0 template for ${templateId}`);
+    return V6_TEMPLATE_REGISTRY[templateId];
   }
   
   // Detect schema version
@@ -122,11 +144,12 @@ export const TemplateRouter = ({ scene, styles, presets, easingMap, transitions 
   
   const TemplateComponent = getTemplateComponent(templateId, scene);
   
-  // Check if this is a v5.x template (has required exports)
+  // Check if this is a v5.x or v6.x template (has required exports)
   const isV5Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('5.');
+  const isV6Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('6.');
   
-  if (isV5Template) {
-    // v5.x templates require SceneIdContext wrapper
+  if (isV5Template || isV6Template) {
+    // v5.x and v6.x templates require SceneIdContext wrapper
     return (
       <SceneIdContext.Provider value={sceneId}>
         <TemplateComponent 
@@ -155,4 +178,4 @@ export const isV5Template = (templateId) => {
 /**
  * Export template registries for external use
  */
-export { TEMPLATE_REGISTRY, AGNOSTIC_TEMPLATE_REGISTRY };
+export { TEMPLATE_REGISTRY, AGNOSTIC_TEMPLATE_REGISTRY, V6_TEMPLATE_REGISTRY };
