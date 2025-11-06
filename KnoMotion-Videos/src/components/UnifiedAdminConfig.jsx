@@ -145,11 +145,11 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
     // Use template-specific duration calculation
     switch (selectedTemplateId) {
       case 'Reveal9ProgressiveUnveil':
-        return getReveal9Duration ? getReveal9Duration(scene, fps) : 450;
+        return Reveal9Module.getDuration ? Reveal9Module.getDuration(scene, fps) : 450;
       case 'Guide10StepSequence':
-        return getGuide10Duration ? getGuide10Duration(scene, fps) : 450;
+        return Guide10Module.getDuration ? Guide10Module.getDuration(scene, fps) : 450;
       case 'Compare11BeforeAfter':
-        return getCompare11Duration ? getCompare11Duration(scene, fps) : 450;
+        return Compare11Module.getDuration ? Compare11Module.getDuration(scene, fps) : 450;
       default:
         // Fallback: try to calculate from beats
         if (scene.beats && scene.beats.exit) {
