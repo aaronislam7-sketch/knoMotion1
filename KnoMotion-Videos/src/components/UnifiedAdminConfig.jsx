@@ -159,6 +159,14 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
     }
   };
   
+  console.log('🎛️ UnifiedAdminConfig rendering:', {
+    selectedTemplateId,
+    sceneTemplateId: scene?.template_id,
+    duration: getDurationInFrames(),
+    hasScene: !!scene,
+    sceneKeys: scene ? Object.keys(scene) : []
+  });
+  
   return (
     <div style={{
       display: 'grid',
