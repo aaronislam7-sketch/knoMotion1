@@ -337,10 +337,13 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
     colors: false,
     fonts: false,
     timeline: false,
-    content: false
+    content: false,
+    animations: false,
+    layout: false
   });
   const [showJSON, setShowJSON] = useState(false);
   const [playerKey, setPlayerKey] = useState(0);
+  const [beatMode, setBeatMode] = useState('relative'); // 'relative' or 'absolute'
 
   // Sync scene updates
   useEffect(() => {
@@ -452,6 +455,42 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
         [beat]: value
       }
     }));
+  };
+
+  // Helper: Calculate cumulative beats (relative to previous)
+  const calculateCumulativeBeats = (beats) => {
+    const order = [
+      'entrance', 'questionStart', 'moveUp', 'emphasis',
+      'wipeQuestions', 'mapReveal', 'transformMap', 
+      'welcome', 'subtitle', 'breathe', 'exit'
+    ];
+    
+    const cumulative = {};
+    let runningTotal = 0;
+    
+    order.forEach(beat => {
+      if (beats[beat] !== undefined) {
+        cumulative[beat] = runningTotal + beats[beat];
+        runningTotal = cumulative[beat];
+      }
+    });
+    
+    return cumulative;
+  };
+
+  // Helper: Get relative beat value (duration from previous)
+  const getRelativeBeat = (beat, beats) => {
+    const order = [
+      'entrance', 'questionStart', 'moveUp', 'emphasis',
+      'wipeQuestions', 'mapReveal', 'transformMap', 
+      'welcome', 'subtitle', 'breathe', 'exit'
+    ];
+    
+    const index = order.indexOf(beat);
+    if (index === 0) return beats[beat] || 0;
+    
+    const prevBeat = order[index - 1];
+    return (beats[beat] || 0) - (beats[prevBeat] || 0);
   };
 
   const updateContent = (contentUpdates) => {
@@ -1024,7 +1063,7 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
             />
           </AccordionSection>
 
-          {/* Timeline Section */}
+          {/* Timeline Section - WITH SMART BEAT CALCULATION */}
           <AccordionSection
             title="Timeline (Beats)"
             icon="⏱️"
@@ -1033,106 +1072,106 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
           >
             <div style={{
               marginBottom: 20,
+              padding: 16,
+              backgroundColor: '#e8f5e9',
+              border: '2px solid #4caf50',
+              borderRadius: 8
+            }}>
+              <div style={{ fontSize: 13, color: '#2e7d32', marginBottom: 8, fontWeight: 600 }}>
+                💡 Smart Beat Timing
+              </div>
+              <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                Each beat's value = <strong>duration after previous beat</strong>
+              </div>
+              <div style={{ fontSize: 12, color: '#666' }}>
+                Example: Beat1=4s, Beat2=2.5s → Beat2 happens at 6.5s total
+              </div>
+            </div>
+
+            <div style={{
+              marginBottom: 20,
               padding: 12,
               backgroundColor: '#fff',
               border: '2px solid #e0e0e0',
               borderRadius: 8
             }}>
-              <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
                 Timeline Duration: <strong>{beats.exit || 15.0}s</strong>
               </div>
             </div>
 
-            <Slider
-              label="Entrance"
-              value={beats.entrance || 0.6}
-              onChange={(val) => updateBeat('entrance', val)}
-              min={0}
-              max={5}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Question Start"
-              value={beats.questionStart || 0.6}
-              onChange={(val) => updateBeat('questionStart', val)}
-              min={0}
-              max={5}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Move Up"
-              value={beats.moveUp || 2.0}
-              onChange={(val) => updateBeat('moveUp', val)}
-              min={0}
-              max={10}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Emphasis"
-              value={beats.emphasis || 4.2}
-              onChange={(val) => updateBeat('emphasis', val)}
-              min={0}
-              max={10}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Wipe Questions"
-              value={beats.wipeQuestions || 5.5}
-              onChange={(val) => updateBeat('wipeQuestions', val)}
-              min={0}
-              max={15}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Map Reveal"
-              value={beats.mapReveal || 6.5}
-              onChange={(val) => updateBeat('mapReveal', val)}
-              min={0}
-              max={15}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Transform Map"
-              value={beats.transformMap || 9.0}
-              onChange={(val) => updateBeat('transformMap', val)}
-              min={0}
-              max={15}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Welcome"
-              value={beats.welcome || 10.0}
-              onChange={(val) => updateBeat('welcome', val)}
-              min={0}
-              max={15}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Subtitle"
-              value={beats.subtitle || 12.0}
-              onChange={(val) => updateBeat('subtitle', val)}
-              min={0}
-              max={15}
-              step={0.1}
-              unit="s"
-            />
-            <Slider
-              label="Exit"
-              value={beats.exit || 15.0}
-              onChange={(val) => updateBeat('exit', val)}
-              min={5}
-              max={20}
-              step={0.5}
-              unit="s"
-            />
+            {/* Beat sliders with cumulative display */}
+            {[
+              { key: 'entrance', label: 'Entrance', default: 0.6, max: 3 },
+              { key: 'questionStart', label: 'Question Start (+)', default: 0.6, max: 3 },
+              { key: 'moveUp', label: 'Move Up (+)', default: 2.0, max: 5 },
+              { key: 'emphasis', label: 'Emphasis (+)', default: 4.2, max: 5 },
+              { key: 'wipeQuestions', label: 'Wipe Questions (+)', default: 5.5, max: 5 },
+              { key: 'mapReveal', label: 'Map Reveal (+)', default: 6.5, max: 5 },
+              { key: 'transformMap', label: 'Transform Map (+)', default: 9.0, max: 5 },
+              { key: 'welcome', label: 'Welcome (+)', default: 10.0, max: 5 },
+              { key: 'subtitle', label: 'Subtitle (+)', default: 12.0, max: 5 },
+              { key: 'exit', label: 'Exit (+)', default: 15.0, max: 8 }
+            ].map((beat, index) => {
+              const prevBeat = index > 0 ? 
+                ['entrance', 'questionStart', 'moveUp', 'emphasis', 'wipeQuestions', 'mapReveal', 'transformMap', 'welcome', 'subtitle', 'exit'][index - 1] : null;
+              const cumulativeTime = prevBeat ? (beats[prevBeat] || 0) + (beats[beat.key] || beat.default) : (beats[beat.key] || beat.default);
+              
+              return (
+                <div key={beat.key} style={{ marginBottom: 16 }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 6
+                  }}>
+                    <label style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: '#333'
+                    }}>
+                      {beat.label}
+                    </label>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{
+                        fontSize: 11,
+                        color: '#999',
+                        backgroundColor: '#f5f5f5',
+                        padding: '2px 6px',
+                        borderRadius: 3
+                      }}>
+                        Cumulative: {cumulativeTime.toFixed(1)}s
+                      </span>
+                      <span style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: '#732282',
+                        backgroundColor: '#f0e6f6',
+                        padding: '2px 8px',
+                        borderRadius: 4
+                      }}>
+                        {(beats[beat.key] || beat.default).toFixed(1)}s
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    type="range"
+                    value={beats[beat.key] || beat.default}
+                    onChange={(e) => updateBeat(beat.key, parseFloat(e.target.value))}
+                    min={0}
+                    max={beat.max}
+                    step={0.1}
+                    style={{
+                      width: '100%',
+                      height: 6,
+                      borderRadius: 3,
+                      outline: 'none',
+                      background: `linear-gradient(to right, #732282 0%, #732282 ${((beats[beat.key] || beat.default) / beat.max) * 100}%, #e0e0e0 ${((beats[beat.key] || beat.default) / beat.max) * 100}%, #e0e0e0 100%)`
+                    }}
+                  />
+                </div>
+              );
+            })}
           </AccordionSection>
 
           {/* Text Content Section */}
@@ -1197,6 +1236,282 @@ export const AdminConfig = ({ initialScene, onSceneUpdate }) => {
                   resize: 'vertical',
                   fontFamily: 'inherit'
                 }}
+              />
+            </div>
+          </AccordionSection>
+
+          {/* Animations Section - NEW! */}
+          <AccordionSection
+            title="Animations & Effects"
+            icon="✨"
+            isOpen={openSections.animations}
+            onToggle={() => toggleSection('animations')}
+          >
+            {/* Text Effects */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 8
+              }}>
+                Question Text Effect
+              </label>
+              <select
+                value={scene.question?.effects?.entrance || 'sparkles'}
+                onChange={(e) => updateQuestion({
+                  effects: { ...(scene.question?.effects || {}), entrance: e.target.value }
+                })}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  border: '1px solid #ddd',
+                  borderRadius: 6,
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="sparkles">✨ Sparkles</option>
+                <option value="none">⭕ None</option>
+                <option value="glow">💫 Glow</option>
+                <option value="shimmer">🌟 Shimmer</option>
+              </select>
+            </div>
+
+            {/* Scene Transition */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 8
+              }}>
+                Scene Exit Transition
+              </label>
+              <select
+                value={scene.transition?.type || 'wipe-left'}
+                onChange={(e) => updateContent({
+                  transition: { ...(scene.transition || {}), type: e.target.value }
+                })}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  border: '1px solid #ddd',
+                  borderRadius: 6,
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="wipe-left">← Wipe Left</option>
+                <option value="wipe-right">→ Wipe Right</option>
+                <option value="wipe-up">↑ Wipe Up</option>
+                <option value="wipe-down">↓ Wipe Down</option>
+                <option value="fade">🌫️ Fade</option>
+                <option value="zoom-out">🔍 Zoom Out</option>
+              </select>
+            </div>
+
+            {/* Hero Rotation */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 8
+              }}>
+                Hero Transform Effect
+              </label>
+              <Slider
+                label="Rotation (degrees)"
+                value={hero.transforms?.[0]?.rotation || 0}
+                onChange={(val) => updateHero({
+                  transforms: [{
+                    ...(hero.transforms?.[0] || {}),
+                    rotation: val,
+                    beat: 'transformMap',
+                    targetScale: hero.transforms?.[0]?.targetScale || 0.4,
+                    targetPos: hero.transforms?.[0]?.targetPos || { x: 600, y: -300 },
+                    duration: hero.transforms?.[0]?.duration || 1.2
+                  }]
+                })}
+                min={-360}
+                max={360}
+                step={15}
+                unit="°"
+              />
+            </div>
+
+            {/* Element Entrance Animation */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 8
+              }}>
+                Element Entrance Style
+              </label>
+              <select
+                value={scene.animations?.entrance || 'fade-up'}
+                onChange={(e) => updateContent({
+                  animations: { ...(scene.animations || {}), entrance: e.target.value }
+                })}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  fontSize: 13,
+                  border: '1px solid #ddd',
+                  borderRadius: 6,
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="fade-up">↗️ Fade Up</option>
+                <option value="fade-in">⚪ Fade In</option>
+                <option value="slide-right">→ Slide Right</option>
+                <option value="slide-left">← Slide Left</option>
+                <option value="scale-up">⬆️ Scale Up</option>
+                <option value="bounce">🎾 Bounce</option>
+              </select>
+            </div>
+          </AccordionSection>
+
+          {/* Layout Section - NEW! */}
+          <AccordionSection
+            title="Layout & Spacing"
+            icon="📐"
+            isOpen={openSections.layout}
+            onToggle={() => toggleSection('layout')}
+          >
+            <div style={{
+              marginBottom: 16,
+              padding: 12,
+              backgroundColor: '#e3f2fd',
+              border: '2px solid #2196f3',
+              borderRadius: 8,
+              fontSize: 12,
+              color: '#1565c0'
+            }}>
+              <strong>💡 Pro Tip:</strong> Use offsets to fine-tune element positioning
+            </div>
+
+            {/* Question Offset */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 12
+              }}>
+                Question Position Offset
+              </div>
+              <Slider
+                label="Horizontal (X)"
+                value={question.layout?.offset?.x || 0}
+                onChange={(val) => updateQuestion({
+                  layout: {
+                    ...(question.layout || {}),
+                    offset: { ...(question.layout?.offset || {}), x: val }
+                  }
+                })}
+                min={-500}
+                max={500}
+                step={10}
+                unit="px"
+              />
+              <Slider
+                label="Vertical (Y)"
+                value={question.layout?.offset?.y || 0}
+                onChange={(val) => updateQuestion({
+                  layout: {
+                    ...(question.layout || {}),
+                    offset: { ...(question.layout?.offset || {}), y: val }
+                  }
+                })}
+                min={-300}
+                max={300}
+                step={10}
+                unit="px"
+              />
+            </div>
+
+            {/* Hero Offset */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 12
+              }}>
+                Hero Position Offset
+              </div>
+              <Slider
+                label="Horizontal (X)"
+                value={hero.offset?.x || 0}
+                onChange={(val) => updateHero({
+                  offset: { ...(hero.offset || {}), x: val }
+                })}
+                min={-500}
+                max={500}
+                step={10}
+                unit="px"
+              />
+              <Slider
+                label="Vertical (Y)"
+                value={hero.offset?.y || 0}
+                onChange={(val) => updateHero({
+                  offset: { ...(hero.offset || {}), y: val }
+                })}
+                min={-300}
+                max={300}
+                step={10}
+                unit="px"
+              />
+            </div>
+
+            {/* Padding Controls */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#333',
+                marginBottom: 12
+              }}>
+                Content Padding
+              </div>
+              <Slider
+                label="Top Padding"
+                value={scene.layout?.padding?.top || 0}
+                onChange={(val) => updateContent({
+                  layout: {
+                    ...(scene.layout || {}),
+                    padding: { ...(scene.layout?.padding || {}), top: val }
+                  }
+                })}
+                min={0}
+                max={200}
+                step={10}
+                unit="px"
+              />
+              <Slider
+                label="Bottom Padding"
+                value={scene.layout?.padding?.bottom || 0}
+                onChange={(val) => updateContent({
+                  layout: {
+                    ...(scene.layout || {}),
+                    padding: { ...(scene.layout?.padding || {}), bottom: val }
+                  }
+                })}
+                min={0}
+                max={200}
+                step={10}
+                unit="px"
               />
             </div>
           </AccordionSection>
