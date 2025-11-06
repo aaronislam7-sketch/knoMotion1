@@ -256,6 +256,54 @@ const particles = generateAmbientParticles(20, 11001, width, height);
 
 Each template uses a unique seed to ensure different particle patterns while remaining deterministic.
 
+### Commit 6: `fix: Attach TEMPLATE_VERSION to component functions` (CRITICAL)
+**Problem**: Templates were not rendering in the player. Console showed:
+```
+📦 Got template component: {name: 'Guide10StepSequence', hasVersion: false, version: undefined}
+⚠️ Rendering legacy template without context
+```
+
+**Root Cause**: The `TemplateRouter` checks if a component is v6 by looking at:
+```javascript
+const isV6Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('6.');
+```
+
+This checks if the **component function itself** has a `TEMPLATE_VERSION` property.
+
+However, templates were exporting `TEMPLATE_VERSION` separately:
+```javascript
+export const Guide10StepSequence = ({ scene, ... }) => { ... };
+export const TEMPLATE_VERSION = '6.0.0';  // ❌ Separate export!
+```
+
+The `TEMPLATE_VERSION` constant is NOT a property of the `Guide10StepSequence` function, so `TemplateComponent.TEMPLATE_VERSION` returned `undefined`.
+
+This caused v6 templates to be treated as **legacy templates**, which:
+- Don't get wrapped in `SceneIdContext`
+- Don't receive `easingMap`, `styles`, or `presets` props
+- Only get the `scene` prop
+- Result: Template fails to render anything
+
+**Fix**: Attach `TEMPLATE_VERSION` as a property to the component function:
+```javascript
+// Export the version constant (for imports)
+export const TEMPLATE_VERSION = '6.0.0';
+
+// Attach version to component for TemplateRouter detection
+Guide10StepSequence.TEMPLATE_VERSION = '6.0.0';
+Guide10StepSequence.TEMPLATE_ID = 'Guide10StepSequence';
+```
+
+Now `TemplateComponent.TEMPLATE_VERSION` returns `'6.0.0'`, causing the TemplateRouter to:
+1. ✅ Wrap template in `SceneIdContext.Provider`
+2. ✅ Pass all required props: `scene`, `easingMap`, `styles`, `presets`, `transitions`
+3. ✅ Template renders successfully!
+
+**Files Fixed**:
+- ✅ `Reveal9ProgressiveUnveil_V6.jsx`: Attached version properties
+- ✅ `Guide10StepSequence_V6.jsx`: Attached version properties
+- ✅ `Compare11BeforeAfter_V6.jsx`: Attached version properties
+
 ## Next Steps
 
 When adding new V6 templates, remember to:
