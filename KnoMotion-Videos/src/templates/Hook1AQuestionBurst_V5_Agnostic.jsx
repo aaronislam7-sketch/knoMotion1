@@ -103,22 +103,29 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
     position: 'bottom-center'
   };
   
+  // ✨ Read animation/effects configuration from JSON
+  const textEffect = scene.question?.effects?.entrance || 'sparkles';
+  const transitionType = scene.transition?.type || 'wipe-left';
+  const entranceStyle = scene.animations?.entrance || 'fade-up';
+  
   // ✨ Generate deterministic particles
   const ambientParticles = React.useMemo(
     () => generateAmbientParticles(20, 42, 1920, 1080),
     []
   );
   
+  // Only generate sparkles if that effect is selected
   const sparklesQ = React.useMemo(() => {
+    if (textEffect !== 'sparkles') return [];
     return questionConfig.lines.map((_, index) => 
       generateSparkles(8 + index * 2, { x: 760, y: 380 + index * 80, width: 400, height: 200 }, 100 + index * 100)
     );
-  }, [questionConfig.lines.length]);
+  }, [questionConfig.lines.length, textEffect]);
   
-  const sparklesWelcome = React.useMemo(
-    () => generateSparkles(12, { x: 660, y: 480, width: 600, height: 160 }, 300),
-    []
-  );
+  const sparklesWelcome = React.useMemo(() => {
+    if (textEffect !== 'sparkles') return null;
+    return generateSparkles(12, { x: 660, y: 480, width: 600, height: 160 }, 300);
+  }, [textEffect]);
 
   // Style tokens with fallbacks
   const style = scene.style_tokens || {};
@@ -489,7 +496,7 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
         preserveAspectRatio="xMidYMid meet"
       />
       
-      {/* Sparkles layer */}
+      {/* Effects layer (sparkles, glow, etc.) */}
       <svg
         ref={svgRef}
         style={{
@@ -503,19 +510,19 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* ✨ Sparkles for question lines */}
-        {questionConfig.lines.map((line, index) => {
+        {/* ✨ Sparkles for question lines (only if sparkles effect enabled) */}
+        {textEffect === 'sparkles' && questionConfig.lines.map((line, index) => {
           const lineStartFrame = toFrames((sceneBeats.questionStart || 0.6) + (index * 0.3), fps);
           return frame >= lineStartFrame && frame < lineStartFrame + 50 && sparklesQ[index] ? 
             renderSparkles(sparklesQ[index], frame, lineStartFrame, index === questionConfig.lines.length - 1 ? colors.accent : colors.accent2) : null;
         })}
         
-        {/* ✨ Sparkles for welcome text */}
-        {frame >= beats.welcome && frame < beats.welcome + 60 &&
+        {/* ✨ Sparkles for welcome text (only if sparkles effect enabled) */}
+        {textEffect === 'sparkles' && frame >= beats.welcome && frame < beats.welcome + 60 && sparklesWelcome &&
           renderSparkles(sparklesWelcome, frame, beats.welcome, '#FFD700')}
       </svg>
 
-      {/* Rough text layer */}
+      {/* Rough text layer with effects */}
       <svg
         ref={roughTextSvgRef}
         style={{
@@ -525,6 +532,8 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
           height: '100%',
           pointerEvents: 'none',
           transform: `translate(${cameraDrift.x}px, ${cameraDrift.y}px)`,
+          filter: textEffect === 'glow' ? 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 20px rgba(255, 107, 53, 0.5))' :
+                  textEffect === 'shimmer' ? 'brightness(1.2) saturate(1.3)' : 'none'
         }}
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid meet"
@@ -593,22 +602,77 @@ const Hook1AQuestionBurst_Agnostic = ({ scene, styles, presets, easingMap, trans
         )}
       </AbsoluteFill>
 
-      {/* Settle fade */}
-      {frame >= beats.exit && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: colors.bg,
-            opacity: interpolate(
-              frame,
-              [beats.exit, beats.exit + 30],
-              [0, 0.15],
-              { extrapolateRight: 'clamp', easing: EZ.smooth }
-            ),
-          }}
-        />
-      )}
+      {/* Scene Transition (configurable) */}
+      {frame >= beats.exit && (() => {
+        const transitionProgress = interpolate(
+          frame,
+          [beats.exit, beats.exit + 30],
+          [0, 1],
+          { extrapolateRight: 'clamp', easing: EZ.power2In }
+        );
+
+        // Wipe transitions
+        if (transitionType.startsWith('wipe-')) {
+          const direction = transitionType.split('-')[1]; // left, right, up, down
+          const transforms = {
+            'left': `translateX(-${transitionProgress * 100}%)`,
+            'right': `translateX(${transitionProgress * 100}%)`,
+            'up': `translateY(-${transitionProgress * 100}%)`,
+            'down': `translateY(${transitionProgress * 100}%)`
+          };
+          
+          return (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: colors.bg,
+                transform: transforms[direction] || transforms['left'],
+              }}
+            />
+          );
+        }
+        
+        // Fade transition
+        if (transitionType === 'fade') {
+          return (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: colors.bg,
+                opacity: transitionProgress,
+              }}
+            />
+          );
+        }
+        
+        // Zoom out transition
+        if (transitionType === 'zoom-out') {
+          return (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: colors.bg,
+                opacity: transitionProgress * 0.7,
+              }}
+            />
+          );
+        }
+        
+        // Default: subtle settle fade
+        return (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: colors.bg,
+              opacity: transitionProgress * 0.15,
+            }}
+          />
+        );
+      })()}
     </AbsoluteFill>
   );
 };
