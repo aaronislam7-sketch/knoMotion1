@@ -323,12 +323,14 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
               fps={fps}
               style={{
                 width: '100%',
-                height: 'auto',
+                height: '100%',
+                minHeight: 600,
                 border: '2px solid red'  // Debug: make player visible
               }}
               controls
               loop
               clickToPlay
+              autoPlay
             />
           </div>
           
