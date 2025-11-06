@@ -290,8 +290,16 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             border: '3px solid #E0E0E0',
             borderRadius: 12,
             overflow: 'hidden',
-            backgroundColor: '#000000'
+            backgroundColor: '#000000',
+            minHeight: 400
           }}>
+            {console.log('🎥 About to render Player with:', {
+              playerKey,
+              sceneId: scene?.scene_id,
+              templateId: scene?.template_id,
+              duration: getDurationInFrames(),
+              fps
+            })}
             <Player
               key={playerKey}
               component={TemplateRouter}
@@ -307,7 +315,8 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
               fps={fps}
               style={{
                 width: '100%',
-                height: 'auto'
+                height: 'auto',
+                border: '2px solid red'  // Debug: make player visible
               }}
               controls
               loop
