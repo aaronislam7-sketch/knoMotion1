@@ -309,13 +309,27 @@ Now `TemplateComponent.TEMPLATE_VERSION` returns `'6.0.0'`, causing the Template
 When adding new V6 templates, remember to:
 
 ### In the Template File:
-1. Export a `getDuration(scene, fps)` function
-2. Always call `renderHero()` with ALL required parameters:
+1. **Export AND attach version to component** (CRITICAL!):
+   ```javascript
+   export const MyTemplate = ({ scene, ... }) => { ... };
+   
+   // Export constants (for module imports)
+   export const TEMPLATE_VERSION = '6.0.0';
+   export const TEMPLATE_ID = 'MyTemplate';
+   
+   // Attach to component for TemplateRouter detection
+   MyTemplate.TEMPLATE_VERSION = '6.0.0';
+   MyTemplate.TEMPLATE_ID = 'MyTemplate';
+   ```
+   **Without this, templates will be treated as legacy and won't render!**
+
+2. Export a `getDuration(scene, fps)` function
+3. Always call `renderHero()` with ALL required parameters:
    ```javascript
    renderHero(config, frame, beats, colors, EZ, fps)
    ```
-3. Import EZ from SDK: `import { EZ } from '../sdk'`
-4. When using particle systems, use **numeric seeds** and extract `.element`:
+4. Import EZ from SDK: `import { EZ } from '../sdk'`
+5. When using particle systems, use **numeric seeds** and extract `.element`:
    ```javascript
    // Generate particles with NUMERIC seed (not string!)
    const particles = generateAmbientParticles(20, 12001, width, height);
