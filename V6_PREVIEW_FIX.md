@@ -217,6 +217,45 @@ const particleElements = renderAmbientParticles(particles, frame, fps, [colors.a
 - ✅ `Guide10StepSequence_V6.jsx`: Added particle system with proper rendering + imports
 - ✅ `Compare11BeforeAfter_V6.jsx`: Added SVG wrapper + `.map(p => p.element)`
 
+### Commit 5: `fix: Use numeric seeds for generateAmbientParticles`
+**Problem**: Particle circles were showing NaN errors for `cx`, `cy`, `r`, and `opacity` attributes:
+```
+Warning: Received NaN for the `cy` attribute
+Warning: Received NaN for the `r` attribute
+Warning: Received NaN for the `opacity` attribute
+```
+
+**Root Cause**: The `generateAmbientParticles()` function signature is:
+```javascript
+generateAmbientParticles(count, seed, canvasWidth, canvasHeight)
+//                              ^^^^ Must be a NUMBER for math operations
+```
+
+But templates were passing **strings** as the seed:
+```javascript
+generateAmbientParticles(25, 'reveal-ambient', width, height)  // ❌ String!
+```
+
+This caused all math operations in the particle generation to return NaN:
+```javascript
+const particleSeed = seed + i * 1000;  // 'reveal-ambient' + 0 * 1000 = NaN
+seededRandom(particleSeed) * canvasWidth  // NaN * 1920 = NaN
+```
+
+**Fix**: Use numeric seeds for each template:
+```javascript
+// Reveal9
+const particles = generateAmbientParticles(25, 9001, width, height);
+
+// Guide10
+const particles = generateAmbientParticles(20, 10001, width, height);
+
+// Compare11
+const particles = generateAmbientParticles(20, 11001, width, height);
+```
+
+Each template uses a unique seed to ensure different particle patterns while remaining deterministic.
+
 ## Next Steps
 
 When adding new V6 templates, remember to:
@@ -228,17 +267,20 @@ When adding new V6 templates, remember to:
    renderHero(config, frame, beats, colors, EZ, fps)
    ```
 3. Import EZ from SDK: `import { EZ } from '../sdk'`
-4. When using `renderAmbientParticles()`, always extract `.element`:
+4. When using particle systems, use **numeric seeds** and extract `.element`:
    ```javascript
-   // Generate particles
-   const particles = generateAmbientParticles(20, 'template-ambient', width, height);
+   // Generate particles with NUMERIC seed (not string!)
+   const particles = generateAmbientParticles(20, 12001, width, height);
+   //                                            ^^^^^ Must be a number
    const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
    
-   // Render in SVG
+   // Render in SVG and extract .element
    <svg style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0, opacity: 0.3 }} viewBox="0 0 1920 1080">
      {particleElements.map(p => p.element)}
    </svg>
    ```
+   
+   **Important**: Use a unique numeric seed per template (e.g., 9001, 10001, 11001, 12001) for deterministic particle patterns.
 
 ### In UnifiedAdminConfig.jsx:
 1. Import the template module at the top
