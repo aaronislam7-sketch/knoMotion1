@@ -1,181 +1,122 @@
-# 🎬 KnoMotion Videos
+# KnoMotion Videos - V6 Template System
 
-**Blueprint v5.0** - JSON-driven video templates for educational content
-
-> Deterministic, FPS-agnostic, export-safe video scenes built with Remotion
-
----
-
-## 🌟 Features
-
-- **8 Production-Ready Templates** - 2 per pedagogical pillar (Hook, Explain, Apply, Reflect)
-- **JSON-Driven Content** - No code required, just edit scene JSON files
-- **Blueprint v5.0 Architecture** - Fully deterministic animations, perfect preview-to-export parity
-- **Remotion-Native** - Pure Remotion animations (no GSAP), broadcast-grade quality
-- **Visual Wizard** - Step-by-step video creation with live preview
-- **Notebook Aesthetic** - Warm, "alive notebook" style with rough.js sketches
+**Status:** Production Ready ✅  
+**Version:** 6.0.0  
+**Date:** November 7, 2025
 
 ---
 
-## 📦 Quick Start
+## 🚀 Quick Start
 
-### Installation
+### Get Started in 30 Seconds
 
-```bash
+\`\`\`bash
+cd /workspace/KnoMotion-Videos
 npm install
-```
-
-### Run Development Server
-
-```bash
 npm run dev
-```
+\`\`\`
 
-### Build for Production
-
-```bash
-npm run build
-```
-
----
-
-## 🎨 Template Showcase
-
-### Hook Templates (Capture Attention)
-- **Hook 1A: Question Burst** - Provocative question with kinetic typography (15s)
-- **Hook 1E: Ambient Mystery** - Atmospheric fog and intrigue (12s)
-
-### Explain Templates (Teach Concepts)
-- **Explain 2A: Concept Breakdown** - Break complex ideas into digestible parts (10s)
-- **Explain 2B: Analogy** - Visual side-by-side comparison (12s)
-
-### Apply Templates (Practice Skills)
-- **Apply 3A: Micro Quiz** - Quick knowledge check with instant feedback (12s)
-- **Apply 3B: Scenario Choice** - Real-world application scenarios (11s)
-
-### Reflect Templates (Consolidate Learning)
-- **Reflect 4A: Key Takeaways** - Summary with key points (8s)
-- **Reflect 4D: Forward Link** - Learning anchor → next journey (10s)
-
----
-
-## 🚀 Creating Your First Video
-
-### Option 1: Use the Wizard (Recommended)
-
-1. Run `npm run dev`
-2. The Video Wizard opens automatically
-3. Click through each pillar step:
-   - **Hook** → Define & preview
-   - **Explain** → Define & preview
-   - **Apply** → Define & preview
-   - **Reflect** → Define & preview
-4. See your complete video on the final step!
-
-### Option 2: Edit JSON Directly
-
-1. Switch to "Scene Preview" mode
-2. Select a template from the dropdown
-3. Edit the JSON in the left panel
-4. Click "Apply Changes" to preview
-5. Export when ready!
+**Then:** Click the green **"🎛️ NEW: Template Gallery & Config"** button
 
 ---
 
 ## 📖 Documentation
 
-- **[Getting Started](./docs/GETTING_STARTED.md)** - Installation, first scene, wizard walkthrough
-- **[Blueprint v5.0 Specification](./docs/BLUEPRINT_V5.md)** - Complete architecture reference
-- **[API Reference](./docs/API_REFERENCE.md)** - SDK functions, presets, helpers
+### Start Here
+- **[README_071126_V6_SYSTEM_COMPLETE.md](./README_071126_V6_SYSTEM_COMPLETE.md)** - Complete implementation guide
+- **[PRODUCTION_READY_SUMMARY.md](./PRODUCTION_READY_SUMMARY.md)** - Quick overview
+- **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Full documentation index
+
+### Essential Reading
+- **[V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md)** - Debugging guide & common pitfalls
+- **[INTERACTIVE_CONFIGURATION_PRINCIPAL.md](./INTERACTIVE_CONFIGURATION_PRINCIPAL.md)** - UI standards
 
 ---
 
-## 🏗️ Project Structure
+## ✨ What's Included
 
-```
-KnoMotion-Videos/
-├── src/
-│   ├── templates/       # 8 v5 templates + router
-│   ├── sdk/            # Animation presets, easing, helpers
-│   ├── utils/          # Theme, rough.js helpers
-│   ├── components/     # VideoWizard, MultiSceneVideo
-│   ├── scenes/         # v5 scene JSON files + examples
-│   └── App.jsx         # Main application
-├── docs/               # Documentation
-└── package.json
-```
+- **3 Production-Ready V6 Templates**
+  - Reveal9 - Progressive Unveil
+  - Guide10 - Step Sequence
+  - Compare11 - Before/After
 
----
+- **Interactive Admin Config Tool**
+  - Visual template gallery
+  - Live preview with Remotion Player
+  - Full JSON/JSX parameter alignment
 
-## 🎯 Core Principles (Blueprint v5.0)
+- **Agnostic Template System**
+  - 6 core architectural principles
+  - Zero hardcoded values
+  - 100% configurable via UI
 
-✅ **Deterministic** - Frame-driven animations, no state triggers  
-✅ **FPS-Agnostic** - Author in seconds, works at any frame rate  
-✅ **Zero Wobble** - Strict `roughness: 0, bowing: 0` for consistency  
-✅ **Remotion-Native** - Pure interpolate/spring, no GSAP  
-✅ **Export-Safe** - Perfect preview-to-export parity  
-✅ **JSON-Driven** - Authors write data, templates render motion
+- **8 Learning Intentions**
+  - Flexible, action-based categorization
+  - AI-friendly architecture
+  - Replaces rigid H.E.A.R. framework
 
 ---
 
-## 🔧 Tech Stack
+## 🎯 Template Roadmap
 
-- **Remotion** - Video rendering framework
-- **React** - UI components
-- **Vite** - Build tooling
-- **rough.js** - Hand-drawn aesthetic
-- **@lottiefiles/react-lottie-player** - Lottie animations
+**Complete:** 3 templates  
+**Planned:** 17 more templates  
+**Total Target:** 20 V6 templates
 
----
-
-## 📝 Example Scene JSON
-
-```json
-{
-  "schema_version": "5.0",
-  "scene_id": "hook1a",
-  "template_id": "Hook1AQuestionBurst",
-  
-  "beats": {
-    "entrance": 0.6,
-    "questionPart1": 0.6,
-    "questionPart2": 2.8,
-    "emphasis": 4.2,
-    "exit": 15.0
-  },
-  
-  "fill": {
-    "texts": {
-      "questionPart1": "What if geography",
-      "questionPart2": "was measured in mindsets?"
-    }
-  }
-}
-```
+See full roadmap in [README_071126_V6_SYSTEM_COMPLETE.md](./README_071126_V6_SYSTEM_COMPLETE.md)
 
 ---
 
-## 🤝 Contributing
+## 🏗️ For Developers
 
-This is a focused production repository. For historical context and iteration notes, see the archive repo.
+### Add a New Template
+Complete step-by-step guide in:  
+**[README_071126_V6_SYSTEM_COMPLETE.md](./README_071126_V6_SYSTEM_COMPLETE.md)** → Section: "How to Add a New V6 Template"
 
----
+### Key Principles
+1. Type-Based Polymorphism
+2. Data-Driven Structure
+3. Token-Based Positioning
+4. Separation of Concerns
+5. Progressive Configuration
+6. Registry Pattern
 
-## 📄 License
-
-MIT License - See LICENSE file for details
-
----
-
-## 🎓 Educational Use
-
-Perfect for:
-- Online courses
-- Explainer videos
-- Educational content creators
-- Learning platforms
-- Training materials
+Details in [AGNOSTIC_TEMPLATE_SYSTEM_COMPLETE.md](./AGNOSTIC_TEMPLATE_SYSTEM_COMPLETE.md)
 
 ---
 
-**Built with ❤️ for educators who want beautiful, consistent video content**
+## 📦 Build & Deploy
+
+\`\`\`bash
+# Development
+npm run dev
+
+# Production build
+npm run build
+
+# Render video
+npm run render -- src/scenes/your_scene.json
+\`\`\`
+
+---
+
+## 🐛 Troubleshooting
+
+See **[V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md)** for:
+- 6 critical fixes documented
+- Common pitfalls explained
+- Best practices for templates
+
+---
+
+## 📞 Need Help?
+
+1. Check [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md) for specific guides
+2. Review [V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md) for common issues
+3. See example templates in \`/src/templates/*_V6.jsx\`
+
+---
+
+**Built with:** React, Remotion, Vite  
+**Architecture:** Agnostic Template System v6.0  
+**Last Updated:** November 7, 2025
