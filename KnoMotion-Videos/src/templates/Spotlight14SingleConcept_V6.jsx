@@ -384,14 +384,15 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       {titleVisible && (
         <div style={{
           position: 'absolute',
-          ...positionToCSS(titlePos),
+          left: titlePos.x,
+          top: titlePos.y,
           fontSize: fonts.size_title,
           fontWeight: 700,
           fontFamily: 'Inter, sans-serif',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity * titleFadeOut,
-          transform: `translateY(${titleAnim.translateY}px)`,
+          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px)`,
           zIndex: 10
         }}>
           {config.title.text}

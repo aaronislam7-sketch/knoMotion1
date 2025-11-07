@@ -292,14 +292,15 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          ...positionToCSS(titlePos),
+          left: titlePos.x,
+          top: titlePos.y,
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
           zIndex: 10
         }}>
           {config.title.text}

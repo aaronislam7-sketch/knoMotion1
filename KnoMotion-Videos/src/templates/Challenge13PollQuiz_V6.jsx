@@ -340,14 +340,15 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          ...positionToCSS(titlePos),
+          left: titlePos.x,
+          top: titlePos.y,
           fontSize: fonts.size_title,
           fontWeight: 700,
           fontFamily: 'Inter, sans-serif',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px)`,
+          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px)`,
           zIndex: 10
         }}>
           {config.title.text}
@@ -358,7 +359,8 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
       {frame >= questionStartFrame && (
         <div style={{
           position: 'absolute',
-          ...positionToCSS(questionPos),
+          left: questionPos.x,
+          top: questionPos.y,
           fontSize: fonts.size_question,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
@@ -367,7 +369,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
           maxWidth: '85%',
           lineHeight: 1.2,
           opacity: questionAnim.opacity,
-          transform: `translateY(${questionAnim.translateY}px)`,
+          transform: `translate(-50%, -50%) translateY(${questionAnim.translateY}px)`,
           zIndex: 10
         }}>
           {config.question.text}
@@ -494,7 +496,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
           position: 'absolute',
           bottom: 100,
           left: '50%',
-          transform: `translate(-50%, ${explanationAnim.translateY}px)`,
+          transform: `translate(-50%, 0) translateY(${explanationAnim.translateY}px)`,
           maxWidth: '80%',
           backgroundColor: colors.explanationBg,
           padding: '24px 36px',

@@ -189,7 +189,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           position: 'absolute',
           top: 60,
           left: '50%',
-          transform: `translate(-50%, ${titleAnim.translateY}px)`,
+          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
           fontSize: fonts.size_title,
           fontWeight: 800,
           fontFamily: '"Permanent Marker", cursive',

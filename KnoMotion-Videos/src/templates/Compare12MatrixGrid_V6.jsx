@@ -338,14 +338,15 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          ...positionToCSS(titlePos),
+          left: titlePos.x,
+          top: titlePos.y,
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px)`,
+          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px)`,
           zIndex: 10
         }}>
           {config.title.text}
@@ -473,7 +474,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
           position: 'absolute',
           bottom: 80,
           left: '50%',
-          transform: `translate(-50%, ${conclusionAnim.translateY}px)`,
+          transform: `translate(-50%, 0) translateY(${conclusionAnim.translateY}px)`,
           fontSize: fonts.size_conclusion,
           fontWeight: 700,
           fontFamily: 'Inter, sans-serif',
