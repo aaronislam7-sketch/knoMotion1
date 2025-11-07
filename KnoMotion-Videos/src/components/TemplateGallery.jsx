@@ -323,7 +323,8 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
       {!isCollapsed && (
         <div style={{ 
           padding: '20px',
-          maxHeight: '500px',
+          maxHeight: 'calc(70vh - 100px)',
+          minHeight: '300px',
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollBehavior: 'smooth',
@@ -395,9 +396,9 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
       {/* Template Cards */}
       <div style={{
         display: viewMode === 'grid' ? 'grid' : 'flex',
-        gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'none',
+        gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(260px, 1fr))' : 'none',
         flexDirection: viewMode === 'list' ? 'column' : 'none',
-        gap: 16
+        gap: 14
       }}>
         {filteredTemplates.map(template => {
           const isSelected = template.id === selectedTemplateId;

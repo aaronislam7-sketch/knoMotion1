@@ -269,7 +269,9 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
       <div
         style={{
           position: 'absolute',
-          ...positionToCSS(quotePos),
+          left: '50%',
+          top: '50%',
+          transform: `translate(-50%, calc(-50% + ${(1 - quoteProgress) * 30}px)) scale(${pulseProgress})`,
           width: '80%',
           maxWidth: 1400,
           padding: styleVariant.quotePadding,
@@ -278,7 +280,6 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
           background: styleVariant.quoteBackground,
           backdropFilter: 'blur(10px)',
           opacity: quoteProgress * (1 - exitProgress),
-          transform: `translateY(${(1 - quoteProgress) * 30}px) scale(${pulseProgress})`,
           transition: 'transform 0.3s ease-out'
         }}
       >
