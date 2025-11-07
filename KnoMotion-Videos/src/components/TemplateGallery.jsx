@@ -127,6 +127,56 @@ const TEMPLATE_CATALOG = [
     version: 'v6.0',
     isNew: true,
     hasConfig: true
+  },
+  
+  // LEARNING CONTENT PIPELINE (Nov 2025)
+  {
+    id: 'Compare12MatrixGrid',
+    name: 'Matrix Comparison',
+    intentions: { primary: 'COMPARE', secondary: ['BREAKDOWN', 'GUIDE'] },
+    description: 'Feature comparison matrix with 2x2 to 5x4 grids',
+    duration: '30-60s',
+    icon: '📊',
+    color: '#00796B',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: false
+  },
+  {
+    id: 'Challenge13PollQuiz',
+    name: 'Poll/Quiz',
+    intentions: { primary: 'CHALLENGE', secondary: ['QUESTION', 'REVEAL'] },
+    description: 'Interactive quiz with timer and answer reveal',
+    duration: '15-25s',
+    icon: '🎮',
+    color: '#D32F2F',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: false
+  },
+  {
+    id: 'Spotlight14SingleConcept',
+    name: 'Concept Spotlight',
+    intentions: { primary: 'QUESTION', secondary: ['REVEAL', 'BREAKDOWN'] },
+    description: 'Deep dive into single concept with multi-stage reveal',
+    duration: '20-30s',
+    icon: '💡',
+    color: '#FF6B35',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: false
+  },
+  {
+    id: 'Connect15AnalogyBridge',
+    name: 'Analogy Bridge',
+    intentions: { primary: 'CONNECT', secondary: ['EXPLAIN', 'REVEAL'] },
+    description: 'Visual analogy connecting familiar to new concept',
+    duration: '25-35s',
+    icon: '🌉',
+    color: '#9C27B0',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: false
   }
 ];
 
