@@ -142,27 +142,13 @@ export const TemplateRouter = ({ scene, styles, presets, easingMap, transitions 
   const templateId = scene.template_id;
   const sceneId = scene.scene_id || 'default-scene';
   
-  console.log('🎬 TemplateRouter rendering:', {
-    templateId,
-    sceneId,
-    hasScene: !!scene,
-    hasEasingMap: !!easingMap
-  });
-  
   const TemplateComponent = getTemplateComponent(templateId, scene);
-  
-  console.log('📦 Got template component:', {
-    name: TemplateComponent?.name || TemplateComponent?.displayName || 'unknown',
-    hasVersion: !!TemplateComponent?.TEMPLATE_VERSION,
-    version: TemplateComponent?.TEMPLATE_VERSION
-  });
   
   // Check if this is a v5.x or v6.x template (has required exports)
   const isV5Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('5.');
   const isV6Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('6.');
   
   if (isV5Template || isV6Template) {
-    console.log(`✅ Rendering ${isV6Template ? 'v6' : 'v5'} template with context`);
     // v5.x and v6.x templates require SceneIdContext wrapper
     return (
       <SceneIdContext.Provider value={sceneId}>
@@ -177,7 +163,6 @@ export const TemplateRouter = ({ scene, styles, presets, easingMap, transitions 
     );
   }
   
-  console.log('⚠️ Rendering legacy template without context');
   // Legacy templates don't need wrapper
   return <TemplateComponent scene={scene} />;
 };

@@ -159,14 +159,6 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
     }
   };
   
-  console.log('🎛️ UnifiedAdminConfig rendering:', {
-    selectedTemplateId,
-    sceneTemplateId: scene?.template_id,
-    duration: getDurationInFrames(),
-    hasScene: !!scene,
-    sceneKeys: scene ? Object.keys(scene) : []
-  });
-  
   return (
     <div style={{
       display: 'grid',
@@ -301,13 +293,6 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             backgroundColor: '#000000',
             minHeight: 400
           }}>
-            {console.log('🎥 About to render Player with:', {
-              playerKey,
-              sceneId: scene?.scene_id,
-              templateId: scene?.template_id,
-              duration: getDurationInFrames(),
-              fps
-            })}
             <Player
               key={playerKey}
               component={TemplateRouter}
@@ -324,8 +309,7 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
               style={{
                 width: '100%',
                 height: '100%',
-                minHeight: 600,
-                border: '2px solid red'  // Debug: make player visible
+                minHeight: 600
               }}
               controls
               loop

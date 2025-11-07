@@ -205,13 +205,8 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  console.log('🎨 Reveal9 rendering frame:', frame, 'fps:', fps, 'hasScene:', !!scene, 'width:', width, 'height:', height);
-  
   if (!scene) {
-    console.error('❌ Reveal9: No scene provided!');
-    return <AbsoluteFill style={{ backgroundColor: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#FFF', fontSize: 48 }}>NO SCENE DATA</div>
-    </AbsoluteFill>;
+    return <AbsoluteFill style={{ backgroundColor: '#1A1A2E' }} />;
   }
   
   // Merge with defaults
@@ -276,35 +271,8 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
     { width, height }
   );
   
-  console.log('🎨 Reveal9 config:', {
-    bgColor: colors.bg,
-    accentColor: colors.accent,
-    inkColor: colors.ink,
-    titleText: config.title.text,
-    stageCount: stages.length,
-    currentStage,
-    titleStartFrame,
-    frame
-  });
-  
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
-      {/* DEBUG: Always visible element */}
-      <div style={{
-        position: 'absolute',
-        top: 20,
-        left: 20,
-        padding: 20,
-        backgroundColor: '#FF00FF',
-        color: '#FFFFFF',
-        fontSize: 24,
-        fontWeight: 'bold',
-        zIndex: 9999,
-        border: '4px solid yellow'
-      }}>
-        DEBUG: Frame {frame} | Stage {currentStage} | Title Frame: {titleStartFrame}
-      </div>
-      
       {/* Ambient particles */}
       <svg
         style={{
