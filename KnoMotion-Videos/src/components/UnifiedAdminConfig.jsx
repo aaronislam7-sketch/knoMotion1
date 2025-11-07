@@ -5,6 +5,10 @@ import { TemplateGallery } from './TemplateGallery';
 import { Reveal9Config } from './configs/Reveal9Config';
 import { Guide10Config } from './configs/Guide10Config';
 import { Compare11Config } from './configs/Compare11Config';
+import { Compare12Config } from './configs/Compare12Config';
+import { Challenge13Config } from './configs/Challenge13Config';
+import { Spotlight14Config } from './configs/Spotlight14Config';
+import { Connect15Config } from './configs/Connect15Config';
 import { EZ } from '../sdk';
 
 // Import templates directly to access their getDuration functions
@@ -154,6 +158,17 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return <Guide10Config scene={scene} onUpdate={handleSceneUpdate} />;
       case 'Compare11BeforeAfter':
         return <Compare11Config scene={scene} onUpdate={handleSceneUpdate} />;
+      
+      // Learning Content Pipeline Templates (Nov 2025)
+      case 'Compare12MatrixGrid':
+        return <Compare12Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Challenge13PollQuiz':
+        return <Challenge13Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Spotlight14SingleConcept':
+        return <Spotlight14Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Connect15AnalogyBridge':
+        return <Connect15Config scene={scene} onUpdate={handleSceneUpdate} />;
+      
       default:
         return (
           <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>
@@ -241,9 +256,9 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
           }}>
             Select a template, configure it visually, and see real-time changes.
             <br />
-            <strong>Currently available:</strong> 7 templates (Reveal9, Guide10, Compare11, Compare12, Challenge13, Spotlight14, Connect15)
+            <strong>Currently available:</strong> 7 templates with FULL interactive config panels!
             <br />
-            <em style={{ fontSize: 13, color: '#718096' }}>Note: Config panels for new templates coming soon. JSON preview available for all.</em>
+            <em style={{ fontSize: 13, color: '#718096' }}>✅ All templates (9, 10, 11, 12, 13, 14, 15) now have complete configuration UIs</em>
           </p>
         </div>
         
