@@ -1,0 +1,11 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Explain2BAnalogy_V6",
+  "metadata": { "name": "Analogy - Phone Comparison", "primary_intention": "COMPARE", "duration_estimate": "9s" },
+  "title": { "text": "Understanding Smartphones", "position": "top-center", "offset": { "x": 0, "y": 60 } },
+  "leftSide": { "label": "Smartphone", "description": "Complex computing device with apps", "visual": { "type": "emoji", "value": "📱", "scale": 2.5, "enabled": true } },
+  "rightSide": { "label": "Swiss Army Knife", "description": "Multi-tool combining many functions", "visual": { "type": "emoji", "value": "🔪", "scale": 2.5, "enabled": true } },
+  "connector": { "text": "is like", "enabled": true },
+  "style_tokens": { "colors": { "bg": "#FFF9F0", "left": "#3498DB", "right": "#2ECC71", "text": "#1A1A1A", "connector": "#9CA3AF" }, "fonts": { "size_title": 48, "size_label": 36, "size_desc": 22, "size_connector": 28 } },
+  "beats": { "entrance": 0.5, "title": 1.0, "leftReveal": 2.0, "connector": 3.5, "rightReveal": 4.5, "hold": 7.0, "exit": 9.0 }
+}

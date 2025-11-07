@@ -1,0 +1,86 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Hook1AQuestionBurst",
+  "metadata": {
+    "name": "Question Burst - Geography Example",
+    "description": "Thought-provoking two-part question about geography and mindsets",
+    "primary_intention": "QUESTION",
+    "secondary_intentions": ["CHALLENGE", "REVEAL"],
+    "tags": ["curiosity", "provocation", "philosophy", "geography"],
+    "duration_estimate": "10s"
+  },
+  
+  "questionPart1": {
+    "text": "What if geography",
+    "position": "center",
+    "offset": { "x": 0, "y": -80 }
+  },
+  
+  "questionPart2": {
+    "text": "was measured in mindsets?",
+    "position": "center",
+    "offset": { "x": 0, "y": 20 }
+  },
+  
+  "centralVisual": {
+    "type": "emoji",
+    "value": "🗺️",
+    "position": "center",
+    "offset": { "x": 0, "y": 0 },
+    "scale": 3.0,
+    "enabled": true
+  },
+  
+  "conclusion": {
+    "text": "Welcome to Knodovia",
+    "subtitle": "Where your mindset shapes reality",
+    "position": "center",
+    "offset": { "x": 0, "y": 0 },
+    "enabled": true
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "accent": "#FF6B35",
+      "accent2": "#9B59B6",
+      "text": "#1A1A1A",
+      "textSecondary": "#5A5A5A",
+      "particles": "rgba(255, 107, 53, 0.3)"
+    },
+    "fonts": {
+      "size_title": 56,
+      "size_question": 80,
+      "size_conclusion": 64,
+      "size_subtitle": 28,
+      "weight_question": 800,
+      "weight_conclusion": 700
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "questionPart1": 0.8,
+    "questionPart2": 2.5,
+    "emphasis": 4.0,
+    "exit": 5.5,
+    "visualReveal": 6.0,
+    "conclusion": 7.0,
+    "hold": 9.0,
+    "fadeOut": 10.0
+  },
+  
+  "animation": {
+    "questionEntrance": "fade-up",
+    "questionExit": "slide-left",
+    "emphasis": "pulse",
+    "visualEntrance": "fade-scale",
+    "easing": "power3Out"
+  },
+  
+  "particles": {
+    "enabled": true,
+    "count": 25,
+    "style": "ambient"
+  }
+}

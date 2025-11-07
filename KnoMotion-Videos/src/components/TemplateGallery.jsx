@@ -18,7 +18,8 @@ const TEMPLATE_CATALOG = [
     duration: '15-18s',
     icon: '❓',
     color: '#FF6B35',
-    version: 'v5.1'
+    version: 'v5.1',
+    hasConfig: false
   },
   {
     id: 'Hook1EAmbientMystery',
@@ -202,6 +203,104 @@ const TEMPLATE_CATALOG = [
     duration: '6-10s',
     icon: '🛤️',
     color: '#00BCD4',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  
+  // V5 TO V6 MIGRATIONS
+  {
+    id: 'Hook1AQuestionBurst_V6',
+    name: 'Question Burst V6',
+    intentions: { primary: 'QUESTION', secondary: ['CHALLENGE', 'REVEAL'] },
+    description: '✨ Fully configurable two-part question with optional visuals and conclusion',
+    duration: '8-12s',
+    icon: '❓',
+    color: '#FF6B35',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Hook1EAmbientMystery_V6',
+    name: 'Ambient Mystery V6',
+    intentions: { primary: 'REVEAL', secondary: ['INSPIRE', 'QUESTION'] },
+    description: '✨ Dark atmospheric template with fog, particles, and sequential mystery reveals',
+    duration: '12-18s',
+    icon: '🌫️',
+    color: '#8E44AD',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Explain2AConceptBreakdown_V6',
+    name: 'Concept Breakdown V6',
+    intentions: { primary: 'BREAKDOWN', secondary: ['CONNECT', 'GUIDE'] },
+    description: '✨ Hub-and-spoke layout with dynamic parts array (2-8 components) and connections',
+    duration: '12-20s',
+    icon: '🧩',
+    color: '#3498DB',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Apply3AMicroQuiz_V6',
+    name: 'Micro Quiz V6',
+    intentions: { primary: 'CHALLENGE', secondary: ['QUESTION', 'REVEAL'] },
+    description: '✨ Interactive multiple-choice quiz with countdown timer and answer reveal',
+    duration: '12-16s',
+    icon: '🎯',
+    color: '#E74C3C',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Explain2BAnalogy_V6',
+    name: 'Visual Analogy V6',
+    intentions: { primary: 'COMPARE', secondary: ['BREAKDOWN', 'INSPIRE'] },
+    description: '✨ Side-by-side comparison with familiar analogies for better understanding',
+    duration: '9-12s',
+    icon: '🔄',
+    color: '#16A085',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Apply3BScenarioChoice_V6',
+    name: 'Scenario Choice V6',
+    intentions: { primary: 'CHALLENGE', secondary: ['GUIDE', 'COMPARE'] },
+    description: '✨ Real-world decision scenarios with multiple paths and consequences',
+    duration: '9-12s',
+    icon: '🎲',
+    color: '#F39C12',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Reflect4AKeyTakeaways_V6',
+    name: 'Key Takeaways V6',
+    intentions: { primary: 'BREAKDOWN', secondary: ['GUIDE', 'REVEAL'] },
+    description: '✨ Clean bullet-point summary of main points with dynamic list',
+    duration: '8-12s',
+    icon: '📋',
+    color: '#27AE60',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Reflect4DForwardLink_V6',
+    name: 'Forward Link V6',
+    intentions: { primary: 'CONNECT', secondary: ['INSPIRE', 'REVEAL'] },
+    description: '✨ Bridge to next topic with context and preview for continuity',
+    duration: '9-12s',
+    icon: '🔗',
+    color: '#8E44AD',
     version: 'v6.0',
     isNew: true,
     hasConfig: true

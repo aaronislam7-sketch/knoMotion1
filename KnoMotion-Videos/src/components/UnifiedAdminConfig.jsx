@@ -11,6 +11,14 @@ import { Spotlight14Config } from './configs/Spotlight14Config';
 import { Connect15Config } from './configs/Connect15Config';
 import { Quote16Config } from './configs/Quote16Config';
 import { Progress18Config } from './configs/Progress18Config';
+import { Hook1AConfig } from './configs/Hook1AConfig';
+import { Hook1EConfig } from './configs/Hook1EConfig';
+import { Explain2AConfig } from './configs/Explain2AConfig';
+import { Apply3AConfig } from './configs/Apply3AConfig';
+import { Explain2BConfig } from './configs/Explain2BConfig';
+import { Apply3BConfig } from './configs/Apply3BConfig';
+import { Reflect4AConfig } from './configs/Reflect4AConfig';
+import { Reflect4DConfig } from './configs/Reflect4DConfig';
 import { EZ } from '../sdk';
 
 // Import templates directly to access their getDuration functions
@@ -25,6 +33,14 @@ import * as Spotlight14Module from '../templates/Spotlight14SingleConcept_V6';
 import * as Connect15Module from '../templates/Connect15AnalogyBridge_V6';
 import * as Quote16Module from '../templates/Quote16Showcase_V6';
 import * as Progress18Module from '../templates/Progress18Path_V6';
+import * as Hook1AModule from '../templates/Hook1AQuestionBurst_V6';
+import * as Hook1EModule from '../templates/Hook1EAmbientMystery_V6';
+import * as Explain2AModule from '../templates/Explain2AConceptBreakdown_V6';
+import * as Apply3AModule from '../templates/Apply3AMicroQuiz_V6';
+import * as Explain2BModule from '../templates/Explain2BAnalogy_V6';
+import * as Apply3BModule from '../templates/Apply3BScenarioChoice_V6';
+import * as Reflect4AModule from '../templates/Reflect4AKeyTakeaways_V6';
+import * as Reflect4DModule from '../templates/Reflect4DForwardLink_V6';
 
 // Import example scenes
 import reveal9Example from '../scenes/reveal_9_progressive_unveil_example.json';
@@ -38,6 +54,14 @@ import spotlight14Example from '../scenes/spotlight_14_single_concept_example.js
 import connect15Example from '../scenes/connect_15_analogy_bridge_example.json';
 import quote16Example from '../scenes/quote_16_showcase_example.json';
 import progress18Example from '../scenes/progress_18_path_example.json';
+import hook1AExample from '../scenes/hook_1a_question_burst_v6.json';
+import hook1EExample from '../scenes/hook_1e_ambient_mystery_v6.json';
+import explain2AExample from '../scenes/explain_2a_concept_breakdown_v6.json';
+import apply3AExample from '../scenes/apply_3a_micro_quiz_v6.json';
+import explain2BExample from '../scenes/explain_2b_analogy_v6.json';
+import apply3BExample from '../scenes/apply_3b_scenario_choice_v6.json';
+import reflect4AExample from '../scenes/reflect_4a_key_takeaways_v6.json';
+import reflect4DExample from '../scenes/reflect_4d_forward_link_v6.json';
 
 /**
  * Unified Admin Configuration Tool
@@ -62,7 +86,17 @@ const DEFAULT_SCENES = {
   'Spotlight14SingleConcept': spotlight14Example,
   'Connect15AnalogyBridge': connect15Example,
   'Quote16Showcase': quote16Example,
-  'Progress18Path': progress18Example
+  'Progress18Path': progress18Example,
+  
+  // V5 to V6 Migrations (Nov 2025)
+  'Hook1AQuestionBurst_V6': hook1AExample,
+  'Hook1EAmbientMystery_V6': hook1EExample,
+  'Explain2AConceptBreakdown_V6': explain2AExample,
+  'Apply3AMicroQuiz_V6': apply3AExample,
+  'Explain2BAnalogy_V6': explain2BExample,
+  'Apply3BScenarioChoice_V6': apply3BExample,
+  'Reflect4AKeyTakeaways_V6': reflect4AExample,
+  'Reflect4DForwardLink_V6': reflect4DExample
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -181,6 +215,24 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
       case 'Progress18Path':
         return <Progress18Config scene={scene} onUpdate={handleSceneUpdate} />;
       
+      // V5 to V6 Migrations
+      case 'Hook1AQuestionBurst_V6':
+        return <Hook1AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Hook1EAmbientMystery_V6':
+        return <Hook1EConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Explain2AConceptBreakdown_V6':
+        return <Explain2AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Apply3AMicroQuiz_V6':
+        return <Apply3AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Explain2BAnalogy_V6':
+        return <Explain2BConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Apply3BScenarioChoice_V6':
+        return <Apply3BConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Reflect4AKeyTakeaways_V6':
+        return <Reflect4AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Reflect4DForwardLink_V6':
+        return <Reflect4DConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      
       default:
         return (
           <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>
@@ -217,6 +269,24 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Quote16Module.getDuration ? Quote16Module.getDuration(scene, fps) : 450;
       case 'Progress18Path':
         return Progress18Module.getDuration ? Progress18Module.getDuration(scene, fps) : 450;
+      
+      // V5 to V6 Migrations
+      case 'Hook1AQuestionBurst_V6':
+        return Hook1AModule.getDuration ? Hook1AModule.getDuration(scene, fps) : 450;
+      case 'Hook1EAmbientMystery_V6':
+        return Hook1EModule.getDuration ? Hook1EModule.getDuration(scene, fps) : 450;
+      case 'Explain2AConceptBreakdown_V6':
+        return Explain2AModule.getDuration ? Explain2AModule.getDuration(scene, fps) : 450;
+      case 'Apply3AMicroQuiz_V6':
+        return Apply3AModule.getDuration ? Apply3AModule.getDuration(scene, fps) : 450;
+      case 'Explain2BAnalogy_V6':
+        return Explain2BModule.getDuration ? Explain2BModule.getDuration(scene, fps) : 450;
+      case 'Apply3BScenarioChoice_V6':
+        return Apply3BModule.getDuration ? Apply3BModule.getDuration(scene, fps) : 450;
+      case 'Reflect4AKeyTakeaways_V6':
+        return Reflect4AModule.getDuration ? Reflect4AModule.getDuration(scene, fps) : 450;
+      case 'Reflect4DForwardLink_V6':
+        return Reflect4DModule.getDuration ? Reflect4DModule.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats
