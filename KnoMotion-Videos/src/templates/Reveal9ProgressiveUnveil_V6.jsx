@@ -291,18 +291,18 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          left: '50%',
+          left: 0,
+          right: 0,
           top: 70,
-          width: '100%',
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translateX(-50%) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
           zIndex: 100,
-          padding: '0 5%'
+          padding: '0 60px'
         }}>
           {config.title.text}
         </div>

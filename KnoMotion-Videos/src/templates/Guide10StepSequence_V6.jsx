@@ -101,14 +101,22 @@ const DEFAULT_CONFIG = {
   }
 };
 
-// Calculate step positions based on layout
+// Calculate step positions based on layout (COLLISION-FREE)
 const calculateStepPositions = (stepCount, layout, width, height) => {
   const positions = [];
+  const TITLE_SAFE_ZONE = 160; // Title + padding
   
   switch (layout) {
     case 'vertical': {
-      const startY = height * 0.25;
-      const spacing = (height * 0.6) / (stepCount - 1 || 1);
+      // Account for step height to prevent collisions
+      const stepHeight = 120; // Approximate step box height
+      const availableHeight = height - TITLE_SAFE_ZONE - 100; // Bottom padding
+      const totalStepsHeight = stepHeight * stepCount;
+      const spacing = totalStepsHeight > availableHeight ? 
+        availableHeight / stepCount : // Tight fit if needed
+        Math.max((availableHeight - totalStepsHeight) / (stepCount - 1 || 1), stepHeight + 20); // Min 20px gap
+      
+      const startY = TITLE_SAFE_ZONE + 80;
       for (let i = 0; i < stepCount; i++) {
         positions.push({
           x: width * 0.5,
@@ -292,18 +300,18 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          left: '50%',
+          left: 0,
+          right: 0,
           top: 70,
-          width: '100%',
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translateX(-50%) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
           zIndex: 100,
-          padding: '0 5%'
+          padding: '0 60px'
         }}>
           {config.title.text}
         </div>
@@ -395,18 +403,18 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
             }}>
               {/* Step number badge */}
               <div style={{
-                width: 80,
-                height: 80,
+                width: 70,
+                height: 70,
                 borderRadius: '50%',
                 backgroundColor: colors.accent,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: fonts.size_stepNumber,
+                fontSize: fonts.size_stepNumber - 6,
                 fontWeight: 900,
                 fontFamily: '"Permanent Marker", cursive',
                 color: '#FFFFFF',
-                boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
                 flexShrink: 0
               }}>
                 {index + 1}
@@ -415,20 +423,22 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Step content box */}
               <div style={{
                 backgroundColor: colors.stepBg,
-                padding: '24px 32px',
-                borderRadius: 16,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                border: `4px solid ${colors.accent2}`,
-                minWidth: 350,
-                maxWidth: 500
+                padding: '16px 24px',
+                borderRadius: 12,
+                boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+                border: `3px solid ${colors.accent2}`,
+                minWidth: 300,
+                maxWidth: 420,
+                width: 380
               }}>
                 {/* Step title */}
                 <div style={{
-                  fontSize: fonts.size_stepTitle,
+                  fontSize: Math.min(fonts.size_stepTitle, 28),
                   fontWeight: 800,
                   fontFamily: '"Permanent Marker", cursive',
                   color: colors.ink,
-                  marginBottom: 8
+                  marginBottom: 6,
+                  lineHeight: 1.2
                 }}>
                   {step.title}
                 </div>
@@ -436,12 +446,12 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                 {/* Step description */}
                 {step.description && (
                   <div style={{
-                    fontSize: fonts.size_stepDesc,
+                    fontSize: Math.min(fonts.size_stepDesc, 18),
                     fontWeight: 400,
                     fontFamily: 'Inter, sans-serif',
                     color: colors.ink,
-                    lineHeight: 1.5,
-                    opacity: 0.8
+                    lineHeight: 1.4,
+                    opacity: 0.85
                   }}>
                     {step.description}
                   </div>
