@@ -66,7 +66,7 @@ export const Spotlight14Config = ({ scene, onUpdate }) => {
   const updateStage = (index, field, value) => {
     const stages = [...(scene.stages || [])];
     stages[index] = { ...stages[index], [field]: value };
-    updateField('stages', stages);
+    onUpdate({ ...scene, stages });
   };
   
   const addStage = () => {
@@ -75,9 +75,11 @@ export const Spotlight14Config = ({ scene, onUpdate }) => {
       stages.push({
         type: 'explanation',
         headline: 'New Stage',
-        content: 'Stage content here...'
+        bodyText: 'Stage content here...',
+        visual: null,
+        position: 'center'
       });
-      updateField('stages', stages);
+      onUpdate({ ...scene, stages });
     }
   };
   
@@ -85,7 +87,7 @@ export const Spotlight14Config = ({ scene, onUpdate }) => {
     const stages = [...(scene.stages || [])];
     if (stages.length > 2) {
       stages.splice(index, 1);
-      updateField('stages', stages);
+      onUpdate({ ...scene, stages });
     }
   };
   
@@ -125,14 +127,16 @@ export const Spotlight14Config = ({ scene, onUpdate }) => {
         </div>
         
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="checkbox"
-              checked={scene.showTransitions !== false}
-              onChange={(e) => updateField('showTransitions', e.target.checked)}
-            />
-            <span style={{ fontWeight: 600 }}>Mid-Scene Transitions</span>
-          </label>
+          <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Transition Style</label>
+          <select
+            value={scene.transitionStyle || 'fade'}
+            onChange={(e) => updateField('transitionStyle', e.target.value)}
+            style={{ width: '100%', padding: 8, fontSize: 14 }}
+          >
+            <option value="fade">Fade</option>
+            <option value="slide">Slide</option>
+            <option value="zoom">Zoom</option>
+          </select>
         </div>
       </AccordionSection>
       
@@ -196,10 +200,10 @@ export const Spotlight14Config = ({ scene, onUpdate }) => {
             </div>
             
             <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Content</label>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Body Text</label>
               <textarea
-                value={stage.content || ''}
-                onChange={(e) => updateStage(index, 'content', e.target.value)}
+                value={stage.bodyText || ''}
+                onChange={(e) => updateStage(index, 'bodyText', e.target.value)}
                 rows={2}
                 style={{ width: '100%', padding: 6, fontSize: 13 }}
               />
@@ -283,15 +287,15 @@ export const Spotlight14Config = ({ scene, onUpdate }) => {
       >
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>
-            Stage Duration: {scene.beats?.stageDuration || 2.5}s
+            Stage Interval: {scene.beats?.stageInterval || 4.5}s
           </label>
           <input
             type="range"
-            min="1.5"
-            max="5.0"
+            min="2.0"
+            max="8.0"
             step="0.5"
-            value={scene.beats?.stageDuration || 2.5}
-            onChange={(e) => updateField('beats.stageDuration', parseFloat(e.target.value))}
+            value={scene.beats?.stageInterval || 4.5}
+            onChange={(e) => updateField('beats.stageInterval', parseFloat(e.target.value))}
             style={{ width: '100%' }}
           />
         </div>

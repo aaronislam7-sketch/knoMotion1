@@ -63,28 +63,28 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
     onUpdate(newScene);
   };
   
-  const updateAnswer = (index, field, value) => {
-    const answers = [...(scene.answers || [])];
-    answers[index] = { ...answers[index], [field]: value };
-    updateField('answers', answers);
+  const updateOption = (index, field, value) => {
+    const options = [...(scene.options || [])];
+    options[index] = { ...options[index], [field]: value };
+    updateField('options', options);
   };
   
-  const addAnswer = () => {
-    const answers = [...(scene.answers || [])];
-    if (answers.length < 6) {
-      answers.push({
-        text: `Option ${answers.length + 1}`,
-        correct: false
+  const addOption = () => {
+    const options = [...(scene.options || [])];
+    if (options.length < 6) {
+      options.push({
+        text: `Option ${options.length + 1}`,
+        icon: null
       });
-      updateField('answers', answers);
+      updateField('options', options);
     }
   };
   
-  const removeAnswer = (index) => {
-    const answers = [...(scene.answers || [])];
-    if (answers.length > 2) {
-      answers.splice(index, 1);
-      updateField('answers', answers);
+  const removeOption = (index) => {
+    const options = [...(scene.options || [])];
+    if (options.length > 2) {
+      options.splice(index, 1);
+      updateField('options', options);
     }
   };
   
@@ -112,8 +112,8 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Question</label>
           <textarea
-            value={scene.question || ''}
-            onChange={(e) => updateField('question', e.target.value)}
+            value={scene.question?.text || ''}
+            onChange={(e) => updateField('question.text', e.target.value)}
             rows={3}
             style={{ width: '100%', padding: 8, fontSize: 14 }}
           />
@@ -146,47 +146,47 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
         {scene.showTimer !== false && (
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>
-              Timer Duration: {scene.timerDuration || 10}s
+              Think Time: {scene.thinkTimeSeconds || 6}s
             </label>
             <input
               type="range"
-              min="5"
-              max="30"
+              min="3"
+              max="15"
               step="1"
-              value={scene.timerDuration || 10}
-              onChange={(e) => updateField('timerDuration', parseInt(e.target.value))}
+              value={scene.thinkTimeSeconds || 6}
+              onChange={(e) => updateField('thinkTimeSeconds', parseInt(e.target.value))}
               style={{ width: '100%' }}
             />
           </div>
         )}
       </AccordionSection>
       
-      {/* Answers */}
+      {/* Answer Options */}
       <AccordionSection
         title="Answer Options"
         icon="✅"
         isOpen={openSections.answers}
         onToggle={() => toggleSection('answers')}
       >
-        {(scene.answers || []).map((answer, index) => (
+        {(scene.options || []).map((option, index) => (
           <div key={index} style={{ 
             marginBottom: 12, 
             padding: 12, 
-            border: answer.correct ? '2px solid #4CAF50' : '1px solid #E0E0E0',
+            border: scene.correctAnswer === index ? '2px solid #4CAF50' : '1px solid #E0E0E0',
             borderRadius: 4,
-            backgroundColor: answer.correct ? '#E8F5E9' : '#FFFFFF'
+            backgroundColor: scene.correctAnswer === index ? '#E8F5E9' : '#FFFFFF'
           }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'start', marginBottom: 8 }}>
               <input
                 type="text"
-                value={answer.text || ''}
-                onChange={(e) => updateAnswer(index, 'text', e.target.value)}
+                value={option.text || ''}
+                onChange={(e) => updateOption(index, 'text', e.target.value)}
                 placeholder={`Option ${index + 1}`}
                 style={{ flex: 1, padding: 6, fontSize: 13 }}
               />
               <button
-                onClick={() => removeAnswer(index)}
-                disabled={(scene.answers || []).length <= 2}
+                onClick={() => removeOption(index)}
+                disabled={(scene.options || []).length <= 2}
                 style={{ 
                   padding: '6px 10px', 
                   fontSize: 12,
@@ -195,7 +195,7 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
                   border: 'none',
                   borderRadius: 4,
                   cursor: 'pointer',
-                  opacity: (scene.answers || []).length <= 2 ? 0.5 : 1
+                  opacity: (scene.options || []).length <= 2 ? 0.5 : 1
                 }}
               >
                 ✕
@@ -203,9 +203,10 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
               <input
-                type="checkbox"
-                checked={answer.correct || false}
-                onChange={(e) => updateAnswer(index, 'correct', e.target.checked)}
+                type="radio"
+                name="correctAnswer"
+                checked={scene.correctAnswer === index}
+                onChange={() => updateField('correctAnswer', index)}
               />
               <span style={{ fontWeight: 600 }}>Correct Answer</span>
             </label>
@@ -213,8 +214,8 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
         ))}
         
         <button
-          onClick={addAnswer}
-          disabled={(scene.answers || []).length >= 6}
+          onClick={addOption}
+          disabled={(scene.options || []).length >= 6}
           style={{
             width: '100%',
             padding: 10,
@@ -226,17 +227,17 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
             borderRadius: 4,
             cursor: 'pointer',
             marginTop: 8,
-            opacity: (scene.answers || []).length >= 6 ? 0.5 : 1
+            opacity: (scene.options || []).length >= 6 ? 0.5 : 1
           }}
         >
-          + Add Answer (max 6)
+          + Add Option (max 6)
         </button>
         
         <div style={{ marginTop: 16 }}>
           <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Explanation</label>
           <textarea
-            value={scene.explanation || ''}
-            onChange={(e) => updateField('explanation', e.target.value)}
+            value={scene.explanation?.text || ''}
+            onChange={(e) => updateField('explanation.text', e.target.value)}
             rows={2}
             placeholder="Explain why the answer is correct..."
             style={{ width: '100%', padding: 8, fontSize: 13 }}
@@ -300,15 +301,15 @@ export const Challenge13Config = ({ scene, onUpdate }) => {
       >
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>
-            Answer Stagger: {scene.beats?.answerStagger || 0.15}s
+            Option Interval: {scene.beats?.optionInterval || 0.35}s
           </label>
           <input
             type="range"
-            min="0.05"
-            max="0.5"
+            min="0.1"
+            max="0.8"
             step="0.05"
-            value={scene.beats?.answerStagger || 0.15}
-            onChange={(e) => updateField('beats.answerStagger', parseFloat(e.target.value))}
+            value={scene.beats?.optionInterval || 0.35}
+            onChange={(e) => updateField('beats.optionInterval', parseFloat(e.target.value))}
             style={{ width: '100%' }}
           />
         </div>

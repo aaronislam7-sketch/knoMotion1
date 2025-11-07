@@ -340,7 +340,8 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          left: '50%',
+          left: 0,
+          right: 0,
           top: 60,
           fontSize: fonts.size_title,
           fontWeight: 700,
@@ -348,9 +349,9 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
+          transform: `translateY(${titleAnim.translateY}px)`,
           zIndex: 100,
-          maxWidth: '90%'
+          padding: '0 60px'
         }}>
           {config.title.text}
         </div>
