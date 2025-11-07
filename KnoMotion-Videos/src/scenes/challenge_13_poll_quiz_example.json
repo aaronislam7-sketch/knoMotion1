@@ -1,0 +1,89 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "challenge_13_geography_quiz",
+  "template_id": "Challenge13PollQuiz",
+  "learning_intentions": {
+    "primary": ["challenge"],
+    "secondary": ["question", "reveal"],
+    "tags": ["quiz", "geography", "capitals"]
+  },
+  
+  "title": {
+    "text": "Geography Challenge",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 30 }
+  },
+  
+  "question": {
+    "text": "Which country has the most time zones?",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 140 },
+    "multiline": false
+  },
+  
+  "options": [
+    { "text": "Russia", "icon": null },
+    { "text": "France", "icon": null },
+    { "text": "United States", "icon": null },
+    { "text": "China", "icon": null }
+  ],
+  
+  "correctAnswer": 1,
+  
+  "layout": "grid",
+  "optionsPerRow": 2,
+  
+  "showTimer": true,
+  "thinkTimeSeconds": 6,
+  
+  "explanation": {
+    "show": true,
+    "text": "France has 12 time zones due to its overseas territories scattered across the world",
+    "position": "bottom-center",
+    "offset": { "x": 0, "y": -100 }
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0F0F1E",
+      "accent": "#FF6B35",
+      "accent2": "#00D9FF",
+      "ink": "#F0F0F0",
+      "optionBg": "#1E1E3F",
+      "optionBorder": "#3E3E6F",
+      "correctBg": "#00C853",
+      "correctBorder": "#00E676",
+      "incorrectBg": "#D32F2F",
+      "incorrectBorder": "#FF5252",
+      "timerBg": "#FF6B35",
+      "explanationBg": "#1E1E3F"
+    },
+    "fonts": {
+      "size_title": 52,
+      "size_question": 58,
+      "size_option": 34,
+      "size_explanation": 26,
+      "size_timer": 68
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.6,
+    "questionEntry": 1.0,
+    "optionsStart": 2.0,
+    "optionInterval": 0.35,
+    "thinkTime": 6.0,
+    "revealAnswer": 1.0,
+    "explanationEntry": 1.5,
+    "exit": 3.0
+  },
+  
+  "animation": {
+    "questionAnimation": "fade-up",
+    "optionEntrance": "pop",
+    "correctReveal": "pulse",
+    "incorrectReveal": "shake",
+    "easing": "power3InOut"
+  }
+}
