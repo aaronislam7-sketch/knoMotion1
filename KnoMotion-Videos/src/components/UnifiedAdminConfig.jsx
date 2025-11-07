@@ -5,6 +5,10 @@ import { TemplateGallery } from './TemplateGallery';
 import { Reveal9Config } from './configs/Reveal9Config';
 import { Guide10Config } from './configs/Guide10Config';
 import { Compare11Config } from './configs/Compare11Config';
+import { Compare12Config } from './configs/Compare12Config';
+import { Challenge13Config } from './configs/Challenge13Config';
+import { Spotlight14Config } from './configs/Spotlight14Config';
+import { Connect15Config } from './configs/Connect15Config';
 import { EZ } from '../sdk';
 
 // Import templates directly to access their getDuration functions
@@ -12,10 +16,22 @@ import * as Reveal9Module from '../templates/Reveal9ProgressiveUnveil_V6';
 import * as Guide10Module from '../templates/Guide10StepSequence_V6';
 import * as Compare11Module from '../templates/Compare11BeforeAfter_V6';
 
+// NEW: Learning Content Pipeline Templates (Nov 2025)
+import * as Compare12Module from '../templates/Compare12MatrixGrid_V6';
+import * as Challenge13Module from '../templates/Challenge13PollQuiz_V6';
+import * as Spotlight14Module from '../templates/Spotlight14SingleConcept_V6';
+import * as Connect15Module from '../templates/Connect15AnalogyBridge_V6';
+
 // Import example scenes
 import reveal9Example from '../scenes/reveal_9_progressive_unveil_example.json';
 import guide10Example from '../scenes/guide_10_step_sequence_example.json';
 import compare11Example from '../scenes/compare_11_before_after_example.json';
+
+// NEW: Example scenes for new templates
+import compare12Example from '../scenes/compare_12_matrix_example.json';
+import challenge13Example from '../scenes/challenge_13_poll_quiz_example.json';
+import spotlight14Example from '../scenes/spotlight_14_single_concept_example.json';
+import connect15Example from '../scenes/connect_15_analogy_bridge_example.json';
 
 /**
  * Unified Admin Configuration Tool
@@ -32,7 +48,13 @@ import compare11Example from '../scenes/compare_11_before_after_example.json';
 const DEFAULT_SCENES = {
   'Reveal9ProgressiveUnveil': reveal9Example,
   'Guide10StepSequence': guide10Example,
-  'Compare11BeforeAfter': compare11Example
+  'Compare11BeforeAfter': compare11Example,
+  
+  // Learning Content Pipeline Templates (Nov 2025)
+  'Compare12MatrixGrid': compare12Example,
+  'Challenge13PollQuiz': challenge13Example,
+  'Spotlight14SingleConcept': spotlight14Example,
+  'Connect15AnalogyBridge': connect15Example
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -115,7 +137,15 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
           </h3>
           <p style={{ fontSize: 14, margin: 0 }}>
             The interactive configuration panel for <strong>{selectedTemplateId}</strong> is coming soon.
-            <br />Only the 3 new V6 templates have config panels currently.
+            <br />Currently, only Reveal9, Guide10, and Compare11 have config panels.
+            <br /><br />
+            <strong>You can still:</strong>
+            <ul style={{ textAlign: 'left', marginTop: 8, paddingLeft: 20 }}>
+              <li>View the live preview</li>
+              <li>See the JSON configuration</li>
+              <li>Copy or download the JSON</li>
+              <li>Manually edit the JSON and reload</li>
+            </ul>
           </p>
         </div>
       );
@@ -128,6 +158,17 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return <Guide10Config scene={scene} onUpdate={handleSceneUpdate} />;
       case 'Compare11BeforeAfter':
         return <Compare11Config scene={scene} onUpdate={handleSceneUpdate} />;
+      
+      // Learning Content Pipeline Templates (Nov 2025)
+      case 'Compare12MatrixGrid':
+        return <Compare12Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Challenge13PollQuiz':
+        return <Challenge13Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Spotlight14SingleConcept':
+        return <Spotlight14Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Connect15AnalogyBridge':
+        return <Connect15Config scene={scene} onUpdate={handleSceneUpdate} />;
+      
       default:
         return (
           <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>
@@ -150,6 +191,17 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Guide10Module.getDuration ? Guide10Module.getDuration(scene, fps) : 450;
       case 'Compare11BeforeAfter':
         return Compare11Module.getDuration ? Compare11Module.getDuration(scene, fps) : 450;
+      
+      // Learning Content Pipeline Templates
+      case 'Compare12MatrixGrid':
+        return Compare12Module.getDuration ? Compare12Module.getDuration(scene, fps) : 450;
+      case 'Challenge13PollQuiz':
+        return Challenge13Module.getDuration ? Challenge13Module.getDuration(scene, fps) : 450;
+      case 'Spotlight14SingleConcept':
+        return Spotlight14Module.getDuration ? Spotlight14Module.getDuration(scene, fps) : 450;
+      case 'Connect15AnalogyBridge':
+        return Connect15Module.getDuration ? Connect15Module.getDuration(scene, fps) : 450;
+      
       default:
         // Fallback: try to calculate from beats
         if (scene.beats && scene.beats.exit) {
@@ -204,7 +256,9 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
           }}>
             Select a template, configure it visually, and see real-time changes.
             <br />
-            <strong>Currently available:</strong> Reveal9, Guide10, Compare11 (more coming soon!)
+            <strong>Currently available:</strong> 7 templates with FULL interactive config panels!
+            <br />
+            <em style={{ fontSize: 13, color: '#718096' }}>✅ All templates (9, 10, 11, 12, 13, 14, 15) now have complete configuration UIs</em>
           </p>
         </div>
         

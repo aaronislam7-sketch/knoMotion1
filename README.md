@@ -100,6 +100,36 @@ npm run render -- src/scenes/your_scene.json
 
 ---
 
+## 🔀 Git Workflow
+
+### Pushing Changes
+
+**IMPORTANT:** Always push changes to the feature branch created by the agent/request, **never directly to main**.
+
+\`\`\`bash
+# Check current branch
+git branch
+
+# Stage all changes
+git add -A
+
+# Commit with descriptive message
+git commit -m "Your descriptive commit message"
+
+# Push to the feature branch (e.g., cursor/feature-name-xxxx)
+git push origin cursor/your-feature-branch-name
+\`\`\`
+
+**Workflow:**
+1. Agent creates feature branch (e.g., \`cursor/create-versatile-learning-content-templates-06cf\`)
+2. All changes are committed and pushed to that branch
+3. You can spin up an environment on that branch to test changes
+4. Once verified, merge to main via pull request
+
+**Never push directly to main** - this allows proper testing and review before merging.
+
+---
+
 ## 🐛 Troubleshooting
 
 See **[V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md)** for:

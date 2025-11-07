@@ -1,0 +1,86 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "connect_15_dna_analogy",
+  "template_id": "Connect15AnalogyBridge",
+  "learning_intentions": {
+    "primary": ["connect", "explain"],
+    "secondary": ["breakdown", "reveal"],
+    "tags": ["analogy", "DNA", "biology"]
+  },
+  
+  "title": {
+    "text": "Understanding DNA",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  
+  "familiar": {
+    "title": "A Twisted Ladder",
+    "description": "Two rails connected by rungs, spiraling upward",
+    "visual": {
+      "type": "emoji",
+      "emoji": "🪜",
+      "size": 150
+    }
+  },
+  
+  "newConcept": {
+    "title": "DNA Double Helix",
+    "description": "Two strands connected by base pairs, spiraling in 3D",
+    "visual": {
+      "type": "emoji",
+      "emoji": "🧬",
+      "size": 150
+    }
+  },
+  
+  "bridge": {
+    "label": "is structured like",
+    "style": "arrow",
+    "mappings": [
+      { "from": "Rails", "to": "Sugar-Phosphate Backbone" },
+      { "from": "Rungs", "to": "Base Pairs (A-T, G-C)" },
+      { "from": "Twist", "to": "Double Helix Shape" }
+    ]
+  },
+  
+  "layout": "horizontal",
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#F0F4F8",
+      "accent": "#FF6B35",
+      "accent2": "#00BCD4",
+      "ink": "#263238",
+      "bridgeColor": "#9C27B0",
+      "familiarBg": "#FFE0B2",
+      "newBg": "#B2EBF2",
+      "mappingColor": "#546E7A"
+    },
+    "fonts": {
+      "size_title": 56,
+      "size_concept": 48,
+      "size_description": 26,
+      "size_bridge": 42,
+      "size_mapping": 22
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.6,
+    "familiarEntry": 1.2,
+    "bridgeStart": 2.5,
+    "bridgeDraw": 1.5,
+    "newConceptEntry": 4.2,
+    "mappingsStart": 5.5,
+    "mappingInterval": 0.7,
+    "exit": 2.5
+  },
+  
+  "animation": {
+    "conceptEntrance": "slide",
+    "bridgeAnimation": "draw",
+    "easing": "power3InOut"
+  }
+}

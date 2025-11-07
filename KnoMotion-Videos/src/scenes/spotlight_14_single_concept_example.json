@@ -1,0 +1,93 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "spotlight_14_photosynthesis",
+  "template_id": "Spotlight14SingleConcept",
+  "learning_intentions": {
+    "primary": ["question", "reveal"],
+    "secondary": ["breakdown", "inspire"],
+    "tags": ["biology", "photosynthesis", "science"]
+  },
+  
+  "title": {
+    "text": "Concept Deep Dive",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  
+  "stages": [
+    {
+      "type": "question",
+      "headline": "How do plants create their own food?",
+      "bodyText": null,
+      "visual": null,
+      "position": "center"
+    },
+    {
+      "type": "visual",
+      "headline": null,
+      "bodyText": null,
+      "visual": {
+        "type": "emoji",
+        "emoji": "🌱",
+        "size": 240
+      },
+      "position": "center"
+    },
+    {
+      "type": "explanation",
+      "headline": "Photosynthesis",
+      "bodyText": "Plants convert sunlight, water, and CO₂ into glucose and oxygen through a remarkable chemical process",
+      "visual": null,
+      "position": "center"
+    },
+    {
+      "type": "takeaway",
+      "headline": "Life Depends On It",
+      "bodyText": "This process produces the oxygen we breathe and forms the foundation of Earth's food chain",
+      "visual": {
+        "type": "emoji",
+        "emoji": "🌍",
+        "size": 120
+      },
+      "position": "center"
+    }
+  ],
+  
+  "transitionStyle": "fade",
+  "emphasisStyle": "pulse",
+  "backgroundStyle": "gradient",
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0A1F0A",
+      "bgGradientStart": "#1A3A1A",
+      "bgGradientEnd": "#0A1F0A",
+      "accent": "#4CAF50",
+      "accent2": "#81C784",
+      "ink": "#E8F5E9",
+      "highlight": "#FFD54F"
+    },
+    "fonts": {
+      "size_title": 56,
+      "size_headline": 72,
+      "size_body": 38,
+      "size_takeaway": 44
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.6,
+    "stageInterval": 4.5,
+    "transitionDuration": 0.9,
+    "emphasisDuration": 1.0,
+    "exit": 2.5
+  },
+  
+  "animation": {
+    "titleAnimation": "fade-up",
+    "stageEntrance": "fade-up",
+    "transitionEasing": "power3InOut",
+    "emphasisEasing": "backOut"
+  }
+}

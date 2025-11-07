@@ -287,11 +287,13 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          ...positionToCSS(titlePos),
+          left: 0,
+          right: 0,
+          top: 70,
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
@@ -299,7 +301,8 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
           textAlign: 'center',
           opacity: titleAnim.opacity,
           transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          zIndex: 10
+          zIndex: 100,
+          padding: '0 60px'
         }}>
           {config.title.text}
         </div>

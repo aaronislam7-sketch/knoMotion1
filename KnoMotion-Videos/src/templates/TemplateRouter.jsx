@@ -27,6 +27,12 @@ import { Reveal9ProgressiveUnveil } from './Reveal9ProgressiveUnveil_V6';
 import { Guide10StepSequence } from './Guide10StepSequence_V6';
 import { Compare11BeforeAfter } from './Compare11BeforeAfter_V6';
 
+// NEW: Learning Content Pipeline Templates (Nov 2025)
+import { Compare12MatrixGrid } from './Compare12MatrixGrid_V6';
+import { Challenge13PollQuiz } from './Challenge13PollQuiz_V6';
+import { Spotlight14SingleConcept } from './Spotlight14SingleConcept_V6';
+import { Connect15AnalogyBridge } from './Connect15AnalogyBridge_V6';
+
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
 
@@ -77,6 +83,12 @@ const V6_TEMPLATE_REGISTRY = {
   'Reveal9ProgressiveUnveil': Reveal9ProgressiveUnveil,
   'Guide10StepSequence': Guide10StepSequence,
   'Compare11BeforeAfter': Compare11BeforeAfter,
+  
+  // Learning Content Pipeline (Nov 2025)
+  'Compare12MatrixGrid': Compare12MatrixGrid,
+  'Challenge13PollQuiz': Challenge13PollQuiz,
+  'Spotlight14SingleConcept': Spotlight14SingleConcept,
+  'Connect15AnalogyBridge': Connect15AnalogyBridge,
   // Future v6 templates will be added here
 };
 

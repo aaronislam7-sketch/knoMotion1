@@ -1,0 +1,91 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "compare_12_product_matrix",
+  "template_id": "Compare12MatrixGrid",
+  "learning_intentions": {
+    "primary": ["compare"],
+    "secondary": ["breakdown", "guide"],
+    "tags": ["comparison", "products", "features"]
+  },
+  
+  "title": {
+    "text": "Product Comparison",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  
+  "columns": [
+    { "header": "Basic Plan", "highlight": false },
+    { "header": "Pro Plan", "highlight": false },
+    { "header": "Enterprise", "highlight": true }
+  ],
+  
+  "rows": [
+    {
+      "header": "Users",
+      "cells": ["5", "25", "Unlimited"]
+    },
+    {
+      "header": "Storage",
+      "cells": ["10GB", "100GB", "1TB"]
+    },
+    {
+      "header": "Support",
+      "cells": ["✗", "✓", "✓"]
+    },
+    {
+      "header": "API Access",
+      "cells": ["✗", "✓", "✓"]
+    },
+    {
+      "header": "Rating",
+      "cells": [3, 4, 5]
+    }
+  ],
+  
+  "fillAnimation": "by-row",
+  "highlightWinner": true,
+  "winnerColumn": 2,
+  "showConclusion": true,
+  "conclusionText": "Enterprise Plan offers the best value for growing teams",
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#F8F9FA",
+      "accent": "#00796B",
+      "accent2": "#0097A7",
+      "ink": "#212121",
+      "gridLines": "#B0BEC5",
+      "cellBg": "#FFFFFF",
+      "headerBg": "#E0F2F1",
+      "highlight": "#FFF9C4",
+      "checkmark": "#00C853",
+      "cross": "#D32F2F"
+    },
+    "fonts": {
+      "size_title": 68,
+      "size_header": 30,
+      "size_cell": 26,
+      "size_conclusion": 34
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.6,
+    "gridStructure": 1.2,
+    "fillStart": 2.0,
+    "cellInterval": 0.3,
+    "highlightStart": 1.0,
+    "highlightDuration": 1.2,
+    "conclusion": 1.5,
+    "exit": 2.0
+  },
+  
+  "animation": {
+    "titleAnimation": "fade-up",
+    "cellEntrance": "pop",
+    "highlightStyle": "glow",
+    "easing": "power3InOut"
+  }
+}
