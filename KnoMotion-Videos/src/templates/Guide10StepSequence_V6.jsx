@@ -294,15 +294,16 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
           position: 'absolute',
           left: '50%',
           top: 70,
+          width: '100%',
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+          transform: `translateX(-50%) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
           zIndex: 100,
-          maxWidth: '90%'
+          padding: '0 5%'
         }}>
           {config.title.text}
         </div>
@@ -380,23 +381,22 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               config.layout
             )}
             
-            {/* Step container */}
+            {/* Step container - Centered with flexbox */}
             <div style={{
               position: 'absolute',
               left: pos.x,
               top: pos.y,
-              transform: `translate(-50%, -50%) scale(${stepAnim.scale * pulseScale})`,
+              transform: `translate(-50%, -50%) translateX(${stepAnim.translateX}px) scale(${stepAnim.scale * pulseScale})`,
               opacity: stepAnim.opacity,
-              zIndex: 10 + index
+              zIndex: 10 + index,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 20
             }}>
               {/* Step number badge */}
               <div style={{
-                position: 'absolute',
-                left: -40,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: 70,
-                height: 70,
+                width: 80,
+                height: 80,
                 borderRadius: '50%',
                 backgroundColor: colors.accent,
                 display: 'flex',
@@ -406,21 +406,21 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                 fontWeight: 900,
                 fontFamily: '"Permanent Marker", cursive',
                 color: '#FFFFFF',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+                flexShrink: 0
               }}>
                 {index + 1}
               </div>
               
               {/* Step content box */}
               <div style={{
-                marginLeft: 50,
                 backgroundColor: colors.stepBg,
-                padding: '20px 30px',
-                borderRadius: 12,
-                boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
-                border: `3px solid ${colors.accent2}`,
-                minWidth: 300,
-                maxWidth: 450
+                padding: '24px 32px',
+                borderRadius: 16,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                border: `4px solid ${colors.accent2}`,
+                minWidth: 350,
+                maxWidth: 500
               }}>
                 {/* Step title */}
                 <div style={{
