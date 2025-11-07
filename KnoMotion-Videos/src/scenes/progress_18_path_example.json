@@ -1,0 +1,97 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Progress18Path",
+  "scene_id": "progress_18_guide_demo",
+  
+  "title": {
+    "text": "Your Learning Journey",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 60 }
+  },
+  
+  "waypoints": [
+    {
+      "label": "Start",
+      "description": "Begin your journey",
+      "icon": "🚀",
+      "status": "completed"
+    },
+    {
+      "label": "Learn Basics",
+      "description": "Master fundamentals",
+      "icon": "📚",
+      "status": "completed"
+    },
+    {
+      "label": "Practice",
+      "description": "Apply knowledge",
+      "icon": "💪",
+      "status": "current"
+    },
+    {
+      "label": "Build Projects",
+      "description": "Create real solutions",
+      "icon": "🛠️",
+      "status": "locked"
+    },
+    {
+      "label": "Master",
+      "description": "Achieve expertise",
+      "icon": "🏆",
+      "status": "locked"
+    }
+  ],
+  
+  "direction": "horizontal",
+  "showProgress": true,
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0F1419",
+      "path": "#2C3E50",
+      "pathActive": "#4CAF50",
+      "title": "#FFFFFF",
+      "completed": "#4CAF50",
+      "current": "#FFC107",
+      "locked": "#5A6C7D",
+      "text": "#FFFFFF"
+    },
+    "fonts": {
+      "size_title": 56,
+      "size_label": 28,
+      "size_description": 18,
+      "weight_title": 800,
+      "weight_label": 700
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.8,
+    "waypointInterval": 0.6,
+    "progressAnimation": 1.0,
+    "hold": 2.0,
+    "exit": 1.0
+  },
+  
+  "animation": {
+    "entrance": "fade-up",
+    "waypointReveal": "pop",
+    "easing": "power3Out"
+  },
+  
+  "meta": {
+    "title": "Learning Journey Progress Path",
+    "description": "Visual progress path showing learning milestones",
+    "tags": ["guide", "progress", "journey", "v6"],
+    "intention": "GUIDE",
+    "duration": 7.0
+  },
+  
+  "layout": {
+    "canvas": {
+      "w": 1920,
+      "h": 1080
+    }
+  }
+}

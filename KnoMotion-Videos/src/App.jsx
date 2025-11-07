@@ -125,7 +125,7 @@ const validateScene = (scene) => {
 };
 
 export default function App() {
-  const [mode, setMode] = useState('wizard'); // 'wizard', 'preview', or 'unified-config'
+  const [mode, setMode] = useState('unified-config'); // 'wizard', 'preview', or 'unified-config' - DEFAULT: unified-config
   const [selectedTemplate, setSelectedTemplate] = useState('hook_1a_v5');
   const [sceneJSON, setSceneJSON] = useState(JSON.stringify(hook1AV5Scene, null, 2));
   const [currentScene, setCurrentScene] = useState(hook1AV5Scene);

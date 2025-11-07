@@ -140,7 +140,7 @@ const TEMPLATE_CATALOG = [
     color: '#00796B',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
   },
   {
     id: 'Challenge13PollQuiz',
@@ -152,7 +152,7 @@ const TEMPLATE_CATALOG = [
     color: '#D32F2F',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
   },
   {
     id: 'Spotlight14SingleConcept',
@@ -164,7 +164,7 @@ const TEMPLATE_CATALOG = [
     color: '#FF6B35',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
   },
   {
     id: 'Connect15AnalogyBridge',
@@ -176,7 +176,35 @@ const TEMPLATE_CATALOG = [
     color: '#9C27B0',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
+  },
+  
+  // INSPIRE TEMPLATES (Nov 7, 2025) - CRITICAL GAP FILLED
+  {
+    id: 'Quote16Showcase',
+    name: 'Quote Showcase',
+    intentions: { primary: 'INSPIRE', secondary: ['QUESTION', 'REVEAL'] },
+    description: 'Inspirational quotes with beautiful visuals and animations',
+    duration: '7-10s',
+    icon: '✨',
+    color: '#F39C12',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  
+  // ADDITIONAL GUIDE TEMPLATES (Nov 7, 2025)
+  {
+    id: 'Progress18Path',
+    name: 'Progress Path',
+    intentions: { primary: 'GUIDE', secondary: ['INSPIRE', 'CONNECT'] },
+    description: 'Visual journey with milestones and progress tracking',
+    duration: '6-10s',
+    icon: '🛤️',
+    color: '#00BCD4',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
   }
 ];
 
@@ -206,6 +234,7 @@ const INTENTION_ICONS = {
 export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
   const [filterIntention, setFilterIntention] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [isCollapsed, setIsCollapsed] = useState(false);
   
   // Filter templates by intention
   const filteredTemplates = filterIntention
@@ -220,45 +249,79 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
   
   return (
     <div style={{
-      padding: '20px',
-      backgroundColor: '#F8F9FA',
+      backgroundColor: '#FFFFFF',
       borderRadius: 12,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      overflow: 'hidden',
       marginBottom: 20
     }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20
-      }}>
-        <h2 style={{
-          fontSize: 28,
-          fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
-          color: '#1A1A1A',
-          margin: 0
-        }}>
-          🎨 Template Gallery
-        </h2>
+      {/* Collapsible Header */}
+      <div 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 20px',
+          backgroundColor: '#4CAF50',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          userSelect: 'none'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45A049'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 24 }}>🎨</span>
+          <h2 style={{
+            fontSize: 22,
+            fontWeight: 800,
+            fontFamily: '"Permanent Marker", cursive',
+            color: '#FFFFFF',
+            margin: 0
+          }}>
+            Template Gallery {!isCollapsed && `(${filteredTemplates.length})`}
+          </h2>
+        </div>
         
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#FFFFFF',
-              border: '2px solid #DDD',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: 14
-            }}
-          >
-            {viewMode === 'grid' ? '📋 List View' : '🎨 Grid View'}
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {!isCollapsed && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewMode(viewMode === 'grid' ? 'list' : 'grid');
+              }}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                border: '2px solid rgba(255,255,255,0.4)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 13,
+                color: '#FFFFFF',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+            >
+              {viewMode === 'grid' ? '📋 List' : '🎨 Grid'}
+            </button>
+          )}
+          <span style={{ 
+            fontSize: 24, 
+            color: '#FFFFFF',
+            transition: 'transform 0.3s',
+            transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'
+          }}>
+            ▼
+          </span>
         </div>
       </div>
+      
+      {/* Gallery Content */}
+      {!isCollapsed && (
+        <div style={{ padding: '20px' }}>
       
       {/* Intention Filter */}
       <div style={{ marginBottom: 20 }}>
@@ -517,6 +580,8 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
           >
             Clear Filter
           </button>
+        </div>
+      )}
         </div>
       )}
     </div>

@@ -1,0 +1,74 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Quote16Showcase",
+  "scene_id": "quote_16_inspire_demo",
+  
+  "quote": {
+    "text": "The only way to do great work is to love what you do.",
+    "author": "Steve Jobs",
+    "position": "center",
+    "offset": { "x": 0, "y": 0 }
+  },
+  
+  "visual": {
+    "type": "emoji",
+    "value": "💡",
+    "position": "top-center",
+    "offset": { "x": 0, "y": -200 },
+    "scale": 2.0
+  },
+  
+  "style": "classic",
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A2E",
+      "quote": "#FFFFFF",
+      "author": "#9B9B9B",
+      "accent": "#FFD700",
+      "particles": "rgba(255, 215, 0, 0.3)"
+    },
+    "fonts": {
+      "size_quote": 48,
+      "size_author": 28,
+      "weight_quote": 700,
+      "weight_author": 400
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "quoteReveal": 1.0,
+    "quoteFull": 3.5,
+    "authorReveal": 4.0,
+    "hold": 6.5,
+    "exit": 7.5
+  },
+  
+  "animation": {
+    "entrance": "fade-up",
+    "emphasis": "pulse",
+    "easing": "power3Out"
+  },
+  
+  "particles": {
+    "enabled": true,
+    "count": 30,
+    "style": "sparkle"
+  },
+  
+  "meta": {
+    "title": "Inspirational Quote - Steve Jobs",
+    "description": "Beautiful quote showcase with animated entrance and emphasis",
+    "tags": ["inspire", "quote", "motivation", "v6"],
+    "intention": "INSPIRE",
+    "duration": 8.0
+  },
+  
+  "layout": {
+    "canvas": {
+      "w": 1920,
+      "h": 1080
+    }
+  }
+}

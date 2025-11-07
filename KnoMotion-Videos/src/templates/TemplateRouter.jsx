@@ -32,6 +32,8 @@ import { Compare12MatrixGrid } from './Compare12MatrixGrid_V6';
 import { Challenge13PollQuiz } from './Challenge13PollQuiz_V6';
 import { Spotlight14SingleConcept } from './Spotlight14SingleConcept_V6';
 import { Connect15AnalogyBridge } from './Connect15AnalogyBridge_V6';
+import { Quote16Showcase } from './Quote16Showcase_V6';
+import { Progress18Path } from './Progress18Path_V6';
 
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
@@ -89,6 +91,8 @@ const V6_TEMPLATE_REGISTRY = {
   'Challenge13PollQuiz': Challenge13PollQuiz,
   'Spotlight14SingleConcept': Spotlight14SingleConcept,
   'Connect15AnalogyBridge': Connect15AnalogyBridge,
+  'Quote16Showcase': Quote16Showcase,
+  'Progress18Path': Progress18Path,
   // Future v6 templates will be added here
 };
 
