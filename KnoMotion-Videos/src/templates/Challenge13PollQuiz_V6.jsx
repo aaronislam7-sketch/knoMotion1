@@ -336,31 +336,32 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          left: titlePos.x,
-          top: titlePos.y,
+          left: '50%',
+          top: 60,
           fontSize: fonts.size_title,
           fontWeight: 700,
           fontFamily: 'Inter, sans-serif',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px)`,
-          zIndex: 10
+          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
+          zIndex: 100,
+          maxWidth: '90%'
         }}>
           {config.title.text}
         </div>
       )}
       
-      {/* Question */}
+      {/* Question - Below title safe zone */}
       {frame >= questionStartFrame && (
         <div style={{
           position: 'absolute',
-          left: questionPos.x,
-          top: questionPos.y,
+          left: '50%',
+          top: 180,
           fontSize: fonts.size_question,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
@@ -369,7 +370,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
           maxWidth: '85%',
           lineHeight: 1.2,
           opacity: questionAnim.opacity,
-          transform: `translate(-50%, -50%) translateY(${questionAnim.translateY}px)`,
+          transform: `translate(-50%, 0) translateY(${questionAnim.translateY}px)`,
           zIndex: 10
         }}>
           {config.question.text}

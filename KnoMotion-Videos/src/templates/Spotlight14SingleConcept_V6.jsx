@@ -380,20 +380,21 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title - Fixed at top in safe zone */}
       {titleVisible && (
         <div style={{
           position: 'absolute',
-          left: titlePos.x,
-          top: titlePos.y,
+          left: '50%',
+          top: 70,
           fontSize: fonts.size_title,
           fontWeight: 700,
           fontFamily: 'Inter, sans-serif',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity * titleFadeOut,
-          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px)`,
-          zIndex: 10
+          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
+          zIndex: 100,
+          maxWidth: '90%'
         }}>
           {config.title.text}
         </div>

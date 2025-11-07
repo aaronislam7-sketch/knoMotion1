@@ -249,9 +249,10 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
   const columns = config.columns;
   const rows = config.rows;
   
-  // Calculate grid layout
+  // Calculate grid layout - ensure it stays below title safe zone
+  const TITLE_SAFE_ZONE = 140; // Title lives in 0-140px zone
   const layout = calculateGridLayout(rows, columns, width, height, {
-    top: 180,
+    top: TITLE_SAFE_ZONE + 60, // Start well below title
     left: 120,
     right: 120,
     bottom: config.showConclusion ? 220 : 180
@@ -334,20 +335,21 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          left: titlePos.x,
-          top: titlePos.y,
+          left: '50%',
+          top: 70,
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px)`,
-          zIndex: 10
+          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
+          zIndex: 100,
+          maxWidth: '90%'
         }}>
           {config.title.text}
         </div>

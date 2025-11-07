@@ -183,7 +183,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
@@ -194,8 +194,10 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           fontWeight: 800,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
+          textAlign: 'center',
           opacity: titleAnim.opacity,
-          zIndex: 10
+          zIndex: 100,
+          maxWidth: '90%'
         }}>
           {config.title.text}
         </div>

@@ -313,21 +313,22 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
         <div style={{
           position: 'absolute',
-          left: titlePos.x,
-          top: titlePos.y,
+          left: '50%',
+          top: 70,
           fontSize: fonts.size_title,
           fontWeight: 900,
           fontFamily: '"Permanent Marker", cursive',
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translate(-50%, -50%) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
           zIndex: 200,
-          textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+          textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+          maxWidth: '90%'
         }}>
           {config.title.text}
         </div>
