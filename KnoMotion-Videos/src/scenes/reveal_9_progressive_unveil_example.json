@@ -1,0 +1,85 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "reveal_9_mystery_reveal",
+  "template_id": "Reveal9ProgressiveUnveil",
+  "learning_intentions": {
+    "primary": ["reveal"],
+    "secondary": ["question", "breakdown"],
+    "tags": ["progressive", "suspense", "unveiling"]
+  },
+  
+  "title": {
+    "text": "The Mystery Unveiled",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  
+  "revealStyle": "curtain",
+  
+  "stages": [
+    {
+      "headline": "Stage 1: The Question",
+      "description": "What lies behind the curtain?",
+      "visual": null,
+      "position": "center"
+    },
+    {
+      "headline": "Stage 2: The First Clue",
+      "description": "A pattern begins to emerge...",
+      "visual": {
+        "type": "roughSVG",
+        "shape": "circle",
+        "size": 150
+      },
+      "position": "center"
+    },
+    {
+      "headline": "Stage 3: The Connection",
+      "description": "Everything is linked by a central concept",
+      "visual": {
+        "type": "roughSVG",
+        "shape": "rect",
+        "size": 180
+      },
+      "position": "center"
+    },
+    {
+      "headline": "Stage 4: The Answer",
+      "description": "Now you see the complete picture!",
+      "visual": {
+        "type": "roughSVG",
+        "shape": "star",
+        "size": 200
+      },
+      "position": "center"
+    }
+  ],
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A2E",
+      "accent": "#FF6B35",
+      "accent2": "#9B59B6",
+      "ink": "#EAEAEA",
+      "curtain": "#16213E"
+    },
+    "fonts": {
+      "size_title": 72,
+      "size_headline": 52,
+      "size_description": 28
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.6,
+    "stageInterval": 3.5,
+    "stageTransition": 1.0,
+    "exit": 2.0
+  },
+  
+  "animation": {
+    "entrance": "fade-up",
+    "transitionEasing": "power3InOut"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "guide_10_recipe_tutorial",
+  "template_id": "Guide10StepSequence",
+  "learning_intentions": {
+    "primary": ["guide"],
+    "secondary": ["breakdown", "connect"],
+    "tags": ["tutorial", "process", "instructions"]
+  },
+  
+  "title": {
+    "text": "How to Create Amazing Content",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  
+  "layout": "vertical",
+  "connectionStyle": "arrow",
+  
+  "steps": [
+    {
+      "title": "Research Your Topic",
+      "description": "Gather information from reliable sources and understand your audience",
+      "icon": null
+    },
+    {
+      "title": "Create an Outline",
+      "description": "Structure your content with clear sections and logical flow",
+      "icon": null
+    },
+    {
+      "title": "Write Your Draft",
+      "description": "Put your ideas into words without worrying about perfection",
+      "icon": null
+    },
+    {
+      "title": "Add Visuals",
+      "description": "Enhance understanding with images, diagrams, or videos",
+      "icon": null
+    },
+    {
+      "title": "Edit & Refine",
+      "description": "Polish your content for clarity, grammar, and impact",
+      "icon": null
+    },
+    {
+      "title": "Publish & Share",
+      "description": "Release your content to the world and gather feedback",
+      "icon": null
+    }
+  ],
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#F0F8FF",
+      "accent": "#4169E1",
+      "accent2": "#32CD32",
+      "ink": "#1A1A1A",
+      "stepBg": "#FFFFFF",
+      "connectionColor": "#AAAAAA"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_stepTitle": 32,
+      "size_stepDesc": 20,
+      "size_stepNumber": 48
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleEntry": 0.6,
+    "firstStep": 1.5,
+    "stepInterval": 2.0,
+    "emphasize": 0.8,
+    "exit": 2.0
+  },
+  
+  "animation": {
+    "stepEntrance": "slide-left",
+    "connectionDraw": true,
+    "pulseOnEntry": true
+  }
+}
