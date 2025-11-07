@@ -1,0 +1,93 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Hook1EAmbientMystery_V6",
+  "metadata": {
+    "name": "Ambient Mystery - Knowledge Depths",
+    "description": "Atmospheric mystery with fog, particles, and sequential reveals",
+    "primary_intention": "REVEAL",
+    "secondary_intentions": ["INSPIRE", "QUESTION"],
+    "tags": ["mystery", "atmospheric", "intrigue", "dark-theme"],
+    "duration_estimate": "12s"
+  },
+  
+  "whisper": {
+    "text": "In the depths of knowledge...",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 100 },
+    "enabled": true
+  },
+  
+  "question": {
+    "text": "What secrets lie beneath the surface?",
+    "position": "center",
+    "offset": { "x": 0, "y": 0 }
+  },
+  
+  "hint": {
+    "text": "Sometimes the answer is in the shadows",
+    "position": "bottom-center",
+    "offset": { "x": 0, "y": -100 },
+    "enabled": true
+  },
+  
+  "centralVisual": {
+    "type": "emoji",
+    "value": "🌫️",
+    "position": "center",
+    "offset": { "x": 0, "y": -80 },
+    "scale": 2.5,
+    "enabled": false
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1F2E",
+      "fog": "rgba(74, 85, 104, 0.3)",
+      "accent": "#8E44AD",
+      "accent2": "#6C7A89",
+      "text": "#E8F4FD",
+      "textSecondary": "#9CA3AF",
+      "glow": "#F39C12"
+    },
+    "fonts": {
+      "size_whisper": 38,
+      "size_question": 72,
+      "size_hint": 28,
+      "weight_whisper": 400,
+      "weight_question": 700,
+      "weight_hint": 400
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "fog": 1.0,
+    "whisper": 2.5,
+    "question": 4.0,
+    "glow": 5.5,
+    "hint": 8.0,
+    "settle": 10.0,
+    "exit": 12.0
+  },
+  
+  "animation": {
+    "cameraZoom": true,
+    "zoomAmount": 0.08
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 20,
+      "style": "ambient"
+    },
+    "fog": {
+      "enabled": true,
+      "intensity": 0.3
+    },
+    "glow": {
+      "enabled": true,
+      "intensity": 0.6
+    }
+  }
+}

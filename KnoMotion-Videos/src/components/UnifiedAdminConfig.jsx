@@ -9,6 +9,16 @@ import { Compare12Config } from './configs/Compare12Config';
 import { Challenge13Config } from './configs/Challenge13Config';
 import { Spotlight14Config } from './configs/Spotlight14Config';
 import { Connect15Config } from './configs/Connect15Config';
+import { Quote16Config } from './configs/Quote16Config';
+import { Progress18Config } from './configs/Progress18Config';
+import { Hook1AConfig } from './configs/Hook1AConfig';
+import { Hook1EConfig } from './configs/Hook1EConfig';
+import { Explain2AConfig } from './configs/Explain2AConfig';
+import { Apply3AConfig } from './configs/Apply3AConfig';
+import { Explain2BConfig } from './configs/Explain2BConfig';
+import { Apply3BConfig } from './configs/Apply3BConfig';
+import { Reflect4AConfig } from './configs/Reflect4AConfig';
+import { Reflect4DConfig } from './configs/Reflect4DConfig';
 import { EZ } from '../sdk';
 
 // Import templates directly to access their getDuration functions
@@ -21,6 +31,16 @@ import * as Compare12Module from '../templates/Compare12MatrixGrid_V6';
 import * as Challenge13Module from '../templates/Challenge13PollQuiz_V6';
 import * as Spotlight14Module from '../templates/Spotlight14SingleConcept_V6';
 import * as Connect15Module from '../templates/Connect15AnalogyBridge_V6';
+import * as Quote16Module from '../templates/Quote16Showcase_V6';
+import * as Progress18Module from '../templates/Progress18Path_V6';
+import * as Hook1AModule from '../templates/Hook1AQuestionBurst_V6';
+import * as Hook1EModule from '../templates/Hook1EAmbientMystery_V6';
+import * as Explain2AModule from '../templates/Explain2AConceptBreakdown_V6';
+import * as Apply3AModule from '../templates/Apply3AMicroQuiz_V6';
+import * as Explain2BModule from '../templates/Explain2BAnalogy_V6';
+import * as Apply3BModule from '../templates/Apply3BScenarioChoice_V6';
+import * as Reflect4AModule from '../templates/Reflect4AKeyTakeaways_V6';
+import * as Reflect4DModule from '../templates/Reflect4DForwardLink_V6';
 
 // Import example scenes
 import reveal9Example from '../scenes/reveal_9_progressive_unveil_example.json';
@@ -32,6 +52,16 @@ import compare12Example from '../scenes/compare_12_matrix_example.json';
 import challenge13Example from '../scenes/challenge_13_poll_quiz_example.json';
 import spotlight14Example from '../scenes/spotlight_14_single_concept_example.json';
 import connect15Example from '../scenes/connect_15_analogy_bridge_example.json';
+import quote16Example from '../scenes/quote_16_showcase_example.json';
+import progress18Example from '../scenes/progress_18_path_example.json';
+import hook1AExample from '../scenes/hook_1a_question_burst_v6.json';
+import hook1EExample from '../scenes/hook_1e_ambient_mystery_v6.json';
+import explain2AExample from '../scenes/explain_2a_concept_breakdown_v6.json';
+import apply3AExample from '../scenes/apply_3a_micro_quiz_v6.json';
+import explain2BExample from '../scenes/explain_2b_analogy_v6.json';
+import apply3BExample from '../scenes/apply_3b_scenario_choice_v6.json';
+import reflect4AExample from '../scenes/reflect_4a_key_takeaways_v6.json';
+import reflect4DExample from '../scenes/reflect_4d_forward_link_v6.json';
 
 /**
  * Unified Admin Configuration Tool
@@ -54,7 +84,19 @@ const DEFAULT_SCENES = {
   'Compare12MatrixGrid': compare12Example,
   'Challenge13PollQuiz': challenge13Example,
   'Spotlight14SingleConcept': spotlight14Example,
-  'Connect15AnalogyBridge': connect15Example
+  'Connect15AnalogyBridge': connect15Example,
+  'Quote16Showcase': quote16Example,
+  'Progress18Path': progress18Example,
+  
+  // V5 to V6 Migrations (Nov 2025)
+  'Hook1AQuestionBurst_V6': hook1AExample,
+  'Hook1EAmbientMystery_V6': hook1EExample,
+  'Explain2AConceptBreakdown_V6': explain2AExample,
+  'Apply3AMicroQuiz_V6': apply3AExample,
+  'Explain2BAnalogy_V6': explain2BExample,
+  'Apply3BScenarioChoice_V6': apply3BExample,
+  'Reflect4AKeyTakeaways_V6': reflect4AExample,
+  'Reflect4DForwardLink_V6': reflect4DExample
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -168,6 +210,28 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return <Spotlight14Config scene={scene} onUpdate={handleSceneUpdate} />;
       case 'Connect15AnalogyBridge':
         return <Connect15Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Quote16Showcase':
+        return <Quote16Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Progress18Path':
+        return <Progress18Config scene={scene} onUpdate={handleSceneUpdate} />;
+      
+      // V5 to V6 Migrations
+      case 'Hook1AQuestionBurst_V6':
+        return <Hook1AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Hook1EAmbientMystery_V6':
+        return <Hook1EConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Explain2AConceptBreakdown_V6':
+        return <Explain2AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Apply3AMicroQuiz_V6':
+        return <Apply3AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Explain2BAnalogy_V6':
+        return <Explain2BConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Apply3BScenarioChoice_V6':
+        return <Apply3BConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Reflect4AKeyTakeaways_V6':
+        return <Reflect4AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'Reflect4DForwardLink_V6':
+        return <Reflect4DConfig scene={scene} onUpdate={handleSceneUpdate} />;
       
       default:
         return (
@@ -201,6 +265,28 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Spotlight14Module.getDuration ? Spotlight14Module.getDuration(scene, fps) : 450;
       case 'Connect15AnalogyBridge':
         return Connect15Module.getDuration ? Connect15Module.getDuration(scene, fps) : 450;
+      case 'Quote16Showcase':
+        return Quote16Module.getDuration ? Quote16Module.getDuration(scene, fps) : 450;
+      case 'Progress18Path':
+        return Progress18Module.getDuration ? Progress18Module.getDuration(scene, fps) : 450;
+      
+      // V5 to V6 Migrations
+      case 'Hook1AQuestionBurst_V6':
+        return Hook1AModule.getDuration ? Hook1AModule.getDuration(scene, fps) : 450;
+      case 'Hook1EAmbientMystery_V6':
+        return Hook1EModule.getDuration ? Hook1EModule.getDuration(scene, fps) : 450;
+      case 'Explain2AConceptBreakdown_V6':
+        return Explain2AModule.getDuration ? Explain2AModule.getDuration(scene, fps) : 450;
+      case 'Apply3AMicroQuiz_V6':
+        return Apply3AModule.getDuration ? Apply3AModule.getDuration(scene, fps) : 450;
+      case 'Explain2BAnalogy_V6':
+        return Explain2BModule.getDuration ? Explain2BModule.getDuration(scene, fps) : 450;
+      case 'Apply3BScenarioChoice_V6':
+        return Apply3BModule.getDuration ? Apply3BModule.getDuration(scene, fps) : 450;
+      case 'Reflect4AKeyTakeaways_V6':
+        return Reflect4AModule.getDuration ? Reflect4AModule.getDuration(scene, fps) : 450;
+      case 'Reflect4DForwardLink_V6':
+        return Reflect4DModule.getDuration ? Reflect4DModule.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats
@@ -226,67 +312,75 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: 20,
-        overflowY: 'auto',
-        maxHeight: '100vh',
+        height: 'calc(100vh - 48px)',
         paddingRight: 12
       }}>
-        {/* Header */}
+        {/* Header - Compact */}
         <div style={{
           backgroundColor: '#FFFFFF',
-          padding: 24,
+          padding: '16px 20px',
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          flexShrink: 0
         }}>
           <h1 style={{
-            fontSize: 36,
-            fontWeight: 900,
-            fontFamily: '"Permanent Marker", cursive',
-            color: '#1A1A1A',
-            margin: 0,
-            marginBottom: 8
-          }}>
-            🎛️ Interactive Template Config
-          </h1>
-          <p style={{
-              fontSize: 15,
-              color: '#4A5568',
-              margin: 0,
-              lineHeight: 1.6,
-              fontWeight: 400
-          }}>
-            Select a template, configure it visually, and see real-time changes.
-            <br />
-            <strong>Currently available:</strong> 7 templates with FULL interactive config panels!
-            <br />
-            <em style={{ fontSize: 13, color: '#718096' }}>✅ All templates (9, 10, 11, 12, 13, 14, 15) now have complete configuration UIs</em>
-          </p>
-        </div>
-        
-        {/* Template Gallery */}
-        <TemplateGallery
-          onSelectTemplate={handleTemplateSelect}
-          selectedTemplateId={selectedTemplateId}
-        />
-        
-        {/* Configuration Panel */}
-        <div style={{
-          backgroundColor: '#FFFFFF',
-          padding: 24,
-          borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{
             fontSize: 24,
             fontWeight: 800,
             fontFamily: '"Permanent Marker", cursive',
             color: '#1A1A1A',
-            marginTop: 0,
-            marginBottom: 16
+            margin: 0
           }}>
-            ⚙️ Configure: {selectedTemplateId}
-          </h2>
+            🎛️ Template Builder
+          </h1>
+        </div>
+        
+        {/* Template Gallery - Fixed Height */}
+        <div style={{ flexShrink: 0 }}>
+          <TemplateGallery
+            onSelectTemplate={handleTemplateSelect}
+            selectedTemplateId={selectedTemplateId}
+          />
+        </div>
+        
+        {/* Configuration Panel - Scrollable */}
+        <div style={{
+          backgroundColor: '#FFFFFF',
+          padding: 20,
+          borderRadius: 12,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 16,
+            flexShrink: 0
+          }}>
+            <span style={{ fontSize: 20 }}>⚙️</span>
+            <h2 style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: '#2C3E50',
+              margin: 0
+            }}>
+              Configuration
+            </h2>
+          </div>
           
-          {renderConfigPanel()}
+          <div style={{
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            flex: 1,
+            paddingRight: 8,
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#CBD5E0 #F7FAFC'
+          }}>
+            {renderConfigPanel()}
+          </div>
         </div>
       </div>
       
@@ -302,7 +396,7 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         {/* Live Preview */}
         <div style={{
           backgroundColor: '#FFFFFF',
-          padding: 24,
+          padding: 20,
           borderRadius: 12,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
         }}>
@@ -310,30 +404,35 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 16
+            marginBottom: 12
           }}>
-            <h2 style={{
-              fontSize: 24,
-              fontWeight: 800,
-              fontFamily: '"Permanent Marker", cursive',
-              color: '#1A1A1A',
-              margin: 0
-            }}>
-              🎥 Live Preview
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 20 }}>🎥</span>
+              <h2 style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: '#2C3E50',
+                margin: 0
+              }}>
+                Preview
+              </h2>
+            </div>
             
             <button
               onClick={handleReloadPlayer}
               style={{
-                padding: '8px 16px',
+                padding: '6px 14px',
                 backgroundColor: '#4CAF50',
                 color: '#FFFFFF',
                 border: 'none',
-                borderRadius: 8,
+                borderRadius: 6,
                 cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: 14
+                fontWeight: 600,
+                fontSize: 13,
+                transition: 'all 0.2s'
               }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#45A049'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#4CAF50'}
             >
               🔄 Reload
             </button>
@@ -372,29 +471,27 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             />
           </div>
           
-          {/* Meta Info */}
+          {/* Meta Info - Simplified */}
           <div style={{
-            marginTop: 16,
-            padding: 12,
-            backgroundColor: '#F5F5F5',
-            borderRadius: 8,
-            fontSize: 13,
-            color: '#2C3E50',
-            lineHeight: 1.6
+            marginTop: 12,
+            padding: 10,
+            backgroundColor: '#F8F9FA',
+            borderRadius: 6,
+            fontSize: 12,
+            color: '#5A6C7D',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>Template:</strong> <span style={{ color: '#4CAF50', fontWeight: 600 }}>{selectedTemplateId}</span></div>
-              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>Schema:</strong> {scene.schema_version || 'v6.0'}</div>
-              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>Duration:</strong> {(getDurationInFrames() / fps).toFixed(1)}s</div>
-              <div style={{ fontSize: 13 }}><strong style={{ fontWeight: 700, color: '#1A1A1A' }}>FPS:</strong> {fps} fps</div>
-            </div>
+            <span><strong>Template:</strong> {selectedTemplateId.replace(/([0-9]+)/, ' $1 ')}</span>
+            <span><strong>Duration:</strong> {(getDurationInFrames() / fps).toFixed(1)}s</span>
           </div>
         </div>
         
-        {/* JSON Viewer */}
+        {/* JSON Viewer - Simplified */}
         <div style={{
           backgroundColor: '#FFFFFF',
-          padding: 24,
+          padding: 20,
           borderRadius: 12,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
         }}>
@@ -402,65 +499,74 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 16
+            marginBottom: 12
           }}>
-            <h3 style={{
-              fontSize: 20,
-              fontWeight: 800,
-              fontFamily: '"Permanent Marker", cursive',
-              color: '#1A1A1A',
-              margin: 0
-            }}>
-              📋 Scene JSON
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 20 }}>📋</span>
+              <h3 style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: '#2C3E50',
+                margin: 0
+              }}>
+                Export
+              </h3>
+            </div>
             
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
               <button
                 onClick={() => setShowJSON(!showJSON)}
                 style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#2196F3',
-                  color: '#FFFFFF',
+                  padding: '5px 10px',
+                  backgroundColor: showJSON ? '#5A6C7D' : '#E0E0E0',
+                  color: showJSON ? '#FFFFFF' : '#2C3E50',
                   border: 'none',
-                  borderRadius: 6,
+                  borderRadius: 5,
                   cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: 12
+                  fontWeight: 600,
+                  fontSize: 12,
+                  transition: 'all 0.2s'
                 }}
               >
-                {showJSON ? '👁️ Hide' : '👁️ Show'}
+                {showJSON ? 'Hide' : 'Show'}
               </button>
               
               <button
                 onClick={handleCopyJSON}
                 style={{
-                  padding: '6px 12px',
+                  padding: '5px 10px',
                   backgroundColor: '#9C27B0',
                   color: '#FFFFFF',
                   border: 'none',
-                  borderRadius: 6,
+                  borderRadius: 5,
                   cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: 12
+                  fontWeight: 600,
+                  fontSize: 12,
+                  transition: 'all 0.2s'
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#7B1FA2'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#9C27B0'}
               >
-                📋 Copy
+                Copy
               </button>
               
               <button
                 onClick={handleDownloadJSON}
                 style={{
-                  padding: '6px 12px',
+                  padding: '5px 10px',
                   backgroundColor: '#FF9800',
                   color: '#FFFFFF',
                   border: 'none',
-                  borderRadius: 6,
+                  borderRadius: 5,
                   cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: 12
+                  fontWeight: 600,
+                  fontSize: 12,
+                  transition: 'all 0.2s'
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#F57C00'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#FF9800'}
               >
-                💾 Download
+                Download
               </button>
             </div>
           </div>

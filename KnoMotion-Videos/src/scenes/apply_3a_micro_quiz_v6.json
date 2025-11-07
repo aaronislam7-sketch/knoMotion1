@@ -1,0 +1,52 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Apply3AMicroQuiz_V6",
+  "metadata": {
+    "name": "Micro Quiz - Geography Question",
+    "description": "Interactive multiple-choice quiz with timer and answer reveal",
+    "primary_intention": "CHALLENGE",
+    "secondary_intentions": ["QUESTION", "REVEAL"],
+    "tags": ["quiz", "interactive", "multiple-choice", "timer"],
+    "duration_estimate": "14s"
+  },
+  "question": {
+    "text": "What is the capital of France?",
+    "visual": { "type": "emoji", "value": "🗼", "scale": 2.0, "enabled": false }
+  },
+  "choices": [
+    { "text": "London", "id": "A" },
+    { "text": "Paris", "id": "B" },
+    { "text": "Berlin", "id": "C" },
+    { "text": "Madrid", "id": "D" }
+  ],
+  "correctAnswer": 1,
+  "timer": { "duration": 8, "enabled": true, "style": "countdown" },
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "question": "#1A1A1A",
+      "choice": "#FFFFFF",
+      "choiceBorder": "#CBD5E0",
+      "correct": "#2ECC71",
+      "incorrect": "#E74C3C",
+      "timer": "#FF6B35"
+    },
+    "fonts": {
+      "size_question": 48,
+      "size_choice": 28,
+      "size_timer": 64,
+      "weight_question": 700,
+      "weight_choice": 600
+    }
+  },
+  "beats": {
+    "entrance": 0.5,
+    "question": 1.0,
+    "choicesReveal": 2.0,
+    "choiceInterval": 0.3,
+    "thinking": 4.0,
+    "reveal": 10.0,
+    "hold": 12.0,
+    "exit": 14.0
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Explain2AConceptBreakdown_V6",
+  "metadata": {
+    "name": "Concept Breakdown - Learning Components",
+    "description": "Hub-and-spoke layout showing a central concept with radiating parts",
+    "primary_intention": "BREAKDOWN",
+    "secondary_intentions": ["CONNECT", "GUIDE"],
+    "tags": ["concept", "breakdown", "hub-spoke", "educational"],
+    "duration_estimate": "12s"
+  },
+  
+  "title": {
+    "text": "What is Deep Learning?",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 60 }
+  },
+  
+  "center": {
+    "text": "Deep Learning",
+    "visual": {
+      "type": "emoji",
+      "value": "🧠",
+      "scale": 2.0,
+      "enabled": true
+    }
+  },
+  
+  "parts": [
+    {
+      "label": "Neural Networks",
+      "description": "Interconnected layers of nodes",
+      "color": "#FF6B35"
+    },
+    {
+      "label": "Training Data",
+      "description": "Large datasets for learning",
+      "color": "#2ECC71"
+    },
+    {
+      "label": "Backpropagation",
+      "description": "Error correction algorithm",
+      "color": "#9B59B6"
+    },
+    {
+      "label": "Optimization",
+      "description": "Tuning parameters",
+      "color": "#3498DB"
+    }
+  ],
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "center": "#FF6B35",
+      "connection": "#CBD5E0",
+      "text": "#1A1A1A",
+      "textSecondary": "#5A5A5A"
+    },
+    "fonts": {
+      "size_title": 52,
+      "size_center": 44,
+      "size_part_label": 28,
+      "size_part_desc": 18,
+      "weight_title": 800,
+      "weight_center": 700,
+      "weight_part": 600
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "centerReveal": 2.0,
+    "firstPart": 3.0,
+    "partInterval": 0.6,
+    "connections": 5.0,
+    "emphasis": 7.0,
+    "hold": 9.0,
+    "exit": 11.0
+  },
+  
+  "layout": {
+    "radius": 350,
+    "centerSize": 180,
+    "partSize": 140
+  },
+  
+  "animation": {
+    "partReveal": "pop-in",
+    "connectionDraw": true,
+    "pulse": true
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 15
+    },
+    "glow": {
+      "enabled": true
+    }
+  }
+}

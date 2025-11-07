@@ -98,6 +98,32 @@ const RoughSVGRenderer = ({ config, frame, beats, colors, easingMap, fps, svgRef
 };
 
 /**
+ * Emoji Hero Renderer
+ * Renders an emoji as a hero visual
+ * 
+ * @param {Object} config - Hero configuration
+ * @param {string} config.value - Emoji character
+ * @param {number} config.scale - Scale multiplier
+ * @returns {JSX.Element} Emoji element
+ */
+const EmojiRenderer = ({ config, frame, beats, colors, easingMap, fps }) => {
+  const { value, scale = 1.0, style = {} } = config;
+  
+  return (
+    <div style={{
+      fontSize: `${80 * scale}px`,
+      lineHeight: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...style
+    }}>
+      {value || '⭐'}
+    </div>
+  );
+};
+
+/**
  * Lottie Hero Renderer
  * Renders a Lottie animation
  * 
@@ -166,6 +192,7 @@ export const registerCustomHero = (id, component) => {
 HERO_TYPES['image'] = ImageRenderer;
 HERO_TYPES['svg'] = SVGRenderer;
 HERO_TYPES['roughSVG'] = RoughSVGRenderer;
+HERO_TYPES['emoji'] = EmojiRenderer;
 HERO_TYPES['lottie'] = LottieRenderer;
 HERO_TYPES['custom'] = CustomRenderer;
 

@@ -32,6 +32,18 @@ import { Compare12MatrixGrid } from './Compare12MatrixGrid_V6';
 import { Challenge13PollQuiz } from './Challenge13PollQuiz_V6';
 import { Spotlight14SingleConcept } from './Spotlight14SingleConcept_V6';
 import { Connect15AnalogyBridge } from './Connect15AnalogyBridge_V6';
+import { Quote16Showcase } from './Quote16Showcase_V6';
+import { Progress18Path } from './Progress18Path_V6';
+
+// V5 to V6 Migrations (Nov 2025)
+import { Hook1AQuestionBurst as Hook1AQuestionBurst_V6 } from './Hook1AQuestionBurst_V6';
+import { Hook1EAmbientMystery as Hook1EAmbientMystery_V6 } from './Hook1EAmbientMystery_V6';
+import { Explain2AConceptBreakdown as Explain2AConceptBreakdown_V6 } from './Explain2AConceptBreakdown_V6';
+import { Apply3AMicroQuiz as Apply3AMicroQuiz_V6 } from './Apply3AMicroQuiz_V6';
+import { Explain2BAnalogy as Explain2BAnalogy_V6 } from './Explain2BAnalogy_V6';
+import { Apply3BScenarioChoice as Apply3BScenarioChoice_V6 } from './Apply3BScenarioChoice_V6';
+import { Reflect4AKeyTakeaways as Reflect4AKeyTakeaways_V6 } from './Reflect4AKeyTakeaways_V6';
+import { Reflect4DForwardLink as Reflect4DForwardLink_V6 } from './Reflect4DForwardLink_V6';
 
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
@@ -80,6 +92,7 @@ const AGNOSTIC_TEMPLATE_REGISTRY = {
  * Fully configurable, no hardcoded values, action-based intentions
  */
 const V6_TEMPLATE_REGISTRY = {
+  // Original V6 Templates
   'Reveal9ProgressiveUnveil': Reveal9ProgressiveUnveil,
   'Guide10StepSequence': Guide10StepSequence,
   'Compare11BeforeAfter': Compare11BeforeAfter,
@@ -89,7 +102,18 @@ const V6_TEMPLATE_REGISTRY = {
   'Challenge13PollQuiz': Challenge13PollQuiz,
   'Spotlight14SingleConcept': Spotlight14SingleConcept,
   'Connect15AnalogyBridge': Connect15AnalogyBridge,
-  // Future v6 templates will be added here
+  'Quote16Showcase': Quote16Showcase,
+  'Progress18Path': Progress18Path,
+  
+  // V5 to V6 Migrations (Nov 2025)
+  'Hook1AQuestionBurst_V6': Hook1AQuestionBurst_V6,
+  'Hook1EAmbientMystery_V6': Hook1EAmbientMystery_V6,
+  'Explain2AConceptBreakdown_V6': Explain2AConceptBreakdown_V6,
+  'Apply3AMicroQuiz_V6': Apply3AMicroQuiz_V6,
+  'Explain2BAnalogy_V6': Explain2BAnalogy_V6,
+  'Apply3BScenarioChoice_V6': Apply3BScenarioChoice_V6,
+  'Reflect4AKeyTakeaways_V6': Reflect4AKeyTakeaways_V6,
+  'Reflect4DForwardLink_V6': Reflect4DForwardLink_V6
 };
 
 /**

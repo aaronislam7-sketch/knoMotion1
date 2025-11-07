@@ -18,7 +18,8 @@ const TEMPLATE_CATALOG = [
     duration: '15-18s',
     icon: '❓',
     color: '#FF6B35',
-    version: 'v5.1'
+    version: 'v5.1',
+    hasConfig: false
   },
   {
     id: 'Hook1EAmbientMystery',
@@ -140,7 +141,7 @@ const TEMPLATE_CATALOG = [
     color: '#00796B',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
   },
   {
     id: 'Challenge13PollQuiz',
@@ -152,7 +153,7 @@ const TEMPLATE_CATALOG = [
     color: '#D32F2F',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
   },
   {
     id: 'Spotlight14SingleConcept',
@@ -164,7 +165,7 @@ const TEMPLATE_CATALOG = [
     color: '#FF6B35',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
   },
   {
     id: 'Connect15AnalogyBridge',
@@ -176,7 +177,133 @@ const TEMPLATE_CATALOG = [
     color: '#9C27B0',
     version: 'v6.0',
     isNew: true,
-    hasConfig: false
+    hasConfig: true
+  },
+  
+  // INSPIRE TEMPLATES (Nov 7, 2025) - CRITICAL GAP FILLED
+  {
+    id: 'Quote16Showcase',
+    name: 'Quote Showcase',
+    intentions: { primary: 'INSPIRE', secondary: ['QUESTION', 'REVEAL'] },
+    description: 'Inspirational quotes with beautiful visuals and animations',
+    duration: '7-10s',
+    icon: '✨',
+    color: '#F39C12',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  
+  // ADDITIONAL GUIDE TEMPLATES (Nov 7, 2025)
+  {
+    id: 'Progress18Path',
+    name: 'Progress Path',
+    intentions: { primary: 'GUIDE', secondary: ['INSPIRE', 'CONNECT'] },
+    description: 'Visual journey with milestones and progress tracking',
+    duration: '6-10s',
+    icon: '🛤️',
+    color: '#00BCD4',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  
+  // V5 TO V6 MIGRATIONS
+  {
+    id: 'Hook1AQuestionBurst_V6',
+    name: 'Question Burst V6',
+    intentions: { primary: 'QUESTION', secondary: ['CHALLENGE', 'REVEAL'] },
+    description: '✨ Fully configurable two-part question with optional visuals and conclusion',
+    duration: '8-12s',
+    icon: '❓',
+    color: '#FF6B35',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Hook1EAmbientMystery_V6',
+    name: 'Ambient Mystery V6',
+    intentions: { primary: 'REVEAL', secondary: ['INSPIRE', 'QUESTION'] },
+    description: '✨ Dark atmospheric template with fog, particles, and sequential mystery reveals',
+    duration: '12-18s',
+    icon: '🌫️',
+    color: '#8E44AD',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Explain2AConceptBreakdown_V6',
+    name: 'Concept Breakdown V6',
+    intentions: { primary: 'BREAKDOWN', secondary: ['CONNECT', 'GUIDE'] },
+    description: '✨ Hub-and-spoke layout with dynamic parts array (2-8 components) and connections',
+    duration: '12-20s',
+    icon: '🧩',
+    color: '#3498DB',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Apply3AMicroQuiz_V6',
+    name: 'Micro Quiz V6',
+    intentions: { primary: 'CHALLENGE', secondary: ['QUESTION', 'REVEAL'] },
+    description: '✨ Interactive multiple-choice quiz with countdown timer and answer reveal',
+    duration: '12-16s',
+    icon: '🎯',
+    color: '#E74C3C',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Explain2BAnalogy_V6',
+    name: 'Visual Analogy V6',
+    intentions: { primary: 'COMPARE', secondary: ['BREAKDOWN', 'INSPIRE'] },
+    description: '✨ Side-by-side comparison with familiar analogies for better understanding',
+    duration: '9-12s',
+    icon: '🔄',
+    color: '#16A085',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Apply3BScenarioChoice_V6',
+    name: 'Scenario Choice V6',
+    intentions: { primary: 'CHALLENGE', secondary: ['GUIDE', 'COMPARE'] },
+    description: '✨ Real-world decision scenarios with multiple paths and consequences',
+    duration: '9-12s',
+    icon: '🎲',
+    color: '#F39C12',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Reflect4AKeyTakeaways_V6',
+    name: 'Key Takeaways V6',
+    intentions: { primary: 'BREAKDOWN', secondary: ['GUIDE', 'REVEAL'] },
+    description: '✨ Clean bullet-point summary of main points with dynamic list',
+    duration: '8-12s',
+    icon: '📋',
+    color: '#27AE60',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'Reflect4DForwardLink_V6',
+    name: 'Forward Link V6',
+    intentions: { primary: 'CONNECT', secondary: ['INSPIRE', 'REVEAL'] },
+    description: '✨ Bridge to next topic with context and preview for continuity',
+    duration: '9-12s',
+    icon: '🔗',
+    color: '#8E44AD',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true
   }
 ];
 
@@ -206,6 +333,7 @@ const INTENTION_ICONS = {
 export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
   const [filterIntention, setFilterIntention] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [isCollapsed, setIsCollapsed] = useState(false);
   
   // Filter templates by intention
   const filteredTemplates = filterIntention
@@ -220,45 +348,87 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
   
   return (
     <div style={{
-      padding: '20px',
-      backgroundColor: '#F8F9FA',
+      backgroundColor: '#FFFFFF',
       borderRadius: 12,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      overflow: 'hidden',
       marginBottom: 20
     }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20
-      }}>
-        <h2 style={{
-          fontSize: 28,
-          fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
-          color: '#1A1A1A',
-          margin: 0
-        }}>
-          🎨 Template Gallery
-        </h2>
+      {/* Collapsible Header */}
+      <div 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 20px',
+          backgroundColor: '#4CAF50',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          userSelect: 'none'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45A049'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 24 }}>🎨</span>
+          <h2 style={{
+            fontSize: 22,
+            fontWeight: 800,
+            fontFamily: '"Permanent Marker", cursive',
+            color: '#FFFFFF',
+            margin: 0
+          }}>
+            Template Gallery {!isCollapsed && `(${filteredTemplates.length})`}
+          </h2>
+        </div>
         
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#FFFFFF',
-              border: '2px solid #DDD',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: 14
-            }}
-          >
-            {viewMode === 'grid' ? '📋 List View' : '🎨 Grid View'}
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {!isCollapsed && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewMode(viewMode === 'grid' ? 'list' : 'grid');
+              }}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                border: '2px solid rgba(255,255,255,0.4)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 13,
+                color: '#FFFFFF',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+            >
+              {viewMode === 'grid' ? '📋 List' : '🎨 Grid'}
+            </button>
+          )}
+          <span style={{ 
+            fontSize: 24, 
+            color: '#FFFFFF',
+            transition: 'transform 0.3s',
+            transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'
+          }}>
+            ▼
+          </span>
         </div>
       </div>
+      
+      {/* Gallery Content */}
+      {!isCollapsed && (
+        <div style={{ 
+          padding: '20px',
+          maxHeight: '400px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          scrollBehavior: 'smooth',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#4CAF50 #F0F0F0'
+        }}>
       
       {/* Intention Filter */}
       <div style={{ marginBottom: 20 }}>
@@ -324,9 +494,9 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
       {/* Template Cards */}
       <div style={{
         display: viewMode === 'grid' ? 'grid' : 'flex',
-        gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'none',
+        gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(260px, 1fr))' : 'none',
         flexDirection: viewMode === 'list' ? 'column' : 'none',
-        gap: 16
+        gap: 14
       }}>
         {filteredTemplates.map(template => {
           const isSelected = template.id === selectedTemplateId;
@@ -517,6 +687,8 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
           >
             Clear Filter
           </button>
+        </div>
+      )}
         </div>
       )}
     </div>
