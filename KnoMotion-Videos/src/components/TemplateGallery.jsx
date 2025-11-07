@@ -323,8 +323,7 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
       {!isCollapsed && (
         <div style={{ 
           padding: '20px',
-          maxHeight: 'calc(70vh - 100px)',
-          minHeight: '300px',
+          maxHeight: '400px',
           overflowY: 'auto',
           overflowX: 'hidden',
           scrollBehavior: 'smooth',

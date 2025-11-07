@@ -242,58 +242,53 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: 20,
-        overflowY: 'auto',
-        maxHeight: 'calc(100vh - 48px)',
-        paddingRight: 12,
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#CBD5E0 #F7FAFC'
+        height: 'calc(100vh - 48px)',
+        paddingRight: 12
       }}>
-        {/* Header */}
+        {/* Header - Compact */}
         <div style={{
           backgroundColor: '#FFFFFF',
-          padding: 20,
+          padding: '16px 20px',
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          flexShrink: 0
         }}>
           <h1 style={{
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: 800,
             fontFamily: '"Permanent Marker", cursive',
             color: '#1A1A1A',
-            margin: 0,
-            marginBottom: 6
+            margin: 0
           }}>
             🎛️ Template Builder
           </h1>
-          <p style={{
-              fontSize: 14,
-              color: '#5A6C7D',
-              margin: 0,
-              lineHeight: 1.5,
-              fontWeight: 400
-          }}>
-            Choose a template, customize it, and preview your video in real-time.
-          </p>
         </div>
         
-        {/* Template Gallery */}
-        <TemplateGallery
-          onSelectTemplate={handleTemplateSelect}
-          selectedTemplateId={selectedTemplateId}
-        />
+        {/* Template Gallery - Fixed Height */}
+        <div style={{ flexShrink: 0 }}>
+          <TemplateGallery
+            onSelectTemplate={handleTemplateSelect}
+            selectedTemplateId={selectedTemplateId}
+          />
+        </div>
         
-        {/* Configuration Panel */}
+        {/* Configuration Panel - Scrollable */}
         <div style={{
           backgroundColor: '#FFFFFF',
           padding: 20,
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            marginBottom: 16
+            marginBottom: 16,
+            flexShrink: 0
           }}>
             <span style={{ fontSize: 20 }}>⚙️</span>
             <h2 style={{
@@ -306,7 +301,16 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
             </h2>
           </div>
           
-          {renderConfigPanel()}
+          <div style={{
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            flex: 1,
+            paddingRight: 8,
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#CBD5E0 #F7FAFC'
+          }}>
+            {renderConfigPanel()}
+          </div>
         </div>
       </div>
       
