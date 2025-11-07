@@ -378,15 +378,15 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
             {/* Column headers */}
             {columns.map((col, colIndex) => {
               const isHighlighted = config.highlightWinner && config.winnerColumn === colIndex && highlightProgress > 0;
-              const highlightScale = isHighlighted ? 1 + (0.05 * EZ.smooth(highlightProgress)) : 1;
-              const highlightGlow = isHighlighted ? `0 0 20px ${colors.highlight}` : 'none';
+              const highlightGlow = isHighlighted ? `0 0 30px ${colors.highlight}` : 'none';
+              const borderWidth = isHighlighted ? 5 : 3;
               
               return (
                 <div key={colIndex} style={{
                   width: layout.cellWidth,
                   height: layout.cellHeight,
                   backgroundColor: isHighlighted ? colors.highlight : colors.headerBg,
-                  border: `3px solid ${isHighlighted ? colors.accent : colors.gridLines}`,
+                  border: `${borderWidth}px solid ${isHighlighted ? colors.accent : colors.gridLines}`,
                   borderRadius: 8,
                   marginLeft: 4,
                   display: 'flex',
@@ -396,7 +396,6 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
                   fontWeight: 800,
                   fontFamily: '"Permanent Marker", cursive',
                   color: isHighlighted ? colors.ink : colors.accent2,
-                  transform: `scale(${highlightScale})`,
                   boxShadow: highlightGlow,
                   transition: 'all 0.3s ease'
                 }}>
@@ -441,17 +440,18 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
                 );
                 
                 const isHighlighted = config.highlightWinner && config.winnerColumn === colIndex && highlightProgress > 0;
-                const cellScale = config.animation.cellEntrance === 'pop' ?
+                const cellScale = config.animation.cellEntrance === 'pop' && !isHighlighted ?
                   EZ.backOut(visibility.progress) :
                   1;
                 const cellOpacity = EZ.smooth(visibility.progress);
+                const borderWidth = isHighlighted ? 4 : 2;
                 
                 return (
                   <div key={colIndex} style={{
                     width: layout.cellWidth,
                     height: layout.cellHeight,
                     backgroundColor: isHighlighted ? colors.highlight : colors.cellBg,
-                    border: `2px solid ${isHighlighted ? colors.accent : colors.gridLines}`,
+                    border: `${borderWidth}px solid ${isHighlighted ? colors.accent : colors.gridLines}`,
                     borderRadius: 8,
                     marginLeft: 4,
                     display: 'flex',
@@ -459,7 +459,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
                     justifyContent: 'center',
                     opacity: cellOpacity,
                     transform: `scale(${cellScale})`,
-                    boxShadow: isHighlighted ? `0 0 15px ${colors.highlight}` : '0 2px 8px rgba(0,0,0,0.1)'
+                    boxShadow: isHighlighted ? `0 0 20px ${colors.highlight}` : '0 2px 8px rgba(0,0,0,0.1)'
                   }}>
                     {renderCellContent(cell, colors, fonts, frame, beats, fps, EZ)}
                   </div>
