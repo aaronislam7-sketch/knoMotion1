@@ -321,7 +321,15 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
       
       {/* Gallery Content */}
       {!isCollapsed && (
-        <div style={{ padding: '20px' }}>
+        <div style={{ 
+          padding: '20px',
+          maxHeight: '500px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          scrollBehavior: 'smooth',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#4CAF50 #F0F0F0'
+        }}>
       
       {/* Intention Filter */}
       <div style={{ marginBottom: 20 }}>

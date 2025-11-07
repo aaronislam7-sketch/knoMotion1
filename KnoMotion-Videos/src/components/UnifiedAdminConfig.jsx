@@ -243,8 +243,10 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         flexDirection: 'column',
         gap: 20,
         overflowY: 'auto',
-        maxHeight: '100vh',
-        paddingRight: 12
+        maxHeight: 'calc(100vh - 48px)',
+        paddingRight: 12,
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#CBD5E0 #F7FAFC'
       }}>
         {/* Header */}
         <div style={{
