@@ -59,7 +59,9 @@ const TEMPLATE_CATALOG = [
     duration: '12-15s',
     icon: '🎯',
     color: '#E74C3C',
-    version: 'v5.0'
+    version: 'v5.0',
+    deprecated: true,
+    replacement: 'ChallengeQuiz'
   },
   {
     id: 'Apply3BScenarioChoice',
@@ -153,7 +155,22 @@ const TEMPLATE_CATALOG = [
     color: '#D32F2F',
     version: 'v6.0',
     isNew: true,
-    hasConfig: true
+    hasConfig: true,
+    deprecated: true,
+    replacement: 'ChallengeQuiz'
+  },
+  {
+    id: 'ChallengeQuiz',
+    name: 'Unified Quiz',
+    intentions: { primary: 'CHALLENGE', secondary: ['QUESTION', 'REVEAL'] },
+    description: 'Flexible quiz template with multiple layouts, timer styles, and micro-delights',
+    duration: '14-25s',
+    icon: '🎯',
+    color: '#FF6B35',
+    version: 'v6.0',
+    isNew: true,
+    hasConfig: true,
+    featured: true
   },
   {
     id: 'Spotlight14SingleConcept',
@@ -529,8 +546,27 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                 }
               }}
             >
+              {/* Featured Badge */}
+              {template.featured && (
+                <div style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  backgroundColor: '#FF6B35',
+                  color: '#FFFFFF',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  zIndex: 10
+                }}>
+                  ⭐ FEATURED
+                </div>
+              )}
+              
               {/* New Badge */}
-              {template.isNew && (
+              {template.isNew && !template.featured && (
                 <div style={{
                   position: 'absolute',
                   top: 12,
@@ -544,6 +580,24 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                   letterSpacing: 1
                 }}>
                   NEW
+                </div>
+              )}
+              
+              {/* Deprecated Badge */}
+              {template.deprecated && (
+                <div style={{
+                  position: 'absolute',
+                  top: 12,
+                  left: 12,
+                  backgroundColor: '#999',
+                  color: '#FFFFFF',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 1
+                }}>
+                  DEPRECATED
                 </div>
               )}
               
@@ -603,6 +657,17 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
               fontWeight: 400
               }}>
                 {template.description}
+                {template.deprecated && template.replacement && (
+                  <span style={{ 
+                    display: 'block', 
+                    marginTop: 8, 
+                    fontSize: 12, 
+                    color: '#FF6B35',
+                    fontWeight: 600 
+                  }}>
+                    → Use {template.replacement} instead
+                  </span>
+                )}
               </p>
               
               {/* Intentions */}

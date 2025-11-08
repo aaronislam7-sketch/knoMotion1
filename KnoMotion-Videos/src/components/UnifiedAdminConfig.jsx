@@ -29,6 +29,7 @@ import * as Compare11Module from '../templates/Compare11BeforeAfter_V6';
 // NEW: Learning Content Pipeline Templates (Nov 2025)
 import * as Compare12Module from '../templates/Compare12MatrixGrid_V6';
 import * as Challenge13Module from '../templates/Challenge13PollQuiz_V6';
+import * as ChallengeQuizModule from '../templates/ChallengeQuiz_V6';
 import * as Spotlight14Module from '../templates/Spotlight14SingleConcept_V6';
 import * as Connect15Module from '../templates/Connect15AnalogyBridge_V6';
 import * as Quote16Module from '../templates/Quote16Showcase_V6';
@@ -83,6 +84,7 @@ const DEFAULT_SCENES = {
   // Learning Content Pipeline Templates (Nov 2025)
   'Compare12MatrixGrid': compare12Example,
   'Challenge13PollQuiz': challenge13Example,
+  'ChallengeQuiz': challenge13Example, // Uses same example scene structure
   'Spotlight14SingleConcept': spotlight14Example,
   'Connect15AnalogyBridge': connect15Example,
   'Quote16Showcase': quote16Example,
@@ -206,6 +208,8 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return <Compare12Config scene={scene} onUpdate={handleSceneUpdate} />;
       case 'Challenge13PollQuiz':
         return <Challenge13Config scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'ChallengeQuiz':
+        return <Challenge13Config scene={scene} onUpdate={handleSceneUpdate} />; // Reuse Challenge13Config
       case 'Spotlight14SingleConcept':
         return <Spotlight14Config scene={scene} onUpdate={handleSceneUpdate} />;
       case 'Connect15AnalogyBridge':
@@ -261,6 +265,8 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Compare12Module.getDuration ? Compare12Module.getDuration(scene, fps) : 450;
       case 'Challenge13PollQuiz':
         return Challenge13Module.getDuration ? Challenge13Module.getDuration(scene, fps) : 450;
+      case 'ChallengeQuiz':
+        return ChallengeQuizModule.getDuration ? ChallengeQuizModule.getDuration(scene, fps) : 450;
       case 'Spotlight14SingleConcept':
         return Spotlight14Module.getDuration ? Spotlight14Module.getDuration(scene, fps) : 450;
       case 'Connect15AnalogyBridge':
