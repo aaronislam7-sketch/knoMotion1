@@ -338,6 +338,10 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
+  const conclusionPulse = anim.emphasis === 'pulse' && frame >= f_conclusion && frame < f_fadeOut
+    ? 1 + Math.sin((frame - f_conclusion) / 18) * 0.05
+    : 1;
+  
   const conclusionFadeOut = frame >= f_fadeOut
     ? interpolate(
         frame,

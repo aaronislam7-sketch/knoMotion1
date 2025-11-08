@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -349,33 +349,11 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       ? 'lowercase'
       : 'none';
   
-  const stageTransitionOptions = useMemo(() => {
-    switch (config.transitionStyle) {
-      case 'slide':
-        return { style: 'slide', direction: 'left' };
-      case 'curtain':
-        return { style: 'wipe', axis: 'horizontal' };
-      case 'morph':
-        return { style: 'iris' };
-      case 'fade':
-      default:
-        return { style: 'fade' };
-    }
-  }, [config.transitionStyle]);
-
-  const stageTransition = useMemo(
-    () =>
-      createTransitionProps({
-        ...stageTransitionOptions,
-        durationInFrames: toFrames(beats.transitionDuration, fps)
-      }),
-    [stageTransitionOptions, beats.transitionDuration, fps]
-  );
-  
   // Calculate current stage
   let currentStage = -1;
   let stageProgress = 0;
   let transitionProgress = 0;
+  let transitionOverlayProgress = 0;
   
   for (let i = 0; i < stages.length; i++) {
     const stageStartTime = beats.titleEntry + 1.0 + (i * beats.stageInterval);
@@ -388,17 +366,15 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       
       // Calculate transition progress
         if (frame < transitionEndFrame) {
-          transitionProgress = stageTransition.timing
-            ? Math.min(
-                1,
-                stageTransition.timing.getProgress({
-                  frame: Math.max(0, frame - stageStartFrame),
-                  fps
-                })
-              )
-            : (frame - stageStartFrame) / (transitionEndFrame - stageStartFrame);
+          const raw = Math.min(
+            Math.max((frame - stageStartFrame) / (transitionEndFrame - stageStartFrame), 0),
+            1
+          );
+          transitionProgress = EZ.power3InOut(raw);
+          transitionOverlayProgress = raw;
         } else {
           transitionProgress = 1;
+          transitionOverlayProgress = 1;
         }
       
       // Calculate content progress
@@ -501,9 +477,9 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       )}
       
       {/* Transition overlay */}
-      {currentStage >= 0 && transitionProgress < 1 && renderTransition(
-        config.transitionStyle,
-        transitionProgress,
+        {currentStage >= 0 && transitionOverlayProgress < 1 && renderTransition(
+          config.transitionStyle,
+          transitionOverlayProgress,
         colors,
         width,
         height

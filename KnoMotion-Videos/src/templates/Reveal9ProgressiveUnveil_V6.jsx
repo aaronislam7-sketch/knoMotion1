@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { THEME } from '../utils/theme';
 import rough from 'roughjs/bundled/rough.esm.js';
@@ -21,7 +21,6 @@ import {
   renderAmbientParticles
 } from '../sdk';
 import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
-import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #9: PROGRESSIVE REVEAL - v6.0
@@ -254,31 +253,6 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       ? 'lowercase'
       : 'none';
 
-  const revealTransitionOptions = useMemo(() => {
-    switch (config.revealStyle || DEFAULT_CONFIG.revealStyle) {
-      case 'curtain':
-        return { style: 'wipe', axis: 'horizontal' };
-      case 'slide-left':
-        return { style: 'slide', direction: 'left' };
-      case 'slide-right':
-        return { style: 'slide', direction: 'right' };
-      case 'zoom':
-        return { style: 'iris' };
-      case 'fade':
-      default:
-        return { style: 'fade' };
-    }
-  }, [config.revealStyle]);
-
-  const revealTransition = useMemo(
-    () =>
-      createTransitionProps({
-        ...revealTransitionOptions,
-        durationInFrames: toFrames(beats.stageTransition, fps)
-      }),
-    [revealTransitionOptions, beats.stageTransition, fps]
-  );
-  
   // Calculate which stage is currently active
   const titleStartFrame = toFrames(beats.titleEntry, fps);
   let currentStage = -1;
@@ -295,16 +269,11 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       
       // Calculate transition progress for reveal effect
       if (frame < transitionEndFrame) {
-        const localFrame = frame - stageStartFrame;
-        revealProgress = revealTransition.timing
-          ? Math.min(
-              1,
-              revealTransition.timing.getProgress({
-                frame: Math.max(0, localFrame),
-                fps
-              })
-            )
-          : (frame - stageStartFrame) / (transitionEndFrame - stageStartFrame);
+        const rawProgress = Math.min(
+          Math.max((frame - stageStartFrame) / (transitionEndFrame - stageStartFrame), 0),
+          1
+        );
+        revealProgress = EZ.power3InOut(rawProgress);
       } else {
         revealProgress = 1;
       }
