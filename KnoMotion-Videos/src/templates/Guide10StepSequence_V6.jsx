@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { THEME } from '../utils/theme';
 import rough from 'roughjs/bundled/rough.esm.js';
 
 // SDK imports - Agnostic Template System v6
@@ -22,19 +21,40 @@ import {
 } from '../sdk';
 import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
 import { createTransitionProps } from '../sdk/transitions';
+import { GlassmorphicPane, ShineEffect, SpotlightEffect } from '../sdk/broadcastEffects';
+import { AnimatedLottie, LottieIcon } from '../sdk/lottieIntegration';
+import { getLottieFromConfig, getStepCompleteLottie } from '../sdk/lottiePresets';
+import {
+  getCardEntrance,
+  getPathDraw,
+  getStaggerDelay,
+  applyTransform
+} from '../sdk/microDelights';
 
 /**
- * TEMPLATE #10: STEP SEQUENCE - v6.0
+ * TEMPLATE #10: STEP SEQUENCE - v6.0 (POLISHED)
  * 
  * PRIMARY INTENTION: GUIDE
  * SECONDARY INTENTIONS: BREAKDOWN, CONNECT
  * 
+ * PURPOSE: Step-by-step process visualization
+ * 
  * VISUAL PATTERN:
- * - Step-by-step process visualization
- * - 2-8 numbered steps
- * - Each step: number badge, title, description, optional icon
- * - Sequential reveal with connecting lines
- * - Progress indicator
+ * - Step-by-step process with glassmorphic cards
+ * - 2-8 numbered steps with animated entrances
+ * - Progress bar at top showing completion
+ * - Animated connecting lines with flowing particles
+ * - Lottie checkmarks for completed steps
+ * - Each step: glassmorphic card, number badge, title, description, optional icon
+ * 
+ * ENHANCEMENTS (ALL CONFIGURABLE VIA JSON):
+ * ✨ Glassmorphic step cards with shine effects
+ * ✨ Animated progress bar showing completion
+ * ✨ Lottie checkmark animations on completion
+ * ✨ Flowing particles along connector lines
+ * ✨ Spring bounce card entrances
+ * ✨ Pulsing glow on active step
+ * ✨ Number badge rotates in with pop effect
  * 
  * AGNOSTIC PRINCIPALS:
  * ✅ Type-based polymorphism (icons via hero registry)
@@ -43,15 +63,6 @@ import { createTransitionProps } from '../sdk/transitions';
  * ✅ Separation of concerns (content/layout/style/animation)
  * ✅ Progressive configuration (simple → advanced)
  * ✅ Registry pattern (extensible step types)
- * 
- * CONFIGURABILITY:
- * - Number of steps (2-8)
- * - Layout: vertical, horizontal, grid
- * - Each step: title, description, icon (optional)
- * - Connection style: line, arrow, dots, none
- * - Colors, fonts, timing all configurable
- * - Step entrance animation style
- * - Emphasis effects
  * 
  * NO HARDCODED VALUES!
  */
@@ -69,9 +80,29 @@ const DEFAULT_CONFIG = {
     {
       title: 'Step 1',
       description: 'First step description',
-      icon: null
+      icon: null,
+      completed: false // NEW: Mark as completed for checkmark
     }
   ],
+  // NEW: Progress bar configuration
+  progressBar: {
+    enabled: true,
+    height: 8,
+    showPercentage: true
+  },
+  // NEW: Glassmorphic styling
+  glass: {
+    enabled: true,
+    glowOpacity: 0.15,
+    borderOpacity: 0.3,
+    shineEffect: true
+  },
+  // NEW: Lottie checkmarks
+  checkmarks: {
+    enabled: true,
+    size: 50,
+    showOnCompletion: true // Show when step fully revealed
+  },
   style_tokens: {
     colors: {
       bg: '#FFF9F0',
@@ -79,7 +110,9 @@ const DEFAULT_CONFIG = {
       accent2: '#9B59B6',
       ink: '#1A1A1A',
       stepBg: '#FFFFFF',
-      connectionColor: '#CCCCCC'
+      connectionColor: '#CCCCCC',
+      progressBg: '#E0E0E0',
+      progressFill: '#2ECC71'
     },
     fonts: {
       size_title: 64,
@@ -99,7 +132,9 @@ const DEFAULT_CONFIG = {
   animation: {
     stepEntrance: 'slide-left', // fade-up, slide-left, pop, bounce
     connectionDraw: true,
-    pulseOnEntry: true
+    connectionParticles: true, // NEW: Particles flowing along connections
+    pulseOnEntry: true,
+    badgeRotation: true // NEW: Number badge rotates in
   },
   typography: {
     voice: 'utility',
@@ -175,71 +210,69 @@ const calculateStepPositions = (stepCount, layout, width, height) => {
   return positions;
 };
 
-// Render connection between steps
-const renderConnection = (fromPos, toPos, progress, style, color, layout) => {
+// Render connection between steps with animated path
+const renderConnection = (fromPos, toPos, progress, style, color, layout, showParticle, frame) => {
   if (style === 'none') return null;
   
-  const ease = EZ.smooth(progress);
   const dx = toPos.x - fromPos.x;
   const dy = toPos.y - fromPos.y;
   const length = Math.sqrt(dx * dx + dy * dy);
   const angle = Math.atan2(dy, dx) * (180 / Math.PI);
   
-  const drawLength = length * ease;
-  
-  if (style === 'line' || style === 'arrow') {
-    return (
-      <div style={{
+  return (
+    <svg
+      style={{
         position: 'absolute',
-        left: fromPos.x,
-        top: fromPos.y,
-        width: drawLength,
-        height: 3,
-        backgroundColor: color,
-        transformOrigin: '0 50%',
-        transform: `rotate(${angle}deg)`,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
         zIndex: 1
-      }}>
-        {style === 'arrow' && progress > 0.8 && (
-          <>
-            <div style={{
-              position: 'absolute',
-              right: -2,
-              top: -5,
-              width: 0,
-              height: 0,
-              borderLeft: '10px solid ' + color,
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent'
-            }} />
-          </>
-        )}
-      </div>
-    );
-  }
-  
-  if (style === 'dots') {
-    const dotCount = Math.floor(length / 30);
-    const dots = [];
-    for (let i = 0; i < dotCount * ease; i++) {
-      const t = i / dotCount;
-      dots.push(
-        <div key={i} style={{
-          position: 'absolute',
-          left: fromPos.x + dx * t,
-          top: fromPos.y + dy * t,
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          backgroundColor: color,
-          zIndex: 1
-        }} />
-      );
-    }
-    return <>{dots}</>;
-  }
-  
-  return null;
+      }}
+    >
+      {/* Connection line with animated drawing */}
+      <line
+        x1={fromPos.x}
+        y1={fromPos.y}
+        x2={fromPos.x + dx * progress}
+        y2={fromPos.y + dy * progress}
+        stroke={color}
+        strokeWidth={3}
+        strokeDasharray={style === 'dots' ? '8,8' : undefined}
+        style={{
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+        }}
+      />
+      
+      {/* Arrow head */}
+      {style === 'arrow' && progress > 0.8 && (
+        <polygon
+          points={`0,-6 12,0 0,6`}
+          fill={color}
+          transform={`translate(${fromPos.x + dx * progress}, ${fromPos.y + dy * progress}) rotate(${angle})`}
+        />
+      )}
+      
+      {/* Flowing particle */}
+      {showParticle && progress === 1 && (
+        <circle
+          cx={fromPos.x + dx * (Math.sin(frame * 0.08) * 0.5 + 0.5)}
+          cy={fromPos.y + dy * (Math.sin(frame * 0.08) * 0.5 + 0.5)}
+          r={5}
+          fill={color}
+          opacity={0.6}
+        >
+          <animate
+            attributeName="r"
+            values="3;6;3"
+            dur="2s"
+            repeatCount="indefinite"
+          />
+        </circle>
+      )}
+    </svg>
+  );
 };
 
 export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
@@ -264,6 +297,9 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
     ...DEFAULT_CONFIG,
     ...scene,
     title: { ...DEFAULT_CONFIG.title, ...(scene.title || {}) },
+    progressBar: { ...DEFAULT_CONFIG.progressBar, ...(scene.progressBar || {}) },
+    glass: { ...DEFAULT_CONFIG.glass, ...(scene.glass || {}) },
+    checkmarks: { ...DEFAULT_CONFIG.checkmarks, ...(scene.checkmarks || {}) },
     style_tokens: {
       colors: { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) },
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
@@ -294,11 +330,13 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
     ease: 'smooth'
   }, EZ, fps);
   
-  const titlePos = resolvePosition(
-    config.title.position || DEFAULT_CONFIG.title.position,
-    config.title.offset || DEFAULT_CONFIG.title.offset,
-    { width, height }
-  );
+  // Progress bar calculation
+  const completedSteps = steps.filter((_, index) => {
+    const stepStartTime = beats.firstStep + (index * beats.stepInterval);
+    const stepStartFrame = toFrames(stepStartTime, fps);
+    return frame >= stepStartFrame + toFrames(0.8, fps);
+  }).length;
+  const progressPercentage = (completedSteps / steps.length) * 100;
   
   // Ambient particles
   const particles = generateAmbientParticles(20, 10001, width, height);
@@ -319,6 +357,55 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       >
         {particleElements.map(p => p.element)}
       </svg>
+      
+      {/* Progress Bar */}
+      {config.progressBar.enabled && frame >= titleStartFrame && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 120,
+            left: width * 0.2,
+            width: width * 0.6,
+            zIndex: 50
+          }}
+        >
+          <div
+            style={{
+              height: config.progressBar.height,
+              backgroundColor: colors.progressBg,
+              borderRadius: config.progressBar.height / 2,
+              overflow: 'hidden',
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${progressPercentage}%`,
+                backgroundColor: colors.progressFill,
+                transition: 'width 0.3s ease',
+                boxShadow: '0 0 10px rgba(46, 204, 113, 0.5)'
+              }}
+            />
+          </div>
+          {config.progressBar.showPercentage && (
+            <div
+              style={{
+                position: 'absolute',
+                top: -25,
+                right: 0,
+                fontSize: 14,
+                fontWeight: 600,
+                color: colors.ink,
+                opacity: 0.7
+              }}
+            >
+              {Math.round(progressPercentage)}%
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
         <div className="absolute left-0 right-0 text-center px-safe-x z-[100]" style={{
@@ -328,7 +415,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
           fontFamily: fontTokens.title.family,
           color: colors.accent,
           opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`
+          transform: `translateY(${titleAnim.translateY}px)`
         }}>
           {config.title.text}
         </div>
@@ -338,156 +425,225 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       {steps.map((step, index) => {
         const stepStartTime = beats.firstStep + (index * beats.stepInterval);
         const stepStartFrame = toFrames(stepStartTime, fps);
-        const stepEndFrame = stepStartFrame + toFrames(beats.emphasize, fps);
+        const stepCompletionFrame = stepStartFrame + toFrames(0.8, fps);
         
         if (frame < stepStartFrame) return null;
         
-        const stepProgress = Math.min((frame - stepStartFrame) / toFrames(0.6, fps), 1);
         const pos = stepPositions[index];
         
-        // Step entrance animation based on configured style
-        let stepAnim = { opacity: 1, translateX: 0, translateY: 0, scale: 1 };
-        switch (config.animation.stepEntrance) {
-          case 'fade-up':
-            stepAnim = fadeUpIn(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              dist: 40,
-              ease: 'smooth'
-            }, EZ, fps);
-            break;
-          case 'slide-left':
-            stepAnim = slideInLeft(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              dist: 100,
-              ease: 'power3Out'
-            }, EZ, fps);
-            break;
-          case 'pop':
-            stepAnim = popInSpring(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              ease: 'backOut'
-            }, EZ, fps);
-            break;
-          default:
-            stepAnim = fadeUpIn(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              dist: 40,
-              ease: 'smooth'
-            }, EZ, fps);
-        }
+        // Step card entrance with spring bounce
+        const stepEntrance = getCardEntrance(frame, {
+          startFrame: stepStartTime,
+          duration: 0.7,
+          direction: config.layout === 'horizontal' ? 'up' : 'left',
+          distance: config.layout === 'horizontal' ? 40 : 80,
+          withGlow: true,
+          glowColor: `${colors.accent2}33`
+        }, fps);
         
-        // Pulse emphasis
-        let pulseScale = 1;
-        if (config.animation.pulseOnEntry && frame >= stepStartFrame && frame <= stepEndFrame) {
-          pulseScale = pulseEmphasis(frame, {
-            start: stepStartTime + 0.6,
-            dur: 0.4,
-            ease: 'smooth'
-          }, EZ, fps).scale;
-        }
+        // Badge rotation animation
+        const badgeProgress = interpolate(
+          frame,
+          [stepStartFrame, stepStartFrame + toFrames(0.5, fps)],
+          [0, 1],
+          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.backOut }
+        );
+        const badgeRotation = config.animation.badgeRotation ? (1 - badgeProgress) * 180 : 0;
+        
+        // Check if step is "completed" for checkmark
+        const isCompleted = frame >= stepCompletionFrame && (step.completed !== false);
         
         // Connection to previous step
         const showConnection = index > 0 && frame >= stepStartFrame;
-        const connectionProgress = Math.min((frame - stepStartFrame) / toFrames(0.5, fps), 1);
+        const connectionProgress = Math.min((frame - stepStartFrame) / toFrames(0.6, fps), 1);
         
         return (
           <React.Fragment key={index}>
-            {/* Connection line */}
+            {/* Connection line with flowing particle */}
             {showConnection && config.animation.connectionDraw && renderConnection(
               stepPositions[index - 1],
               pos,
               connectionProgress,
               config.connectionStyle || DEFAULT_CONFIG.connectionStyle,
               colors.connectionColor,
-              config.layout
+              config.layout,
+              config.animation.connectionParticles,
+              frame
             )}
             
-            {/* Step container - Centered with flexbox */}
+            {/* Step container */}
             <div style={{
               position: 'absolute',
               left: pos.x,
               top: pos.y,
-              transform: `translate(-50%, -50%) translateX(${stepAnim.translateX}px) scale(${stepAnim.scale * pulseScale})`,
-              opacity: stepAnim.opacity,
+              transform: `translate(-50%, -50%) ${applyTransform({}, stepEntrance).transform}`,
+              opacity: stepEntrance.opacity,
               zIndex: 10 + index,
               display: 'flex',
               alignItems: 'center',
               gap: 20
             }}>
-              {/* Step number badge */}
-              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{
-                width: 70,
-                height: 70,
-                backgroundColor: colors.accent,
-                fontSize: fonts.size_stepNumber - 6,
-                fontWeight: 900,
-                fontFamily: fontTokens.title.family,
-                color: '#FFFFFF',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
-              }}>
+              {/* Step number badge with rotation */}
+              <div
+                className="flex items-center justify-center rounded-full flex-shrink-0"
+                style={{
+                  width: 70,
+                  height: 70,
+                  backgroundColor: colors.accent,
+                  fontSize: fonts.size_stepNumber - 6,
+                  fontWeight: 900,
+                  fontFamily: fontTokens.title.family,
+                  color: '#FFFFFF',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                  transform: `rotate(${badgeRotation}deg)`,
+                  position: 'relative'
+                }}
+              >
                 {index + 1}
+                
+                {/* Checkmark Lottie on completion */}
+                {isCompleted && config.checkmarks.enabled && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      width: config.checkmarks.size,
+                      height: config.checkmarks.size
+                    }}
+                  >
+                    <AnimatedLottie
+                      animation="checkmark"
+                      loop={false}
+                      autoplay={true}
+                      speed={1.0}
+                      entranceDelay={0}
+                      entranceDuration={15}
+                    />
+                  </div>
+                )}
               </div>
               
-              {/* Step content box */}
-              <div style={{
-                backgroundColor: colors.stepBg,
-                padding: '16px 24px',
-                borderRadius: 12,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
-                border: `3px solid ${colors.accent2}`,
-                minWidth: 300,
-                maxWidth: 420,
-                width: 380
-              }}>
-                {/* Step title */}
-                <div className="mb-2 leading-tight" style={{
-                  fontSize: Math.min(fonts.size_stepTitle, 28),
-                  fontWeight: 800,
-                  fontFamily: fontTokens.title.family,
-                  color: colors.ink
+              {/* Step content box with glassmorphic styling */}
+              {config.glass.enabled ? (
+                <GlassmorphicPane
+                  innerRadius={12}
+                  glowOpacity={config.glass.glowOpacity}
+                  borderOpacity={config.glass.borderOpacity}
+                  padding={20}
+                  backgroundColor="rgba(255, 255, 255, 0.95)"
+                  style={{
+                    border: `3px solid ${colors.accent2}`,
+                    minWidth: 300,
+                    maxWidth: 420,
+                    width: 380,
+                    position: 'relative'
+                  }}
+                >
+                  {config.glass.shineEffect && <ShineEffect borderRadius={12} opacity={0.2} speed={0.3} />}
+                  
+                  {/* Step title */}
+                  <div className="mb-2 leading-tight" style={{
+                    fontSize: Math.min(fonts.size_stepTitle, 28),
+                    fontWeight: 800,
+                    fontFamily: fontTokens.title.family,
+                    color: colors.ink
+                  }}>
+                    {step.title}
+                  </div>
+                  
+                  {/* Step description */}
+                  {step.description && (
+                    <div style={{
+                      fontSize: Math.min(fonts.size_stepDesc, 18),
+                      fontWeight: 400,
+                      fontFamily: 'Inter, sans-serif',
+                      color: colors.ink,
+                      lineHeight: 1.4,
+                      opacity: 0.85
+                    }}>
+                      {step.description}
+                    </div>
+                  )}
+                  
+                  {/* Step icon (if provided) */}
+                  {step.icon && (
+                    <div style={{
+                      marginTop: 12,
+                      display: 'flex',
+                      justifyContent: 'center'
+                    }}>
+                      {renderHero(
+                        mergeHeroConfig({
+                          ...step.icon,
+                          size: 60
+                        }),
+                        frame,
+                        beats,
+                        colors,
+                        EZ,
+                        fps
+                      )}
+                    </div>
+                  )}
+                </GlassmorphicPane>
+              ) : (
+                <div style={{
+                  backgroundColor: colors.stepBg,
+                  padding: '16px 24px',
+                  borderRadius: 12,
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+                  border: `3px solid ${colors.accent2}`,
+                  minWidth: 300,
+                  maxWidth: 420,
+                  width: 380
                 }}>
-                  {step.title}
+                  {/* Step title */}
+                  <div className="mb-2 leading-tight" style={{
+                    fontSize: Math.min(fonts.size_stepTitle, 28),
+                    fontWeight: 800,
+                    fontFamily: fontTokens.title.family,
+                    color: colors.ink
+                  }}>
+                    {step.title}
+                  </div>
+                  
+                  {/* Step description */}
+                  {step.description && (
+                    <div style={{
+                      fontSize: Math.min(fonts.size_stepDesc, 18),
+                      fontWeight: 400,
+                      fontFamily: 'Inter, sans-serif',
+                      color: colors.ink,
+                      lineHeight: 1.4,
+                      opacity: 0.85
+                    }}>
+                      {step.description}
+                    </div>
+                  )}
+                  
+                  {/* Step icon (if provided) */}
+                  {step.icon && (
+                    <div style={{
+                      marginTop: 12,
+                      display: 'flex',
+                      justifyContent: 'center'
+                    }}>
+                      {renderHero(
+                        mergeHeroConfig({
+                          ...step.icon,
+                          size: 60
+                        }),
+                        frame,
+                        beats,
+                        colors,
+                        EZ,
+                        fps
+                      )}
+                    </div>
+                  )}
                 </div>
-                
-                {/* Step description */}
-                {step.description && (
-                  <div style={{
-                    fontSize: Math.min(fonts.size_stepDesc, 18),
-                    fontWeight: 400,
-                    fontFamily: 'Inter, sans-serif',
-                    color: colors.ink,
-                    lineHeight: 1.4,
-                    opacity: 0.85
-                  }}>
-                    {step.description}
-                  </div>
-                )}
-                
-                {/* Step icon (if provided) */}
-                {step.icon && (
-                  <div style={{
-                    marginTop: 12,
-                    display: 'flex',
-                    justifyContent: 'center'
-                  }}>
-                    {renderHero(
-                      mergeHeroConfig({
-                        ...step.icon,
-                        size: 60
-                      }),
-                      frame,
-                      beats,
-                      colors,
-                      EZ,
-                      fps
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </React.Fragment>
         );
@@ -519,9 +675,9 @@ export const getDuration = (scene, fps) => {
 };
 
 export const CAPABILITIES = {
-  usesSVG: false,
+  usesSVG: true,
   usesRoughJS: false,
-  usesLottie: false,
+  usesLottie: true,
   requiresAudio: false,
   dynamicSteps: true,
   maxSteps: 8,
@@ -529,7 +685,7 @@ export const CAPABILITIES = {
   layoutOptions: ['vertical', 'horizontal', 'grid']
 };
 
-// Configuration schema for AdminConfig integration
+// Configuration schema for AdminConfig integration (EXTENDED)
 export const CONFIG_SCHEMA = {
   title: {
     type: 'object',
@@ -549,6 +705,31 @@ export const CONFIG_SCHEMA = {
     options: ['line', 'arrow', 'dots', 'none'],
     default: 'arrow'
   },
+  progressBar: {
+    type: 'object',
+    fields: {
+      enabled: { type: 'checkbox', label: 'Show Progress Bar' },
+      height: { type: 'slider', label: 'Bar Height', min: 4, max: 16, step: 2 },
+      showPercentage: { type: 'checkbox', label: 'Show Percentage' }
+    }
+  },
+  glass: {
+    type: 'object',
+    fields: {
+      enabled: { type: 'checkbox', label: 'Glassmorphic Style' },
+      glowOpacity: { type: 'slider', label: 'Glow Opacity', min: 0, max: 0.3, step: 0.05 },
+      borderOpacity: { type: 'slider', label: 'Border Opacity', min: 0, max: 0.5, step: 0.05 },
+      shineEffect: { type: 'checkbox', label: 'Shine Effect' }
+    }
+  },
+  checkmarks: {
+    type: 'object',
+    fields: {
+      enabled: { type: 'checkbox', label: 'Show Checkmarks' },
+      size: { type: 'slider', label: 'Checkmark Size', min: 30, max: 70, step: 10 },
+      showOnCompletion: { type: 'checkbox', label: 'Show on Completion' }
+    }
+  },
   steps: {
     type: 'dynamic-array',
     min: 2,
@@ -556,24 +737,32 @@ export const CONFIG_SCHEMA = {
     itemSchema: {
       title: { type: 'string', required: true },
       description: { type: 'string', required: false },
-      icon: { type: 'polymorphic-hero', required: false }
+      icon: { type: 'polymorphic-hero', required: false },
+      completed: { type: 'checkbox', label: 'Mark as Completed' }
+    }
+  },
+  animation: {
+    type: 'animation-config',
+    options: {
+      stepEntrance: { type: 'enum', options: ['fade-up', 'slide-left', 'pop', 'bounce'] },
+      connectionDraw: { type: 'checkbox', label: 'Animate Connections' },
+      connectionParticles: { type: 'checkbox', label: 'Flowing Particles' },
+      pulseOnEntry: { type: 'checkbox', label: 'Pulse on Entry' },
+      badgeRotation: { type: 'checkbox', label: 'Badge Rotation' }
     }
   },
   style_tokens: {
     type: 'style-tokens',
-    colors: ['bg', 'accent', 'accent2', 'ink', 'stepBg', 'connectionColor'],
+    colors: ['bg', 'accent', 'accent2', 'ink', 'stepBg', 'connectionColor', 'progressBg', 'progressFill'],
     fonts: ['size_title', 'size_stepTitle', 'size_stepDesc', 'size_stepNumber']
   },
   beats: {
     type: 'timeline',
     beats: ['entrance', 'titleEntry', 'firstStep', 'stepInterval', 'emphasize', 'exit']
   },
-  animation: {
-    type: 'animation-config',
-    options: {
-      stepEntrance: ['fade-up', 'slide-left', 'pop', 'bounce'],
-      connectionDraw: 'boolean',
-      pulseOnEntry: 'boolean'
-    }
+  typography: {
+    voice: { type: 'select', label: 'Font Voice', options: ['notebook', 'story', 'utility'] },
+    align: { type: 'select', label: 'Text Align', options: ['left', 'center', 'right'] },
+    transform: { type: 'select', label: 'Text Transform', options: ['none', 'uppercase', 'lowercase', 'capitalize'] }
   }
 };

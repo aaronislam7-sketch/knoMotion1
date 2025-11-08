@@ -10,9 +10,21 @@ import {
 } from '../sdk';
 import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
 import { createTransitionProps } from '../sdk/transitions';
+import { GlassmorphicPane, SpotlightEffect, FloatingParticles } from '../sdk/broadcastEffects';
+import { AnimatedLottie } from '../sdk/lottieIntegration';
+import { getLottieFromConfig } from '../sdk/lottiePresets';
+import {
+  getCardEntrance,
+  getIconPop,
+  getPulseGlow,
+  getPathDraw,
+  getParticleBurst,
+  renderParticleBurst,
+  applyTransform
+} from '../sdk/microDelights';
 
 /**
- * TEMPLATE #3: CONCEPT BREAKDOWN - v6.0
+ * TEMPLATE #3: CONCEPT BREAKDOWN - v6.0 (POLISHED)
  * 
  * PRIMARY INTENTION: BREAKDOWN
  * SECONDARY INTENTIONS: CONNECT, GUIDE
@@ -20,28 +32,28 @@ import { createTransitionProps } from '../sdk/transitions';
  * PURPOSE: Deconstruct complex concepts into manageable parts
  * 
  * VISUAL PATTERN:
- * - Hub-and-spoke layout
- * - Central concept with radiating parts (2-8 parts)
- * - Connecting lines from center to each part
- * - Sequential reveals with cascading animation
+ * - Hub-and-spoke layout with glassmorphic styling
+ * - Central concept with pulsing glow and optional Lottie
+ * - Radiating parts (2-8) with color-coded glassmorphic cards
+ * - Animated connecting lines with particle flows
+ * - Sequential reveals with spring bounces
+ * 
+ * ENHANCEMENTS (ALL CONFIGURABLE VIA JSON):
+ * ✨ Glassmorphic cards for center hub and parts
+ * ✨ Lottie animations in center and parts
+ * ✨ Pulsing glow effects
+ * ✨ Particle burst on reveals
+ * ✨ Animated connector lines with flow particles
+ * ✨ Spring bounce entrances
+ * ✨ Spotlight effect on center
  * 
  * AGNOSTIC PRINCIPALS:
- * ✓ Type-Based Polymorphism (hero registry for central visual)
+ * ✓ Type-Based Polymorphism (hero registry for visuals)
  * ✓ Data-Driven Structure (dynamic parts array)
  * ✓ Token-Based Positioning (auto-calculated spoke positions)
  * ✓ Separation of Concerns (content/layout/style/animation)
  * ✓ Progressive Configuration (simple defaults)
  * ✓ Registry Pattern (extensible visual types)
- * 
- * CONFIGURABILITY:
- * - Title text
- * - Central concept text and optional visual
- * - Parts array (2-8 parts, each with label and description)
- * - Colors (background, accent, connections)
- * - Fonts (sizes, weights)
- * - Timing (all beat points)
- * - Connection styles
- * - Particle effects
  * 
  * NO HARDCODED VALUES!
  */
@@ -61,14 +73,47 @@ const DEFAULT_CONFIG = {
       value: '💡',
       scale: 2.0,
       enabled: false
+    },
+    // NEW: Lottie configuration
+    lottie: {
+      enabled: false,
+      preset: 'centralGlow', // or custom config
+      position: 'background' // 'background', 'icon', or 'overlay'
+    },
+    // NEW: Glassmorphic styling
+    glass: {
+      enabled: true,
+      glowOpacity: 0.2,
+      borderOpacity: 0.4
     }
   },
   
   parts: [
-    { label: 'Part 1', description: 'First component', color: '#FF6B35' },
-    { label: 'Part 2', description: 'Second component', color: '#2ECC71' },
-    { label: 'Part 3', description: 'Third component', color: '#9B59B6' },
-    { label: 'Part 4', description: 'Fourth component', color: '#3498DB' }
+    { 
+      label: 'Part 1', 
+      description: 'First component', 
+      color: '#FF6B35',
+      icon: '🎯', // Optional emoji icon
+      lottie: { enabled: false } // Optional Lottie per part
+    },
+    { 
+      label: 'Part 2', 
+      description: 'Second component', 
+      color: '#2ECC71',
+      icon: '✨'
+    },
+    { 
+      label: 'Part 3', 
+      description: 'Third component', 
+      color: '#9B59B6',
+      icon: '🚀'
+    },
+    { 
+      label: 'Part 4', 
+      description: 'Fourth component', 
+      color: '#3498DB',
+      icon: '💎'
+    }
   ],
   
   typography: {
@@ -100,9 +145,9 @@ const DEFAULT_CONFIG = {
     entrance: 0.5,
     title: 1.0,
     centerReveal: 2.0,
-    firstPart: 3.0,
+    firstPart: 3.5,
     partInterval: 0.6,
-    connections: 5.0,
+    connections: 3.0,
     emphasis: 7.0,
     hold: 9.0,
     exit: 11.0
@@ -115,9 +160,11 @@ const DEFAULT_CONFIG = {
   },
   
   animation: {
-    partReveal: 'pop-in',
+    partReveal: 'spring-bounce', // 'spring-bounce', 'pop-in', 'fade-up'
     connectionDraw: true,
-    pulse: true
+    connectionParticles: true, // NEW: Particles flowing along connections
+    pulse: true,
+    centerBurst: true // NEW: Particle burst when center appears
   },
   
   effects: {
@@ -126,7 +173,14 @@ const DEFAULT_CONFIG = {
       count: 15
     },
     glow: {
-      enabled: true
+      enabled: true,
+      intensity: 20,
+      frequency: 0.05
+    },
+    spotlight: {
+      enabled: true, // NEW: Spotlight on center
+      opacity: 0.15,
+      size: 600
     }
   },
   
@@ -154,7 +208,7 @@ const calculateSpokePosition = (index, totalParts, radius, centerX, centerY) => 
 // MAIN COMPONENT
 export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
   
   // Load fonts
   const config = { ...DEFAULT_CONFIG, ...scene };
@@ -166,7 +220,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   
   const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
-  // Merge config (already done above)
+  // Merge config
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
@@ -175,7 +229,9 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const effects = { 
     ...DEFAULT_CONFIG.effects, 
     ...(scene.effects || {}),
-    particles: { ...DEFAULT_CONFIG.effects.particles, ...(scene.effects?.particles || {}) }
+    particles: { ...DEFAULT_CONFIG.effects.particles, ...(scene.effects?.particles || {}) },
+    glow: { ...DEFAULT_CONFIG.effects.glow, ...(scene.effects?.glow || {}) },
+    spotlight: { ...DEFAULT_CONFIG.effects.spotlight, ...(scene.effects?.spotlight || {}) }
   };
   
   // Parts data
@@ -198,7 +254,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         seed: 142,
         style: 'ambient',
         color: colors.connection,
-        bounds: { w: 1920, h: 1080 }
+        bounds: { w: width, h: height }
       })
     : [];
   
@@ -221,25 +277,36 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const titleOpacity = titleProgress;
   const titleY = (1 - titleProgress) * 30;
   
-  // Center concept animation
-  const centerProgress = interpolate(
-    frame,
-    [f_center, f_center + toFrames(0.6, fps)],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: EZ.backOut
-    }
-  );
+  // Center concept animation with spring bounce
+  const centerEntrance = getCardEntrance(frame, {
+    startFrame: beats.centerReveal,
+    duration: 0.8,
+    direction: 'up',
+    distance: 60,
+    withGlow: effects.glow.enabled
+  }, fps);
   
-  const centerScale = centerProgress;
-  const centerOpacity = centerProgress;
+  // Center pulse glow
+  const centerGlow = effects.glow.enabled 
+    ? getPulseGlow(frame, {
+        frequency: effects.glow.frequency,
+        intensity: effects.glow.intensity,
+        color: `${colors.center}66`,
+        startFrame: f_center
+      })
+    : {};
   
-  // Pulse animation for emphasis
-  const pulse = anim.pulse && frame >= f_emphasis
-    ? 1 + Math.sin((frame - f_emphasis) / 15) * 0.03
-    : 1;
+  // Particle burst when center appears
+  const centerBurstParticles = anim.centerBurst
+    ? getParticleBurst(frame, {
+        triggerFrame: beats.centerReveal,
+        particleCount: 16,
+        duration: 1.2,
+        color: colors.center,
+        size: 8,
+        spread: 120
+      }, fps)
+    : [];
   
   // Exit animation
   const exitProgress = frame >= f_exit
@@ -257,12 +324,14 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   
   const exitOpacity = 1 - exitProgress;
   
-  // Exit transition
-  const exitTransition = config.transition?.exit ? createTransitionProps(config.transition.exit) : null;
-  
   // Center position
-  const centerX = 960;
-  const centerY = 540;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  
+  // Center Lottie configuration
+  const centerLottieConfig = config.center.lottie?.enabled 
+    ? getLottieFromConfig(config.center.lottie)
+    : null;
   
   return (
     <AbsoluteFill
@@ -272,12 +341,24 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         fontFamily: fontTokens.body.family
       }}
     >
+      {/* Spotlight Effect on Center */}
+      {effects.spotlight?.enabled && centerEntrance.opacity > 0 && (
+        <SpotlightEffect
+          x={50}
+          y={50}
+          size={effects.spotlight.size}
+          color={colors.center}
+          opacity={effects.spotlight.opacity * centerEntrance.opacity}
+        />
+      )}
+      
       {/* Particle Background */}
       <svg
         style={{
           position: 'absolute',
           width: '100%',
-          height: '100%'
+          height: '100%',
+          pointerEvents: 'none'
         }}
       >
         {particleElements.map(p => p.element)}
@@ -301,7 +382,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         {config.title.text}
       </div>
       
-      {/* Connections (drawn after center appears, before parts) */}
+      {/* Connections with animated particles */}
       {anim.connectionDraw && frame >= f_connections && (
         <svg
           style={{
@@ -316,116 +397,198 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
             if (frame < partBeat) return null;
             
             const pos = calculateSpokePosition(i, totalParts, layout.radius, centerX, centerY);
-            const connectionProgress = interpolate(
-              frame,
-              [f_connections, f_connections + toFrames(1.0, fps)],
-              [0, 1],
-              {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                easing: EZ.power2Out
-              }
-            );
             
-            const x2 = centerX + (pos.x - centerX) * connectionProgress;
-            const y2 = centerY + (pos.y - centerY) * connectionProgress;
+            // Animated line drawing
+            const pathLength = Math.sqrt(Math.pow(pos.x - centerX, 2) + Math.pow(pos.y - centerY, 2));
+            const drawProgress = getPathDraw(frame, {
+              startFrame: beats.connections + i * 0.15,
+              duration: 0.8,
+              pathLength
+            }, fps);
             
             return (
-              <line
-                key={`connection-${i}`}
-                x1={centerX}
-                y1={centerY}
-                x2={x2}
-                y2={y2}
-                stroke={part.color || colors.connection}
-                strokeWidth={3}
-                strokeDasharray="8,4"
-                opacity={0.6 * exitOpacity}
-                style={{
-                  filter: effects.glow?.enabled ? `drop-shadow(0 0 6px ${part.color})` : 'none'
-                }}
-              />
+              <g key={`connection-${i}`}>
+                <line
+                  x1={centerX}
+                  y1={centerY}
+                  x2={pos.x}
+                  y2={pos.y}
+                  stroke={part.color || colors.connection}
+                  strokeWidth={3}
+                  strokeDasharray={drawProgress.strokeDasharray}
+                  strokeDashoffset={drawProgress.strokeDashoffset}
+                  opacity={0.6 * exitOpacity}
+                  style={{
+                    filter: effects.glow?.enabled ? `drop-shadow(0 0 6px ${part.color})` : 'none'
+                  }}
+                />
+                
+                {/* Flowing particle along connection */}
+                {anim.connectionParticles && drawProgress.strokeDashoffset === 0 && (
+                  <circle
+                    cx={centerX + (pos.x - centerX) * (Math.sin((frame - partBeat) * 0.08) * 0.5 + 0.5)}
+                    cy={centerY + (pos.y - centerY) * (Math.sin((frame - partBeat) * 0.08) * 0.5 + 0.5)}
+                    r={4}
+                    fill={part.color}
+                    opacity={0.6}
+                  />
+                )}
+              </g>
             );
           })}
         </svg>
       )}
       
-      {/* Center Concept */}
-      {centerOpacity > 0 && (
+      {/* Center Concept Burst Particles */}
+      {renderParticleBurst(centerBurstParticles, centerX, centerY)}
+      
+      {/* Center Concept with Glassmorphic Styling */}
+      {centerEntrance.opacity > 0 && (
         <div
           style={{
             position: 'absolute',
             left: centerX,
             top: centerY,
-            transform: `translate(-50%, -50%) scale(${centerScale * pulse})`,
-            width: layout.centerSize,
-            height: layout.centerSize,
-            borderRadius: '50%',
-            backgroundColor: colors.center,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: centerOpacity * exitOpacity,
-            boxShadow: effects.glow?.enabled 
-              ? `0 0 30px rgba(255, 107, 53, 0.4)`
-              : '0 4px 12px rgba(0,0,0,0.1)',
-            padding: 16
+            transform: `translate(-50%, -50%) ${applyTransform({}, centerEntrance).transform}`,
+            opacity: centerEntrance.opacity * exitOpacity,
+            ...centerGlow
           }}
         >
-          {config.center.visual?.enabled && (
-            <div style={{ marginBottom: 8 }}>
-              {renderHero(
-                mergeHeroConfig({
-                  type: config.center.visual.type,
-                  value: config.center.visual.value,
-                  scale: config.center.visual.scale
-                }),
-                frame,
-                beats,
-                colors,
-                easingMap || EZ,
-                fps
+          {config.center.glass?.enabled ? (
+            <GlassmorphicPane
+              innerRadius={layout.centerSize / 2}
+              glowOpacity={config.center.glass.glowOpacity}
+              borderOpacity={config.center.glass.borderOpacity}
+              padding={0}
+              backgroundColor={`${colors.center}22`}
+              style={{
+                width: layout.centerSize,
+                height: layout.centerSize,
+                borderRadius: '50%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {centerLottieConfig && centerLottieConfig.position === 'background' && (
+                <div style={{ position: 'absolute', inset: 0, opacity: 0.3 }}>
+                  <AnimatedLottie
+                    animation={centerLottieConfig.animation}
+                    loop={centerLottieConfig.loop}
+                    autoplay={centerLottieConfig.autoplay}
+                    speed={centerLottieConfig.speed}
+                    style={centerLottieConfig.style}
+                    entranceDelay={centerLottieConfig.entranceDelay || 0}
+                    entranceDuration={centerLottieConfig.entranceDuration || 20}
+                  />
+                </div>
               )}
+              
+              {config.center.visual?.enabled && (
+                <div style={{ marginBottom: 8 }}>
+                  {renderHero(
+                    mergeHeroConfig({
+                      type: config.center.visual.type,
+                      value: config.center.visual.value,
+                      scale: config.center.visual.scale
+                    }),
+                    frame,
+                    beats,
+                    colors,
+                    easingMap || EZ,
+                    fps
+                  )}
+                </div>
+              )}
+              <div
+                className="text-center"
+                style={{
+                  fontSize: fonts.size_center,
+                  fontWeight: fonts.weight_center,
+                  fontFamily: fontTokens.title.family,
+                  color: colors.text,
+                  lineHeight: 1.2,
+                  padding: 16,
+                  zIndex: 1
+                }}
+              >
+                {config.center.text}
+              </div>
+            </GlassmorphicPane>
+          ) : (
+            <div
+              style={{
+                width: layout.centerSize,
+                height: layout.centerSize,
+                borderRadius: '50%',
+                backgroundColor: colors.center,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: effects.glow?.enabled 
+                  ? `0 0 30px rgba(255, 107, 53, 0.4)`
+                  : '0 4px 12px rgba(0,0,0,0.1)',
+                padding: 16
+              }}
+            >
+              {config.center.visual?.enabled && (
+                <div style={{ marginBottom: 8 }}>
+                  {renderHero(
+                    mergeHeroConfig({
+                      type: config.center.visual.type,
+                      value: config.center.visual.value,
+                      scale: config.center.visual.scale
+                    }),
+                    frame,
+                    beats,
+                    colors,
+                    easingMap || EZ,
+                    fps
+                  )}
+                </div>
+              )}
+              <div
+                className="text-center"
+                style={{
+                  fontSize: fonts.size_center,
+                  fontWeight: fonts.weight_center,
+                  fontFamily: fontTokens.title.family,
+                  color: '#FFFFFF',
+                  lineHeight: 1.2
+                }}
+              >
+                {config.center.text}
+              </div>
             </div>
           )}
-          <div
-            className="text-center"
-            style={{
-              fontSize: fonts.size_center,
-              fontWeight: fonts.weight_center,
-              fontFamily: fontTokens.title.family,
-              color: '#FFFFFF',
-              lineHeight: 1.2
-            }}
-          >
-            {config.center.text}
-          </div>
         </div>
       )}
       
-      {/* Parts (spokes) */}
+      {/* Parts (spokes) with Glassmorphic Cards */}
       {parts.map((part, i) => {
         const partBeat = f_firstPart + toFrames(beats.partInterval * i, fps);
         
-        const partProgress = frame >= partBeat
-          ? interpolate(
-              frame,
-              [partBeat, partBeat + toFrames(0.5, fps)],
-              [0, 1],
-              {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                easing: EZ.backOut
-              }
-            )
-          : 0;
+        const partEntrance = getCardEntrance(frame, {
+          startFrame: beats.firstPart + i * beats.partInterval,
+          duration: 0.6,
+          direction: 'up',
+          distance: 40,
+          withGlow: true,
+          glowColor: `${part.color}33`
+        }, fps);
         
-        if (partProgress === 0) return null;
+        if (partEntrance.opacity === 0) return null;
         
         const pos = calculateSpokePosition(i, totalParts, layout.radius, centerX, centerY);
-        const partScale = partProgress;
-        const partOpacity = partProgress * exitOpacity;
+        
+        // Icon pop animation
+        const iconPop = part.icon ? getIconPop(frame, {
+          startFrame: beats.firstPart + i * beats.partInterval + 0.3,
+          duration: 0.4,
+          withBounce: true
+        }, fps) : null;
         
         return (
           <div
@@ -434,42 +597,63 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               position: 'absolute',
               left: pos.x,
               top: pos.y,
-              transform: `translate(-50%, -50%) scale(${partScale * pulse})`,
+              transform: `translate(-50%, -50%) ${applyTransform({}, partEntrance).transform}`,
               width: layout.partSize,
               minHeight: layout.partSize,
-              borderRadius: 12,
-              backgroundColor: '#FFFFFF',
-              border: `3px solid ${part.color || colors.center}`,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: partOpacity,
-              boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
-              padding: 16
+              opacity: partEntrance.opacity * exitOpacity
             }}
           >
-            <div
-              className="text-center mb-2"
+            <GlassmorphicPane
+              innerRadius={12}
+              glowOpacity={0.15}
+              borderOpacity={0.3}
+              padding={16}
+              backgroundColor="rgba(255, 255, 255, 0.95)"
               style={{
-                fontSize: fonts.size_part_label,
-                fontWeight: fonts.weight_part,
-                fontFamily: fontTokens.accent.family,
-                color: part.color || colors.center
+                border: `3px solid ${part.color || colors.center}`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: layout.partSize - 32
               }}
             >
-              {part.label}
-            </div>
-            <div
-              className="text-center leading-tight"
-              style={{
-                fontSize: fonts.size_part_desc,
-                fontFamily: fontTokens.body.family,
-                color: colors.textSecondary
-              }}
-            >
-              {part.description}
-            </div>
+              {/* Icon with pop animation */}
+              {part.icon && iconPop && (
+                <div 
+                  style={{
+                    fontSize: 32,
+                    marginBottom: 8,
+                    opacity: iconPop.opacity,
+                    transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`
+                  }}
+                >
+                  {part.icon}
+                </div>
+              )}
+              
+              <div
+                className="text-center mb-2"
+                style={{
+                  fontSize: fonts.size_part_label,
+                  fontWeight: fonts.weight_part,
+                  fontFamily: fontTokens.accent.family,
+                  color: part.color || colors.center
+                }}
+              >
+                {part.label}
+              </div>
+              <div
+                className="text-center leading-tight"
+                style={{
+                  fontSize: fonts.size_part_desc,
+                  fontFamily: fontTokens.body.family,
+                  color: colors.textSecondary
+                }}
+              >
+                {part.description}
+              </div>
+            </GlassmorphicPane>
           </div>
         );
       })}
@@ -496,7 +680,7 @@ export const TEMPLATE_ID = 'Explain2AConceptBreakdown';
 export const PRIMARY_INTENTION = 'BREAKDOWN';
 export const SECONDARY_INTENTIONS = ['CONNECT', 'GUIDE'];
 
-// CONFIG SCHEMA
+// CONFIG SCHEMA (EXTENDED)
 export const CONFIG_SCHEMA = {
   title: {
     text: { type: 'text', label: 'Title' }
@@ -507,6 +691,16 @@ export const CONFIG_SCHEMA = {
       enabled: { type: 'checkbox', label: 'Show Visual' },
       type: { type: 'select', label: 'Type', options: ['emoji', 'image', 'roughSVG'] },
       value: { type: 'text', label: 'Value' }
+    },
+    lottie: {
+      enabled: { type: 'checkbox', label: 'Enable Lottie Animation' },
+      preset: { type: 'select', label: 'Lottie Preset', options: ['centralGlow', 'sparkle', 'insight'] },
+      position: { type: 'select', label: 'Position', options: ['background', 'icon', 'overlay'] }
+    },
+    glass: {
+      enabled: { type: 'checkbox', label: 'Glassmorphic Style' },
+      glowOpacity: { type: 'slider', label: 'Glow Opacity', min: 0, max: 0.5, step: 0.05 },
+      borderOpacity: { type: 'slider', label: 'Border Opacity', min: 0, max: 0.6, step: 0.05 }
     }
   },
   parts: {
@@ -515,7 +709,30 @@ export const CONFIG_SCHEMA = {
     itemSchema: {
       label: { type: 'text', label: 'Part Label' },
       description: { type: 'text', label: 'Description' },
-      color: { type: 'color', label: 'Color' }
+      color: { type: 'color', label: 'Color' },
+      icon: { type: 'text', label: 'Icon (emoji)' },
+      lottie: {
+        enabled: { type: 'checkbox', label: 'Enable Lottie' }
+      }
+    }
+  },
+  animation: {
+    partReveal: { type: 'select', label: 'Part Animation', options: ['spring-bounce', 'pop-in', 'fade-up'] },
+    connectionDraw: { type: 'checkbox', label: 'Animate Connections' },
+    connectionParticles: { type: 'checkbox', label: 'Particle Flow on Connections' },
+    pulse: { type: 'checkbox', label: 'Pulse Effect' },
+    centerBurst: { type: 'checkbox', label: 'Center Particle Burst' }
+  },
+  effects: {
+    glow: {
+      enabled: { type: 'checkbox', label: 'Enable Glow' },
+      intensity: { type: 'slider', label: 'Glow Intensity', min: 0, max: 40, step: 5 },
+      frequency: { type: 'slider', label: 'Pulse Frequency', min: 0.01, max: 0.2, step: 0.01 }
+    },
+    spotlight: {
+      enabled: { type: 'checkbox', label: 'Enable Spotlight' },
+      opacity: { type: 'slider', label: 'Spotlight Opacity', min: 0, max: 0.5, step: 0.05 },
+      size: { type: 'slider', label: 'Spotlight Size', min: 300, max: 900, step: 100 }
     }
   },
   typography: {

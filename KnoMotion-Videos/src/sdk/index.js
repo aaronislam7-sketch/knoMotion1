@@ -64,6 +64,8 @@ export * from './particleSystem.jsx';
 export * from './handwritingEffects.jsx';
 export * from './advancedEffects.jsx';
 export * from './lottieLibrary';
+export * from './microDelights.jsx';
+export * from './lottiePresets';
 
 // 🎯 AGNOSTIC TEMPLATE SYSTEM - Phase 1
 export * from './heroRegistry.jsx';
