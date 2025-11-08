@@ -47,6 +47,9 @@ export { StyleTokensProvider, useStyleTokens } from './StyleTokensProvider';
 export * from './fontSystem';
 export * from './transitions';
 
+// Micro-Delights SDK
+export * from './microDelights';
+
 // Blueprint v5.0 - Core Systems
 export * from './presets';
 export { SceneIdContext, useSceneId, generateSceneId } from './SceneIdContext';

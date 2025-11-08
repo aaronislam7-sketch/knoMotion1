@@ -18,28 +18,47 @@ export const lottieAnimations = {
   confetti: 'https://lottie.host/395f0e7d-b105-4c77-8c06-5a388d7cd78e/lchIiQQbHx.json',
   success: 'https://lottie.host/647c5f3f-7e80-4c68-89a4-4e5a60ce1a0a/7r5lMSc8ZE.json',
   trophy: 'https://lottie.host/c9623fcd-0ed7-46d1-b0d3-e4c4be1fe8d3/DhBmqFjXrM.json',
+  fireworks: 'https://lottie.host/embed/8c7b6a5f-4e3d-2c1b-0a9f-8e7d6c5b4a3f/6IhJkLmNpD.json',
+  party: 'https://lottie.host/embed/9d8c7b6a-5f4e-3d2c-1b0a-9f8e7d6c5b4a/8KjLmNoPqE.json',
   
   // Learning & Education  
   lightbulb: 'https://lottie.host/3c1f7b61-81c3-4e79-8b95-2f4c05c3d0a0/FhSKUXSILT.json',
   book: 'https://lottie.host/1d4b6e12-9c05-4d9e-8e20-5f7b3d3c1f2a/8KdLmSzPqW.json',
   brain: 'https://lottie.host/5e3d2b9f-1a2c-4d6e-9b7f-3e5a1c2d4f6b/9NfMpTyQrX.json',
   rocket: 'https://lottie.host/4f5e3c2d-1b9a-4e7f-8c6a-2d3f5e4c1a2b/7JhKnRxLsY.json',
+  graduation: 'https://lottie.host/embed/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d/3DfGhIjKlA.json',
+  certificate: 'https://lottie.host/embed/2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e/4EgHjIkLmN.json',
+  knowledge: 'https://lottie.host/embed/3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f/5FhIjKlMnO.json',
   
   // Emotions & Engagement
   thinking: 'https://lottie.host/2c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f/5GiJkMnOpZ.json',
   question: 'https://lottie.host/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d/3DfGhIjKlA.json',
   star: 'https://lottie.host/7e6f5d4c-3b2a-1f0e-9d8c-7b6a5f4e3d2c/2CeBfDgEhB.json',
   sparkle: 'https://lottie.host/6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a/4FgHiJkLmC.json',
+  excitement: 'https://lottie.host/embed/4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b/6GhIjKlMnO.json',
+  curiosity: 'https://lottie.host/embed/5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c/7HiJkLmNoP.json',
+  aha: 'https://lottie.host/embed/6a7b8c9d-0e1f-2a3b-4c5d-6e7f8a9b0c1d/8IjKlMnOpQ.json',
   
   // Abstract & Background
   particles: 'https://lottie.host/8c7b6a5f-4e3d-2c1b-0a9f-8e7d6c5b4a3f/6IhJkLmNpD.json',
   dots: 'https://lottie.host/9d8c7b6a-5f4e-3d2c-1b0a-9f8e7d6c5b4a/8KjLmNoPqE.json',
   wave: 'https://lottie.host/0e9d8c7b-6a5f-4e3d-2c1b-0a9f8e7d6c5b/1MnOpQrStF.json',
+  geometric: 'https://lottie.host/embed/7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e/9JkLmNoPqR.json',
+  flowing: 'https://lottie.host/embed/8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f/1KlMnOpQrS.json',
+  gradient: 'https://lottie.host/embed/9d0e1f2a-3b4c-5d6e-7f8a-9b0c1d2e3f4a/2LmNoPqRsT.json',
   
   // Actions & Transitions
   arrow: 'https://lottie.host/1f0e9d8c-7b6a-5f4e-3d2c-1b0a9f8e7d6c/3PqRsTuVwG.json',
   checkmark: 'https://lottie.host/2a1f0e9d-8c7b-6a5f-4e3d-2c1b0a9f8e7d/5SuVwXyZaH.json',
   loading: 'https://lottie.host/3b2a1f0e-9d8c-7b6a-5f4e-3d2c1b0a9f8e/7WxYzAbCdI.json',
+  progress: 'https://lottie.host/embed/0e1f2a3b-4c5d-6e7f-8a9b-0c1d2e3f4a5b/3MnOpQrStU.json',
+  spinner: 'https://lottie.host/embed/1f2a3b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c/4NoPqRsTuV.json',
+  
+  // Progress & Completion
+  progressBar: 'https://lottie.host/embed/2a3b4c5d-6e7f-8a9b-0c1d-2e3f4a5b6c7d/5OpQrStUvW.json',
+  badge: 'https://lottie.host/embed/3b4c5d6e-7f8a-9b0c-1d2e-3f4a5b6c7d8e/6PqRsTuVwX.json',
+  unlock: 'https://lottie.host/embed/4c5d6e7f-8a9b-0c1d-2e3f-4a5b6c7d8e9f/7QrStUvWxY.json',
+  complete: 'https://lottie.host/embed/5d6e7f8a-9b0c-1d2e-3f4a-5b6c7d8e9f0a/8RsTuVwXyZ.json',
 };
 
 export type LottieAnimationType = keyof typeof lottieAnimations;
@@ -233,4 +252,103 @@ export const LottieOverlay: React.FC<{
       />
     </div>
   );
+};
+
+// ==================== LOTTIE MICRO-DELIGHT HOOK ====================
+
+/**
+ * Hook for easy Lottie micro-delight integration
+ * Provides common patterns for using Lottie animations as micro-delights
+ */
+export const useLottieMicroDelight = (
+  animation: LottieAnimationType | string,
+  config: {
+    triggerFrame?: number;
+    duration?: number;
+    loop?: boolean;
+    opacity?: number;
+    scale?: number;
+    position?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    type?: 'background' | 'icon' | 'overlay' | 'inline';
+  } = {}
+) => {
+  const frame = useCurrentFrame();
+  const {
+    triggerFrame = 0,
+    duration,
+    loop = true,
+    opacity = 1,
+    scale = 1,
+    position = 'center',
+    type = 'inline'
+  } = config;
+
+  const shouldShow = duration
+    ? frame >= triggerFrame && frame <= triggerFrame + duration
+    : frame >= triggerFrame;
+
+  if (!shouldShow) {
+    return null;
+  }
+
+  const baseStyle: React.CSSProperties = {
+    opacity,
+    transform: `scale(${scale})`,
+    pointerEvents: 'none',
+  };
+
+  if (type === 'background') {
+    const positions = {
+      center: { top: '50%', left: '50%', transform: 'translate(-50%, -50%) scale(' + scale + ')' },
+      'top-left': { top: '10%', left: '10%' },
+      'top-right': { top: '10%', right: '10%' },
+      'bottom-left': { bottom: '10%', left: '10%' },
+      'bottom-right': { bottom: '10%', right: '10%' },
+    };
+
+    return {
+      component: RemotionLottie,
+      props: {
+        animation,
+        loop,
+        style: {
+          position: 'absolute',
+          width: '40%',
+          height: '40%',
+          ...positions[position],
+          ...baseStyle,
+          zIndex: 0,
+        }
+      }
+    };
+  }
+
+  if (type === 'overlay') {
+    return {
+      component: RemotionLottie,
+      props: {
+        animation,
+        loop,
+        startFrame: triggerFrame,
+        endFrame: duration ? triggerFrame + duration : undefined,
+        style: {
+          position: 'absolute',
+          inset: 0,
+          ...baseStyle,
+          zIndex: 1000,
+        }
+      }
+    };
+  }
+
+  return {
+    component: RemotionLottie,
+    props: {
+      animation,
+      loop,
+      startFrame: triggerFrame,
+      endFrame: duration ? triggerFrame + duration : undefined,
+      style: baseStyle
+    }
+  };
 };

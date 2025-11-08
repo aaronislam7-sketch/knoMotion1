@@ -45,6 +45,9 @@ import { Apply3BScenarioChoice as Apply3BScenarioChoice_V6 } from './Apply3BScen
 import { Reflect4AKeyTakeaways as Reflect4AKeyTakeaways_V6 } from './Reflect4AKeyTakeaways_V6';
 import { Reflect4DForwardLink as Reflect4DForwardLink_V6 } from './Reflect4DForwardLink_V6';
 
+// Unified Quiz Template (V6 - Merges Apply3AMicroQuiz and Challenge13PollQuiz)
+import { ChallengeQuiz } from './ChallengeQuiz_V6';
+
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
 
@@ -113,7 +116,11 @@ const V6_TEMPLATE_REGISTRY = {
   'Explain2BAnalogy_V6': Explain2BAnalogy_V6,
   'Apply3BScenarioChoice_V6': Apply3BScenarioChoice_V6,
   'Reflect4AKeyTakeaways_V6': Reflect4AKeyTakeaways_V6,
-  'Reflect4DForwardLink_V6': Reflect4DForwardLink_V6
+  'Reflect4DForwardLink_V6': Reflect4DForwardLink_V6,
+  
+  // Unified Quiz Template (V6 - Phase 1 Consolidation)
+  'ChallengeQuiz': ChallengeQuiz,
+  'ChallengeQuiz_V6': ChallengeQuiz
 };
 
 /**
@@ -123,6 +130,13 @@ const getTemplateComponent = (templateId, scene) => {
   if (!templateId) {
     console.warn('No template_id found, using default v5 template');
     return Hook1AQuestionBurst;
+  }
+  
+  // Route old quiz template IDs to unified ChallengeQuiz
+  const quizTemplateIds = ['Apply3AMicroQuiz', 'Apply3AMicroQuiz_V6', 'Challenge13PollQuiz'];
+  if (quizTemplateIds.includes(templateId)) {
+    console.info(`🔄 Routing ${templateId} to unified ChallengeQuiz_V6`);
+    return ChallengeQuiz;
   }
   
   // Check v6 templates first (new intention-based system)
