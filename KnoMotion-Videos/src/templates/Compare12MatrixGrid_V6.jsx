@@ -241,7 +241,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
     title: { family: 'Figtree, sans-serif' },
     body: { family: 'Inter, sans-serif' },
     accent: { family: 'Caveat, cursive' },
-    display: { family: 'Figtree, sans-serif' }
+    utility: { family: 'Inter, sans-serif' }
   };
   
   useEffect(() => {

@@ -49,7 +49,7 @@ export const Explain2BAnalogy = ({ scene }) => {
     title: { family: 'Caveat, cursive' },
     body: { family: 'Kalam, sans-serif' },
     accent: { family: 'Permanent Marker, cursive' },
-    display: { family: 'Caveat, cursive' }
+    utility: { family: 'Inter, sans-serif' }
   };
   
   useEffect(() => {
