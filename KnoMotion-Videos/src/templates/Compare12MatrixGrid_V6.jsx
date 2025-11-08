@@ -237,10 +237,11 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
   
   // Font loading
   const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
   useEffect(() => {
     loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
-  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   // Merge with defaults
   const config = {

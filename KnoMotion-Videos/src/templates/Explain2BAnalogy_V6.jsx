@@ -43,12 +43,11 @@ export const Explain2BAnalogy = ({ scene }) => {
   const { fps } = useVideoConfig();
   const config = { ...DEFAULT_CONFIG, ...scene };
   const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   useEffect(() => {
     loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
-  
-  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
