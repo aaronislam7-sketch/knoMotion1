@@ -87,7 +87,7 @@ export const Explain2BAnalogy = ({ scene }) => {
           {renderHero(mergeHeroConfig({ type: side.visual.type, value: side.visual.value, scale: side.visual.scale }), frame, beats, colors, EZ, fps)}
         </div>
       )}
-      <div className="mb-3" style={{ fontSize: fonts.size_label, fontWeight: 700, fontFamily: fontTokens.display.family, color }}>{side.label}</div>
+      <div className="mb-3" style={{ fontSize: fonts.size_label, fontWeight: 700, fontFamily: fontTokens.title.family, color }}>{side.label}</div>
       <div className="leading-snug" style={{ fontSize: fonts.size_desc, fontFamily: fontTokens.body.family, color: colors.text }}>{side.description}</div>
     </div>
   );

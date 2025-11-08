@@ -327,7 +327,7 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
           style={{
             fontSize: fonts.size_quote,
             fontWeight: fonts.weight_quote,
-            fontFamily: fontTokens.display.family,
+            fontFamily: fontTokens.title.family,
             color: colors.quote,
             textAlign: typography.align,
             letterSpacing: '0.5px',

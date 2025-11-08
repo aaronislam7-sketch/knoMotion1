@@ -383,7 +383,7 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           <div className="text-center mb-4" style={{
             fontSize: fonts.size_headline,
             fontWeight: 800,
-            fontFamily: fontTokens.display.family,
+            fontFamily: fontTokens.title.family,
             color: colors.ink
           }}>
             {config.before.headline}
@@ -448,7 +448,7 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           <div className="text-center mb-4" style={{
             fontSize: fonts.size_headline,
             fontWeight: 800,
-            fontFamily: fontTokens.display.family,
+            fontFamily: fontTokens.title.family,
             color: colors.ink
           }}>
             {config.after.headline}

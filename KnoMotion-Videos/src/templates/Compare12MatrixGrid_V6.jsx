@@ -163,7 +163,7 @@ const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ, fontTo
         fontSize: fonts.size_cell * 1.5,
         fontWeight: 900,
         color: colors.checkmark,
-        fontFamily: fontTokens.display.family
+        fontFamily: fontTokens.title.family
       }}>
         ✓
       </div>
@@ -177,7 +177,7 @@ const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ, fontTo
         fontSize: fonts.size_cell * 1.5,
         fontWeight: 900,
         color: colors.cross,
-        fontFamily: fontTokens.display.family
+        fontFamily: fontTokens.title.family
       }}>
         ✗
       </div>
@@ -411,7 +411,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
                   justifyContent: 'center',
                   fontSize: fonts.size_header,
                   fontWeight: 800,
-                  fontFamily: fontTokens.display.family,
+                  fontFamily: fontTokens.title.family,
                   color: isHighlighted ? colors.ink : colors.accent2,
                   boxShadow: highlightGlow,
                   transition: 'all 0.3s ease'
@@ -489,7 +489,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
           transform: `translate(-50%, 0) translateY(${conclusionAnim.translateY}px)`,
           fontSize: fonts.size_conclusion,
           fontWeight: 700,
-          fontFamily: fontTokens.display.family,
+          fontFamily: fontTokens.title.family,
           color: colors.accent,
           opacity: conclusionAnim.opacity,
           padding: '20px 40px',

@@ -425,7 +425,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                 backgroundColor: colors.accent,
                 fontSize: fonts.size_stepNumber - 6,
                 fontWeight: 900,
-                fontFamily: fontTokens.display.family,
+                fontFamily: fontTokens.title.family,
                 color: '#FFFFFF',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
               }}>
@@ -447,7 +447,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                 <div className="mb-2 leading-tight" style={{
                   fontSize: Math.min(fonts.size_stepTitle, 28),
                   fontWeight: 800,
-                  fontFamily: fontTokens.display.family,
+                  fontFamily: fontTokens.title.family,
                   color: colors.ink
                 }}>
                   {step.title}
