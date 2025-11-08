@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -17,6 +17,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #14: SINGLE CONCEPT SPOTLIGHT - v6.0
@@ -93,6 +95,12 @@ const DEFAULT_CONFIG = {
   transitionStyle: 'fade', // fade, slide, curtain, morph
   emphasisStyle: 'pulse', // pulse, glow, scale, shake
   backgroundStyle: 'solid', // solid, gradient, ambient
+
+  typography: {
+    voice: 'notebook',
+    align: 'center',
+    transform: 'none'
+  },
   
   style_tokens: {
     colors: {
@@ -130,36 +138,51 @@ const DEFAULT_CONFIG = {
 };
 
 // Render stage content based on type
-const renderStageContent = (stage, colors, fonts, frame, beats, fps, EZ, width, height, stageProgress) => {
+const renderStageContent = (
+  stage,
+  colors,
+  fonts,
+  frame,
+  beats,
+  fps,
+  EZ,
+  width,
+  height,
+  stageProgress,
+  alignmentClass,
+  textTransform
+) => {
   const contentOpacity = interpolate(stageProgress, [0, 0.3], [0, 1], { extrapolateRight: 'clamp' });
   const contentY = interpolate(stageProgress, [0, 0.3], [30, 0], { extrapolateRight: 'clamp' });
   
   return (
-    <div style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: `translate(-50%, calc(-50% + ${contentY}px))`,
-      opacity: contentOpacity,
-      textAlign: 'center',
-      maxWidth: '85%',
-      zIndex: 10
-    }}>
+    <div
+      className={`absolute left-1/2 top-1/2 w-[85%] -translate-x-1/2 -translate-y-1/2 text-center ${alignmentClass}`}
+      style={{
+        transform: `translate(-50%, calc(-50% + ${contentY}px))`,
+        opacity: contentOpacity,
+        maxWidth: '85%',
+        zIndex: 10
+      }}
+    >
       {/* Headline */}
       {stage.headline && (
-        <div style={{
-          fontSize: stage.type === 'question' ? fonts.size_headline : 
-                    stage.type === 'takeaway' ? fonts.size_takeaway :
-                    fonts.size_headline * 0.85,
-          fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
-          color: stage.type === 'question' ? colors.accent :
-                 stage.type === 'takeaway' ? colors.highlight :
-                 colors.ink,
-          marginBottom: stage.bodyText ? 30 : 0,
-          lineHeight: 1.2,
-          textShadow: stage.type === 'question' ? `0 0 40px ${colors.accent}` : 'none'
-        }}>
+        <div
+          className="font-display leading-tight drop-shadow"
+          style={{
+            fontSize: stage.type === 'question' ? fonts.size_headline :
+                      stage.type === 'takeaway' ? fonts.size_takeaway :
+                      fonts.size_headline * 0.85,
+            fontWeight: 900,
+            color: stage.type === 'question' ? colors.accent :
+                   stage.type === 'takeaway' ? colors.highlight :
+                   colors.ink,
+            marginBottom: stage.bodyText ? 30 : 0,
+            lineHeight: 1.2,
+            textShadow: stage.type === 'question' ? `0 0 40px ${colors.accent}` : 'none',
+            textTransform
+          }}
+        >
           {stage.headline}
         </div>
       )}
@@ -185,17 +208,20 @@ const renderStageContent = (stage, colors, fonts, frame, beats, fps, EZ, width, 
       
       {/* Body Text */}
       {stage.bodyText && (
-        <div style={{
-          fontSize: fonts.size_body,
-          fontWeight: 400,
-          fontFamily: 'Inter, sans-serif',
-          color: colors.ink,
-          lineHeight: 1.6,
-          marginTop: stage.headline || stage.visual ? 30 : 0,
-          maxWidth: '90%',
-          marginLeft: 'auto',
-          marginRight: 'auto'
-        }}>
+        <div
+          className="font-body leading-relaxed"
+          style={{
+            fontSize: fonts.size_body,
+            fontWeight: 400,
+            color: colors.ink,
+            lineHeight: 1.6,
+            marginTop: stage.headline || stage.visual ? 30 : 0,
+            maxWidth: '90%',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            textTransform
+          }}
+        >
           {stage.bodyText}
         </div>
       )}
@@ -279,7 +305,9 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
   const { fps, width, height } = useVideoConfig();
   
   if (!scene) {
-    return <AbsoluteFill style={{ backgroundColor: '#1A1A2E' }} />;
+    return (
+      <AbsoluteFill className="bg-surface" style={{ backgroundColor: '#1A1A2E' }} />
+    );
   }
   
   // Merge with defaults
@@ -293,13 +321,56 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
     },
     beats: { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) },
-    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) }
+    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) },
+    typography: { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) }
   };
   
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
   const beats = config.beats;
   const stages = config.stages;
+  const typography = config.typography;
+
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+  
+  const alignmentClass =
+    typography.align === 'left'
+      ? 'text-left'
+      : typography.align === 'right'
+      ? 'text-right'
+      : 'text-center';
+
+  const textTransform =
+    typography.transform === 'uppercase'
+      ? 'uppercase'
+      : typography.transform === 'lowercase'
+      ? 'lowercase'
+      : 'none';
+  
+  const stageTransitionOptions = useMemo(() => {
+    switch (config.transitionStyle) {
+      case 'slide':
+        return { style: 'slide', direction: 'left' };
+      case 'curtain':
+        return { style: 'wipe', axis: 'horizontal' };
+      case 'morph':
+        return { style: 'iris' };
+      case 'fade':
+      default:
+        return { style: 'fade' };
+    }
+  }, [config.transitionStyle]);
+
+  const stageTransition = useMemo(
+    () =>
+      createTransitionProps({
+        ...stageTransitionOptions,
+        durationInFrames: toFrames(beats.transitionDuration, fps)
+      }),
+    [stageTransitionOptions, beats.transitionDuration, fps]
+  );
   
   // Calculate current stage
   let currentStage = -1;
@@ -316,11 +387,19 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       currentStage = i;
       
       // Calculate transition progress
-      if (frame < transitionEndFrame) {
-        transitionProgress = (frame - stageStartFrame) / (transitionEndFrame - stageStartFrame);
-      } else {
-        transitionProgress = 1;
-      }
+        if (frame < transitionEndFrame) {
+          transitionProgress = stageTransition.timing
+            ? Math.min(
+                1,
+                stageTransition.timing.getProgress({
+                  frame: Math.max(0, frame - stageStartFrame),
+                  fps
+                })
+              )
+            : (frame - stageStartFrame) / (transitionEndFrame - stageStartFrame);
+        } else {
+          transitionProgress = 1;
+        }
       
       // Calculate content progress
       if (frame >= transitionEndFrame) {
@@ -365,7 +444,10 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
   };
   
   return (
-    <AbsoluteFill style={bgStyle}>
+    <AbsoluteFill
+      className="relative h-full w-full overflow-hidden text-ink"
+      style={bgStyle}
+    >
       {/* Ambient particles */}
       <svg
         style={{
@@ -402,7 +484,20 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
       
       {/* Current stage content */}
       {currentStage >= 0 && transitionProgress > 0.3 && (
-        renderStageContent(stages[currentStage], colors, fonts, frame, beats, fps, EZ, width, height, stageProgress)
+        renderStageContent(
+          stages[currentStage],
+          colors,
+          fonts,
+          frame,
+          beats,
+          fps,
+          EZ,
+          width,
+          height,
+          stageProgress,
+          alignmentClass,
+          textTransform
+        )
       )}
       
       {/* Transition overlay */}
@@ -419,10 +514,10 @@ export const Spotlight14SingleConcept = ({ scene, styles, presets, easingMap }) 
 
 // Required exports
 export const TEMPLATE_ID = 'Spotlight14SingleConcept';
-export const TEMPLATE_VERSION = '6.0.0';
+export const TEMPLATE_VERSION = '6.1.0';
 
 // Attach version to component for TemplateRouter detection
-Spotlight14SingleConcept.TEMPLATE_VERSION = '6.0.0';
+Spotlight14SingleConcept.TEMPLATE_VERSION = '6.1.0';
 Spotlight14SingleConcept.TEMPLATE_ID = 'Spotlight14SingleConcept';
 
 export const LEARNING_INTENTIONS = {

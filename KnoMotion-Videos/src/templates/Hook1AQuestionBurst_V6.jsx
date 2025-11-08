@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { 
-  EZ, 
-  toFrames, 
+import {
+  EZ,
+  toFrames,
   renderHero,
   mergeHeroConfig,
   resolvePosition,
-  positionToCSS,
   generateAmbientParticles,
-  renderAmbientParticles
+  renderAmbientParticles,
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #1: QUESTION BURST - v6.0
@@ -83,6 +84,12 @@ const DEFAULT_CONFIG = {
     enabled: false // Optional conclusion
   },
   
+  typography: {
+    voice: 'notebook',
+    align: 'center',
+    transform: 'none'
+  },
+
   style_tokens: {
     colors: {
       bg: '#FFF9F0',
@@ -116,7 +123,9 @@ const DEFAULT_CONFIG = {
   
   animation: {
     questionEntrance: 'fade-up',
-    questionExit: 'slide-left',
+    questionTransitionStyle: 'slide',
+    questionTransitionDirection: 'left',
+    transitionDuration: 0.6,
     emphasis: 'pulse',
     visualEntrance: 'fade-scale',
     easing: 'power3Out'
@@ -125,14 +134,21 @@ const DEFAULT_CONFIG = {
   particles: {
     enabled: true,
     count: 25,
-    style: 'ambient'
+    style: 'ambient',
+    seed: 1
+  },
+
+  cta: {
+    enabled: false,
+    label: 'Tap to explore more',
+    url: ''
   }
 };
 
 // MAIN COMPONENT
 export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
   
   // Merge config
   const config = { ...DEFAULT_CONFIG, ...scene };
@@ -141,6 +157,12 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
   const particles = { ...DEFAULT_CONFIG.particles, ...(scene.particles || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  const cta = { ...DEFAULT_CONFIG.cta, ...(scene.cta || {}) };
+
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Convert beats to frames
   const f_entrance = toFrames(beats.entrance, fps);
@@ -152,18 +174,28 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   const f_conclusion = toFrames(beats.conclusion, fps);
   const f_fadeOut = toFrames(beats.fadeOut, fps);
   
-  // Generate particles
-  const particleElements = particles.enabled
-    ? generateAmbientParticles({
-        count: particles.count,
-        seed: 1,
-        style: particles.style,
-        color: colors.particles,
-        bounds: { w: 1920, h: 1080 }
-      })
+  const baseParticles = useMemo(() => {
+    if (!particles.enabled) return [];
+    return generateAmbientParticles(
+      particles.count,
+      particles.seed ?? 1,
+      width,
+      height
+    );
+  }, [particles.enabled, particles.count, particles.seed, width, height]);
+
+  const ambientParticles = particles.enabled
+    ? renderAmbientParticles(
+        baseParticles,
+        frame,
+        fps,
+        [
+          colors.particles || colors.accent,
+          colors.accent2,
+          `${colors.text}33`,
+        ]
+      )
     : [];
-  
-  renderAmbientParticles(particleElements, frame, fps, { opacity: 1 });
   
   // ==================== ANIMATIONS ====================
   
@@ -179,20 +211,62 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
     }
   );
   
-  const q1ExitProgress = interpolate(
-    frame,
-    [f_exit, f_exit + toFrames(0.5, fps)],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: EZ.power3In
-    }
+  const questionExitTransition = useMemo(
+    () =>
+      createTransitionProps({
+        style: anim.questionTransitionStyle || 'slide',
+        durationInFrames: toFrames(anim.transitionDuration ?? 0.6, fps),
+        direction: anim.questionTransitionDirection || 'left'
+      }),
+    [
+      anim.questionTransitionStyle,
+      anim.transitionDuration,
+      anim.questionTransitionDirection,
+      fps
+    ]
   );
-  
-  const q1Opacity = frame < f_q1 ? 0 : frame < f_exit ? q1Progress : 1 - q1ExitProgress;
+
+  const questionExitProgress = frame < f_exit
+    ? 0
+    : Math.min(
+        1,
+        questionExitTransition.timing
+          ? questionExitTransition.timing.getProgress({
+              frame: frame - f_exit,
+              fps
+            })
+          : interpolate(
+              frame,
+              [f_exit, f_exit + toFrames(0.5, fps)],
+              [0, 1],
+              {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                easing: EZ.power3In
+              }
+            )
+      );
+
+  const exitOffset = (() => {
+    if (!anim.questionTransitionStyle?.includes('slide')) {
+      return { x: 0, y: 0 };
+    }
+    const direction = anim.questionTransitionDirection || 'left';
+    switch (direction) {
+      case 'right':
+        return { x: width * questionExitProgress, y: 0 };
+      case 'up':
+        return { x: 0, y: -height * questionExitProgress };
+      case 'down':
+        return { x: 0, y: height * questionExitProgress };
+      case 'left':
+      default:
+        return { x: -width * questionExitProgress, y: 0 };
+    }
+  })();
+
+  const q1Opacity = frame < f_q1 ? 0 : Math.max(0, Math.min(1, q1Progress * (1 - questionExitProgress)));
   const q1TranslateY = frame < f_q1 ? 30 : (1 - q1Progress) * 30;
-  const q1TranslateX = frame < f_exit ? 0 : -1200 * q1ExitProgress;
   
   // Emphasis pulse for Q1
   const q1Pulse = anim.emphasis === 'pulse' && frame >= f_emphasis && frame < f_exit
@@ -211,21 +285,9 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
     }
   );
   
-  const q2ExitProgress = interpolate(
-    frame,
-    [f_exit, f_exit + toFrames(0.5, fps)],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: EZ.power3In
-    }
-  );
-  
-  const q2Opacity = frame < f_q2 ? 0 : frame < f_exit ? q2Progress : 1 - q2ExitProgress;
+  const q2Opacity = frame < f_q2 ? 0 : Math.max(0, Math.min(1, q2Progress * (1 - questionExitProgress)));
   const q2TranslateY = frame < f_q2 ? 40 : (1 - q2Progress) * 40;
   const q2Scale = frame < f_q2 ? 0.9 : 0.9 + (q2Progress * 0.1);
-  const q2TranslateX = frame < f_exit ? 0 : -1200 * q2ExitProgress;
   
   // Emphasis pulse for Q2
   const q2Pulse = anim.emphasis === 'pulse' && frame >= f_emphasis && frame < f_exit
@@ -259,8 +321,8 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const visualOpacity = visualProgress * (1 - visualFadeOut);
-  const visualScale = 0.8 + (visualProgress * 0.2);
+    const visualOpacity = visualProgress * (1 - Math.max(visualFadeOut, questionExitProgress));
+    const visualScale = 0.8 + (visualProgress * 0.2);
   
   // Conclusion Animation
   const conclusionProgress = config.conclusion.enabled && frame >= f_conclusion
@@ -292,48 +354,58 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   const conclusionOpacity = conclusionProgress * (1 - conclusionFadeOut);
   
   // Position resolution
+  const viewport = { width, height };
   const q1Pos = resolvePosition(
-    config.questionPart1.position,
-    config.questionPart1.offset,
-    { w: 1920, h: 1080 }
-  );
-  
+      config.questionPart1.position,
+      config.questionPart1.offset,
+      viewport
+    );
+
   const q2Pos = resolvePosition(
-    config.questionPart2.position,
-    config.questionPart2.offset,
-    { w: 1920, h: 1080 }
-  );
+      config.questionPart2.position,
+      config.questionPart2.offset,
+      viewport
+    );
+
+  const alignmentClass =
+    typography.align === 'left'
+      ? 'text-left'
+      : typography.align === 'right'
+      ? 'text-right'
+      : 'text-center';
+
+  const textTransform =
+    typography.transform === 'uppercase'
+      ? 'uppercase'
+      : typography.transform === 'lowercase'
+      ? 'lowercase'
+      : 'none';
   
   return (
     <AbsoluteFill
-      style={{
-        backgroundColor: colors.bg,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-      }}
+      className="relative flex h-full w-full overflow-hidden bg-surface text-ink"
+      style={{ backgroundColor: colors.bg }}
     >
       {/* Particle Background */}
-      <svg
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%'
-        }}
-      >
-        {particleElements.map(p => p.element)}
-      </svg>
+      {particles.enabled && (
+        <svg
+          className="absolute inset-0 h-full w-full"
+          viewBox={`0 0 ${width} ${height}`}
+        >
+          {ambientParticles.map(({ key, element }) =>
+            React.cloneElement(element, { key })
+          )}
+        </svg>
+      )}
       
       {/* Optional Title */}
       {config.title.enabled && (
         <div
+          className="absolute left-1/2 -translate-x-1/2 font-display font-bold tracking-tight text-ink"
           style={{
-            position: 'absolute',
-            left: '50%',
             top: config.title.offset.y,
-            transform: 'translateX(-50%)',
             fontSize: fonts.size_title,
-            fontWeight: 700,
-            color: colors.text,
-            textAlign: 'center'
+            textTransform,
           }}
         >
           {config.title.text}
@@ -342,19 +414,16 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       
       {/* Question Part 1 */}
       <div
+        className={`pointer-events-none absolute max-w-[88%] font-display leading-tight drop-shadow-lg ${alignmentClass}`}
         style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: `translate(-50%, calc(-50% + ${q1Pos.y + q1TranslateY}px + ${q1TranslateX}px)) scale(${q1Pulse})`,
+          left: `${q1Pos.x}px`,
+          top: `${q1Pos.y}px`,
+          transform: `translate(-50%, -50%) translate(${exitOffset.x}px, ${exitOffset.y}px) translateY(${q1TranslateY}px) scale(${q1Pulse})`,
           fontSize: fonts.size_question,
           fontWeight: fonts.weight_question,
           color: colors.accent,
           opacity: q1Opacity,
-          textAlign: 'center',
-          maxWidth: '90%',
-          lineHeight: 1.2,
-          textShadow: '0 2px 10px rgba(0,0,0,0.1)'
+          textTransform,
         }}
       >
         {config.questionPart1.text}
@@ -362,19 +431,16 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       
       {/* Question Part 2 */}
       <div
+        className={`pointer-events-none absolute max-w-[88%] font-display leading-tight drop-shadow-lg ${alignmentClass}`}
         style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: `translate(-50%, calc(-50% + ${q2Pos.y + q2TranslateY}px + ${q2TranslateX}px)) scale(${q2Scale * q2Pulse})`,
+          left: `${q2Pos.x}px`,
+          top: `${q2Pos.y}px`,
+          transform: `translate(-50%, -50%) translate(${exitOffset.x}px, ${exitOffset.y}px) translateY(${q2TranslateY}px) scale(${q2Scale * q2Pulse})`,
           fontSize: fonts.size_question,
           fontWeight: fonts.weight_question,
           color: colors.accent2,
           opacity: q2Opacity,
-          textAlign: 'center',
-          maxWidth: '90%',
-          lineHeight: 1.2,
-          textShadow: '0 2px 10px rgba(0,0,0,0.1)'
+          textTransform,
         }}
       >
         {config.questionPart2.text}
@@ -383,11 +449,9 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       {/* Central Visual */}
       {config.centralVisual.enabled && config.centralVisual.type !== 'none' && visualOpacity > 0 && (
         <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]"
           style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: `translate(-50%, -50%) scale(${visualScale})`,
+            transform: `translate(-50%, -50%) translate(${exitOffset.x * 0.6}px, ${exitOffset.y * 0.6}px) scale(${visualScale})`,
             opacity: visualOpacity
           }}
         >
@@ -408,37 +472,50 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       
       {/* Conclusion */}
       {config.conclusion.enabled && conclusionOpacity > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            opacity: conclusionOpacity,
-            textAlign: 'center'
-          }}
-        >
+        <div className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center ${alignmentClass}`} style={{ opacity: conclusionOpacity }}>
           <div
+            className="font-display drop-shadow-lg"
             style={{
               fontSize: fonts.size_conclusion,
               fontWeight: fonts.weight_conclusion,
               color: colors.accent,
               marginBottom: 20,
-              textShadow: '0 2px 10px rgba(0,0,0,0.1)'
+              transform: `scale(${conclusionPulse})`,
+              textTransform,
             }}
           >
             {config.conclusion.text}
           </div>
           {config.conclusion.subtitle && (
             <div
+              className="font-body"
               style={{
                 fontSize: fonts.size_subtitle,
                 color: colors.textSecondary,
-                fontWeight: 400
+                fontWeight: 400,
+                textTransform,
               }}
             >
               {config.conclusion.subtitle}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* CTA Badge */}
+      {cta.enabled && conclusionOpacity > 0 && (
+        <div className="absolute inset-x-0 bottom-[14%] flex justify-center" style={{ opacity: Math.min(1, conclusionOpacity) }}>
+          {cta.url ? (
+            <a
+              href={cta.url}
+              target="_blank"
+              rel="noreferrer"
+              className="badge-chalk shadow-lg"
+            >
+              {cta.label}
+            </a>
+          ) : (
+            <div className="badge-chalk shadow-lg">{cta.label}</div>
           )}
         </div>
       )}
@@ -462,7 +539,7 @@ export const getDuration = (scene, fps) => {
 };
 
 // METADATA
-export const TEMPLATE_VERSION = '6.0';
+export const TEMPLATE_VERSION = '6.1';
 export const TEMPLATE_ID = 'Hook1AQuestionBurst';
 export const PRIMARY_INTENTION = 'QUESTION';
 export const SECONDARY_INTENTIONS = ['CHALLENGE', 'REVEAL'];
@@ -485,5 +562,46 @@ export const CONFIG_SCHEMA = {
     enabled: { type: 'checkbox', label: 'Show Conclusion' },
     text: { type: 'text', label: 'Conclusion Text' },
     subtitle: { type: 'text', label: 'Subtitle' }
+  },
+  typography: {
+    voice: {
+      type: 'select',
+      label: 'Font Voice',
+      options: ['notebook', 'story', 'utility']
+    },
+    align: {
+      type: 'select',
+      label: 'Text Alignment',
+      options: ['left', 'center', 'right']
+    },
+    transform: {
+      type: 'select',
+      label: 'Letter Case',
+      options: ['none', 'uppercase', 'lowercase']
+    }
+  },
+  animation: {
+    questionTransitionStyle: {
+      type: 'select',
+      label: 'Question Exit Style',
+      options: ['slide', 'fade', 'wipe', 'none']
+    },
+    questionTransitionDirection: {
+      type: 'select',
+      label: 'Slide Direction',
+      options: ['left', 'right', 'up', 'down']
+    },
+    transitionDuration: {
+      type: 'slider',
+      label: 'Transition Duration (s)',
+      min: 0.2,
+      max: 1.2,
+      step: 0.05
+    }
+  },
+  cta: {
+    enabled: { type: 'checkbox', label: 'Show CTA Badge' },
+    label: { type: 'text', label: 'CTA Label' },
+    url: { type: 'text', label: 'CTA Link (optional)' }
   }
 };

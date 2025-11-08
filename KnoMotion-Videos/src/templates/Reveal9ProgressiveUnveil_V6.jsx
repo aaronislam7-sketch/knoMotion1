@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { THEME } from '../utils/theme';
 import rough from 'roughjs/bundled/rough.esm.js';
@@ -20,6 +20,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #9: PROGRESSIVE REVEAL - v6.0
@@ -92,6 +94,11 @@ const DEFAULT_CONFIG = {
   animation: {
     entrance: 'fade-up',
     transitionEasing: 'power3InOut'
+  },
+  typography: {
+    voice: 'notebook',
+    align: 'center',
+    transform: 'none'
   }
 };
 
@@ -219,13 +226,58 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
     },
     beats: { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) },
-    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) }
+    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) },
+    typography: { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) }
   };
   
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
   const beats = config.beats;
   const stages = config.stages || DEFAULT_CONFIG.stages;
+  const typography = config.typography;
+
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+
+  const alignmentClass =
+    typography.align === 'left'
+      ? 'text-left'
+      : typography.align === 'right'
+      ? 'text-right'
+      : 'text-center';
+
+  const textTransform =
+    typography.transform === 'uppercase'
+      ? 'uppercase'
+      : typography.transform === 'lowercase'
+      ? 'lowercase'
+      : 'none';
+
+  const revealTransitionOptions = useMemo(() => {
+    switch (config.revealStyle || DEFAULT_CONFIG.revealStyle) {
+      case 'curtain':
+        return { style: 'wipe', axis: 'horizontal' };
+      case 'slide-left':
+        return { style: 'slide', direction: 'left' };
+      case 'slide-right':
+        return { style: 'slide', direction: 'right' };
+      case 'zoom':
+        return { style: 'iris' };
+      case 'fade':
+      default:
+        return { style: 'fade' };
+    }
+  }, [config.revealStyle]);
+
+  const revealTransition = useMemo(
+    () =>
+      createTransitionProps({
+        ...revealTransitionOptions,
+        durationInFrames: toFrames(beats.stageTransition, fps)
+      }),
+    [revealTransitionOptions, beats.stageTransition, fps]
+  );
   
   // Calculate which stage is currently active
   const titleStartFrame = toFrames(beats.titleEntry, fps);
@@ -243,7 +295,16 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       
       // Calculate transition progress for reveal effect
       if (frame < transitionEndFrame) {
-        revealProgress = (frame - stageStartFrame) / (transitionEndFrame - stageStartFrame);
+        const localFrame = frame - stageStartFrame;
+        revealProgress = revealTransition.timing
+          ? Math.min(
+              1,
+              revealTransition.timing.getProgress({
+                frame: Math.max(0, localFrame),
+                fps
+              })
+            )
+          : (frame - stageStartFrame) / (transitionEndFrame - stageStartFrame);
       } else {
         revealProgress = 1;
       }
@@ -272,7 +333,10 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
   );
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill
+      className="relative h-full w-full overflow-hidden bg-surface text-ink"
+      style={{ backgroundColor: colors.bg }}
+    >
       {/* Ambient particles */}
       <svg
         style={{
@@ -288,22 +352,19 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       </svg>
       
       {/* Title - Fixed at top in safe zone */}
-      {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 70,
-          fontSize: fonts.size_title,
-          fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
-          color: colors.accent,
-          textAlign: 'center',
-          opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          zIndex: 100,
-          padding: '0 60px'
-        }}>
+        {frame >= titleStartFrame && (
+          <div
+            className={`absolute left-0 right-0 top-16 font-display font-black tracking-tight ${alignmentClass}`}
+            style={{
+              fontSize: fonts.size_title,
+              color: colors.accent,
+              opacity: titleAnim.opacity,
+              transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+              zIndex: 100,
+              padding: '0 60px',
+              textTransform
+            }}
+          >
           {config.title.text}
         </div>
       )}
@@ -312,39 +373,29 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       {currentStage >= 0 && revealProgress >= 0.3 && (
         <>
           {/* Stage headline */}
-          <div style={{
-            position: 'absolute',
-            top: '35%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            fontSize: fonts.size_headline,
-            fontWeight: 800,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.ink,
-            textAlign: 'center',
-            opacity: interpolate(stageProgress, [0, 0.3], [0, 1], { extrapolateRight: 'clamp' }),
-            zIndex: 50
-          }}>
+            <div
+              className={`absolute left-1/2 top-[35%] w-[90%] -translate-x-1/2 -translate-y-1/2 font-display font-extrabold leading-snug text-ink drop-shadow ${alignmentClass}`}
+              style={{
+                fontSize: fonts.size_headline,
+                opacity: interpolate(stageProgress, [0, 0.3], [0, 1], { extrapolateRight: 'clamp' }),
+                zIndex: 50,
+                textTransform
+              }}
+            >
             {stages[currentStage].headline}
           </div>
           
           {/* Stage description */}
           {stages[currentStage].description && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: fonts.size_description,
-              fontWeight: 400,
-              fontFamily: 'Inter, sans-serif',
-              color: colors.ink,
-              textAlign: 'center',
-              maxWidth: '70%',
-              lineHeight: 1.5,
-              opacity: interpolate(stageProgress, [0.2, 0.5], [0, 1], { extrapolateRight: 'clamp' }),
-              zIndex: 50
-            }}>
+              <div
+                className={`absolute left-1/2 top-1/2 w-[70%] -translate-x-1/2 -translate-y-1/2 font-body leading-relaxed text-ink ${alignmentClass}`}
+                style={{
+                  fontSize: fonts.size_description,
+                  opacity: interpolate(stageProgress, [0.2, 0.5], [0, 1], { extrapolateRight: 'clamp' }),
+                  zIndex: 50,
+                  textTransform
+                }}
+              >
               {stages[currentStage].description}
             </div>
           )}
@@ -373,7 +424,7 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
       )}
       
       {/* Reveal overlay (curtain/fade/slide effect) */}
-      {currentStage >= 0 && revealProgress < 1 && renderRevealOverlay(
+        {currentStage >= 0 && revealProgress < 1 && renderRevealOverlay(
         config.revealStyle || DEFAULT_CONFIG.revealStyle,
         revealProgress,
         colors,
@@ -386,10 +437,10 @@ export const Reveal9ProgressiveUnveil = ({ scene, styles, presets, easingMap }) 
 
 // Required exports
 export const TEMPLATE_ID = 'Reveal9ProgressiveUnveil';
-export const TEMPLATE_VERSION = '6.0.0';
+export const TEMPLATE_VERSION = '6.1.0';
 
 // Attach version to component for TemplateRouter detection
-Reveal9ProgressiveUnveil.TEMPLATE_VERSION = '6.0.0';
+Reveal9ProgressiveUnveil.TEMPLATE_VERSION = '6.1.0';
 Reveal9ProgressiveUnveil.TEMPLATE_ID = 'Reveal9ProgressiveUnveil';
 export const LEARNING_INTENTIONS = {
   primary: ['reveal'],

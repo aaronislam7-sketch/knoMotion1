@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Color system */
+    --kn-color-surface: #fff9f0;
+    --kn-color-board: #ffffff;
+    --kn-color-ink: #1a1a1a;
+    --kn-color-accent: #ff6b35;
+    --kn-color-accent2: #9b59b6;
+    --kn-color-highlight: #ffd700;
+    --kn-color-success: #2ecc71;
+    --kn-color-warning: #f39c12;
+    --kn-color-danger: #e74c3c;
+    --kn-color-muted: #9ca3af;
+
+    /* Typography palettes */
+    --kn-font-display: 'Permanent Marker', cursive;
+    --kn-font-body: 'Kalam', sans-serif;
+    --kn-font-accent: 'Caveat', cursive;
+    --kn-font-utility: 'Inter', sans-serif;
+
+    /* Type scale */
+    --kn-font-size-hero: clamp(3.5rem, 6vw, 5.25rem);
+    --kn-font-size-display: clamp(3rem, 5vw, 4.5rem);
+    --kn-font-size-title: clamp(2.5rem, 3.8vw, 3.5rem);
+    --kn-font-size-headline: clamp(2rem, 3.2vw, 3rem);
+    --kn-font-size-body: clamp(1.5rem, 2vw, 2rem);
+    --kn-font-size-small: clamp(1.25rem, 1.6vw, 1.5rem);
+    --kn-font-size-tiny: clamp(1rem, 1.2vw, 1.25rem);
+
+    /* Spacing rhythm */
+    --kn-space-safe: 4rem;
+    --kn-space-safe-x: 6rem;
+    --kn-space-safe-y: 5rem;
+    --kn-space-gap: 3rem;
+    --kn-space-gap-lg: 4.5rem;
+    --kn-space-gap-sm: 1.5rem;
+
+    /* Radius + depth */
+    --kn-radius-card: 1.2rem;
+    --kn-radius-soft: 1.8rem;
+    --kn-radius-pill: 9999px;
+
+    --kn-shadow-soft: 0 10px 32px rgba(0, 0, 0, 0.12);
+    --kn-shadow-glow: 0 20px 60px rgba(255, 215, 0, 0.28);
+    --kn-shadow-sketch: 6px 6px 0 rgba(0, 0, 0, 0.12), 1px 1px 0 rgba(0, 0, 0, 0.06);
+
+    /* Motion curves */
+    --kn-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --kn-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --kn-ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  body {
+    @apply bg-surface text-ink font-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display text-ink tracking-tight;
+  }
+}
+
+@layer components {
+  .safe-zone {
+    @apply px-safe-x py-safe-y lg:px-[calc(var(--kn-space-safe-x)*1.1)] lg:py-[calc(var(--kn-space-safe-y)*1.1)];
+  }
+
+  .card-sketch {
+    @apply bg-board rounded-card shadow-sketch relative overflow-hidden;
+  }
+
+  .badge-chalk {
+    @apply inline-flex items-center gap-2 rounded-pill bg-accent px-4 py-1 text-sm font-accent uppercase tracking-widest text-white;
+  }
+}

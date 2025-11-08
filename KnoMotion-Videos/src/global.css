@@ -9,60 +9,60 @@
 /* ==================== CSS VARIABLES ==================== */
 
 :root {
-  /* Colors - Default Palette */
-  --kn-bg: #fafafa;
-  --kn-accent: #4a9c3b;
-  --kn-accent-support: #8bc34a;
-  --kn-ink: #2d3436;
-  --kn-highlight: #ffd93d;
-  --kn-board: #ffffff;
+  /* Legacy aliases mapped to Tailwind token variables */
+  --kn-bg: var(--kn-color-surface);
+  --kn-accent: var(--kn-color-accent);
+  --kn-accent-support: var(--kn-color-accent2);
+  --kn-ink: var(--kn-color-ink);
+  --kn-highlight: var(--kn-color-highlight);
+  --kn-board: var(--kn-color-board);
   --kn-shadow: rgba(0, 0, 0, 0.15);
-  
-  /* Typography - Defaults */
-  --kn-font-title: 'Cabin Sketch', cursive;
-  --kn-font-body: 'Patrick Hand', cursive;
+
+  /* Typography aliases */
+  --kn-font-title: var(--kn-font-display);
+  --kn-font-body: var(--kn-font-body);
   --kn-font-mono: 'Courier New', monospace;
-  
+
   /* Font Sizes (responsive rhythm) */
-  --kn-text-hero: 80px;
-  --kn-text-title: 64px;
-  --kn-text-h2: 48px;
-  --kn-text-body: 32px;
-  --kn-text-small: 24px;
-  --kn-text-tiny: 18px;
-  
+  --kn-text-hero: var(--kn-font-size-hero);
+  --kn-text-title: var(--kn-font-size-title);
+  --kn-text-h2: var(--kn-font-size-headline);
+  --kn-text-body: var(--kn-font-size-body);
+  --kn-text-small: var(--kn-font-size-small);
+  --kn-text-tiny: var(--kn-font-size-tiny);
+
   /* Motion - Imperfection & Humanization */
   --kn-imp: 0.12;                    /* Imperfection amount (0-1) */
   --kn-jitter: 2px;                  /* Slight position jitter */
   --kn-wobble: 0.5deg;               /* Subtle rotation wobble */
   --kn-bounce: 1.08;                 /* Overshoot scale */
-  
+
   /* Texture & Effects */
   --kn-texture-paper: 1;             /* Paper texture on/off (0/1) */
   --kn-chalk-opacity: 0.15;          /* Chalk dust effect */
   --kn-noise-opacity: 0.05;          /* Background noise */
-  
+
   /* Timing & Easing */
   --kn-duration-fast: 0.3s;
   --kn-duration-medium: 0.6s;
   --kn-duration-slow: 1.0s;
-  --kn-ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
-  --kn-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --kn-ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  
+  --kn-ease-smooth: var(--kn-ease-smooth, cubic-bezier(0.4, 0.0, 0.2, 1));
+  --kn-ease-bounce: var(--kn-ease-bounce, cubic-bezier(0.68, -0.55, 0.265, 1.55));
+  --kn-ease-elastic: var(--kn-ease-elastic, cubic-bezier(0.175, 0.885, 0.32, 1.275));
+
   /* Spacing & Layout */
   --kn-space-xs: 8px;
   --kn-space-sm: 16px;
   --kn-space-md: 32px;
   --kn-space-lg: 64px;
   --kn-space-xl: 96px;
-  
+
   /* Border Radius */
   --kn-radius-sm: 8px;
   --kn-radius-md: 16px;
   --kn-radius-lg: 24px;
   --kn-radius-full: 9999px;
-  
+
   /* Shadows */
   --kn-shadow-sm: 0 2px 8px var(--kn-shadow);
   --kn-shadow-md: 0 4px 16px var(--kn-shadow);
@@ -75,14 +75,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-body {
-  font-family: var(--kn-font-body);
-  color: var(--kn-ink);
-  background-color: var(--kn-bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ==================== UTILITY CLASSES ==================== */
