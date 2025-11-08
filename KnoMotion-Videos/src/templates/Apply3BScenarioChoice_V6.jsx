@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #6: SCENARIO CHOICE - v6.0
@@ -17,13 +19,27 @@ const DEFAULT_CONFIG = {
   ],
   bestChoice: 1,
   style_tokens: { colors: { bg: '#FFF9F0', scenario: '#1A1A1A', option: '#FFFFFF', border: '#CBD5E0', best: '#2ECC71', risky: '#F39C12', poor: '#E74C3C' }, fonts: { size_scenario: 40, size_option: 26, size_consequence: 18 } },
-  beats: { entrance: 0.5, scenario: 1.0, optionsReveal: 2.5, optionInterval: 0.4, reveal: 6.0, exit: 9.0 }
+  beats: { entrance: 0.5, scenario: 1.0, optionsReveal: 2.5, optionInterval: 0.4, reveal: 6.0, exit: 9.0 },
+  typography: { voice: 'utility', align: 'center', transform: 'none' },
+  transition: { exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' } }
 };
 
 export const Apply3BScenarioChoice = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const config = { ...DEFAULT_CONFIG, ...scene };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Figtree, sans-serif' },
+    body: { family: 'Inter, sans-serif' },
+    accent: { family: 'Caveat, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
@@ -37,8 +53,8 @@ export const Apply3BScenarioChoice = ({ scene }) => {
   const opacity = 1 - exitProgress;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ position: 'absolute', left: '50%', top: config.scenario.offset.y, transform: `translate(-50%, ${(1 - scenarioProgress) * 30}px)`, opacity: scenarioProgress * opacity, fontSize: fonts.size_scenario, fontWeight: 700, color: colors.scenario, textAlign: 'center', maxWidth: '85%', lineHeight: 1.3 }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
+      <div style={{ position: 'absolute', left: '50%', top: config.scenario.offset.y, transform: `translate(-50%, ${(1 - scenarioProgress) * 30}px)`, opacity: scenarioProgress * opacity, fontSize: fonts.size_scenario, fontWeight: 700, fontFamily: fontTokens.title.family, color: colors.scenario, textAlign: typography.align, maxWidth: '85%', lineHeight: 1.3 }}>
         {config.scenario.text}
       </div>
       
@@ -61,7 +77,7 @@ export const Apply3BScenarioChoice = ({ scene }) => {
           
           return (
             <div key={i} style={{ backgroundColor: showResult ? bgColor : colors.option, border: `3px solid ${borderColor}`, borderRadius: 12, padding: 20, transform: `scale(${optProgress})`, opacity: optProgress * opacity, transition: showResult ? 'all 0.3s ease' : 'none' }}>
-              <div style={{ fontSize: fonts.size_option, fontWeight: 600, color: showResult ? '#FFFFFF' : colors.scenario, marginBottom: 8 }}>
+              <div style={{ fontSize: fonts.size_option, fontWeight: 600, fontFamily: fontTokens.body.family, color: showResult ? '#FFFFFF' : colors.scenario, marginBottom: 8 }}>
                 {showResult && isBest && '✓ '}{opt.text}
               </div>
               {showResult && (

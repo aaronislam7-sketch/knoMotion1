@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames, renderHero, mergeHeroConfig } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #8: FORWARD LINK - v6.0
@@ -14,13 +16,27 @@ const DEFAULT_CONFIG = {
   bridge: { text: '→', enabled: true },
   visual: { type: 'emoji', value: '🌉', scale: 3.0, enabled: false },
   style_tokens: { colors: { bg: '#FFF9F0', current: '#3498DB', next: '#E74C3C', bridge: '#9CA3AF', text: '#1A1A1A' }, fonts: { size_heading: 40, size_content: 28, size_bridge: 80, weight_heading: 700, weight_content: 400 } },
-  beats: { entrance: 0.5, current: 1.0, bridge: 3.0, visual: 4.0, next: 5.0, hold: 7.0, exit: 9.0 }
+  beats: { entrance: 0.5, current: 1.0, bridge: 3.0, visual: 4.0, next: 5.0, hold: 7.0, exit: 9.0 },
+  typography: { voice: 'story', align: 'center', transform: 'none' },
+  transition: { exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' } }
 };
 
 export const Reflect4DForwardLink = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const config = { ...DEFAULT_CONFIG, ...scene };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Caveat, cursive' },
+    body: { family: 'Kalam, sans-serif' },
+    accent: { family: 'Permanent Marker, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
@@ -35,14 +51,14 @@ export const Reflect4DForwardLink = ({ scene }) => {
   const opacity = 1 - exitProgress;
   
   const renderSection = (section, progress, color, x) => (
-    <div style={{ position: 'absolute', left: x, top: '50%', transform: `translate(-50%, calc(-50% + ${(1 - progress) * 30}px))`, opacity: progress * opacity, width: '40%', textAlign: 'center' }}>
-      <div style={{ fontSize: fonts.size_heading, fontWeight: fonts.weight_heading, color, marginBottom: 16 }}>{section.text}</div>
-      <div style={{ fontSize: fonts.size_content, fontWeight: fonts.weight_content, color: colors.text, lineHeight: 1.5 }}>{section.summary || section.preview}</div>
+    <div style={{ position: 'absolute', left: x, top: '50%', transform: `translate(-50%, calc(-50% + ${(1 - progress) * 30}px))`, opacity: progress * opacity, width: '40%', textAlign: typography.align }}>
+      <div style={{ fontSize: fonts.size_heading, fontWeight: fonts.weight_heading, fontFamily: fontTokens.title.family, color, marginBottom: 16 }}>{section.text}</div>
+      <div style={{ fontSize: fonts.size_content, fontWeight: fonts.weight_content, fontFamily: fontTokens.body.family, color: colors.text, lineHeight: 1.5 }}>{section.summary || section.preview}</div>
     </div>
   );
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       {renderSection(config.current, currentProgress, colors.current, '25%')}
       
       {config.bridge.enabled && bridgeProgress > 0 && (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   EZ, 
@@ -6,6 +6,8 @@ import {
   renderHero,
   mergeHeroConfig
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #18: PROGRESS PATH - v6.0
@@ -108,6 +110,20 @@ const DEFAULT_CONFIG = {
     entrance: 'fade-up',
     waypointReveal: 'pop', // pop | slide | fade
     easing: 'power3Out'
+  },
+  
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  
+  transition: {
+    exit: {
+      style: 'fade',
+      durationInFrames: 18,
+      easing: 'smooth'
+    }
   }
 };
 
@@ -115,6 +131,19 @@ const DEFAULT_CONFIG = {
 export const Progress18Path = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  
+  // Font loading
+  const typography = scene?.typography ? { ...DEFAULT_CONFIG.typography, ...scene.typography } : DEFAULT_CONFIG.typography;
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Figtree, sans-serif' },
+    body: { family: 'Inter, sans-serif' },
+    accent: { family: 'Caveat, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
   
   // Merge config
   const config = { ...DEFAULT_CONFIG, ...scene };
@@ -188,9 +217,10 @@ export const Progress18Path = ({ scene, styles, presets, easingMap }) => {
   
   return (
     <AbsoluteFill
+      className="overflow-hidden"
       style={{
         backgroundColor: colors.bg,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+        fontFamily: fontTokens.body.family
       }}
     >
       {/* Title */}
@@ -209,8 +239,11 @@ export const Progress18Path = ({ scene, styles, presets, easingMap }) => {
           style={{
             fontSize: fonts.size_title,
             fontWeight: fonts.weight_title,
+            fontFamily: fontTokens.title.family,
             color: colors.title,
             margin: 0,
+            textAlign: typography.align,
+            textTransform: typography.transform !== 'none' ? typography.transform : undefined,
             textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)'
           }}
         >
@@ -346,6 +379,7 @@ export const Progress18Path = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: fonts.size_label,
                   fontWeight: fonts.weight_label,
+                  fontFamily: fontTokens.body.family,
                   color: statusColor,
                   marginBottom: 4,
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
