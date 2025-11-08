@@ -1,0 +1,133 @@
+{
+  "id": "guide_10_step_sequence_grid",
+  "title": {
+    "text": "Design Thinking Process",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  "steps": [
+    {
+      "number": 1,
+      "title": "Empathize",
+      "description": "Understand users",
+      "completed": true,
+      "color": "#EF4444",
+      "icon": "❤️"
+    },
+    {
+      "number": 2,
+      "title": "Define",
+      "description": "Clarify problem",
+      "completed": true,
+      "color": "#F97316",
+      "icon": "🎯"
+    },
+    {
+      "number": 3,
+      "title": "Ideate",
+      "description": "Generate solutions",
+      "completed": false,
+      "color": "#EAB308",
+      "icon": "💡"
+    },
+    {
+      "number": 4,
+      "title": "Prototype",
+      "description": "Build quickly",
+      "completed": false,
+      "color": "#22C55E",
+      "icon": "🔧"
+    },
+    {
+      "number": 5,
+      "title": "Test",
+      "description": "Validate ideas",
+      "completed": false,
+      "color": "#06B6D4",
+      "icon": "🧪"
+    },
+    {
+      "number": 6,
+      "title": "Iterate",
+      "description": "Refine & improve",
+      "completed": false,
+      "color": "#8B5CF6",
+      "icon": "🔄"
+    }
+  ],
+  "layout": {
+    "mode": "grid",
+    "spacing": "comfortable",
+    "gridColumns": 3,
+    "cardSize": 220,
+    "cardStyle": "circle"
+  },
+  "arrows": {
+    "enabled": true,
+    "type": "lottie",
+    "lottiePreset": "arrowFlow",
+    "animated": true,
+    "size": 60
+  },
+  "progressTracker": {
+    "enabled": true,
+    "type": "circular",
+    "position": "top-right",
+    "showPercentage": false
+  },
+  "emphasis": {
+    "enabled": true,
+    "activeStyle": "scale-glow",
+    "scaleAmount": 1.1,
+    "glowIntensity": 25
+  },
+  "checkmarks": {
+    "enabled": true,
+    "style": "lottie",
+    "lottiePreset": "successCheck"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#0A0E1A",
+      "bgGradient": true,
+      "primary": "#3B82F6",
+      "completed": "#10B981",
+      "text": "#FFFFFF",
+      "textSecondary": "#94A3B8"
+    },
+    "fonts": {
+      "size_title": 56,
+      "size_step_number": 72,
+      "size_step_title": 30,
+      "size_step_desc": 18,
+      "weight_title": 800,
+      "weight_step": 700
+    }
+  },
+  "beats": {
+    "title": 1.0,
+    "firstStep": 2.5,
+    "stepInterval": 0.7,
+    "arrowDelay": 0.3,
+    "hold": 14.0,
+    "exit": 15.0
+  },
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 20
+    },
+    "glow": {
+      "enabled": true,
+      "intensity": 22
+    },
+    "shine": {
+      "enabled": true,
+      "onCompleted": true
+    },
+    "noiseTexture": {
+      "enabled": true,
+      "opacity": 0.03
+    }
+  }
+}

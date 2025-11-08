@@ -1,0 +1,155 @@
+{
+  "id": "guide_10_step_sequence_revised",
+  "title": {
+    "text": "Content Creation Workflow",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  "steps": [
+    {
+      "number": 1,
+      "title": "Research",
+      "description": "Gather insights",
+      "completed": true,
+      "color": "#3B82F6",
+      "icon": "📚",
+      "emphasize": {
+        "enabled": false
+      }
+    },
+    {
+      "number": 2,
+      "title": "Outline",
+      "description": "Structure ideas",
+      "completed": true,
+      "color": "#8B5CF6",
+      "icon": "📝",
+      "emphasize": {
+        "enabled": false
+      }
+    },
+    {
+      "number": 3,
+      "title": "Draft",
+      "description": "Write first version",
+      "completed": false,
+      "color": "#EC4899",
+      "icon": "✍️",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 6.0,
+        "duration": 2.5
+      }
+    },
+    {
+      "number": 4,
+      "title": "Refine",
+      "description": "Polish content",
+      "completed": false,
+      "color": "#F59E0B",
+      "icon": "✨",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 9.0,
+        "duration": 2.5
+      }
+    },
+    {
+      "number": 5,
+      "title": "Publish",
+      "description": "Share with world",
+      "completed": false,
+      "color": "#10B981",
+      "icon": "🚀",
+      "emphasize": {
+        "enabled": false
+      }
+    }
+  ],
+  "layout": {
+    "mode": "horizontal",
+    "spacing": "comfortable",
+    "gridColumns": 3,
+    "cardSize": 240,
+    "cardStyle": "circle"
+  },
+  "arrows": {
+    "enabled": true,
+    "type": "lottie",
+    "lottiePreset": "arrowFlow",
+    "color": "#3B82F6",
+    "animated": true,
+    "size": 70
+  },
+  "progressTracker": {
+    "enabled": true,
+    "type": "circular",
+    "position": "top-right",
+    "showPercentage": true
+  },
+  "emphasis": {
+    "enabled": true,
+    "activeStyle": "scale-glow",
+    "completedStyle": "checkmark",
+    "scaleAmount": 1.12,
+    "glowIntensity": 28
+  },
+  "checkmarks": {
+    "enabled": true,
+    "style": "lottie",
+    "lottiePreset": "successCheck",
+    "color": "#10B981"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#0A0E1A",
+      "bgGradient": true,
+      "primary": "#3B82F6",
+      "completed": "#10B981",
+      "active": "#F59E0B",
+      "text": "#FFFFFF",
+      "textSecondary": "#94A3B8",
+      "cardBg": "#1E293B"
+    },
+    "fonts": {
+      "size_title": 58,
+      "size_step_number": 76,
+      "size_step_title": 34,
+      "size_step_desc": 19,
+      "weight_title": 800,
+      "weight_step": 700
+    }
+  },
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "firstStep": 2.5,
+    "stepInterval": 0.75,
+    "arrowDelay": 0.35,
+    "hold": 14.0,
+    "exit": 15.0
+  },
+  "animation": {
+    "stepReveal": "spring-bounce",
+    "arrowAnimation": "slide-fade",
+    "progressAnimation": true
+  },
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 18
+    },
+    "glow": {
+      "enabled": true,
+      "intensity": 22
+    },
+    "shine": {
+      "enabled": true,
+      "onCompleted": true
+    },
+    "noiseTexture": {
+      "enabled": true,
+      "opacity": 0.035
+    }
+  }
+}
