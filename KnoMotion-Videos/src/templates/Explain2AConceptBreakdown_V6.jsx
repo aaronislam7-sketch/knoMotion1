@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   EZ, 
@@ -8,6 +8,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #3: CONCEPT BREAKDOWN - v6.0
@@ -69,6 +71,12 @@ const DEFAULT_CONFIG = {
     { label: 'Part 4', description: 'Fourth component', color: '#3498DB' }
   ],
   
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  
   style_tokens: {
     colors: {
       bg: '#FFF9F0',
@@ -120,6 +128,14 @@ const DEFAULT_CONFIG = {
     glow: {
       enabled: true
     }
+  },
+  
+  transition: {
+    exit: {
+      style: 'fade',
+      durationInFrames: 18,
+      easing: 'smooth'
+    }
   }
 };
 
@@ -140,8 +156,17 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Merge config
+  // Load fonts
   const config = { ...DEFAULT_CONFIG, ...scene };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  useEffect(() => {
+    loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+  
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
+  // Merge config (already done above)
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
@@ -232,15 +257,19 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   
   const exitOpacity = 1 - exitProgress;
   
+  // Exit transition
+  const exitTransition = config.transition?.exit ? createTransitionProps(config.transition.exit) : null;
+  
   // Center position
   const centerX = 960;
   const centerY = 540;
   
   return (
     <AbsoluteFill
+      className="overflow-hidden"
       style={{
         backgroundColor: colors.bg,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+        fontFamily: fontTokens.body.family
       }}
     >
       {/* Particle Background */}
@@ -256,17 +285,17 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
       
       {/* Title */}
       <div
+        className="absolute left-1/2 -translate-x-1/2 text-center max-w-[90%]"
         style={{
-          position: 'absolute',
-          left: '50%',
           top: config.title.offset.y,
           transform: `translate(-50%, ${titleY}px)`,
           fontSize: fonts.size_title,
           fontWeight: fonts.weight_title,
+          fontFamily: fontTokens.title.family,
           color: colors.text,
           opacity: titleOpacity * exitOpacity,
-          textAlign: 'center',
-          maxWidth: '90%'
+          textAlign: typography.align,
+          textTransform: typography.transform !== 'none' ? typography.transform : undefined
         }}
       >
         {config.title.text}
@@ -361,11 +390,12 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
             </div>
           )}
           <div
+            className="text-center"
             style={{
               fontSize: fonts.size_center,
               fontWeight: fonts.weight_center,
+              fontFamily: fontTokens.title.family,
               color: '#FFFFFF',
-              textAlign: 'center',
               lineHeight: 1.2
             }}
           >
@@ -420,22 +450,22 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
             }}
           >
             <div
+              className="text-center mb-2"
               style={{
                 fontSize: fonts.size_part_label,
                 fontWeight: fonts.weight_part,
-                color: part.color || colors.center,
-                textAlign: 'center',
-                marginBottom: 8
+                fontFamily: fontTokens.accent.family,
+                color: part.color || colors.center
               }}
             >
               {part.label}
             </div>
             <div
+              className="text-center leading-tight"
               style={{
                 fontSize: fonts.size_part_desc,
-                color: colors.textSecondary,
-                textAlign: 'center',
-                lineHeight: 1.3
+                fontFamily: fontTokens.body.family,
+                color: colors.textSecondary
               }}
             >
               {part.description}
@@ -486,6 +516,17 @@ export const CONFIG_SCHEMA = {
       label: { type: 'text', label: 'Part Label' },
       description: { type: 'text', label: 'Description' },
       color: { type: 'color', label: 'Color' }
+    }
+  },
+  typography: {
+    voice: { type: 'select', label: 'Font Voice', options: ['notebook', 'story', 'utility'] },
+    align: { type: 'select', label: 'Text Align', options: ['left', 'center', 'right'] },
+    transform: { type: 'select', label: 'Text Transform', options: ['none', 'uppercase', 'lowercase', 'capitalize'] }
+  },
+  transition: {
+    exit: {
+      style: { type: 'select', label: 'Exit Style', options: ['none', 'fade', 'slide', 'wipe'] },
+      durationInFrames: { type: 'number', label: 'Exit Duration (frames)', min: 6, max: 60 }
     }
   }
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   EZ, 
@@ -10,6 +10,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #16: QUOTE SHOWCASE - v6.0
@@ -89,6 +91,16 @@ const DEFAULT_CONFIG = {
     enabled: true,
     count: 30,
     style: 'sparkle'
+  },
+  
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
+  
+  transition: {
+    exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' }
   }
 };
 
@@ -97,8 +109,19 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Merge config
+  // Font loading
   const config = { ...DEFAULT_CONFIG, ...scene };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Caveat, cursive' },
+    body: { family: 'Kalam, sans-serif' },
+    accent: { family: 'Permanent Marker, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
@@ -226,9 +249,10 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
   
   return (
     <AbsoluteFill
+      className="overflow-hidden"
       style={{
         backgroundColor: colors.bg,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+        fontFamily: fontTokens.body.family
       }}
     >
       {/* Particle Background */}
@@ -299,14 +323,15 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
         
         {/* Quote Text */}
         <div
+          className="text-center mb-5 leading-normal"
           style={{
             fontSize: fonts.size_quote,
             fontWeight: fonts.weight_quote,
+            fontFamily: fontTokens.title.family,
             color: colors.quote,
-            lineHeight: 1.4,
-            textAlign: 'center',
-            marginBottom: 20,
-            letterSpacing: '0.5px'
+            textAlign: typography.align,
+            letterSpacing: '0.5px',
+            textTransform: typography.transform !== 'none' ? typography.transform : undefined
           }}
         >
           {config.quote.text}
@@ -331,14 +356,14 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
         {/* Author */}
         {config.quote.author && (
           <div
+            className="text-center italic"
             style={{
               fontSize: fonts.size_author,
               fontWeight: fonts.weight_author,
+              fontFamily: fontTokens.accent.family,
               color: colors.author,
-              textAlign: 'center',
               opacity: authorProgress,
-              transform: `translateY(${(1 - authorProgress) * 10}px)`,
-              fontStyle: 'italic'
+              transform: `translateY(${(1 - authorProgress) * 10}px)`
             }}
           >
             — {config.quote.author}
@@ -398,5 +423,16 @@ export const CONFIG_SCHEMA = {
   },
   animation: {
     emphasis: { type: 'select', label: 'Emphasis Effect', options: ['pulse', 'glow', 'scale', 'none'] }
+  },
+  typography: {
+    voice: { type: 'select', label: 'Font Voice', options: ['notebook', 'story', 'utility'] },
+    align: { type: 'select', label: 'Text Align', options: ['left', 'center', 'right'] },
+    transform: { type: 'select', label: 'Text Transform', options: ['none', 'uppercase', 'lowercase', 'capitalize'] }
+  },
+  transition: {
+    exit: {
+      style: { type: 'select', label: 'Exit Style', options: ['none', 'fade', 'slide', 'wipe'] },
+      durationInFrames: { type: 'number', label: 'Exit Duration (frames)', min: 6, max: 60 }
+    }
   }
 };

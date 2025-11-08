@@ -43,6 +43,10 @@ export * from './typography';
 export * from './usePreloadAssets';
 export { StyleTokensProvider, useStyleTokens } from './StyleTokensProvider';
 
+// Font System & Transitions
+export * from './fontSystem';
+export * from './transitions';
+
 // Blueprint v5.0 - Core Systems
 export * from './presets';
 export { SceneIdContext, useSceneId, generateSceneId } from './SceneIdContext';

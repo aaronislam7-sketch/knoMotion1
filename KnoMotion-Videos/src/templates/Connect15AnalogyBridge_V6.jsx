@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -13,6 +13,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #15: ANALOGY BRIDGE - v6.0
@@ -118,6 +120,20 @@ const DEFAULT_CONFIG = {
     conceptEntrance: 'slide',
     bridgeAnimation: 'draw',
     easing: 'power3InOut'
+  },
+  
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
+  
+  transition: {
+    exit: {
+      style: 'fade',
+      durationInFrames: 18,
+      easing: 'smooth'
+    }
   }
 };
 
@@ -128,6 +144,19 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
   if (!scene) {
     return <AbsoluteFill style={{ backgroundColor: '#F8F9FA' }} />;
   }
+  
+  // Font loading
+  const typography = scene.typography ? { ...DEFAULT_CONFIG.typography, ...scene.typography } : DEFAULT_CONFIG.typography;
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Caveat, cursive' },
+    body: { family: 'Kalam, sans-serif' },
+    accent: { family: 'Permanent Marker, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
   
   const config = {
     ...DEFAULT_CONFIG,
@@ -177,7 +206,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
   const centerY = height * 0.5;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       {/* Particles */}
       <svg style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0, opacity: 0.3 }} viewBox="0 0 1920 1080">
         {particleElements.map(p => p.element)}
@@ -192,7 +221,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
           fontSize: fonts.size_title,
           fontWeight: 800,
-          fontFamily: '"Permanent Marker", cursive',
+          fontFamily: fontTokens.accent.family,
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
@@ -223,7 +252,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           <div style={{
             fontSize: fonts.size_concept,
             fontWeight: 900,
-            fontFamily: '"Permanent Marker", cursive',
+            fontFamily: fontTokens.accent.family,
             color: colors.accent,
             marginBottom: 20
           }}>
@@ -237,7 +266,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           <div style={{
             fontSize: fonts.size_description,
             fontWeight: 400,
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: fontTokens.body.family,
             color: colors.ink,
             lineHeight: 1.5
           }}>
@@ -285,7 +314,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
             <div style={{
               fontSize: fonts.size_bridge,
               fontWeight: 900,
-              fontFamily: '"Permanent Marker", cursive',
+              fontFamily: fontTokens.accent.family,
               color: colors.bridgeColor,
               position: 'absolute',
               top: 20,
@@ -320,7 +349,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           <div style={{
             fontSize: fonts.size_concept,
             fontWeight: 900,
-            fontFamily: '"Permanent Marker", cursive',
+            fontFamily: fontTokens.accent.family,
             color: colors.accent2,
             marginBottom: 20
           }}>
@@ -334,7 +363,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           <div style={{
             fontSize: fonts.size_description,
             fontWeight: 400,
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: fontTokens.body.family,
             color: colors.ink,
             lineHeight: 1.5
           }}>
@@ -376,7 +405,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
                 <div style={{
                   fontSize: fonts.size_mapping,
                   fontWeight: 600,
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: fontTokens.body.family,
                   color: colors.mappingColor,
                   textAlign: 'center'
                 }}>

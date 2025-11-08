@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -16,6 +16,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #13: INTERACTIVE POLL/QUIZ - v6.0
@@ -130,6 +132,20 @@ const DEFAULT_CONFIG = {
     correctReveal: 'pulse',
     incorrectReveal: 'shake',
     easing: 'power3InOut'
+  },
+  
+  typography: {
+    voice: 'notebook',
+    align: 'center',
+    transform: 'none'
+  },
+  
+  transition: {
+    exit: {
+      style: 'fade',
+      durationInFrames: 18,
+      easing: 'smooth'
+    }
   }
 };
 
@@ -230,6 +246,19 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
     return <AbsoluteFill style={{ backgroundColor: '#1A1A2E' }} />;
   }
   
+  // Font loading
+  const typography = scene.typography ? { ...DEFAULT_CONFIG.typography, ...scene.typography } : DEFAULT_CONFIG.typography;
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Permanent Marker, cursive' },
+    body: { family: 'Kalam, sans-serif' },
+    accent: { family: 'Caveat, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
+  
   // Merge with defaults
   const config = {
     ...DEFAULT_CONFIG,
@@ -321,7 +350,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
   }, EZ, fps);
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       {/* Ambient particles */}
       <svg
         style={{
@@ -345,7 +374,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
           top: 60,
           fontSize: fonts.size_title,
           fontWeight: 700,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: fontTokens.title.family,
           color: colors.accent,
           textAlign: 'center',
           opacity: titleAnim.opacity,
@@ -365,7 +394,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
           top: 180,
           fontSize: fonts.size_question,
           fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
+          fontFamily: fontTokens.accent.family,
           color: colors.ink,
           textAlign: 'center',
           maxWidth: '85%',
@@ -457,7 +486,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
             <div style={{
               fontSize: fonts.size_option * 0.6,
               fontWeight: 900,
-              fontFamily: '"Permanent Marker", cursive',
+              fontFamily: fontTokens.accent.family,
               color: shouldReveal ? '#FFFFFF' : colors.accent,
               marginBottom: 8
             }}>
@@ -468,7 +497,7 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
             <div style={{
               fontSize: fonts.size_option,
               fontWeight: 700,
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: fontTokens.body.family,
               color: shouldReveal ? '#FFFFFF' : colors.ink,
               textAlign: 'center',
               lineHeight: 1.3

@@ -77,7 +77,15 @@ export const loadFontVoice = async (
   voice: FontVoiceId = DEFAULT_FONT_VOICE,
   options?: { document?: Document },
 ) => {
-  const palette = FONT_VOICES[voice];
+  // Validate voice and use default if invalid
+  const validVoice = FONT_VOICES[voice] ? voice : DEFAULT_FONT_VOICE;
+  const palette = FONT_VOICES[validVoice];
+  
+  if (!palette) {
+    console.error(`[fontSystem] Invalid voice "${voice}", using "${DEFAULT_FONT_VOICE}"`);
+    return loadFontVoice(DEFAULT_FONT_VOICE, options);
+  }
+
   const families = new Set([
     palette.display,
     palette.body,
@@ -102,7 +110,14 @@ export const loadFontVoice = async (
 };
 
 export const buildFontTokens = (voice: FontVoiceId = DEFAULT_FONT_VOICE) => {
-  const palette = FONT_VOICES[voice];
+  // Validate voice and use default if invalid
+  const validVoice = FONT_VOICES[voice] ? voice : DEFAULT_FONT_VOICE;
+  const palette = FONT_VOICES[validVoice];
+
+  if (!palette) {
+    console.error(`[fontSystem] Invalid voice "${voice}", using "${DEFAULT_FONT_VOICE}"`);
+    return buildFontTokens(DEFAULT_FONT_VOICE);
+  }
 
   return {
     title: { family: palette.display },

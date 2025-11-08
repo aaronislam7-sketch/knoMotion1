@@ -20,6 +20,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #10: STEP SEQUENCE - v6.0
@@ -98,6 +100,14 @@ const DEFAULT_CONFIG = {
     stepEntrance: 'slide-left', // fade-up, slide-left, pop, bounce
     connectionDraw: true,
     pulseOnEntry: true
+  },
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  transition: {
+    exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' }
   }
 };
 
@@ -236,6 +246,19 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
+  // Font loading
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Figtree, sans-serif' },
+    body: { family: 'Inter, sans-serif' },
+    accent: { family: 'Caveat, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
+  
   // Merge with defaults
   const config = {
     ...DEFAULT_CONFIG,
@@ -282,7 +305,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       {/* Ambient particles */}
       <svg
         style={{
@@ -298,20 +321,14 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       </svg>
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
+        <div className="absolute left-0 right-0 text-center px-safe-x z-[100]" style={{
           top: 70,
           fontSize: fonts.size_title,
           fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
+          fontFamily: fontTokens.title.family,
           color: colors.accent,
-          textAlign: 'center',
           opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          zIndex: 100,
-          padding: '0 60px'
+          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`
         }}>
           {config.title.text}
         </div>
@@ -402,20 +419,15 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               gap: 20
             }}>
               {/* Step number badge */}
-              <div style={{
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{
                 width: 70,
                 height: 70,
-                borderRadius: '50%',
                 backgroundColor: colors.accent,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 fontSize: fonts.size_stepNumber - 6,
                 fontWeight: 900,
-                fontFamily: '"Permanent Marker", cursive',
+                fontFamily: fontTokens.title.family,
                 color: '#FFFFFF',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-                flexShrink: 0
+                boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
               }}>
                 {index + 1}
               </div>
@@ -432,13 +444,11 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                 width: 380
               }}>
                 {/* Step title */}
-                <div style={{
+                <div className="mb-2 leading-tight" style={{
                   fontSize: Math.min(fonts.size_stepTitle, 28),
                   fontWeight: 800,
-                  fontFamily: '"Permanent Marker", cursive',
-                  color: colors.ink,
-                  marginBottom: 6,
-                  lineHeight: 1.2
+                  fontFamily: fontTokens.title.family,
+                  color: colors.ink
                 }}>
                   {step.title}
                 </div>

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames, renderHero, mergeHeroConfig } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #4: MICRO QUIZ - v6.0
@@ -91,6 +93,20 @@ const DEFAULT_CONFIG = {
     reveal: 10.0,
     hold: 12.0,
     exit: 14.0
+  },
+  
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  
+  transition: {
+    exit: {
+      style: 'fade',
+      durationInFrames: 18,
+      easing: 'smooth'
+    }
   }
 };
 
@@ -99,6 +115,20 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
   const { fps } = useVideoConfig();
   
   const config = { ...DEFAULT_CONFIG, ...scene };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  // Build font tokens with fallback
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Figtree, sans-serif' },
+    body: { family: 'Inter, sans-serif' },
+    accent: { family: 'Caveat, cursive' },
+    utility: { family: 'Inter, sans-serif' }
+  };
+  
+  useEffect(() => {
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
+  
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
@@ -154,7 +184,7 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
   const globalOpacity = 1 - exitProgress;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       
       {/* Question */}
       <div
@@ -188,8 +218,11 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
           style={{
             fontSize: fonts.size_question,
             fontWeight: fonts.weight_question,
+            fontFamily: fontTokens.title.family,
             color: colors.question,
-            lineHeight: 1.3
+            lineHeight: 1.3,
+            textAlign: typography.align,
+            textTransform: typography.transform !== 'none' ? typography.transform : undefined
           }}
         >
           {config.question.text}
@@ -276,6 +309,7 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: fonts.size_choice,
                   fontWeight: fonts.weight_choice,
+                  fontFamily: fontTokens.body.family,
                   color: showResult ? '#FFFFFF' : colors.question,
                   flex: 1
                 }}
