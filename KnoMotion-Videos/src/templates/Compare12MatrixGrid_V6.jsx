@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -16,6 +16,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #12: MATRIX COMPARISON GRID - v6.0
@@ -118,6 +120,14 @@ const DEFAULT_CONFIG = {
     cellEntrance: 'pop', // fade, pop, slide-left
     highlightStyle: 'glow', // glow, border, scale
     easing: 'power3InOut'
+  },
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  transition: {
+    exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' }
   }
 };
 
@@ -145,7 +155,7 @@ const calculateGridLayout = (rows, columns, width, height, margins = {}) => {
 };
 
 // Render cell content based on type
-const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ) => {
+const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ, fontTokens) => {
   // Checkmark
   if (content === '✓' || content === 'check' || content === 'yes') {
     return (
@@ -153,7 +163,7 @@ const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ) => {
         fontSize: fonts.size_cell * 1.5,
         fontWeight: 900,
         color: colors.checkmark,
-        fontFamily: '"Permanent Marker", cursive'
+        fontFamily: fontTokens.display.family
       }}>
         ✓
       </div>
@@ -167,7 +177,7 @@ const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ) => {
         fontSize: fonts.size_cell * 1.5,
         fontWeight: 900,
         color: colors.cross,
-        fontFamily: '"Permanent Marker", cursive'
+        fontFamily: fontTokens.display.family
       }}>
         ✗
       </div>
@@ -205,14 +215,11 @@ const renderCellContent = (content, colors, fonts, frame, beats, fps, EZ) => {
   
   // Plain text
   return (
-    <div style={{
+    <div className="text-center leading-tight max-w-[90%]" style={{
       fontSize: fonts.size_cell,
       fontWeight: 600,
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: fontTokens.body.family,
       color: colors.ink,
-      textAlign: 'center',
-      lineHeight: 1.2,
-      maxWidth: '90%',
       wordWrap: 'break-word'
     }}>
       {content}
@@ -227,6 +234,13 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
   if (!scene) {
     return <AbsoluteFill style={{ backgroundColor: '#1A1A2E' }} />;
   }
+  
+  // Font loading
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  useEffect(() => {
+    loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   // Merge with defaults
   const config = {
@@ -320,7 +334,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
   }, EZ, fps);
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       {/* Ambient particles */}
       <svg
         style={{
@@ -337,19 +351,16 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
       
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          left: '50%',
+        <div className="absolute left-1/2 text-center max-w-[90%] z-[100]" style={{
           top: 70,
           fontSize: fonts.size_title,
           fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
+          fontFamily: fontTokens.title.family,
           color: colors.accent,
-          textAlign: 'center',
+          textAlign: typography.align,
           opacity: titleAnim.opacity,
           transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
-          zIndex: 100,
-          maxWidth: '90%'
+          textTransform: typography.transform !== 'none' ? typography.transform : undefined
         }}>
           {config.title.text}
         </div>
@@ -394,7 +405,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
                   justifyContent: 'center',
                   fontSize: fonts.size_header,
                   fontWeight: 800,
-                  fontFamily: '"Permanent Marker", cursive',
+                  fontFamily: fontTokens.display.family,
                   color: isHighlighted ? colors.ink : colors.accent2,
                   boxShadow: highlightGlow,
                   transition: 'all 0.3s ease'
@@ -409,21 +420,16 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
           {rows.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: 'flex', marginTop: 4 }}>
               {/* Row header */}
-              <div style={{
+              <div className="flex items-center justify-center text-center p-3" style={{
                 width: layout.cellWidth,
                 height: layout.cellHeight,
                 backgroundColor: colors.headerBg,
                 border: `2px solid ${colors.gridLines}`,
                 borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 12px',
                 fontSize: fonts.size_header,
                 fontWeight: 700,
-                fontFamily: 'Inter, sans-serif',
-                color: colors.ink,
-                textAlign: 'center'
+                fontFamily: fontTokens.accent.family,
+                color: colors.ink
               }}>
                 {row.header}
               </div>
@@ -461,7 +467,7 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
                     transform: `scale(${cellScale})`,
                     boxShadow: isHighlighted ? `0 0 20px ${colors.highlight}` : '0 2px 8px rgba(0,0,0,0.1)'
                   }}>
-                    {renderCellContent(cell, colors, fonts, frame, beats, fps, EZ)}
+                    {renderCellContent(cell, colors, fonts, frame, beats, fps, EZ, fontTokens)}
                   </div>
                 );
               })}
@@ -472,24 +478,16 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
       
       {/* Conclusion text */}
       {config.showConclusion && frame >= conclusionStartFrame && (
-        <div style={{
-          position: 'absolute',
+        <div className="absolute left-1/2 text-center max-w-[80%] bg-white rounded-card shadow-soft z-10" style={{
           bottom: 80,
-          left: '50%',
           transform: `translate(-50%, 0) translateY(${conclusionAnim.translateY}px)`,
           fontSize: fonts.size_conclusion,
           fontWeight: 700,
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: fontTokens.display.family,
           color: colors.accent,
-          textAlign: 'center',
           opacity: conclusionAnim.opacity,
-          maxWidth: '80%',
-          backgroundColor: colors.cellBg,
           padding: '20px 40px',
-          borderRadius: 16,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-          border: `3px solid ${colors.accent}`,
-          zIndex: 10
+          border: `3px solid ${colors.accent}`
         }}>
           {config.conclusionText}
         </div>
@@ -606,6 +604,17 @@ export const CONFIG_SCHEMA = {
       cellEntrance: ['fade', 'pop', 'slide-left'],
       highlightStyle: ['glow', 'border', 'scale'],
       easing: ['power3InOut', 'backOut', 'smooth']
+    }
+  },
+  typography: {
+    voice: { type: 'select', label: 'Font Voice', options: ['notebook', 'story', 'utility'] },
+    align: { type: 'select', label: 'Text Align', options: ['left', 'center', 'right'] },
+    transform: { type: 'select', label: 'Text Transform', options: ['none', 'uppercase', 'lowercase', 'capitalize'] }
+  },
+  transition: {
+    exit: {
+      style: { type: 'select', label: 'Exit Style', options: ['none', 'fade', 'slide', 'wipe'] },
+      durationInFrames: { type: 'number', label: 'Exit Duration (frames)', min: 6, max: 60 }
     }
   }
 };

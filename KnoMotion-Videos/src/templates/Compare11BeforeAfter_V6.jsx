@@ -19,6 +19,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #11: BEFORE/AFTER SPLIT - v6.0
@@ -104,6 +106,14 @@ const DEFAULT_CONFIG = {
     beforeEntrance: 'slide-right',
     afterEntrance: 'slide-left',
     pulseAfter: true
+  },
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  transition: {
+    exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' }
   }
 };
 
@@ -207,6 +217,13 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
+  // Font loading
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  useEffect(() => {
+    loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
   // Merge with defaults
   const config = {
     ...DEFAULT_CONFIG,
@@ -298,7 +315,7 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   };
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
       {/* Ambient particles */}
       <svg
         style={{
@@ -315,21 +332,17 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
       
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
+        <div className="absolute left-0 right-0 text-center px-safe-x z-[200]" style={{
           top: 70,
           fontSize: fonts.size_title,
           fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
+          fontFamily: fontTokens.title.family,
           color: colors.accent,
-          textAlign: 'center',
+          textAlign: typography.align,
           opacity: titleAnim.opacity,
           transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          zIndex: 200,
           textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-          padding: '0 60px'
+          textTransform: typography.transform !== 'none' ? typography.transform : undefined
         }}>
           {config.title.text}
         </div>
@@ -351,42 +364,32 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           zIndex: 1
         }}>
           {/* Label */}
-          <div style={{
+          <div className="uppercase tracking-wider mb-5" style={{
             fontSize: fonts.size_label,
             fontWeight: 700,
-            fontFamily: 'Inter, sans-serif',
-            color: colors.accent,
-            letterSpacing: 3,
-            marginBottom: 20,
-            textTransform: 'uppercase'
+            fontFamily: fontTokens.accent.family,
+            color: colors.accent
           }}>
             {config.before.label}
           </div>
           
           {/* Headline */}
-          <div style={{
+          <div className="text-center mb-4" style={{
             fontSize: fonts.size_headline,
             fontWeight: 800,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.ink,
-            textAlign: 'center',
-            marginBottom: 15
+            fontFamily: fontTokens.display.family,
+            color: colors.ink
           }}>
             {config.before.headline}
           </div>
           
           {/* Description */}
           {config.before.description && (
-            <div style={{
+            <div className="text-center max-w-[80%] leading-normal mb-6 opacity-80" style={{
               fontSize: fonts.size_description,
               fontWeight: 400,
-              fontFamily: 'Inter, sans-serif',
-              color: colors.ink,
-              textAlign: 'center',
-              maxWidth: '80%',
-              lineHeight: 1.5,
-              marginBottom: 25,
-              opacity: 0.8
+              fontFamily: fontTokens.body.family,
+              color: colors.ink
             }}>
               {config.before.description}
             </div>
@@ -426,42 +429,32 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           zIndex: 2
         }}>
           {/* Label */}
-          <div style={{
+          <div className="uppercase tracking-wider mb-5" style={{
             fontSize: fonts.size_label,
             fontWeight: 700,
-            fontFamily: 'Inter, sans-serif',
-            color: colors.accent2,
-            letterSpacing: 3,
-            marginBottom: 20,
-            textTransform: 'uppercase'
+            fontFamily: fontTokens.accent.family,
+            color: colors.accent2
           }}>
             {config.after.label}
           </div>
           
           {/* Headline */}
-          <div style={{
+          <div className="text-center mb-4" style={{
             fontSize: fonts.size_headline,
             fontWeight: 800,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.ink,
-            textAlign: 'center',
-            marginBottom: 15
+            fontFamily: fontTokens.display.family,
+            color: colors.ink
           }}>
             {config.after.headline}
           </div>
           
           {/* Description */}
           {config.after.description && (
-            <div style={{
+            <div className="text-center max-w-[80%] leading-normal mb-6 opacity-80" style={{
               fontSize: fonts.size_description,
               fontWeight: 400,
-              fontFamily: 'Inter, sans-serif',
-              color: colors.ink,
-              textAlign: 'center',
-              maxWidth: '80%',
-              lineHeight: 1.5,
-              marginBottom: 25,
-              opacity: 0.8
+              fontFamily: fontTokens.body.family,
+              color: colors.ink
             }}>
               {config.after.description}
             </div>
@@ -583,6 +576,17 @@ export const CONFIG_SCHEMA = {
       beforeEntrance: ['slide-right', 'fade-up', 'pop'],
       afterEntrance: ['slide-left', 'fade-up', 'pop'],
       pulseAfter: 'boolean'
+    }
+  },
+  typography: {
+    voice: { type: 'select', label: 'Font Voice', options: ['notebook', 'story', 'utility'] },
+    align: { type: 'select', label: 'Text Align', options: ['left', 'center', 'right'] },
+    transform: { type: 'select', label: 'Text Transform', options: ['none', 'uppercase', 'lowercase', 'capitalize'] }
+  },
+  transition: {
+    exit: {
+      style: { type: 'select', label: 'Exit Style', options: ['none', 'fade', 'slide', 'wipe'] },
+      durationInFrames: { type: 'number', label: 'Exit Duration (frames)', min: 6, max: 60 }
     }
   }
 };
