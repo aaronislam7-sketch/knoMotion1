@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { 
-  EZ, 
-  toFrames, 
+import {
+  EZ,
+  toFrames,
   renderHero,
   mergeHeroConfig,
   resolvePosition,
-  positionToCSS,
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #2: AMBIENT MYSTERY - v6.0
@@ -77,6 +78,12 @@ const DEFAULT_CONFIG = {
     enabled: false
   },
   
+    typography: {
+      voice: 'story',
+      align: 'center',
+      transform: 'none'
+    },
+
   style_tokens: {
     colors: {
       bg: '#1A1F2E',
@@ -117,7 +124,8 @@ const DEFAULT_CONFIG = {
     particles: {
       enabled: true,
       count: 20,
-      style: 'ambient'
+      style: 'ambient',
+      seed: 542
     },
     fog: {
       enabled: true,
@@ -127,13 +135,18 @@ const DEFAULT_CONFIG = {
       enabled: true,
       intensity: 0.6
     }
+  },
+
+  signature: {
+    enabled: false,
+    text: 'Swipe to reveal more'
   }
 };
 
 // MAIN COMPONENT
 export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
   
   // Merge config
   const config = { ...DEFAULT_CONFIG, ...scene };
@@ -148,6 +161,20 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
     fog: { ...DEFAULT_CONFIG.effects.fog, ...(scene.effects?.fog || {}) },
     glow: { ...DEFAULT_CONFIG.effects.glow, ...(scene.effects?.glow || {}) }
   };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  const signature = { ...DEFAULT_CONFIG.signature, ...(scene.signature || {}) };
+  
+  if (scene.effects?.fogIntensity !== undefined) {
+    effects.fog.intensity = scene.effects.fogIntensity;
+  }
+
+  if (scene.effects?.glowIntensity !== undefined) {
+    effects.glow.intensity = scene.effects.glowIntensity;
+  }
+
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Convert beats to frames
   const f_entrance = toFrames(beats.entrance, fps);
@@ -160,17 +187,54 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   const f_exit = toFrames(beats.exit, fps);
   
   // Generate particles
-  const particleElements = effects.particles.enabled
-    ? generateAmbientParticles({
-        count: effects.particles.count,
-        seed: 542,
-        style: effects.particles.style,
-        color: colors.fog,
-        bounds: { w: 1920, h: 1080 }
-      })
+  const baseParticles = useMemo(() => {
+    if (!effects.particles.enabled) return [];
+    return generateAmbientParticles(
+      effects.particles.count,
+      effects.particles.seed ?? 542,
+      width,
+      height
+    );
+  }, [effects.particles.enabled, effects.particles.count, effects.particles.seed, width, height]);
+
+  const ambientParticles = effects.particles.enabled
+    ? renderAmbientParticles(
+        baseParticles,
+        frame,
+        fps,
+        [colors.fog, `${colors.text}33`, colors.accent2]
+      )
     : [];
-  
-  renderAmbientParticles(particleElements, frame, fps, { opacity: 0.6 });
+
+  const exitTransition = useMemo(
+    () =>
+      createTransitionProps({
+        style: 'fade',
+        durationInFrames: toFrames(0.8, fps)
+      }),
+    [fps]
+  );
+
+  const exitProgress = frame < f_exit
+    ? 0
+    : Math.min(
+        1,
+        exitTransition.timing
+          ? exitTransition.timing.getProgress({
+              frame: frame - f_exit,
+              fps
+            })
+          : interpolate(
+              frame,
+              [f_exit, f_exit + toFrames(0.8, fps)],
+              [0, 1],
+              {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                easing: EZ.power3In
+              }
+            )
+      );
   
   // ==================== ANIMATIONS ====================
   
@@ -255,20 +319,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
     }
   );
   
-  const questionFadeOut = frame >= f_exit
-    ? interpolate(
-        frame,
-        [f_exit, f_exit + toFrames(0.8, fps)],
-        [0, 1],
-        {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-          easing: EZ.power3In
-        }
-      )
-    : 0;
-  
-  const questionOpacity = questionProgress * (1 - questionFadeOut);
+  const questionOpacity = questionProgress * (1 - exitProgress);
   const questionY = (1 - questionProgress) * 40;
   const questionScale = 0.95 + (questionProgress * 0.05);
   
@@ -291,20 +342,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const hintFadeOut = frame >= f_exit
-    ? interpolate(
-        frame,
-        [f_exit, f_exit + toFrames(0.8, fps)],
-        [0, 1],
-        {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-          easing: EZ.power3In
-        }
-      )
-    : 0;
-  
-  const hintOpacity = hintProgress * (1 - hintFadeOut);
+  const hintOpacity = hintProgress * (1 - exitProgress);
   const hintY = (1 - hintProgress) * 30;
   
   // Central visual animation
@@ -321,28 +359,27 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const visualFadeOut = frame >= f_exit
-    ? interpolate(
-        frame,
-        [f_exit, f_exit + toFrames(0.8, fps)],
-        [0, 1],
-        {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-          easing: EZ.power3In
-        }
-      )
-    : 0;
-  
-  const visualOpacity = visualProgress * (1 - visualFadeOut);
+  const visualOpacity = visualProgress * (1 - exitProgress);
   const visualScale = 0.8 + (visualProgress * 0.2);
   
+  const alignmentClass =
+    typography.align === 'left'
+      ? 'text-left'
+      : typography.align === 'right'
+      ? 'text-right'
+      : 'text-center';
+
+  const textTransform =
+    typography.transform === 'uppercase'
+      ? 'uppercase'
+      : typography.transform === 'lowercase'
+      ? 'lowercase'
+      : 'none';
+
   return (
     <AbsoluteFill
-      style={{
-        backgroundColor: colors.bg,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-      }}
+      className="relative flex h-full w-full overflow-hidden bg-surface text-ink"
+      style={{ backgroundColor: colors.bg }}
     >
       {/* Camera Container */}
       <div
@@ -354,16 +391,16 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
         }}
       >
         {/* Particle Background */}
-        <svg
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            opacity: 0.6
-          }}
-        >
-          {particleElements.map(p => p.element)}
-        </svg>
+          {effects.particles.enabled && (
+            <svg
+              className="absolute inset-0 h-full w-full opacity-60"
+              viewBox={`0 0 ${width} ${height}`}
+            >
+              {ambientParticles.map(({ key, element }) =>
+                React.cloneElement(element, { key })
+              )}
+            </svg>
+          )}
         
         {/* Fog Layers */}
         {effects.fog.enabled && (
@@ -407,27 +444,25 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
           }}
         />
         
-        {/* Whisper Text */}
-        {config.whisper.enabled && whisperOpacity > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: config.whisper.offset.y,
-              transform: 'translateX(-50%)',
-              fontSize: fonts.size_whisper,
-              fontWeight: fonts.weight_whisper,
-              color: colors.textSecondary,
-              opacity: whisperOpacity,
-              textAlign: 'center',
-              fontStyle: 'italic',
-              letterSpacing: '0.05em',
-              maxWidth: '90%'
-            }}
-          >
-            {config.whisper.text}
-          </div>
-        )}
+          {/* Whisper Text */}
+          {config.whisper.enabled && whisperOpacity > 0 && (
+            <div
+              className={`absolute left-1/2 font-body italic tracking-[0.08em] ${alignmentClass}`}
+              style={{
+                top: config.whisper.offset.y,
+                fontSize: fonts.size_whisper,
+                fontWeight: fonts.weight_whisper,
+                color: colors.textSecondary,
+                opacity: whisperOpacity,
+                letterSpacing: '0.05em',
+                maxWidth: '90%',
+                textTransform,
+                transform: 'translateX(-50%)'
+              }}
+            >
+              {config.whisper.text}
+            </div>
+          )}
         
         {/* Central Visual */}
         {config.centralVisual.enabled && config.centralVisual.type !== 'none' && visualOpacity > 0 && (
@@ -456,50 +491,57 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
           </div>
         )}
         
-        {/* Question Text */}
-        {questionOpacity > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: `translate(-50%, calc(-50% + ${questionY}px)) scale(${questionScale})`,
-              fontSize: fonts.size_question,
-              fontWeight: fonts.weight_question,
-              color: colors.text,
-              opacity: questionOpacity,
-              textAlign: 'center',
-              maxWidth: '90%',
-              lineHeight: 1.3,
-              textShadow: effects.glow.enabled
-                ? `0 0 ${glowPulse * 40}px ${colors.accent}, 0 2px 10px rgba(0,0,0,0.5)`
-                : '0 2px 10px rgba(0,0,0,0.5)'
-            }}
-          >
-            {config.question.text}
-          </div>
-        )}
+          {/* Question Text */}
+          {questionOpacity > 0 && (
+            <div
+              className={`absolute left-1/2 top-1/2 font-display leading-tight drop-shadow-lg ${alignmentClass}`}
+              style={{
+                transform: `translate(-50%, calc(-50% + ${questionY}px)) scale(${questionScale})`,
+                fontSize: fonts.size_question,
+                fontWeight: fonts.weight_question,
+                color: colors.text,
+                opacity: questionOpacity,
+                maxWidth: '90%',
+                lineHeight: 1.3,
+                textShadow: effects.glow.enabled
+                  ? `0 0 ${glowPulse * 40}px ${colors.accent}, 0 2px 10px rgba(0,0,0,0.5)`
+                  : '0 2px 10px rgba(0,0,0,0.5)',
+                textTransform
+              }}
+            >
+              {config.question.text}
+            </div>
+          )}
         
-        {/* Hint Text */}
-        {config.hint.enabled && hintOpacity > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              bottom: config.hint.offset.y * -1,
-              transform: `translate(-50%, ${hintY}px)`,
-              fontSize: fonts.size_hint,
-              fontWeight: fonts.weight_hint,
-              color: colors.textSecondary,
-              opacity: hintOpacity,
-              textAlign: 'center',
-              fontStyle: 'italic',
-              maxWidth: '90%'
-            }}
-          >
-            {config.hint.text}
-          </div>
-        )}
+          {/* Hint Text */}
+          {config.hint.enabled && hintOpacity > 0 && (
+            <div
+              className={`absolute left-1/2 font-body italic ${alignmentClass}`}
+              style={{
+                bottom: config.hint.offset.y * -1,
+                transform: `translate(-50%, ${hintY}px)`,
+                fontSize: fonts.size_hint,
+                fontWeight: fonts.weight_hint,
+                color: colors.textSecondary,
+                opacity: hintOpacity,
+                maxWidth: '90%',
+                textTransform
+              }}
+            >
+              {config.hint.text}
+            </div>
+          )}
+
+          {signature.enabled && (
+            <div className="absolute inset-x-0 bottom-[12%] flex justify-center">
+              <div
+                className="badge-chalk bg-opacity-80 text-sm tracking-widest shadow-lg"
+                style={{ opacity: Math.min(1, questionOpacity) }}
+              >
+                {signature.text}
+              </div>
+            </div>
+          )}
       </div>
       
       {/* CSS Animations */}
@@ -527,7 +569,7 @@ export const getDuration = (scene, fps) => {
 };
 
 // METADATA
-export const TEMPLATE_VERSION = '6.0';
+export const TEMPLATE_VERSION = '6.1';
 export const TEMPLATE_ID = 'Hook1EAmbientMystery';
 export const PRIMARY_INTENTION = 'REVEAL';
 export const SECONDARY_INTENTIONS = ['INSPIRE', 'QUESTION'];
@@ -549,5 +591,42 @@ export const CONFIG_SCHEMA = {
     enabled: { type: 'checkbox', label: 'Show Visual' },
     type: { type: 'select', label: 'Visual Type', options: ['emoji', 'image', 'roughSVG', 'none'] },
     value: { type: 'text', label: 'Visual Value' }
+  },
+  typography: {
+    voice: {
+      type: 'select',
+      label: 'Font Voice',
+      options: ['notebook', 'story', 'utility']
+    },
+    align: {
+      type: 'select',
+      label: 'Text Alignment',
+      options: ['left', 'center', 'right']
+    },
+    transform: {
+      type: 'select',
+      label: 'Letter Case',
+      options: ['none', 'uppercase', 'lowercase']
+    }
+  },
+  effects: {
+    fogIntensity: {
+      type: 'slider',
+      label: 'Fog Intensity',
+      min: 0,
+      max: 0.8,
+      step: 0.05
+    },
+    glowIntensity: {
+      type: 'slider',
+      label: 'Glow Intensity',
+      min: 0,
+      max: 1,
+      step: 0.05
+    }
+  },
+  signature: {
+    enabled: { type: 'checkbox', label: 'Show Signature Badge' },
+    text: { type: 'text', label: 'Signature Text' }
   }
 };
