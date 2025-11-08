@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -16,6 +16,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #13: INTERACTIVE POLL/QUIZ - v6.0
@@ -86,6 +88,12 @@ const DEFAULT_CONFIG = {
     text: 'Paris has been the capital of France since 987 AD',
     position: 'bottom-center',
     offset: { x: 0, y: -100 }
+  },
+  
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
   },
   
   style_tokens: {
@@ -248,8 +256,14 @@ export const Challenge13PollQuiz = ({ scene, styles, presets, easingMap }) => {
   
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const beats = config.beats;
   const options = config.options;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Calculate option positions
   const optionPositions = calculateOptionLayout(

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -16,6 +16,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #12: MATRIX COMPARISON GRID - v6.0
@@ -79,6 +81,12 @@ const DEFAULT_CONFIG = {
   winnerColumn: 0, // Which column to highlight (0-indexed)
   showConclusion: true,
   conclusionText: 'Option A is the best choice',
+  
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
   
   style_tokens: {
     colors: {
@@ -245,9 +253,15 @@ export const Compare12MatrixGrid = ({ scene, styles, presets, easingMap }) => {
   
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const beats = config.beats;
   const columns = config.columns;
   const rows = config.rows;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Calculate grid layout - ensure it stays below title safe zone
   const TITLE_SAFE_ZONE = 140; // Title lives in 0-140px zone

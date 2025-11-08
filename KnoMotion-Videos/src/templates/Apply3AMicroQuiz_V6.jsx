@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames, renderHero, mergeHeroConfig } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #4: MICRO QUIZ - v6.0
@@ -63,6 +65,12 @@ const DEFAULT_CONFIG = {
     style: 'countdown' // countdown | progress
   },
   
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  
   style_tokens: {
     colors: {
       bg: '#FFF9F0',
@@ -102,8 +110,14 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const timer = { ...DEFAULT_CONFIG.timer, ...(scene.timer || {}) };
   const choices = config.choices || DEFAULT_CONFIG.choices;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   const f_entrance = toFrames(beats.entrance, fps);
   const f_question = toFrames(beats.question, fps);
@@ -154,7 +168,7 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
   const globalOpacity = 1 - exitProgress;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
       
       {/* Question */}
       <div
@@ -184,11 +198,10 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
             )}
           </div>
         )}
-        <div
+        <div className={`font-display text-ink ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : 'text-center'} ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
           style={{
             fontSize: fonts.size_question,
             fontWeight: fonts.weight_question,
-            color: colors.question,
             lineHeight: 1.3
           }}
         >
@@ -272,11 +285,10 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
               >
                 {choice.id}
               </div>
-              <div
+              <div className={`font-body ${showResult ? 'text-white' : 'text-ink'}`}
                 style={{
                   fontSize: fonts.size_choice,
                   fontWeight: fonts.weight_choice,
-                  color: showResult ? '#FFFFFF' : colors.question,
                   flex: 1
                 }}
               >

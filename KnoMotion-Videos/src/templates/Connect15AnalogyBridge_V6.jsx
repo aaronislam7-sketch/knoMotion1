@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 
 // SDK imports - Agnostic Template System v6
@@ -13,6 +13,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #15: ANALOGY BRIDGE - v6.0
@@ -82,6 +84,12 @@ const DEFAULT_CONFIG = {
   
   layout: 'horizontal', // horizontal, vertical
   
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
+  
   style_tokens: {
     colors: {
       bg: '#F8F9FA',
@@ -136,6 +144,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
     familiar: { ...DEFAULT_CONFIG.familiar, ...(scene.familiar || {}) },
     newConcept: { ...DEFAULT_CONFIG.newConcept, ...(scene.newConcept || {}) },
     bridge: { ...DEFAULT_CONFIG.bridge, ...(scene.bridge || {}) },
+    typography: { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) },
     style_tokens: {
       colors: { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) },
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
@@ -147,6 +156,12 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
   const beats = config.beats;
+  const typography = config.typography;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Particles
   const particles = generateAmbientParticles(20, 15001, width, height);
@@ -177,7 +192,7 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
   const centerY = height * 0.5;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
       {/* Particles */}
       <svg style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0, opacity: 0.3 }} viewBox="0 0 1920 1080">
         {particleElements.map(p => p.element)}
@@ -185,20 +200,18 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
       
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          top: 60,
-          left: '50%',
-          transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
-          fontSize: fonts.size_title,
-          fontWeight: 800,
-          fontFamily: '"Permanent Marker", cursive',
-          color: colors.accent,
-          textAlign: 'center',
-          opacity: titleAnim.opacity,
-          zIndex: 100,
-          maxWidth: '90%'
-        }}>
+        <div className={`font-display text-accent text-center ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+          style={{
+            position: 'absolute',
+            top: 60,
+            left: '50%',
+            transform: `translate(-50%, 0) translateY(${titleAnim.translateY}px)`,
+            fontSize: fonts.size_title,
+            fontWeight: 800,
+            opacity: titleAnim.opacity,
+            zIndex: 100,
+            maxWidth: '90%'
+          }}>
           {config.title.text}
         </div>
       )}
@@ -220,13 +233,11 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           minWidth: 350,
           zIndex: 10
         }}>
-          <div style={{
-            fontSize: fonts.size_concept,
-            fontWeight: 900,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.accent,
-            marginBottom: 20
-          }}>
+          <div className="font-display text-accent mb-5"
+            style={{
+              fontSize: fonts.size_concept,
+              fontWeight: 900
+            }}>
             {config.familiar.title}
           </div>
           
@@ -234,13 +245,12 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
             {renderHero(mergeHeroConfig(config.familiar.visual), frame, beats, colors, EZ, fps)}
           </div>
           
-          <div style={{
-            fontSize: fonts.size_description,
-            fontWeight: 400,
-            fontFamily: 'Inter, sans-serif',
-            color: colors.ink,
-            lineHeight: 1.5
-          }}>
+          <div className="font-body text-ink"
+            style={{
+              fontSize: fonts.size_description,
+              fontWeight: 400,
+              lineHeight: 1.5
+            }}>
             {config.familiar.description}
           </div>
         </div>
@@ -282,18 +292,18 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           
           {/* Bridge label */}
           {bridgeProgress > 0.3 && (
-            <div style={{
-              fontSize: fonts.size_bridge,
-              fontWeight: 900,
-              fontFamily: '"Permanent Marker", cursive',
-              color: colors.bridgeColor,
-              position: 'absolute',
-              top: 20,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              whiteSpace: 'nowrap',
-              opacity: interpolate(bridgeProgress, [0.3, 0.6], [0, 1], { extrapolateRight: 'clamp' })
-            }}>
+            <div className="font-display"
+              style={{
+                fontSize: fonts.size_bridge,
+                fontWeight: 900,
+                color: colors.bridgeColor,
+                position: 'absolute',
+                top: 20,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                whiteSpace: 'nowrap',
+                opacity: interpolate(bridgeProgress, [0.3, 0.6], [0, 1], { extrapolateRight: 'clamp' })
+              }}>
               {config.bridge.label}
             </div>
           )}
@@ -317,13 +327,11 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
           minWidth: 350,
           zIndex: 10
         }}>
-          <div style={{
-            fontSize: fonts.size_concept,
-            fontWeight: 900,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.accent2,
-            marginBottom: 20
-          }}>
+          <div className="font-display text-accent2 mb-5"
+            style={{
+              fontSize: fonts.size_concept,
+              fontWeight: 900
+            }}>
             {config.newConcept.title}
           </div>
           
@@ -331,13 +339,12 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
             {renderHero(mergeHeroConfig(config.newConcept.visual), frame, beats, colors, EZ, fps)}
           </div>
           
-          <div style={{
-            fontSize: fonts.size_description,
-            fontWeight: 400,
-            fontFamily: 'Inter, sans-serif',
-            color: colors.ink,
-            lineHeight: 1.5
-          }}>
+          <div className="font-body text-ink"
+            style={{
+              fontSize: fonts.size_description,
+              fontWeight: 400,
+              lineHeight: 1.5
+            }}>
             {config.newConcept.description}
           </div>
         </div>
@@ -373,13 +380,11 @@ export const Connect15AnalogyBridge = ({ scene, styles, presets, easingMap }) =>
                 opacity,
                 transform: `scale(${scale})`
               }}>
-                <div style={{
-                  fontSize: fonts.size_mapping,
-                  fontWeight: 600,
-                  fontFamily: 'Inter, sans-serif',
-                  color: colors.mappingColor,
-                  textAlign: 'center'
-                }}>
+                <div className="font-body text-muted text-center"
+                  style={{
+                    fontSize: fonts.size_mapping,
+                    fontWeight: 600
+                  }}>
                   <span style={{ color: colors.accent }}>{mapping.from}</span>
                   {' → '}
                   <span style={{ color: colors.accent2 }}>{mapping.to}</span>

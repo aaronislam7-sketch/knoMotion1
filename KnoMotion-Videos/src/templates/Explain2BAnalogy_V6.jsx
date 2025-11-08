@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames, renderHero, mergeHeroConfig } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #5: VISUAL ANALOGY - v6.0
@@ -21,6 +23,11 @@ const DEFAULT_CONFIG = {
     visual: { type: 'emoji', value: '📞', scale: 2.5, enabled: true }
   },
   connector: { text: 'is like', enabled: true },
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
   style_tokens: {
     colors: { bg: '#FFF9F0', left: '#3498DB', right: '#2ECC71', text: '#1A1A1A', connector: '#9CA3AF' },
     fonts: { size_title: 48, size_label: 36, size_desc: 22, size_connector: 28 }
@@ -35,6 +42,12 @@ export const Explain2BAnalogy = ({ scene }) => {
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   const f = {
     title: toFrames(beats.title, fps),
@@ -71,13 +84,13 @@ export const Explain2BAnalogy = ({ scene }) => {
           {renderHero(mergeHeroConfig({ type: side.visual.type, value: side.visual.value, scale: side.visual.scale }), frame, beats, colors, EZ, fps)}
         </div>
       )}
-      <div style={{ fontSize: fonts.size_label, fontWeight: 700, color, marginBottom: 12 }}>{side.label}</div>
-      <div style={{ fontSize: fonts.size_desc, color: colors.text, lineHeight: 1.4 }}>{side.description}</div>
+      <div className="font-display mb-3" style={{ fontSize: fonts.size_label, fontWeight: 700, color }}>{side.label}</div>
+      <div className="font-body text-ink" style={{ fontSize: fonts.size_desc, lineHeight: 1.4 }}>{side.description}</div>
     </div>
   );
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
       {/* Title */}
       <div style={{ position: 'absolute', left: '50%', top: config.title.offset.y, transform: `translate(-50%, ${(1 - titleProgress) * 30}px)`, opacity: titleProgress * opacity, fontSize: fonts.size_title, fontWeight: 800, color: colors.text, textAlign: 'center', maxWidth: '90%' }}>
         {config.title.text}

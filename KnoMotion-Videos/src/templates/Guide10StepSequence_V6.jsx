@@ -20,6 +20,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #10: STEP SEQUENCE - v6.0
@@ -70,6 +72,11 @@ const DEFAULT_CONFIG = {
       icon: null
     }
   ],
+  typography: {
+    voice: 'utility',
+    align: 'left',
+    transform: 'none'
+  },
   style_tokens: {
     colors: {
       bg: '#FFF9F0',
@@ -241,6 +248,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
     ...DEFAULT_CONFIG,
     ...scene,
     title: { ...DEFAULT_CONFIG.title, ...(scene.title || {}) },
+    typography: { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) },
     style_tokens: {
       colors: { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) },
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
@@ -252,7 +260,13 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
   const beats = config.beats;
+  const typography = config.typography;
   const steps = config.steps || DEFAULT_CONFIG.steps;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Calculate step positions
   const stepPositions = calculateStepPositions(
@@ -282,7 +296,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
       {/* Ambient particles */}
       <svg
         style={{
@@ -298,21 +312,19 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       </svg>
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 70,
-          fontSize: fonts.size_title,
-          fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
-          color: colors.accent,
-          textAlign: 'center',
-          opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          zIndex: 100,
-          padding: '0 60px'
-        }}>
+        <div className={`font-display text-accent text-center safe-zone ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 70,
+            fontSize: fonts.size_title,
+            fontWeight: 900,
+            opacity: titleAnim.opacity,
+            transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+            zIndex: 100,
+            padding: '0 60px'
+          }}>
           {config.title.text}
         </div>
       )}
@@ -402,57 +414,46 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               gap: 20
             }}>
               {/* Step number badge */}
-              <div style={{
-                width: 70,
-                height: 70,
-                borderRadius: '50%',
-                backgroundColor: colors.accent,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: fonts.size_stepNumber - 6,
-                fontWeight: 900,
-                fontFamily: '"Permanent Marker", cursive',
-                color: '#FFFFFF',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-                flexShrink: 0
-              }}>
+              <div className="font-display text-white rounded-full flex items-center justify-center shadow-soft flex-shrink-0"
+                style={{
+                  width: 70,
+                  height: 70,
+                  backgroundColor: colors.accent,
+                  fontSize: fonts.size_stepNumber - 6,
+                  fontWeight: 900,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                }}>
                 {index + 1}
               </div>
               
               {/* Step content box */}
-              <div style={{
-                backgroundColor: colors.stepBg,
-                padding: '16px 24px',
-                borderRadius: 12,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
-                border: `3px solid ${colors.accent2}`,
-                minWidth: 300,
-                maxWidth: 420,
-                width: 380
-              }}>
-                {/* Step title */}
-                <div style={{
-                  fontSize: Math.min(fonts.size_stepTitle, 28),
-                  fontWeight: 800,
-                  fontFamily: '"Permanent Marker", cursive',
-                  color: colors.ink,
-                  marginBottom: 6,
-                  lineHeight: 1.2
+              <div className="bg-board rounded-card shadow-soft border-2"
+                style={{
+                  backgroundColor: colors.stepBg,
+                  padding: '16px 24px',
+                  borderColor: colors.accent2,
+                  minWidth: 300,
+                  maxWidth: 420,
+                  width: 380
                 }}>
+                {/* Step title */}
+                <div className={`font-display text-ink mb-2 ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+                  style={{
+                    fontSize: Math.min(fonts.size_stepTitle, 28),
+                    fontWeight: 800,
+                    lineHeight: 1.2
+                  }}>
                   {step.title}
                 </div>
                 
                 {/* Step description */}
                 {step.description && (
-                  <div style={{
-                    fontSize: Math.min(fonts.size_stepDesc, 18),
-                    fontWeight: 400,
-                    fontFamily: 'Inter, sans-serif',
-                    color: colors.ink,
-                    lineHeight: 1.4,
-                    opacity: 0.85
-                  }}>
+                  <div className={`font-body text-ink opacity-85 ${typography.align === 'center' ? 'text-center' : typography.align === 'right' ? 'text-right' : ''}`}
+                    style={{
+                      fontSize: Math.min(fonts.size_stepDesc, 18),
+                      fontWeight: 400,
+                      lineHeight: 1.4
+                    }}>
                     {step.description}
                   </div>
                 )}
@@ -521,6 +522,14 @@ export const CAPABILITIES = {
 
 // Configuration schema for AdminConfig integration
 export const CONFIG_SCHEMA = {
+  typography: {
+    type: 'object',
+    fields: {
+      voice: { type: 'enum', options: ['notebook', 'story', 'utility'], default: 'utility' },
+      align: { type: 'enum', options: ['left', 'center', 'right'], default: 'left' },
+      transform: { type: 'enum', options: ['none', 'uppercase', 'lowercase'], default: 'none' }
+    }
+  },
   title: {
     type: 'object',
     fields: {

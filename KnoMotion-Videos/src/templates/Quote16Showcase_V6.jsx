@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   EZ, 
@@ -10,6 +10,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #16: QUOTE SHOWCASE - v6.0
@@ -53,6 +55,12 @@ const DEFAULT_CONFIG = {
   },
   
   style: 'classic', // classic | modern | minimal | bold
+  
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
   
   style_tokens: {
     colors: {
@@ -102,8 +110,14 @@ export const Quote16Showcase = ({ scene, styles, presets, easingMap }) => {
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
   const particles = { ...DEFAULT_CONFIG.particles, ...(scene.particles || {}) };
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Convert beats to frames
   const f_entrance = toFrames(beats.entrance, fps);

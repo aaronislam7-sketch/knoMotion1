@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   EZ, 
@@ -8,6 +8,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #3: CONCEPT BREAKDOWN - v6.0
@@ -68,6 +70,12 @@ const DEFAULT_CONFIG = {
     { label: 'Part 3', description: 'Third component', color: '#9B59B6' },
     { label: 'Part 4', description: 'Fourth component', color: '#3498DB' }
   ],
+  
+  typography: {
+    voice: 'notebook',
+    align: 'center',
+    transform: 'none'
+  },
   
   style_tokens: {
     colors: {
@@ -147,11 +155,17 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
   const layout = { ...DEFAULT_CONFIG.layout, ...(scene.layout || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const effects = { 
     ...DEFAULT_CONFIG.effects, 
     ...(scene.effects || {}),
     particles: { ...DEFAULT_CONFIG.effects.particles, ...(scene.effects?.particles || {}) }
   };
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Parts data
   const parts = config.parts || DEFAULT_CONFIG.parts;
@@ -237,10 +251,9 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const centerY = 540;
   
   return (
-    <AbsoluteFill
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden"
       style={{
-        backgroundColor: colors.bg,
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+        backgroundColor: colors.bg
       }}
     >
       {/* Particle Background */}
@@ -255,7 +268,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
       </svg>
       
       {/* Title */}
-      <div
+      <div className={`font-display text-ink ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : 'text-center'} ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
         style={{
           position: 'absolute',
           left: '50%',
@@ -263,9 +276,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
           transform: `translate(-50%, ${titleY}px)`,
           fontSize: fonts.size_title,
           fontWeight: fonts.weight_title,
-          color: colors.text,
           opacity: titleOpacity * exitOpacity,
-          textAlign: 'center',
           maxWidth: '90%'
         }}
       >
@@ -360,12 +371,10 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               )}
             </div>
           )}
-          <div
+          <div className="font-display text-white text-center"
             style={{
               fontSize: fonts.size_center,
               fontWeight: fonts.weight_center,
-              color: '#FFFFFF',
-              textAlign: 'center',
               lineHeight: 1.2
             }}
           >
@@ -419,22 +428,18 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               padding: 16
             }}
           >
-            <div
+            <div className={`font-display mb-2 ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : 'text-center'}`}
               style={{
                 fontSize: fonts.size_part_label,
                 fontWeight: fonts.weight_part,
-                color: part.color || colors.center,
-                textAlign: 'center',
-                marginBottom: 8
+                color: part.color || colors.center
               }}
             >
               {part.label}
             </div>
-            <div
+            <div className={`font-body text-muted ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : 'text-center'}`}
               style={{
                 fontSize: fonts.size_part_desc,
-                color: colors.textSecondary,
-                textAlign: 'center',
                 lineHeight: 1.3
               }}
             >
@@ -468,6 +473,14 @@ export const SECONDARY_INTENTIONS = ['CONNECT', 'GUIDE'];
 
 // CONFIG SCHEMA
 export const CONFIG_SCHEMA = {
+  typography: {
+    type: 'object',
+    fields: {
+      voice: { type: 'enum', options: ['notebook', 'story', 'utility'], default: 'notebook' },
+      align: { type: 'enum', options: ['left', 'center', 'right'], default: 'center' },
+      transform: { type: 'enum', options: ['none', 'uppercase', 'lowercase'], default: 'none' }
+    }
+  },
   title: {
     text: { type: 'text', label: 'Title' }
   },

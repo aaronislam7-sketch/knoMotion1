@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #7: KEY TAKEAWAYS - v6.0
@@ -15,6 +17,11 @@ const DEFAULT_CONFIG = {
     { text: 'Second key insight or lesson', icon: '🎯' },
     { text: 'Third critical concept or skill', icon: '🚀' }
   ],
+  typography: {
+    voice: 'notebook',
+    align: 'left',
+    transform: 'none'
+  },
   style_tokens: { colors: { bg: '#FFF9F0', title: '#1A1A1A', accent: '#27AE60', text: '#34495E', bullet: '#CBD5E0' }, fonts: { size_title: 56, size_takeaway: 32, weight_title: 800, weight_takeaway: 600 } },
   beats: { entrance: 0.5, title: 1.0, firstTakeaway: 2.0, takeawayInterval: 1.0, hold: 6.0, exit: 8.0 }
 };
@@ -26,7 +33,13 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const takeaways = config.takeaways || DEFAULT_CONFIG.takeaways;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   const f = { title: toFrames(beats.title, fps), first: toFrames(beats.firstTakeaway, fps), exit: toFrames(beats.exit, fps) };
   
@@ -35,8 +48,9 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   const opacity = 1 - exitProgress;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ position: 'absolute', left: '50%', top: config.title.offset.y, transform: `translate(-50%, ${(1 - titleProgress) * 30}px)`, opacity: titleProgress * opacity, fontSize: fonts.size_title, fontWeight: fonts.weight_title, color: colors.title, textAlign: 'center' }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
+      <div className={`font-display text-ink ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : 'text-center'} ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+        style={{ position: 'absolute', left: '50%', top: config.title.offset.y, transform: `translate(-50%, ${(1 - titleProgress) * 30}px)`, opacity: titleProgress * opacity, fontSize: fonts.size_title, fontWeight: fonts.weight_title }}>
         {config.title.text}
       </div>
       
@@ -51,7 +65,8 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
               <div style={{ width: 60, height: 60, borderRadius: '50%', backgroundColor: colors.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, flexShrink: 0 }}>
                 {item.icon || (i + 1)}
               </div>
-              <div style={{ fontSize: fonts.size_takeaway, fontWeight: fonts.weight_takeaway, color: colors.text, lineHeight: 1.4, flex: 1 }}>
+              <div className={`font-body text-ink ${typography.align === 'center' ? 'text-center' : typography.align === 'right' ? 'text-right' : ''}`}
+                style={{ fontSize: fonts.size_takeaway, fontWeight: fonts.weight_takeaway, lineHeight: 1.4, flex: 1 }}>
                 {item.text}
               </div>
             </div>

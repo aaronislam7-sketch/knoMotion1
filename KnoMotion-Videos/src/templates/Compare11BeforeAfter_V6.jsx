@@ -19,6 +19,8 @@ import {
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #11: BEFORE/AFTER SPLIT - v6.0
@@ -75,6 +77,11 @@ const DEFAULT_CONFIG = {
     description: 'Where we arrived',
     visual: null,
     backgroundColor: '#E5FFE5'
+  },
+  typography: {
+    voice: 'notebook',
+    align: 'center',
+    transform: 'none'
   },
   style_tokens: {
     colors: {
@@ -214,6 +221,7 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
     title: { ...DEFAULT_CONFIG.title, ...(scene.title || {}) },
     before: { ...DEFAULT_CONFIG.before, ...(scene.before || {}) },
     after: { ...DEFAULT_CONFIG.after, ...(scene.after || {}) },
+    typography: { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) },
     style_tokens: {
       colors: { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) },
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
@@ -225,6 +233,12 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
   const beats = config.beats;
+  const typography = config.typography;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Ambient particles
   const particles = generateAmbientParticles(20, 11001, width, height);
@@ -298,7 +312,7 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   };
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
       {/* Ambient particles */}
       <svg
         style={{
@@ -315,22 +329,20 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
       
       {/* Title - Fixed at top in safe zone */}
       {frame >= titleStartFrame && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 70,
-          fontSize: fonts.size_title,
-          fontWeight: 900,
-          fontFamily: '"Permanent Marker", cursive',
-          color: colors.accent,
-          textAlign: 'center',
-          opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          zIndex: 200,
-          textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-          padding: '0 60px'
-        }}>
+        <div className={`font-display text-accent text-center safe-zone ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 70,
+            fontSize: fonts.size_title,
+            fontWeight: 900,
+            opacity: titleAnim.opacity,
+            transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
+            zIndex: 200,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+            padding: '0 60px'
+          }}>
           {config.title.text}
         </div>
       )}
@@ -345,49 +357,40 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 40,
+          padding: '2.5rem',
           opacity: beforeAnim.opacity,
           transform: `translateX(${beforeAnim.translateX}px)`,
           zIndex: 1
         }}>
           {/* Label */}
-          <div style={{
-            fontSize: fonts.size_label,
-            fontWeight: 700,
-            fontFamily: 'Inter, sans-serif',
-            color: colors.accent,
-            letterSpacing: 3,
-            marginBottom: 20,
-            textTransform: 'uppercase'
-          }}>
+          <div className="font-utility uppercase tracking-widest mb-5"
+            style={{
+              fontSize: fonts.size_label,
+              fontWeight: 700,
+              color: colors.accent,
+              letterSpacing: 3
+            }}>
             {config.before.label}
           </div>
           
           {/* Headline */}
-          <div style={{
-            fontSize: fonts.size_headline,
-            fontWeight: 800,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.ink,
-            textAlign: 'center',
-            marginBottom: 15
-          }}>
+          <div className={`font-display text-ink text-center mb-4 ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+            style={{
+              fontSize: fonts.size_headline,
+              fontWeight: 800
+            }}>
             {config.before.headline}
           </div>
           
           {/* Description */}
           {config.before.description && (
-            <div style={{
-              fontSize: fonts.size_description,
-              fontWeight: 400,
-              fontFamily: 'Inter, sans-serif',
-              color: colors.ink,
-              textAlign: 'center',
-              maxWidth: '80%',
-              lineHeight: 1.5,
-              marginBottom: 25,
-              opacity: 0.8
-            }}>
+            <div className={`font-body text-ink text-center mb-6 opacity-80 ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : ''}`}
+              style={{
+                fontSize: fonts.size_description,
+                fontWeight: 400,
+                maxWidth: '80%',
+                lineHeight: 1.5
+              }}>
               {config.before.description}
             </div>
           )}
@@ -426,43 +429,34 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           zIndex: 2
         }}>
           {/* Label */}
-          <div style={{
-            fontSize: fonts.size_label,
-            fontWeight: 700,
-            fontFamily: 'Inter, sans-serif',
-            color: colors.accent2,
-            letterSpacing: 3,
-            marginBottom: 20,
-            textTransform: 'uppercase'
-          }}>
+          <div className="font-utility uppercase tracking-widest mb-5"
+            style={{
+              fontSize: fonts.size_label,
+              fontWeight: 700,
+              color: colors.accent2,
+              letterSpacing: 3
+            }}>
             {config.after.label}
           </div>
           
           {/* Headline */}
-          <div style={{
-            fontSize: fonts.size_headline,
-            fontWeight: 800,
-            fontFamily: '"Permanent Marker", cursive',
-            color: colors.ink,
-            textAlign: 'center',
-            marginBottom: 15
-          }}>
+          <div className={`font-display text-ink text-center mb-4 ${typography.transform === 'uppercase' ? 'uppercase' : typography.transform === 'lowercase' ? 'lowercase' : ''}`}
+            style={{
+              fontSize: fonts.size_headline,
+              fontWeight: 800
+            }}>
             {config.after.headline}
           </div>
           
           {/* Description */}
           {config.after.description && (
-            <div style={{
-              fontSize: fonts.size_description,
-              fontWeight: 400,
-              fontFamily: 'Inter, sans-serif',
-              color: colors.ink,
-              textAlign: 'center',
-              maxWidth: '80%',
-              lineHeight: 1.5,
-              marginBottom: 25,
-              opacity: 0.8
-            }}>
+            <div className={`font-body text-ink text-center mb-6 opacity-80 ${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : ''}`}
+              style={{
+                fontSize: fonts.size_description,
+                fontWeight: 400,
+                maxWidth: '80%',
+                lineHeight: 1.5
+              }}>
               {config.after.description}
             </div>
           )}
@@ -530,6 +524,14 @@ export const CAPABILITIES = {
 
 // Configuration schema for AdminConfig integration
 export const CONFIG_SCHEMA = {
+  typography: {
+    type: 'object',
+    fields: {
+      voice: { type: 'enum', options: ['notebook', 'story', 'utility'], default: 'notebook' },
+      align: { type: 'enum', options: ['left', 'center', 'right'], default: 'center' },
+      transform: { type: 'enum', options: ['none', 'uppercase', 'lowercase'], default: 'none' }
+    }
+  },
   title: {
     type: 'object',
     fields: {

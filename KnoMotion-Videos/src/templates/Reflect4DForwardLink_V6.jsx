@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { EZ, toFrames, renderHero, mergeHeroConfig } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #8: FORWARD LINK - v6.0
@@ -13,6 +15,11 @@ const DEFAULT_CONFIG = {
   next: { text: 'Coming up next:', preview: 'Advanced applications and real-world scenarios', position: 'right' },
   bridge: { text: '→', enabled: true },
   visual: { type: 'emoji', value: '🌉', scale: 3.0, enabled: false },
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
   style_tokens: { colors: { bg: '#FFF9F0', current: '#3498DB', next: '#E74C3C', bridge: '#9CA3AF', text: '#1A1A1A' }, fonts: { size_heading: 40, size_content: 28, size_bridge: 80, weight_heading: 700, weight_content: 400 } },
   beats: { entrance: 0.5, current: 1.0, bridge: 3.0, visual: 4.0, next: 5.0, hold: 7.0, exit: 9.0 }
 };
@@ -24,6 +31,12 @@ export const Reflect4DForwardLink = ({ scene }) => {
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   const f = { current: toFrames(beats.current, fps), bridge: toFrames(beats.bridge, fps), visual: toFrames(beats.visual, fps), next: toFrames(beats.next, fps), exit: toFrames(beats.exit, fps) };
   
@@ -35,18 +48,19 @@ export const Reflect4DForwardLink = ({ scene }) => {
   const opacity = 1 - exitProgress;
   
   const renderSection = (section, progress, color, x) => (
-    <div style={{ position: 'absolute', left: x, top: '50%', transform: `translate(-50%, calc(-50% + ${(1 - progress) * 30}px))`, opacity: progress * opacity, width: '40%', textAlign: 'center' }}>
-      <div style={{ fontSize: fonts.size_heading, fontWeight: fonts.weight_heading, color, marginBottom: 16 }}>{section.text}</div>
-      <div style={{ fontSize: fonts.size_content, fontWeight: fonts.weight_content, color: colors.text, lineHeight: 1.5 }}>{section.summary || section.preview}</div>
+    <div className={`${typography.align === 'left' ? 'text-left' : typography.align === 'right' ? 'text-right' : 'text-center'}`}
+      style={{ position: 'absolute', left: x, top: '50%', transform: `translate(-50%, calc(-50% + ${(1 - progress) * 30}px))`, opacity: progress * opacity, width: '40%' }}>
+      <div className="font-display mb-4" style={{ fontSize: fonts.size_heading, fontWeight: fonts.weight_heading, color }}>{section.text}</div>
+      <div className="font-body text-ink" style={{ fontSize: fonts.size_content, fontWeight: fonts.weight_content, lineHeight: 1.5 }}>{section.summary || section.preview}</div>
     </div>
   );
   
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: 'Inter, sans-serif' }}>
+    <AbsoluteFill className="bg-surface text-ink overflow-hidden" style={{ backgroundColor: colors.bg }}>
       {renderSection(config.current, currentProgress, colors.current, '25%')}
       
       {config.bridge.enabled && bridgeProgress > 0 && (
-        <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) scale(${bridgeProgress})`, opacity: bridgeProgress * opacity, fontSize: fonts.size_bridge, color: colors.bridge, fontWeight: 700 }}>
+        <div className="font-display" style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) scale(${bridgeProgress})`, opacity: bridgeProgress * opacity, fontSize: fonts.size_bridge, color: colors.bridge, fontWeight: 700 }}>
           {config.bridge.text}
         </div>
       )}

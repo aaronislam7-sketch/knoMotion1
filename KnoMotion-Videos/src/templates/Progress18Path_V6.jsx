@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   EZ, 
@@ -6,6 +6,8 @@ import {
   renderHero,
   mergeHeroConfig
 } from '../sdk';
+import { loadFontVoice, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
+import { createTransitionProps } from '../sdk/transitions';
 
 /**
  * TEMPLATE #18: PROGRESS PATH - v6.0
@@ -75,6 +77,12 @@ const DEFAULT_CONFIG = {
   direction: 'horizontal', // horizontal | vertical
   showProgress: true,
   
+  typography: {
+    voice: 'utility',
+    align: 'center',
+    transform: 'none'
+  },
+  
   style_tokens: {
     colors: {
       bg: '#0F1419',
@@ -121,8 +129,14 @@ export const Progress18Path = ({ scene, styles, presets, easingMap }) => {
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
   const waypoints = scene.waypoints || DEFAULT_CONFIG.waypoints;
+  
+  // Load font voice
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
   // Convert beats to frames
   const f_entrance = toFrames(beats.entrance, fps);
