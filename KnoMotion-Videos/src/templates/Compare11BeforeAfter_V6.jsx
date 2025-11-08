@@ -219,11 +219,16 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   
   // Font loading
   const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
-  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Figtree, sans-serif' },
+    body: { family: 'Inter, sans-serif' },
+    accent: { family: 'Caveat, cursive' },
+    display: { family: 'Figtree, sans-serif' }
+  };
   
   useEffect(() => {
-    loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
-  }, [typography.voice]);
+    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
+  }, [typography?.voice]);
   
   // Merge with defaults
   const config = {
