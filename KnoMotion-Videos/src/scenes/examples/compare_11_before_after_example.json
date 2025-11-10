@@ -1,11 +1,11 @@
 {
   "schema_version": "6.0",
-  "scene_id": "compare_11_transformation",
+  "scene_id": "compare_11_transformation_polished",
   "template_id": "Compare11BeforeAfter",
   "learning_intentions": {
     "primary": ["compare"],
     "secondary": ["inspire", "reveal"],
-    "tags": ["transformation", "contrast", "change"]
+    "tags": ["transformation", "contrast", "change", "broadcast-grade"]
   },
   
   "title": {
@@ -43,33 +43,39 @@
   
   "style_tokens": {
     "colors": {
-      "bg": "#F5F5F5",
+      "bg": "#F8F7F4",
       "accent": "#FF6B35",
       "accent2": "#00C853",
-      "ink": "#1A1A1A",
-      "divider": "#333333"
+      "ink": "#2C2C2C",
+      "divider": "#4A4A4A"
     },
     "fonts": {
-      "size_title": 64,
-      "size_label": 24,
-      "size_headline": 42,
-      "size_description": 24
+      "size_title": 68,
+      "size_label": 26,
+      "size_headline": 44,
+      "size_description": 22
     }
   },
   
   "beats": {
     "entrance": 0.4,
     "titleEntry": 0.6,
-    "beforeReveal": 1.2,
-    "transitionStart": 3.5,
-    "transitionDuration": 1.8,
-    "afterEmphasize": 1.0,
-    "exit": 2.0
+    "beforeReveal": 1.5,
+    "transitionStart": 4.0,
+    "transitionDuration": 2.0,
+    "afterEmphasize": 1.2,
+    "exit": 2.5
   },
   
   "animation": {
     "beforeEntrance": "slide-right",
     "afterEntrance": "slide-left",
     "pulseAfter": true
+  },
+  
+  "typography": {
+    "voice": "notebook",
+    "align": "center",
+    "transform": "none"
   }
 }

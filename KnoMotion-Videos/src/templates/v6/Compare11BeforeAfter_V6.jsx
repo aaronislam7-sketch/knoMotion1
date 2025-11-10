@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { THEME } from '../../utils/theme';
 import rough from 'roughjs/bundled/rough.esm.js';
@@ -17,8 +17,20 @@ import {
   resolvePosition,
   positionToCSS,
   generateAmbientParticles,
-  renderAmbientParticles
+  renderAmbientParticles,
+  getLetterReveal,
+  renderLetterReveal,
+  getParticleBurst,
+  renderParticleBurst,
+  getCardEntrance,
+  getIconPop,
+  getPulseGlow
 } from '../../sdk';
+import { 
+  GlassmorphicPane, 
+  NoiseTexture, 
+  SpotlightEffect 
+} from '../../sdk/effects/broadcastEffects';
 import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
 import { createTransitionProps } from '../../sdk/transitions';
 
@@ -117,9 +129,12 @@ const DEFAULT_CONFIG = {
   }
 };
 
-// Render split divider
-const renderDivider = (orientation, progress, colors, width, height) => {
+// Render split divider with broadcast-grade polish
+const renderDivider = (orientation, progress, colors, width, height, frame, fps) => {
   const ease = EZ.power3InOut(progress);
+  
+  // Pulsing glow effect on divider
+  const glowIntensity = interpolate(progress, [0, 0.5, 1], [10, 30, 10]);
   
   if (orientation === 'vertical') {
     // Vertical divider with animated position
@@ -127,37 +142,55 @@ const renderDivider = (orientation, progress, colors, width, height) => {
     
     return (
       <>
-        {/* Moving divider line */}
+        {/* Moving divider line with glow */}
         <div style={{
           position: 'absolute',
           left: `${leftWidth}%`,
           top: 0,
-          width: 4,
+          width: 6,
           height: '100%',
-          backgroundColor: colors.divider,
+          background: `linear-gradient(to right, 
+            transparent,
+            ${colors.divider}40,
+            ${colors.divider},
+            ${colors.divider}40,
+            transparent
+          )`,
           transform: 'translateX(-50%)',
           zIndex: 100,
-          boxShadow: '0 0 20px rgba(0,0,0,0.3)'
+          boxShadow: `
+            0 0 ${glowIntensity}px ${colors.divider}80,
+            0 0 40px rgba(0,0,0,0.3)
+          `
         }}>
-          {/* Drag handle visual */}
+          {/* Drag handle visual with glassmorphic effect */}
           <div style={{
             position: 'absolute',
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 50,
-            height: 50,
+            width: 70,
+            height: 70,
             borderRadius: '50%',
-            backgroundColor: colors.divider,
+            backgroundColor: `${colors.divider}E6`,
+            backdropFilter: 'blur(10px)',
+            border: `2px solid ${colors.divider}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+            boxShadow: `
+              0 8px 24px rgba(0,0,0,0.4),
+              0 0 ${glowIntensity}px ${colors.divider}60,
+              inset 0 2px 0 rgba(255,255,255,0.3)
+            `
           }}>
+            {/* Animated icon */}
             <div style={{
               color: '#FFFFFF',
-              fontSize: 24,
-              fontWeight: 900
+              fontSize: 28,
+              fontWeight: 900,
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              animation: 'pulse 2s ease-in-out infinite'
             }}>
               ⟷
             </div>
@@ -171,37 +204,54 @@ const renderDivider = (orientation, progress, colors, width, height) => {
     
     return (
       <>
-        {/* Moving divider line */}
+        {/* Moving divider line with glow */}
         <div style={{
           position: 'absolute',
           left: 0,
           top: `${topHeight}%`,
           width: '100%',
-          height: 4,
-          backgroundColor: colors.divider,
+          height: 6,
+          background: `linear-gradient(to bottom, 
+            transparent,
+            ${colors.divider}40,
+            ${colors.divider},
+            ${colors.divider}40,
+            transparent
+          )`,
           transform: 'translateY(-50%)',
           zIndex: 100,
-          boxShadow: '0 0 20px rgba(0,0,0,0.3)'
+          boxShadow: `
+            0 0 ${glowIntensity}px ${colors.divider}80,
+            0 0 40px rgba(0,0,0,0.3)
+          `
         }}>
-          {/* Drag handle visual */}
+          {/* Drag handle visual with glassmorphic effect */}
           <div style={{
             position: 'absolute',
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 50,
-            height: 50,
+            width: 70,
+            height: 70,
             borderRadius: '50%',
-            backgroundColor: colors.divider,
+            backgroundColor: `${colors.divider}E6`,
+            backdropFilter: 'blur(10px)',
+            border: `2px solid ${colors.divider}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+            boxShadow: `
+              0 8px 24px rgba(0,0,0,0.4),
+              0 0 ${glowIntensity}px ${colors.divider}60,
+              inset 0 2px 0 rgba(255,255,255,0.3)
+            `
           }}>
+            {/* Animated icon */}
             <div style={{
               color: '#FFFFFF',
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: 900,
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
               transform: 'rotate(90deg)'
             }}>
               ⟷
@@ -249,12 +299,21 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   const fonts = config.style_tokens.fonts;
   const beats = config.beats;
   
-  // Ambient particles
-  const particles = generateAmbientParticles(20, 11001, width, height);
+  // Ambient particles (memoized for performance)
+  const particles = useMemo(() => 
+    generateAmbientParticles(30, 11001, width, height),
+    [width, height]
+  );
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
-  // Title animation
+  // Title animation with letter reveal
   const titleStartFrame = toFrames(beats.titleEntry, fps);
+  const titleLetterReveal = getLetterReveal(frame, config.title.text, {
+    startFrame: beats.titleEntry,
+    duration: 0.05,
+    staggerDelay: 0.05
+  }, fps);
+  
   const titleAnim = fadeUpIn(frame, {
     start: beats.titleEntry,
     dur: 0.8,
@@ -268,14 +327,23 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
     { width, height }
   );
   
-  // Before state animation
+  // Before state animation with card entrance
   const beforeStartFrame = toFrames(beats.beforeReveal, fps);
-  const beforeAnim = slideInRight(frame, {
-    start: beats.beforeReveal,
-    dur: 0.8,
-    dist: 100,
-    ease: 'power3Out'
-  }, EZ, fps);
+  const beforeCardAnim = getCardEntrance(frame, {
+    startFrame: beats.beforeReveal,
+    duration: 1.0,
+    direction: 'left',
+    distance: 120,
+    withGlow: true,
+    glowColor: `${colors.accent}40`
+  }, fps);
+  
+  // Label icon pop
+  const beforeLabelIconAnim = getIconPop(frame, {
+    startFrame: beats.beforeReveal + 0.3,
+    duration: 0.6,
+    withBounce: true
+  }, fps);
   
   // Transition animation
   const transitionStartFrame = toFrames(beats.transitionStart, fps);
@@ -284,26 +352,53 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
     ? (frame - transitionStartFrame) / (transitionEndFrame - transitionStartFrame)
     : frame > transitionEndFrame ? 1 : 0;
   
-  // After state animation
+  // After state animation with card entrance
   const afterStartFrame = toFrames(beats.transitionStart + 0.3, fps);
-  const afterAnim = slideInLeft(frame, {
-    start: beats.transitionStart + 0.3,
-    dur: 0.8,
-    dist: 100,
-    ease: 'power3Out'
-  }, EZ, fps);
+  const afterCardAnim = getCardEntrance(frame, {
+    startFrame: beats.transitionStart + 0.3,
+    duration: 1.0,
+    direction: 'right',
+    distance: 120,
+    withGlow: true,
+    glowColor: `${colors.accent2}40`
+  }, fps);
   
-  // After emphasis pulse
+  // Label icon pop
+  const afterLabelIconAnim = getIconPop(frame, {
+    startFrame: beats.transitionStart + 0.6,
+    duration: 0.6,
+    withBounce: true
+  }, fps);
+  
+  // After emphasis pulse with glow
   const afterEmphasizeStart = beats.transitionStart + beats.transitionDuration;
   const afterEmphasizeFrame = toFrames(afterEmphasizeStart, fps);
   let afterPulseScale = 1;
+  let afterPulseGlow = { boxShadow: 'none' };
   if (config.animation.pulseAfter && frame >= afterEmphasizeFrame) {
     afterPulseScale = pulseEmphasis(frame, {
       start: afterEmphasizeStart,
       dur: 0.6,
       ease: 'smooth'
     }, EZ, fps).scale;
+    
+    afterPulseGlow = getPulseGlow(frame, {
+      frequency: 0.08,
+      intensity: 30,
+      color: `${colors.accent2}60`,
+      startFrame: afterEmphasizeFrame
+    });
   }
+  
+  // Particle burst on transition
+  const transitionBurstParticles = getParticleBurst(frame, {
+    triggerFrame: beats.transitionStart,
+    particleCount: 20,
+    duration: 1.2,
+    color: colors.accent2,
+    size: 8,
+    spread: 200
+  }, fps);
   
   // Calculate split areas
   const isVertical = config.splitOrientation === 'vertical';
@@ -321,7 +416,29 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   };
   
   return (
-    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
+    <AbsoluteFill className="overflow-hidden" style={{ 
+      background: `linear-gradient(135deg, ${colors.bg} 0%, ${colors.bg}E6 50%, ${colors.bg} 100%)`,
+      fontFamily: fontTokens.body.family 
+    }}>
+      {/* Noise texture overlay */}
+      <NoiseTexture opacity={0.04} scale={1.5} />
+      
+      {/* Spotlight effects for before/after sections */}
+      <SpotlightEffect 
+        x={25} 
+        y={50} 
+        size={600} 
+        color={colors.accent} 
+        opacity={0.15} 
+      />
+      <SpotlightEffect 
+        x={75} 
+        y={50} 
+        size={600} 
+        color={colors.accent2} 
+        opacity={0.15} 
+      />
+      
       {/* Ambient particles */}
       <svg
         style={{
@@ -329,158 +446,254 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           width: '100%',
           height: '100%',
           zIndex: 0,
-          opacity: 0.3
+          opacity: 0.4
         }}
         viewBox="0 0 1920 1080"
       >
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title - Fixed at top in safe zone */}
+      {/* Title with letter reveal */}
       {frame >= titleStartFrame && (
         <div className="absolute left-0 right-0 text-center px-safe-x z-[200]" style={{
-          top: 70,
-          fontSize: fonts.size_title,
-          fontWeight: 900,
-          fontFamily: fontTokens.title.family,
-          color: colors.accent,
-          textAlign: typography.align,
+          top: 50,
           opacity: titleAnim.opacity,
           transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`,
-          textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-          textTransform: typography.transform !== 'none' ? typography.transform : undefined
         }}>
-          {config.title.text}
+          <div style={{
+            fontSize: Math.min(fonts.size_title, 72),
+            fontWeight: 900,
+            fontFamily: fontTokens.title.family,
+            color: colors.accent,
+            textAlign: typography.align,
+            textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
+            textTransform: typography.transform !== 'none' ? typography.transform : undefined,
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+          }}>
+            {renderLetterReveal(titleLetterReveal.letters, titleLetterReveal.letterOpacities)}
+          </div>
+          {/* Doodle underline */}
+          <svg 
+            width="300" 
+            height="20" 
+            style={{ 
+              margin: '10px auto 0',
+              display: 'block',
+              opacity: titleLetterReveal.isComplete ? 1 : 0,
+              transition: 'opacity 0.3s ease'
+            }}
+          >
+            <path 
+              d="M 10,10 Q 75,5 150,10 T 290,10" 
+              stroke={colors.accent} 
+              strokeWidth="3" 
+              fill="none" 
+              strokeLinecap="round"
+              opacity="0.7"
+            />
+          </svg>
         </div>
       )}
       
-      {/* BEFORE side */}
+      {/* BEFORE side - with gradient background and glassmorphic content */}
       {frame >= beforeStartFrame && (
         <div style={{
           position: 'absolute',
           ...beforeArea,
-          backgroundColor: config.before.backgroundColor,
+          background: `linear-gradient(135deg, 
+            ${config.before.backgroundColor}F0 0%, 
+            ${config.before.backgroundColor}CC 50%,
+            ${config.before.backgroundColor}F0 100%
+          )`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 40,
-          opacity: beforeAnim.opacity,
-          transform: `translateX(${beforeAnim.translateX}px)`,
+          padding: 60,
           zIndex: 1
         }}>
-          {/* Label */}
-          <div className="uppercase tracking-wider mb-5" style={{
-            fontSize: fonts.size_label,
-            fontWeight: 700,
-            fontFamily: fontTokens.accent.family,
-            color: colors.accent
-          }}>
-            {config.before.label}
-          </div>
-          
-          {/* Headline */}
-          <div className="text-center mb-4" style={{
-            fontSize: fonts.size_headline,
-            fontWeight: 800,
-            fontFamily: fontTokens.title.family,
-            color: colors.ink
-          }}>
-            {config.before.headline}
-          </div>
-          
-          {/* Description */}
-          {config.before.description && (
-            <div className="text-center max-w-[80%] leading-normal mb-6 opacity-80" style={{
-              fontSize: fonts.size_description,
-              fontWeight: 400,
-              fontFamily: fontTokens.body.family,
-              color: colors.ink
-            }}>
-              {config.before.description}
+          {/* Glassmorphic content pane */}
+          <GlassmorphicPane
+            innerRadius={30}
+            glowOpacity={0.2}
+            borderOpacity={0.4}
+            backgroundColor={`${colors.accent}15`}
+            padding={40}
+            style={{
+              maxWidth: '85%',
+              opacity: beforeCardAnim.opacity,
+              transform: `translate(${beforeCardAnim.translateX}px, ${beforeCardAnim.translateY}px) scale(${beforeCardAnim.scale})`,
+              boxShadow: beforeCardAnim.boxShadow
+            }}
+          >
+            {/* Label with icon animation */}
+            <div 
+              className="uppercase tracking-wider mb-5 flex items-center justify-center gap-2" 
+              style={{
+                fontSize: Math.min(fonts.size_label, 28),
+                fontWeight: 700,
+                fontFamily: fontTokens.accent.family,
+                color: colors.accent,
+                opacity: beforeLabelIconAnim.opacity,
+                transform: `scale(${beforeLabelIconAnim.scale}) rotate(${beforeLabelIconAnim.rotation}deg)`
+              }}
+            >
+              <span style={{ 
+                display: 'inline-block',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+              }}>
+                ⚠️
+              </span>
+              {config.before.label}
             </div>
-          )}
-          
-          {/* Visual */}
-          {config.before.visual && (
-            <div style={{
-              marginTop: 20
+            
+            {/* Headline */}
+            <div className="text-center mb-4" style={{
+              fontSize: Math.min(fonts.size_headline, 48),
+              fontWeight: 800,
+              fontFamily: fontTokens.title.family,
+              color: colors.ink,
+              textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+              lineHeight: 1.3
             }}>
-              {renderHero(
-                mergeHeroConfig(config.before.visual),
-                frame,
-                beats,
-                colors,
-                EZ,
-                fps
-              )}
+              {config.before.headline}
             </div>
-          )}
+            
+            {/* Description */}
+            {config.before.description && (
+              <div className="text-center max-w-[90%] mx-auto leading-relaxed mb-6" style={{
+                fontSize: Math.min(fonts.size_description, 22),
+                fontWeight: 400,
+                fontFamily: fontTokens.body.family,
+                color: `${colors.ink}CC`,
+                lineHeight: 1.6
+              }}>
+                {config.before.description}
+              </div>
+            )}
+            
+            {/* Visual */}
+            {config.before.visual && (
+              <div style={{
+                marginTop: 20,
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
+              }}>
+                {renderHero(
+                  mergeHeroConfig(config.before.visual),
+                  frame,
+                  beats,
+                  colors,
+                  EZ,
+                  fps
+                )}
+              </div>
+            )}
+          </GlassmorphicPane>
         </div>
       )}
       
-      {/* AFTER side */}
+      {/* AFTER side - with gradient background and glassmorphic content + particles */}
       {frame >= afterStartFrame && (
         <div style={{
           position: 'absolute',
           ...afterArea,
-          backgroundColor: config.after.backgroundColor,
+          background: `linear-gradient(135deg, 
+            ${config.after.backgroundColor}F0 0%, 
+            ${config.after.backgroundColor}CC 50%,
+            ${config.after.backgroundColor}F0 100%
+          )`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 40,
-          opacity: afterAnim.opacity,
-          transform: `translateX(${afterAnim.translateX}px) scale(${afterPulseScale})`,
+          padding: 60,
           zIndex: 2
         }}>
-          {/* Label */}
-          <div className="uppercase tracking-wider mb-5" style={{
-            fontSize: fonts.size_label,
-            fontWeight: 700,
-            fontFamily: fontTokens.accent.family,
-            color: colors.accent2
-          }}>
-            {config.after.label}
-          </div>
-          
-          {/* Headline */}
-          <div className="text-center mb-4" style={{
-            fontSize: fonts.size_headline,
-            fontWeight: 800,
-            fontFamily: fontTokens.title.family,
-            color: colors.ink
-          }}>
-            {config.after.headline}
-          </div>
-          
-          {/* Description */}
-          {config.after.description && (
-            <div className="text-center max-w-[80%] leading-normal mb-6 opacity-80" style={{
-              fontSize: fonts.size_description,
-              fontWeight: 400,
-              fontFamily: fontTokens.body.family,
-              color: colors.ink
-            }}>
-              {config.after.description}
-            </div>
+          {/* Particle burst at center on reveal */}
+          {transitionBurstParticles.length > 0 && renderParticleBurst(
+            transitionBurstParticles, 
+            isVertical ? width * 0.75 : width * 0.5,
+            isVertical ? height * 0.5 : height * 0.75
           )}
           
-          {/* Visual */}
-          {config.after.visual && (
-            <div style={{
-              marginTop: 20
-            }}>
-              {renderHero(
-                mergeHeroConfig(config.after.visual),
-                frame,
-                beats,
-                colors,
-                EZ,
-                fps
-              )}
+          {/* Glassmorphic content pane */}
+          <GlassmorphicPane
+            innerRadius={30}
+            glowOpacity={0.25}
+            borderOpacity={0.5}
+            backgroundColor={`${colors.accent2}20`}
+            padding={40}
+            style={{
+              maxWidth: '85%',
+              opacity: afterCardAnim.opacity,
+              transform: `translate(${afterCardAnim.translateX}px, ${afterCardAnim.translateY}px) scale(${afterCardAnim.scale * afterPulseScale})`,
+              boxShadow: afterCardAnim.boxShadow,
+              ...afterPulseGlow
+            }}
+          >
+            {/* Label with icon animation */}
+            <div 
+              className="uppercase tracking-wider mb-5 flex items-center justify-center gap-2" 
+              style={{
+                fontSize: Math.min(fonts.size_label, 28),
+                fontWeight: 700,
+                fontFamily: fontTokens.accent.family,
+                color: colors.accent2,
+                opacity: afterLabelIconAnim.opacity,
+                transform: `scale(${afterLabelIconAnim.scale}) rotate(${afterLabelIconAnim.rotation}deg)`
+              }}
+            >
+              <span style={{ 
+                display: 'inline-block',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+              }}>
+                ✨
+              </span>
+              {config.after.label}
             </div>
-          )}
+            
+            {/* Headline */}
+            <div className="text-center mb-4" style={{
+              fontSize: Math.min(fonts.size_headline, 48),
+              fontWeight: 800,
+              fontFamily: fontTokens.title.family,
+              color: colors.ink,
+              textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+              lineHeight: 1.3
+            }}>
+              {config.after.headline}
+            </div>
+            
+            {/* Description */}
+            {config.after.description && (
+              <div className="text-center max-w-[90%] mx-auto leading-relaxed mb-6" style={{
+                fontSize: Math.min(fonts.size_description, 22),
+                fontWeight: 400,
+                fontFamily: fontTokens.body.family,
+                color: `${colors.ink}CC`,
+                lineHeight: 1.6
+              }}>
+                {config.after.description}
+              </div>
+            )}
+            
+            {/* Visual */}
+            {config.after.visual && (
+              <div style={{
+                marginTop: 20,
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
+              }}>
+                {renderHero(
+                  mergeHeroConfig(config.after.visual),
+                  frame,
+                  beats,
+                  colors,
+                  EZ,
+                  fps
+                )}
+              </div>
+            )}
+          </GlassmorphicPane>
         </div>
       )}
       
@@ -490,7 +703,9 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
         transitionProgress,
         colors,
         width,
-        height
+        height,
+        frame,
+        fps
       )}
     </AbsoluteFill>
   );

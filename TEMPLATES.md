@@ -434,6 +434,314 @@ Templates must look **broadcast quality**, not presentation slides.
 - ❌ Small elements with wasted space
 - ❌ Generic bullet points
 
+---
+
+### Broadcast-Grade Polish Principles
+
+**Learned from Compare11BeforeAfter_V6 Enhancement (Template #11)**
+
+#### 1. **Layered Background Depth**
+Instead of flat colors, create depth with multiple layers:
+
+```jsx
+// ❌ BAD: Flat color
+style={{ backgroundColor: '#FFE5E5' }}
+
+// ✅ GOOD: Gradient with depth
+style={{ 
+  background: `linear-gradient(135deg, 
+    ${color}F0 0%,   // Slightly transparent at start
+    ${color}CC 50%,  // More transparent in middle
+    ${color}F0 100%  // Back to slightly transparent
+  )`
+}}
+```
+
+**Stack for depth:**
+1. Base gradient background
+2. Noise texture overlay (0.03-0.05 opacity)
+3. Spotlight effects (2-3 strategically placed)
+4. Ambient particles (20-30 floating)
+5. Content with glassmorphic panes
+
+#### 2. **Glassmorphic Content Cards**
+Wrap all major content in glassmorphic panes for premium feel:
+
+```jsx
+import { GlassmorphicPane } from '../sdk/effects/broadcastEffects';
+
+<GlassmorphicPane
+  innerRadius={30}           // Rounded corners
+  glowOpacity={0.2}          // Outer glow intensity
+  borderOpacity={0.4}        // Border transparency
+  backgroundColor="#FF6B3515" // Tinted glass color
+  padding={40}
+  style={{
+    maxWidth: '85%',         // Don't fill entire space
+    ...animations           // Apply entrance animations
+  }}
+>
+  {/* Your content */}
+</GlassmorphicPane>
+```
+
+**Key principles:**
+- Always add subtle glow (0.15-0.25 opacity)
+- Use semi-transparent backgrounds (15-20% opacity of accent color)
+- Add backdrop blur for true glass effect
+- Include subtle inner highlight (inset shadow)
+
+#### 3. **Multi-Layered Entrance Animations**
+Combine multiple animation types for sophistication:
+
+```jsx
+// ❌ BAD: Single fade-in
+const anim = fadeIn(frame, startFrame, duration, fps);
+
+// ✅ GOOD: Multi-layered card entrance
+const cardAnim = getCardEntrance(frame, {
+  startFrame: beats.reveal,
+  duration: 1.0,
+  direction: 'left',      // Slide direction
+  distance: 120,          // Slide distance
+  withGlow: true,         // Add glow pulse
+  glowColor: '#FF6B3540'  // Glow color with opacity
+}, fps);
+
+// Layers included:
+// 1. Opacity fade (0 → 1)
+// 2. Slide motion (distance → 0)
+// 3. Scale spring (0.95 → 1.0)
+// 4. Box shadow glow (pulsing)
+```
+
+**Stagger for impact:**
+- Main container: T+0.0s
+- Icon/label: T+0.3s
+- Headline: T+0.5s (or simultaneous with container)
+- Description: T+0.5s (or simultaneous with container)
+
+#### 4. **Micro-Delights on Key Elements**
+Add small, delightful animations to draw attention:
+
+**Icon Pop Animation:**
+```jsx
+const iconAnim = getIconPop(frame, {
+  startFrame: beats.reveal + 0.3,
+  duration: 0.6,
+  withBounce: true,  // Spring bounce effect
+  rotation: 15       // Slight rotation on entry
+}, fps);
+
+// Apply to icons, emojis, badges
+<span style={{
+  opacity: iconAnim.opacity,
+  transform: `scale(${iconAnim.scale}) rotate(${iconAnim.rotation}deg)`
+}}>
+  ✨
+</span>
+```
+
+**Letter-by-Letter Title Reveal:**
+```jsx
+const letterReveal = getLetterReveal(frame, titleText, {
+  startFrame: beats.title,
+  duration: 0.05,      // Per-letter duration
+  staggerDelay: 0.05   // Delay between letters
+}, fps);
+
+{renderLetterReveal(letterReveal.letters, letterReveal.letterOpacities)}
+```
+
+#### 5. **Particle Bursts on Key Moments**
+Emphasize transitions and reveals with particle effects:
+
+```jsx
+// Burst on transition/reveal
+const burstParticles = getParticleBurst(frame, {
+  triggerFrame: beats.transitionStart,
+  particleCount: 20,
+  duration: 1.2,
+  color: colors.accent,
+  size: 8,
+  spread: 200  // Explosion radius
+}, fps);
+
+{transitionBurstParticles.length > 0 && renderParticleBurst(
+  transitionBurstParticles,
+  centerX,
+  centerY
+)}
+```
+
+**When to use:**
+- On major reveals (after state appears)
+- On emphasis moments (pulse effects)
+- On completion (success states)
+
+#### 6. **Pulsing Glow for Emphasis**
+Add breathing life to emphasized elements:
+
+```jsx
+const pulseGlow = getPulseGlow(frame, {
+  frequency: 0.08,      // Pulse speed (lower = slower)
+  intensity: 30,        // Glow size variation
+  color: `${colors.accent}60`,  // Semi-transparent color
+  startFrame: beats.emphasize
+});
+
+<div style={{
+  ...pulseGlow,  // Applies animated box-shadow
+  transform: `scale(${pulseScale})`  // Combine with scale
+}}>
+  {content}
+</div>
+```
+
+#### 7. **Doodle/Notebook Brand Elements**
+Add hand-drawn, organic elements for Knode branding:
+
+**Hand-drawn underlines:**
+```jsx
+<svg width="300" height="20" style={{ margin: '10px auto 0' }}>
+  <path 
+    d="M 10,10 Q 75,5 150,10 T 290,10"  // Wavy line
+    stroke={colors.accent} 
+    strokeWidth="3" 
+    fill="none" 
+    strokeLinecap="round"
+    opacity="0.7"
+  />
+</svg>
+```
+
+**Decorative elements:**
+- Hand-drawn arrows (→, ←, ↑, ↓)
+- Sketchy circles/stars around key text
+- Wavy underlines on titles
+- Doodle icons (⚠️ for before, ✨ for after)
+
+#### 8. **Enhanced Divider/Slider Effects**
+Make interactive elements feel premium:
+
+**Before:**
+```jsx
+// ❌ Simple line
+<div style={{
+  width: 4,
+  height: '100%',
+  backgroundColor: colors.divider
+}} />
+```
+
+**After:**
+```jsx
+// ✅ Gradient line with glow
+<div style={{
+  width: 6,
+  height: '100%',
+  background: `linear-gradient(to right, 
+    transparent,
+    ${colors.divider}40,
+    ${colors.divider},
+    ${colors.divider}40,
+    transparent
+  )`,
+  boxShadow: `
+    0 0 ${glowIntensity}px ${colors.divider}80,
+    0 0 40px rgba(0,0,0,0.3)
+  `
+}} />
+```
+
+**Glassmorphic handle:**
+- Backdrop blur effect
+- Border with color
+- Multiple shadows (drop + glow + inner highlight)
+- Animated icon inside
+
+#### 9. **Performance Optimizations**
+Maintain smooth 30fps with these practices:
+
+```jsx
+// Memoize expensive calculations
+const particles = useMemo(() => 
+  generateAmbientParticles(30, seed, width, height),
+  [width, height]
+);
+
+// Cap particle counts
+const safeCount = Math.min(config.particleCount, 50);
+
+// Use CSS transforms (GPU accelerated)
+transform: `translate(${x}px, ${y}px) scale(${s})`  // ✅ Good
+left: x, top: y  // ❌ Bad (triggers layout)
+```
+
+#### 10. **Typography & Text Treatment**
+Professional text styling throughout:
+
+```jsx
+// Titles
+style={{
+  fontSize: Math.min(config.size, 72),  // Cap to prevent overflow
+  fontWeight: 900,
+  textShadow: '3px 3px 6px rgba(0,0,0,0.3)',  // Depth
+  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',  // Extra depth
+  lineHeight: 1.3  // Breathing room
+}}
+
+// Body text
+style={{
+  fontSize: Math.min(config.size, 22),
+  lineHeight: 1.6,  // Readability
+  color: `${colors.text}CC`  // Slightly transparent for hierarchy
+}}
+```
+
+---
+
+### Complete Polish Checklist
+
+When uplifting a template to broadcast-grade, ensure:
+
+**Visual Layers (5 required):**
+- [ ] Gradient background (not flat)
+- [ ] Noise texture overlay
+- [ ] Spotlight effects (2-3)
+- [ ] Ambient particles (20-30)
+- [ ] Glassmorphic content panes
+
+**Animation Layers (3+ required):**
+- [ ] Opacity fade
+- [ ] Position animation (slide/scale)
+- [ ] Spring/elastic easing
+- [ ] Optional: Glow pulse
+- [ ] Optional: Rotation
+
+**Micro-Delights (2+ required):**
+- [ ] Icon pop animations
+- [ ] Letter-by-letter reveals
+- [ ] Particle bursts on key moments
+- [ ] Pulsing glow on emphasis
+- [ ] Staggered entrance timing
+
+**Brand Elements:**
+- [ ] Doodle-style decorations
+- [ ] Hand-drawn underlines/arrows
+- [ ] Organic shapes (not boxes)
+- [ ] Notebook-style typography
+
+**Polish Details:**
+- [ ] Font sizes capped with Math.min()
+- [ ] Text shadows for depth
+- [ ] Drop shadows on elements
+- [ ] Semi-transparent overlays
+- [ ] Breathing room (padding/margins)
+- [ ] Color with opacity for hierarchy
+
+---
+
 ### Screen Real Estate Usage
 
 **Target: 90-95% of 1920x1080 canvas**
