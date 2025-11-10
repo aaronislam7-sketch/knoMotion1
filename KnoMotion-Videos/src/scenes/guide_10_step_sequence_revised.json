@@ -4,7 +4,7 @@
   "title": {
     "text": "Content Creation Workflow",
     "position": "top-center",
-    "offset": { "x": 0, "y": 40 }
+    "offset": { "x": 0, "y": 70 }
   },
   "steps": [
     {
@@ -71,7 +71,7 @@
     "mode": "horizontal",
     "spacing": "comfortable",
     "gridColumns": 3,
-    "cardSize": 240,
+    "cardSize": 260,
     "cardStyle": "circle"
   },
   "arrows": {

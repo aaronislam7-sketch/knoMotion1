@@ -4,7 +4,7 @@
   "title": {
     "text": "Design Thinking Process",
     "position": "top-center",
-    "offset": { "x": 0, "y": 40 }
+    "offset": { "x": 0, "y": 70 }
   },
   "steps": [
     {
@@ -60,7 +60,7 @@
     "mode": "grid",
     "spacing": "comfortable",
     "gridColumns": 3,
-    "cardSize": 220,
+    "cardSize": 240,
     "cardStyle": "circle"
   },
   "arrows": {

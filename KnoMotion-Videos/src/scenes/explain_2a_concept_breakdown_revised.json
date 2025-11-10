@@ -4,7 +4,7 @@
   "title": {
     "text": "The Learning Cycle",
     "position": "top-center",
-    "offset": { "x": 0, "y": 50 }
+    "offset": { "x": 0, "y": 80 }
   },
   "center": {
     "text": "Active Learning",
@@ -73,9 +73,9 @@
     "glowIntensity": 35
   },
   "layout": {
-    "radius": 520,
-    "centerSize": 260,
-    "partSize": 170,
+    "radius": 420,
+    "centerSize": 220,
+    "partSize": 200,
     "style": "circular"
   },
   "visualStyle": {

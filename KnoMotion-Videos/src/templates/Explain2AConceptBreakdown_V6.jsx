@@ -49,7 +49,7 @@ const DEFAULT_CONFIG = {
   title: {
     text: 'Understanding the Concept',
     position: 'top-center',
-    offset: { x: 0, y: 50 }
+    offset: { x: 0, y: 80 }  // Increased to avoid top overlap
   },
   
   center: {
@@ -96,9 +96,9 @@ const DEFAULT_CONFIG = {
   },
   
   layout: {
-    radius: 500,        // INCREASED for full screen usage
-    centerSize: 240,    // INCREASED for better visibility
-    partSize: 160,      // INCREASED badge size
+    radius: 420,        // REDUCED to avoid overlaps at edges
+    centerSize: 220,    // Slightly reduced but still prominent
+    partSize: 200,      // INCREASED for text to fit comfortably
     style: 'circular'   // 'circular', 'organic', 'radial'
   },
   
@@ -300,7 +300,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   
   // Center position
   const centerX = width / 2;
-  const centerY = height / 2 + 40; // Slightly lower for better balance
+  const centerY = height / 2 + 20; // Centered with minimal offset
   
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
@@ -524,6 +524,8 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
             <div style={{
               width: layout.partSize,
               height: layout.partSize,
+              minWidth: layout.partSize,  // Enforce uniform size
+              minHeight: layout.partSize,  // Enforce uniform size
               borderRadius: '50%',
               background: `linear-gradient(135deg, ${part.color}DD 0%, ${part.color}AA 100%)`,
               border: `4px solid ${colors.text}20`,
@@ -531,17 +533,19 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: 20,
+              padding: 24,  // Increased padding for text breathing room
+              boxSizing: 'border-box',  // Include padding in size calculation
               ...emphasisGlow,
               backdropFilter: 'blur(10px)'
             }}>
               {/* Icon */}
               {part.icon && iconPop && (
                 <div style={{
-                  fontSize: 48,
-                  marginBottom: 8,
+                  fontSize: 40,  // Slightly smaller icon
+                  marginBottom: 6,
                   opacity: iconPop.opacity,
-                  transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`
+                  transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`,
+                  flexShrink: 0
                 }}>
                   {part.icon}
                 </div>
@@ -550,13 +554,17 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               {/* Label */}
               <div
                 style={{
-                  fontSize: fonts.size_part_label,
+                  fontSize: Math.min(fonts.size_part_label, 28),  // Max 28px
                   fontWeight: fonts.weight_part,
                   fontFamily: fontTokens.accent.family,
                   color: colors.text,
                   textAlign: 'center',
                   marginBottom: 4,
-                  letterSpacing: '0.02em'
+                  letterSpacing: '0.02em',
+                  lineHeight: 1.1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
                 }}
               >
                 {part.label}
@@ -565,12 +573,17 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               {/* Description */}
               <div
                 style={{
-                  fontSize: fonts.size_part_desc,
+                  fontSize: Math.min(fonts.size_part_desc, 16),  // Max 16px
                   fontFamily: fontTokens.body.family,
                   color: colors.text,
                   textAlign: 'center',
                   opacity: 0.9,
-                  lineHeight: 1.3
+                  lineHeight: 1.3,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,  // Limit to 2 lines
+                  WebkitBoxOrient: 'vertical',
+                  maxWidth: '100%'
                 }}
               >
                 {part.description}

@@ -44,7 +44,7 @@ const DEFAULT_CONFIG = {
   title: {
     text: 'Step-by-Step Process',
     position: 'top-center',
-    offset: { x: 0, y: 40 }
+    offset: { x: 0, y: 70 }  // Increased to avoid top overlap
   },
   
   steps: [
@@ -70,7 +70,7 @@ const DEFAULT_CONFIG = {
     spacing: 'comfortable',  // 'tight', 'comfortable', 'spacious'
     gridColumns: 2,  // Only for grid mode
     cardStyle: 'circle',  // 'circle', 'organic', 'minimal'
-    cardSize: 220  // Size of each step card
+    cardSize: 260  // INCREASED for text to fit comfortably
   },
   
   // NEW: Arrow configuration
@@ -187,7 +187,7 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
     // Horizontal layout - distribute evenly across width
     const totalWidth = (totalSteps - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const centerY = height / 2 + 20;
+    const centerY = height / 2 + 10;  // Reduced offset to avoid bottom overlap
     
     for (let i = 0; i < totalSteps; i++) {
       positions.push({
@@ -201,7 +201,7 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
     const totalWidth = (gridColumns - 1) * gap;
     const totalHeight = (rows - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const startY = (height - totalHeight) / 2 + 40;
+    const startY = (height - totalHeight) / 2 + 20;  // Reduced from 40 to avoid overlaps
     
     for (let i = 0; i < totalSteps; i++) {
       const col = i % gridColumns;
@@ -214,8 +214,8 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
   } else if (mode === 'flowing') {
     // Flowing organic layout - snake pattern
     const itemsPerRow = 3;
-    const gapX = gap * 1.2;
-    const gapY = gap * 0.9;
+    const gapX = gap * 1.1;  // Reduced spacing
+    const gapY = gap * 0.85;  // Reduced vertical spacing
     
     for (let i = 0; i < totalSteps; i++) {
       const row = Math.floor(i / itemsPerRow);
@@ -224,7 +224,7 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
       
       const totalWidth = (itemsPerRow - 1) * gapX;
       const startX = (width - totalWidth) / 2;
-      const startY = 250 + (row * gapY);
+      const startY = 220 + (row * gapY);  // Reduced from 250 to avoid overlap
       
       positions.push({
         x: isEvenRow ? startX + (col * gapX) : startX + ((itemsPerRow - 1 - col) * gapX),
@@ -524,6 +524,8 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
             <div style={{
               width: layout.cardSize,
               height: layout.cardSize,
+              minWidth: layout.cardSize,  // Enforce uniform size
+              minHeight: layout.cardSize,  // Enforce uniform size
               borderRadius: '50%',
               background: isCompleted 
                 ? `linear-gradient(135deg, ${colors.completed}DD 0%, ${colors.completed}99 100%)`
@@ -533,7 +535,8 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: 20,
+              padding: 28,  // Increased padding
+              boxSizing: 'border-box',  // Include padding in size calculation
               position: 'relative',
               overflow: 'hidden',
               ...emphasisGlow,
@@ -546,17 +549,18 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               
               {/* Step number or checkmark */}
               <div style={{
-                fontSize: fonts.size_step_number,
+                fontSize: Math.min(fonts.size_step_number, 56),  // Max 56px
                 fontWeight: fonts.weight_step,
                 fontFamily: fontTokens.accent.family,
                 color: colors.text,
-                marginBottom: 12,
+                marginBottom: 8,
                 position: 'relative',
-                zIndex: 2
+                zIndex: 2,
+                flexShrink: 0
               }}>
                 {isCompleted && checkmarks.enabled ? (
                   checkmarks.style === 'lottie' ? (
-                    <div style={{ width: 80, height: 80 }}>
+                    <div style={{ width: 70, height: 70 }}>
                       <AnimatedLottie
                         animationData={getLottiePreset(checkmarks.lottiePreset)?.data}
                         loop={false}
@@ -564,7 +568,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
                       />
                     </div>
                   ) : (
-                    <span style={{ fontSize: 60 }}>✓</span>
+                    <span style={{ fontSize: 50 }}>✓</span>
                   )
                 ) : (
                   <span>{step.number}</span>
@@ -574,11 +578,12 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Icon */}
               {step.icon && iconPop && !isCompleted && (
                 <div style={{
-                  fontSize: 42,
-                  marginBottom: 8,
+                  fontSize: 36,  // Slightly smaller icon
+                  marginBottom: 6,
                   opacity: iconPop.opacity,
                   transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`,
-                  zIndex: 2
+                  zIndex: 2,
+                  flexShrink: 0
                 }}>
                   {step.icon}
                 </div>
@@ -587,14 +592,17 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Title */}
               <div
                 style={{
-                  fontSize: fonts.size_step_title,
+                  fontSize: Math.min(fonts.size_step_title, 26),  // Max 26px
                   fontWeight: fonts.weight_step,
                   fontFamily: fontTokens.accent.family,
                   color: colors.text,
                   textAlign: 'center',
-                  marginBottom: 8,
-                  lineHeight: 1.2,
-                  zIndex: 2
+                  marginBottom: 6,
+                  lineHeight: 1.1,
+                  zIndex: 2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
                 }}
               >
                 {step.title}
@@ -603,13 +611,18 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Description */}
               <div
                 style={{
-                  fontSize: fonts.size_step_desc,
+                  fontSize: Math.min(fonts.size_step_desc, 15),  // Max 15px
                   fontFamily: fontTokens.body.family,
                   color: colors.text,
                   textAlign: 'center',
                   opacity: 0.9,
-                  lineHeight: 1.4,
-                  zIndex: 2
+                  lineHeight: 1.3,
+                  zIndex: 2,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,  // Limit to 2 lines
+                  WebkitBoxOrient: 'vertical',
+                  maxWidth: '100%'
                 }}
               >
                 {step.description}
