@@ -98,10 +98,10 @@
   },
   
   "layout": {
-    "cardWidth": 1150,
-    "cardGap": 36,
-    "iconSize": 85,
-    "padding": 34
+    "cardWidth": 1000,
+    "cardGap": 20,
+    "iconSize": 70,
+    "padding": 28
   },
   
   "typography": {

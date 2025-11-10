@@ -386,10 +386,11 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         </div>
       )}
       
-      {/* Takeaways Container - Using Tailwind flex utilities */}
+      {/* Takeaways Container - Fixed positioning from top */}
       <div 
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col z-30"
+        className="absolute left-1/2 -translate-x-1/2 flex flex-col z-30"
         style={{ 
+          top: config.title.offset.y + 140, // Position below subtitle
           width: layout.cardWidth,
           maxWidth: '90vw',
           gap: layout.cardGap
@@ -442,7 +443,8 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
             borderColor: getAccentColor(i)
           } : {};
           
-          if (cardEntrance.opacity === 0) return null;
+          // DEBUG: Allow cards to show even with low opacity for visibility testing
+          // if (cardEntrance.opacity === 0) return null;
           
           const accentColor = getAccentColor(i);
           
@@ -450,7 +452,7 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
             <div
               key={i}
               style={{
-                opacity: cardEntrance.opacity * opacity,
+                opacity: Math.max(0.3, cardEntrance.opacity * opacity), // DEBUG: Min opacity for visibility!
                 transform: `scale(${cardEntrance.scale * emphasisScale.scale})`,
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 zIndex: isEmphasized ? 50 : 30
@@ -522,13 +524,12 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
                   <div 
                     className="flex-1 leading-snug"
                     style={{ 
-                      fontSize: Math.min(fonts.size_takeaway, 40), // Cap size
+                      fontSize: Math.min(fonts.size_takeaway, 28), // Smaller for notebook
                       fontWeight: fonts.weight_takeaway,
                       fontFamily: fontTokens.body.family,
                       color: colors.text,
                       textAlign: typography.align,
-                      lineHeight: fonts.line_height_takeaway,
-                      textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                      lineHeight: fonts.line_height_takeaway
                     }}
                   >
                     {takeaway.text}
