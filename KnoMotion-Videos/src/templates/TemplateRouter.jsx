@@ -9,41 +9,41 @@ import React from 'react';
 import { SceneIdContext } from '../sdk/SceneIdContext';
 
 // Blueprint v5.0 Templates
-import { Hook1AQuestionBurst } from './Hook1AQuestionBurst_V5';
-import { Hook1EAmbientMystery } from './Hook1EAmbientMystery_V5';
-import { Explain2AConceptBreakdown } from './Explain2AConceptBreakdown_V5';
-import { Explain2BAnalogy } from './Explain2BAnalogy_V5';
-import { Apply3AMicroQuiz } from './Apply3AMicroQuiz_V5';
-import { Apply3BScenarioChoice } from './Apply3BScenarioChoice_V5';
-import { Reflect4AKeyTakeaways } from './Reflect4AKeyTakeaways_V5';
-import { Reflect4DForwardLink } from './Reflect4DForwardLink_V5';
-import { ShowcaseAnimations } from './ShowcaseAnimations_V5';
+import { Hook1AQuestionBurst } from './archive_v5/Hook1AQuestionBurst_V5';
+import { Hook1EAmbientMystery } from './archive_v5/Hook1EAmbientMystery_V5';
+import { Explain2AConceptBreakdown } from './archive_v5/Explain2AConceptBreakdown_V5';
+import { Explain2BAnalogy } from './archive_v5/Explain2BAnalogy_V5';
+import { Apply3AMicroQuiz } from './archive_v5/Apply3AMicroQuiz_V5';
+import { Apply3BScenarioChoice } from './archive_v5/Apply3BScenarioChoice_V5';
+import { Reflect4AKeyTakeaways } from './archive_v5/Reflect4AKeyTakeaways_V5';
+import { Reflect4DForwardLink } from './archive_v5/Reflect4DForwardLink_V5';
+import { ShowcaseAnimations } from './archive_v5/ShowcaseAnimations_V5';
 
 // Blueprint v5.1 Agnostic Templates
-import { Hook1AQuestionBurst_Agnostic } from './Hook1AQuestionBurst_V5_Agnostic';
+import { Hook1AQuestionBurst_Agnostic } from './archive_v5/Hook1AQuestionBurst_V5_Agnostic';
 
 // Blueprint v6.0 New Intention Templates
-import { Reveal9ProgressiveUnveil } from './Reveal9ProgressiveUnveil_V6';
-import { Guide10StepSequence } from './Guide10StepSequence_V6';
-import { Compare11BeforeAfter } from './Compare11BeforeAfter_V6';
+import { Reveal9ProgressiveUnveil } from './v6/Reveal9ProgressiveUnveil_V6';
+import { Guide10StepSequence } from './v6/Guide10StepSequence_V6';
+import { Compare11BeforeAfter } from './v6/Compare11BeforeAfter_V6';
 
 // NEW: Learning Content Pipeline Templates (Nov 2025)
-import { Compare12MatrixGrid } from './Compare12MatrixGrid_V6';
-import { Challenge13PollQuiz } from './Challenge13PollQuiz_V6';
-import { Spotlight14SingleConcept } from './Spotlight14SingleConcept_V6';
-import { Connect15AnalogyBridge } from './Connect15AnalogyBridge_V6';
-import { Quote16Showcase } from './Quote16Showcase_V6';
-import { Progress18Path } from './Progress18Path_V6';
+import { Compare12MatrixGrid } from './v6/Compare12MatrixGrid_V6';
+import { Challenge13PollQuiz } from './v6/Challenge13PollQuiz_V6';
+import { Spotlight14SingleConcept } from './v6/Spotlight14SingleConcept_V6';
+import { Connect15AnalogyBridge } from './v6/Connect15AnalogyBridge_V6';
+import { Quote16Showcase } from './v6/Quote16Showcase_V6';
+import { Progress18Path } from './v6/Progress18Path_V6';
 
 // V5 to V6 Migrations (Nov 2025)
-import { Hook1AQuestionBurst as Hook1AQuestionBurst_V6 } from './Hook1AQuestionBurst_V6';
-import { Hook1EAmbientMystery as Hook1EAmbientMystery_V6 } from './Hook1EAmbientMystery_V6';
-import { Explain2AConceptBreakdown as Explain2AConceptBreakdown_V6 } from './Explain2AConceptBreakdown_V6';
-import { Apply3AMicroQuiz as Apply3AMicroQuiz_V6 } from './Apply3AMicroQuiz_V6';
-import { Explain2BAnalogy as Explain2BAnalogy_V6 } from './Explain2BAnalogy_V6';
-import { Apply3BScenarioChoice as Apply3BScenarioChoice_V6 } from './Apply3BScenarioChoice_V6';
-import { Reflect4AKeyTakeaways as Reflect4AKeyTakeaways_V6 } from './Reflect4AKeyTakeaways_V6';
-import { Reflect4DForwardLink as Reflect4DForwardLink_V6 } from './Reflect4DForwardLink_V6';
+import { Hook1AQuestionBurst as Hook1AQuestionBurst_V6 } from './v6/Hook1AQuestionBurst_V6';
+import { Hook1EAmbientMystery as Hook1EAmbientMystery_V6 } from './v6/Hook1EAmbientMystery_V6';
+import { Explain2AConceptBreakdown as Explain2AConceptBreakdown_V6 } from './v6/Explain2AConceptBreakdown_V6';
+import { Apply3AMicroQuiz as Apply3AMicroQuiz_V6 } from './v6/Apply3AMicroQuiz_V6';
+import { Explain2BAnalogy as Explain2BAnalogy_V6 } from './v6/Explain2BAnalogy_V6';
+import { Apply3BScenarioChoice as Apply3BScenarioChoice_V6 } from './v6/Apply3BScenarioChoice_V6';
+import { Reflect4AKeyTakeaways as Reflect4AKeyTakeaways_V6 } from './v6/Reflect4AKeyTakeaways_V6';
+import { Reflect4DForwardLink as Reflect4DForwardLink_V6 } from './v6/Reflect4DForwardLink_V6';
 
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';

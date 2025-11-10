@@ -1,152 +1,261 @@
-# KnoMotion Videos - V6 Template System
+# 🎬 KnoMotion Video Templates
 
-**Status:** Production Ready ✅  
-**Version:** 6.0.0  
-**Date:** November 7, 2025
+**Production-ready educational video templates powered by Remotion**
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (30 seconds)
 
-### Get Started in 30 Seconds
-
-\`\`\`bash
+```bash
 cd /workspace/KnoMotion-Videos
 npm install
 npm run dev
-\`\`\`
+```
 
-**Then:** Click the green **"🎛️ NEW: Template Gallery & Config"** button
-
----
-
-## 📖 Documentation
-
-### Start Here
-- **[README_071126_V6_SYSTEM_COMPLETE.md](./README_071126_V6_SYSTEM_COMPLETE.md)** - Complete implementation guide
-- **[PRODUCTION_READY_SUMMARY.md](./PRODUCTION_READY_SUMMARY.md)** - Quick overview
-- **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Full documentation index
-
-### Essential Reading
-- **[V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md)** - Debugging guide & common pitfalls
-- **[INTERACTIVE_CONFIGURATION_PRINCIPAL.md](./INTERACTIVE_CONFIGURATION_PRINCIPAL.md)** - UI standards
+**Then:** Click **"🎛️ Template Gallery & Config"** button → Select a template → Configure → Preview
 
 ---
 
-## ✨ What's Included
+## 📖 What Is This?
 
-- **3 Production-Ready V6 Templates**
-  - Reveal9 - Progressive Unveil
-  - Guide10 - Step Sequence
-  - Compare11 - Before/After
+KnoMotion is a **configurable video template system** for creating educational content at scale. Each template:
 
-- **Interactive Admin Config Tool**
-  - Visual template gallery
-  - Live preview with Remotion Player
-  - Full JSON/JSX parameter alignment
+- ✅ **100% configurable** via JSON (no code changes needed)
+- ✅ **Broadcast quality** visuals (not PowerPoint)
+- ✅ **Learning intention-aligned** (Hook, Explain, Apply, Reflect, etc.)
+- ✅ **Domain agnostic** (works for any subject matter)
 
-- **Agnostic Template System**
-  - 6 core architectural principles
-  - Zero hardcoded values
-  - 100% configurable via UI
-
-- **8 Learning Intentions**
-  - Flexible, action-based categorization
-  - AI-friendly architecture
-  - Replaces rigid H.E.A.R. framework
+**Built with:** React, Remotion, Vite
 
 ---
 
-## 🎯 Template Roadmap
+## 📚 Documentation
 
-**Complete:** 3 templates  
-**Planned:** 17 more templates  
-**Total Target:** 20 V6 templates
+### For Content Creators
+- **[CONFIGURATION.md](./CONFIGURATION.md)** - How to configure templates using JSON
+- **[TEMPLATES.md](./TEMPLATES.md)** - Template catalog and usage guide
 
-See full roadmap in [README_071126_V6_SYSTEM_COMPLETE.md](./README_071126_V6_SYSTEM_COMPLETE.md)
+### For Developers
+- **[SDK.md](./SDK.md)** - SDK framework reference and API docs
+- **[TEMPLATES.md](./TEMPLATES.md)** - How to create new templates
+- **[docs/methodology/TEMPLATE_POLISH.md](./docs/methodology/TEMPLATE_POLISH.md)** - Polish standards
 
----
-
-## 🏗️ For Developers
-
-### Add a New Template
-Complete step-by-step guide in:  
-**[README_071126_V6_SYSTEM_COMPLETE.md](./README_071126_V6_SYSTEM_COMPLETE.md)** → Section: "How to Add a New V6 Template"
-
-### Key Principles
-1. Type-Based Polymorphism
-2. Data-Driven Structure
-3. Token-Based Positioning
-4. Separation of Concerns
-5. Progressive Configuration
-6. Registry Pattern
-
-Details in [AGNOSTIC_TEMPLATE_SYSTEM_COMPLETE.md](./AGNOSTIC_TEMPLATE_SYSTEM_COMPLETE.md)
+### Historical Reference
+- **[docs/archive/](./docs/archive/)** - Progress logs and historical documentation
 
 ---
 
-## 📦 Build & Deploy
+## 🎯 Template Library
 
-\`\`\`bash
-# Development
+**V6 Templates (17 active):**
+- **Hook1A, Hook1E** - Attention-grabbing openers
+- **Explain2A, Explain2B** - Concept teaching
+- **Apply3A, Apply3B** - Interactive practice
+- **Reflect4A, Reflect4D** - Summaries and takeaways
+- **Reveal9** - Progressive unveil
+- **Guide10** - Step-by-step sequences
+- **Compare11, Compare12** - Comparisons
+- **Challenge13** - Polls and quizzes
+- **Spotlight14, Connect15, Quote16, Progress18** - Specialized formats
+
+See **[TEMPLATES.md](./TEMPLATES.md)** for full details.
+
+---
+
+## 🏗️ Project Structure
+
+```
+/workspace/
+├── README.md                    ← You are here
+├── TEMPLATES.md                 ← Template guide
+├── CONFIGURATION.md             ← Config guide
+├── SDK.md                       ← SDK reference
+├── docs/
+│   ├── archive/                 ← Historical docs
+│   └── methodology/             ← Best practices
+└── KnoMotion-Videos/
+    ├── src/
+    │   ├── templates/           ← Template components
+    │   │   ├── v6/              ← Active V6 templates
+    │   │   └── archive_v5/      ← Archived V5 templates
+    │   ├── sdk/                 ← Shared utilities
+    │   │   ├── animations.ts    ← Animation helpers
+    │   │   ├── effects.tsx      ← Visual effects
+    │   │   ├── lottie.ts        ← Lottie integration
+    │   │   ├── layout.ts        ← Layout engine
+    │   │   ├── validation/      ← Schema validators
+    │   │   ├── core/            ← Core utilities
+    │   │   ├── components/      ← Shared components
+    │   │   └── index.ts         ← SDK exports
+    │   ├── scenes/              ← Scene configurations
+    │   │   ├── v6/              ← Active V6 scenes
+    │   │   ├── examples/        ← Example scenes
+    │   │   └── archive_v5/      ← Archived V5 scenes
+    │   └── components/
+    │       ├── UnifiedAdminConfig.jsx  ← Config UI
+    │       └── TemplateGallery.jsx     ← Template catalog
+    └── package.json
+```
+
+---
+
+## 🎨 Features
+
+### For Content Creators
+- **Visual configuration UI** - No JSON editing required
+- **Template gallery** - Browse and select templates visually
+- **Live preview** - See changes in real-time
+- **Example presets** - Start from working examples
+- **Export to JSON** - Save configurations for reuse
+
+### For Developers
+- **Modular SDK** - Reusable animation, effect, and layout utilities
+- **Type-safe schemas** - Zod validation for all configurations
+- **Hot reload** - Fast development iteration
+- **Extensible registry** - Easy to add new template types
+- **Collision detection** - Automatic layout validation
+
+---
+
+## 🛠️ Development
+
+### Start Development Server
+```bash
+cd /workspace/KnoMotion-Videos
 npm run dev
+```
 
-# Production build
+### Build for Production
+```bash
 npm run build
+```
 
-# Render video
+### Render a Video
+```bash
 npm run render -- src/scenes/your_scene.json
-\`\`\`
+```
+
+### Run Tests (when available)
+```bash
+npm test
+```
 
 ---
 
-## 🔀 Git Workflow
+## 📝 Creating Your First Video
 
-### Pushing Changes
+### Method 1: Using the UI (Easiest)
+1. Start dev server: `npm run dev`
+2. Click **"Template Gallery & Config"**
+3. Select a template (e.g., Explain2A)
+4. Configure using the visual controls
+5. Preview in real-time
+6. Download JSON when satisfied
 
-**IMPORTANT:** Always push changes to the feature branch created by the agent/request, **never directly to main**.
+### Method 2: Using JSON (Power Users)
+1. Copy an example scene from `/src/scenes/examples/`
+2. Edit the JSON configuration
+3. Load in the UI or use directly in code
+4. Render with `npm run render`
 
-\`\`\`bash
-# Check current branch
-git branch
+See **[CONFIGURATION.md](./CONFIGURATION.md)** for JSON schema details.
 
-# Stage all changes
-git add -A
+---
 
-# Commit with descriptive message
-git commit -m "Your descriptive commit message"
+## 🎯 Core Principles
 
-# Push to the feature branch (e.g., cursor/feature-name-xxxx)
-git push origin cursor/your-feature-branch-name
-\`\`\`
+### 1. Everything is Configurable
+No hardcoded content. All text, colors, timing, and visuals are configured via JSON.
 
-**Workflow:**
-1. Agent creates feature branch (e.g., \`cursor/create-versatile-learning-content-templates-06cf\`)
-2. All changes are committed and pushed to that branch
-3. You can spin up an environment on that branch to test changes
-4. Once verified, merge to main via pull request
+### 2. Broadcast Quality
+Templates follow professional video standards, not PowerPoint aesthetics:
+- Glassmorphic effects
+- Particle systems
+- Sophisticated animations
+- Full-screen usage (90-95%)
 
-**Never push directly to main** - this allows proper testing and review before merging.
+### 3. Learning Intention Aligned
+Templates map to pedagogical goals:
+- **Hook** - Capture attention
+- **Explain** - Teach concepts
+- **Apply** - Practice skills
+- **Reflect** - Consolidate learning
+
+### 4. Domain Agnostic
+Same template works for geography, sports, science, business, etc. Zero code changes.
 
 ---
 
 ## 🐛 Troubleshooting
 
-See **[V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md)** for:
-- 6 critical fixes documented
-- Common pitfalls explained
-- Best practices for templates
+### Common Issues
+
+**Preview not loading?**
+- Check console for errors
+- Verify JSON schema is valid
+- Reload player with refresh button
+
+**Build failing?**
+- Clear node_modules: `rm -rf node_modules && npm install`
+- Check for missing dependencies
+- Verify all imports are correct
+
+**Template not rendering?**
+- Ensure template is registered in TemplateRouter
+- Check template_id in JSON matches registration
+- Verify getDuration function exists
+
+See **[SDK.md](./SDK.md)** for detailed troubleshooting.
 
 ---
 
-## 📞 Need Help?
+## 🤝 Contributing
 
-1. Check [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md) for specific guides
-2. Review [V6_PREVIEW_FIX.md](./V6_PREVIEW_FIX.md) for common issues
-3. See example templates in \`/src/templates/*_V6.jsx\`
+### Adding a New Template
+See **[TEMPLATES.md](./TEMPLATES.md)** → "Creating New Templates" section
+
+### Improving the SDK
+See **[SDK.md](./SDK.md)** → "Contributing" section
+
+### Reporting Issues
+- Check existing documentation first
+- Provide reproducible example
+- Include error messages and screenshots
 
 ---
 
-**Built with:** React, Remotion, Vite  
-**Architecture:** Agnostic Template System v6.0  
-**Last Updated:** November 7, 2025
+## 📊 System Stats
+
+- **Templates:** 17 V6 templates (active)
+- **SDK Modules:** ~20 organized modules
+- **Learning Intentions:** 8 core intentions
+- **Scene Examples:** 25+ example configurations
+- **Documentation:** 4 core docs + methodology
+
+---
+
+## 🔗 Quick Links
+
+- **Template Catalog:** [TEMPLATES.md](./TEMPLATES.md)
+- **Configuration Guide:** [CONFIGURATION.md](./CONFIGURATION.md)
+- **SDK Reference:** [SDK.md](./SDK.md)
+- **Polish Standards:** [docs/methodology/TEMPLATE_POLISH.md](./docs/methodology/TEMPLATE_POLISH.md)
+- **Archive:** [docs/archive/](./docs/archive/)
+
+---
+
+## 📄 License
+
+[Your License Here]
+
+---
+
+## 🎉 Get Started Now
+
+```bash
+cd /workspace/KnoMotion-Videos
+npm install
+npm run dev
+```
+
+**Happy creating!** 🚀

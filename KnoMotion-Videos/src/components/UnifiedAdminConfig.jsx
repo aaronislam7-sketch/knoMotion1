@@ -22,51 +22,51 @@ import { Reflect4DConfig } from './configs/Reflect4DConfig';
 import { EZ } from '../sdk';
 
 // Import templates directly to access their getDuration functions
-import * as Reveal9Module from '../templates/Reveal9ProgressiveUnveil_V6';
-import * as Guide10Module from '../templates/Guide10StepSequence_V6';
-import * as Compare11Module from '../templates/Compare11BeforeAfter_V6';
+import * as Reveal9Module from '../templates/v6/Reveal9ProgressiveUnveil_V6';
+import * as Guide10Module from '../templates/v6/Guide10StepSequence_V6';
+import * as Compare11Module from '../templates/v6/Compare11BeforeAfter_V6';
 
 // NEW: Learning Content Pipeline Templates (Nov 2025)
-import * as Compare12Module from '../templates/Compare12MatrixGrid_V6';
-import * as Challenge13Module from '../templates/Challenge13PollQuiz_V6';
-import * as Spotlight14Module from '../templates/Spotlight14SingleConcept_V6';
-import * as Connect15Module from '../templates/Connect15AnalogyBridge_V6';
-import * as Quote16Module from '../templates/Quote16Showcase_V6';
-import * as Progress18Module from '../templates/Progress18Path_V6';
-import * as Hook1AModule from '../templates/Hook1AQuestionBurst_V6';
-import * as Hook1EModule from '../templates/Hook1EAmbientMystery_V6';
-import * as Explain2AModule from '../templates/Explain2AConceptBreakdown_V6';
-import * as Apply3AModule from '../templates/Apply3AMicroQuiz_V6';
-import * as Explain2BModule from '../templates/Explain2BAnalogy_V6';
-import * as Apply3BModule from '../templates/Apply3BScenarioChoice_V6';
-import * as Reflect4AModule from '../templates/Reflect4AKeyTakeaways_V6';
-import * as Reflect4DModule from '../templates/Reflect4DForwardLink_V6';
+import * as Compare12Module from '../templates/v6/Compare12MatrixGrid_V6';
+import * as Challenge13Module from '../templates/v6/Challenge13PollQuiz_V6';
+import * as Spotlight14Module from '../templates/v6/Spotlight14SingleConcept_V6';
+import * as Connect15Module from '../templates/v6/Connect15AnalogyBridge_V6';
+import * as Quote16Module from '../templates/v6/Quote16Showcase_V6';
+import * as Progress18Module from '../templates/v6/Progress18Path_V6';
+import * as Hook1AModule from '../templates/v6/Hook1AQuestionBurst_V6';
+import * as Hook1EModule from '../templates/v6/Hook1EAmbientMystery_V6';
+import * as Explain2AModule from '../templates/v6/Explain2AConceptBreakdown_V6';
+import * as Apply3AModule from '../templates/v6/Apply3AMicroQuiz_V6';
+import * as Explain2BModule from '../templates/v6/Explain2BAnalogy_V6';
+import * as Apply3BModule from '../templates/v6/Apply3BScenarioChoice_V6';
+import * as Reflect4AModule from '../templates/v6/Reflect4AKeyTakeaways_V6';
+import * as Reflect4DModule from '../templates/v6/Reflect4DForwardLink_V6';
 
 // Import example scenes
-import reveal9Example from '../scenes/reveal_9_progressive_unveil_example.json';
-import guide10Example from '../scenes/guide_10_step_sequence_example.json';
-import compare11Example from '../scenes/compare_11_before_after_example.json';
+import reveal9Example from '../scenes/examples/reveal_9_progressive_unveil_example.json';
+import guide10Example from '../scenes/examples/guide_10_step_sequence_example.json';
+import compare11Example from '../scenes/examples/compare_11_before_after_example.json';
 
 // NEW: Example scenes for new templates
-import compare12Example from '../scenes/compare_12_matrix_example.json';
-import challenge13Example from '../scenes/challenge_13_poll_quiz_example.json';
-import spotlight14Example from '../scenes/spotlight_14_single_concept_example.json';
-import connect15Example from '../scenes/connect_15_analogy_bridge_example.json';
-import quote16Example from '../scenes/quote_16_showcase_example.json';
-import progress18Example from '../scenes/progress_18_path_example.json';
-import hook1AExample from '../scenes/hook_1a_question_burst_v6.json';
-import hook1EExample from '../scenes/hook_1e_ambient_mystery_v6.json';
-import explain2AExample from '../scenes/explain_2a_concept_breakdown_v6.json';
-import apply3AExample from '../scenes/apply_3a_micro_quiz_v6.json';
-import explain2BExample from '../scenes/explain_2b_analogy_v6.json';
-import apply3BExample from '../scenes/apply_3b_scenario_choice_v6.json';
-import reflect4AExample from '../scenes/reflect_4a_key_takeaways_v6.json';
-import reflect4DExample from '../scenes/reflect_4d_forward_link_v6.json';
+import compare12Example from '../scenes/examples/compare_12_matrix_example.json';
+import challenge13Example from '../scenes/examples/challenge_13_poll_quiz_example.json';
+import spotlight14Example from '../scenes/examples/spotlight_14_single_concept_example.json';
+import connect15Example from '../scenes/examples/connect_15_analogy_bridge_example.json';
+import quote16Example from '../scenes/examples/quote_16_showcase_example.json';
+import progress18Example from '../scenes/examples/progress_18_path_example.json';
+import hook1AExample from '../scenes/v6/hook_1a_question_burst_v6.json';
+import hook1EExample from '../scenes/v6/hook_1e_ambient_mystery_v6.json';
+import explain2AExample from '../scenes/v6/explain_2a_concept_breakdown_v6.json';
+import apply3AExample from '../scenes/v6/apply_3a_micro_quiz_v6.json';
+import explain2BExample from '../scenes/v6/explain_2b_analogy_v6.json';
+import apply3BExample from '../scenes/v6/apply_3b_scenario_choice_v6.json';
+import reflect4AExample from '../scenes/v6/reflect_4a_key_takeaways_v6.json';
+import reflect4DExample from '../scenes/v6/reflect_4d_forward_link_v6.json';
 
 // Import TEST scenes (Revised templates)
-import testConceptBreakdownRevised from '../scenes/explain_2a_concept_breakdown_revised.json';
-import testStepSequenceRevised from '../scenes/guide_10_step_sequence_revised.json';
-import testStepSequenceGrid from '../scenes/guide_10_step_sequence_grid_layout.json';
+import testConceptBreakdownRevised from '../scenes/examples/explain_2a_concept_breakdown_revised.json';
+import testStepSequenceRevised from '../scenes/examples/guide_10_step_sequence_revised.json';
+import testStepSequenceGrid from '../scenes/examples/guide_10_step_sequence_grid_layout.json';
 
 /**
  * Unified Admin Configuration Tool
