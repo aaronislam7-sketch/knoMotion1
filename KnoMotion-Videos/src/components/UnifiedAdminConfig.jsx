@@ -63,6 +63,9 @@ import apply3BExample from '../scenes/apply_3b_scenario_choice_v6.json';
 import reflect4AExample from '../scenes/reflect_4a_key_takeaways_v6.json';
 import reflect4DExample from '../scenes/reflect_4d_forward_link_v6.json';
 
+// Import BROADCAST QUALITY scenes
+import reflect4ABroadcastExample from '../scenes/reflect_4a_key_takeaways_broadcast_example.json';
+
 // Import TEST scenes (Revised templates)
 import testConceptBreakdownRevised from '../scenes/explain_2a_concept_breakdown_revised.json';
 import testStepSequenceRevised from '../scenes/guide_10_step_sequence_revised.json';
@@ -100,7 +103,7 @@ const DEFAULT_SCENES = {
   'Apply3AMicroQuiz_V6': apply3AExample,
   'Explain2BAnalogy_V6': explain2BExample,
   'Apply3BScenarioChoice_V6': apply3BExample,
-  'Reflect4AKeyTakeaways_V6': reflect4AExample,
+  'Reflect4AKeyTakeaways_V6': reflect4ABroadcastExample,  // BROADCAST QUALITY VERSION!
   'Reflect4DForwardLink_V6': reflect4DExample,
   
   // TEST: Revised Templates (Broadcast Quality)
