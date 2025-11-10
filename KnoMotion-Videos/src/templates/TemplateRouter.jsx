@@ -113,7 +113,11 @@ const V6_TEMPLATE_REGISTRY = {
   'Explain2BAnalogy_V6': Explain2BAnalogy_V6,
   'Apply3BScenarioChoice_V6': Apply3BScenarioChoice_V6,
   'Reflect4AKeyTakeaways_V6': Reflect4AKeyTakeaways_V6,
-  'Reflect4DForwardLink_V6': Reflect4DForwardLink_V6
+  'Reflect4DForwardLink_V6': Reflect4DForwardLink_V6,
+  
+  // TEST: Revised Templates for Broadcast Quality (Nov 2025)
+  'TEST_Explain2AConceptBreakdown_V6': Explain2AConceptBreakdown_V6,
+  'TEST_Guide10StepSequence_V6': Guide10StepSequence
 };
 
 /**

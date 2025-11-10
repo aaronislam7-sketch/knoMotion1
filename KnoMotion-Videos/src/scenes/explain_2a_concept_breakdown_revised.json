@@ -1,0 +1,142 @@
+{
+  "template_id": "TEST_Explain2AConceptBreakdown_V6",
+  "scene_id": "explain_2a_concept_breakdown_revised",
+  "title": {
+    "text": "The Learning Cycle",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 80 }
+  },
+  "center": {
+    "text": "Active Learning",
+    "visual": {
+      "type": "emoji",
+      "value": "🧠",
+      "scale": 3.5,
+      "enabled": true
+    },
+    "glass": {
+      "enabled": true,
+      "glowOpacity": 0.3,
+      "borderOpacity": 0.6
+    }
+  },
+  "parts": [
+    {
+      "label": "Engage",
+      "description": "Spark curiosity",
+      "color": "#FF6B35",
+      "icon": "🎯",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 5.0,
+        "duration": 2.0
+      }
+    },
+    {
+      "label": "Explore",
+      "description": "Investigate deeply",
+      "color": "#4ECDC4",
+      "icon": "🔍",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 7.5,
+        "duration": 2.0
+      }
+    },
+    {
+      "label": "Explain",
+      "description": "Clarify understanding",
+      "color": "#FFE66D",
+      "icon": "💡",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 10.0,
+        "duration": 2.0
+      }
+    },
+    {
+      "label": "Extend",
+      "description": "Apply knowledge",
+      "color": "#95E1D3",
+      "icon": "🚀",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 12.5,
+        "duration": 2.0
+      }
+    }
+  ],
+  "emphasis": {
+    "enabled": true,
+    "style": "scale-glow",
+    "scaleAmount": 1.15,
+    "glowIntensity": 35
+  },
+  "layout": {
+    "radius": 420,
+    "centerSize": 220,
+    "partSize": 200,
+    "style": "circular"
+  },
+  "visualStyle": {
+    "centerStyle": "glass",
+    "partStyle": "badge",
+    "connectionStyle": "flow"
+  },
+  "style_tokens": {
+    "colors": {
+      "bg": "#0F0F1E",
+      "bgGradient": true,
+      "center": "#FF6B35",
+      "connection": "#4A5568",
+      "text": "#FFFFFF",
+      "textSecondary": "#A0AEC0"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_center": 52,
+      "size_part_label": 34,
+      "size_part_desc": 22,
+      "weight_title": 800,
+      "weight_center": 700,
+      "weight_part": 600
+    }
+  },
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "centerReveal": 2.0,
+    "firstPart": 3.5,
+    "partInterval": 0.8,
+    "connections": 3.2,
+    "hold": 15.0,
+    "exit": 16.0
+  },
+  "animation": {
+    "partReveal": "spring-bounce",
+    "connectionDraw": true,
+    "connectionParticles": true,
+    "pulse": false,
+    "centerBurst": true
+  },
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 25
+    },
+    "glow": {
+      "enabled": true,
+      "intensity": 28,
+      "frequency": 0.04
+    },
+    "spotlight": {
+      "enabled": true,
+      "opacity": 0.22,
+      "size": 850
+    },
+    "noiseTexture": {
+      "enabled": true,
+      "opacity": 0.04
+    }
+  }
+}

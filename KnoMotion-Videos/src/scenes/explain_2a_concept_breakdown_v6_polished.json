@@ -1,0 +1,146 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Explain2AConceptBreakdown_V6",
+  "metadata": {
+    "name": "Concept Breakdown - Deep Learning (POLISHED)",
+    "description": "Enhanced hub-and-spoke with glassmorphic styling, Lottie animations, and micro-delights",
+    "primary_intention": "BREAKDOWN",
+    "secondary_intentions": ["CONNECT", "GUIDE"],
+    "tags": ["concept", "breakdown", "hub-spoke", "educational", "polished", "glassmorphic"],
+    "duration_estimate": "12s",
+    "enhancements": [
+      "Glassmorphic center hub and part cards",
+      "Pulsing glow on center concept",
+      "Particle burst when center appears",
+      "Animated connector lines with flow particles",
+      "Icon pop animations on parts",
+      "Spotlight effect on center",
+      "Spring bounce card entrances"
+    ]
+  },
+  
+  "title": {
+    "text": "What is Deep Learning?",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 60 }
+  },
+  
+  "center": {
+    "text": "Deep Learning",
+    "visual": {
+      "type": "emoji",
+      "value": "🧠",
+      "scale": 2.0,
+      "enabled": true
+    },
+    "lottie": {
+      "enabled": true,
+      "preset": "centralGlow",
+      "position": "background"
+    },
+    "glass": {
+      "enabled": true,
+      "glowOpacity": 0.2,
+      "borderOpacity": 0.4
+    }
+  },
+  
+  "parts": [
+    {
+      "label": "Neural Networks",
+      "description": "Interconnected layers of nodes",
+      "color": "#FF6B35",
+      "icon": "🔗",
+      "lottie": { "enabled": false }
+    },
+    {
+      "label": "Training Data",
+      "description": "Large datasets for learning",
+      "color": "#2ECC71",
+      "icon": "📊",
+      "lottie": { "enabled": false }
+    },
+    {
+      "label": "Backpropagation",
+      "description": "Error correction algorithm",
+      "color": "#9B59B6",
+      "icon": "🔄",
+      "lottie": { "enabled": false }
+    },
+    {
+      "label": "Optimization",
+      "description": "Tuning parameters",
+      "color": "#3498DB",
+      "icon": "⚙️",
+      "lottie": { "enabled": false }
+    }
+  ],
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "center": "#FF6B35",
+      "connection": "#CBD5E0",
+      "text": "#1A1A1A",
+      "textSecondary": "#5A5A5A"
+    },
+    "fonts": {
+      "size_title": 52,
+      "size_center": 44,
+      "size_part_label": 28,
+      "size_part_desc": 18,
+      "weight_title": 800,
+      "weight_center": 700,
+      "weight_part": 600
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "centerReveal": 2.0,
+    "firstPart": 3.5,
+    "partInterval": 0.6,
+    "connections": 3.0,
+    "emphasis": 7.0,
+    "hold": 9.0,
+    "exit": 11.0
+  },
+  
+  "layout": {
+    "radius": 350,
+    "centerSize": 180,
+    "partSize": 140
+  },
+  
+  "animation": {
+    "partReveal": "spring-bounce",
+    "connectionDraw": true,
+    "connectionParticles": true,
+    "pulse": true,
+    "centerBurst": true
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 15
+    },
+    "glow": {
+      "enabled": true,
+      "intensity": 20,
+      "frequency": 0.05
+    },
+    "spotlight": {
+      "enabled": true,
+      "opacity": 0.15,
+      "size": 600
+    }
+  },
+  
+  "typography": {
+    "voice": "utility",
+    "align": "center",
+    "transform": "none"
+  }
+}

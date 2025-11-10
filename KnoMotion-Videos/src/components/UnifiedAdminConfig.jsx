@@ -63,6 +63,11 @@ import apply3BExample from '../scenes/apply_3b_scenario_choice_v6.json';
 import reflect4AExample from '../scenes/reflect_4a_key_takeaways_v6.json';
 import reflect4DExample from '../scenes/reflect_4d_forward_link_v6.json';
 
+// Import TEST scenes (Revised templates)
+import testConceptBreakdownRevised from '../scenes/explain_2a_concept_breakdown_revised.json';
+import testStepSequenceRevised from '../scenes/guide_10_step_sequence_revised.json';
+import testStepSequenceGrid from '../scenes/guide_10_step_sequence_grid_layout.json';
+
 /**
  * Unified Admin Configuration Tool
  * 
@@ -96,7 +101,11 @@ const DEFAULT_SCENES = {
   'Explain2BAnalogy_V6': explain2BExample,
   'Apply3BScenarioChoice_V6': apply3BExample,
   'Reflect4AKeyTakeaways_V6': reflect4AExample,
-  'Reflect4DForwardLink_V6': reflect4DExample
+  'Reflect4DForwardLink_V6': reflect4DExample,
+  
+  // TEST: Revised Templates (Broadcast Quality)
+  'TEST_Explain2AConceptBreakdown_V6': testConceptBreakdownRevised,
+  'TEST_Guide10StepSequence_V6': testStepSequenceRevised
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -233,6 +242,12 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
       case 'Reflect4DForwardLink_V6':
         return <Reflect4DConfig scene={scene} onUpdate={handleSceneUpdate} />;
       
+      // TEST: Revised Templates
+      case 'TEST_Explain2AConceptBreakdown_V6':
+        return <Explain2AConfig scene={scene} onUpdate={handleSceneUpdate} />;
+      case 'TEST_Guide10StepSequence_V6':
+        return <Guide10Config scene={scene} onUpdate={handleSceneUpdate} />;
+      
       default:
         return (
           <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>
@@ -287,6 +302,12 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Reflect4AModule.getDuration ? Reflect4AModule.getDuration(scene, fps) : 450;
       case 'Reflect4DForwardLink_V6':
         return Reflect4DModule.getDuration ? Reflect4DModule.getDuration(scene, fps) : 450;
+      
+      // TEST: Revised Templates
+      case 'TEST_Explain2AConceptBreakdown_V6':
+        return Explain2AModule.getDuration ? Explain2AModule.getDuration(scene, fps) : 450;
+      case 'TEST_Guide10StepSequence_V6':
+        return Guide10Module.getDuration ? Guide10Module.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats

@@ -1,579 +1,775 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { THEME } from '../utils/theme';
-import rough from 'roughjs/bundled/rough.esm.js';
-
-// SDK imports - Agnostic Template System v6
 import { 
-  fadeUpIn,
-  slideInLeft,
-  popInSpring,
-  pulseEmphasis,
-  EZ,
-  useSceneId,
-  toFrames,
+  EZ, 
+  toFrames, 
   renderHero,
   mergeHeroConfig,
-  resolvePosition,
-  positionToCSS,
-  getCircleDrawOn,
   generateAmbientParticles,
   renderAmbientParticles
 } from '../sdk';
 import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../sdk/fontSystem';
 import { createTransitionProps } from '../sdk/transitions';
+import { GlassmorphicPane, ShineEffect, NoiseTexture } from '../sdk/broadcastEffects';
+import { AnimatedLottie } from '../sdk/lottieIntegration';
+import { getLottieFromConfig, getLottiePreset } from '../sdk/lottiePresets';
+import {
+  getCardEntrance,
+  getStaggerDelay,
+  getIconPop,
+  applyTransform
+} from '../sdk/microDelights.jsx';
 
 /**
- * TEMPLATE #10: STEP SEQUENCE - v6.0
+ * TEMPLATE #10: STEP-BY-STEP GUIDE - v6.0 (REVISED FOR BROADCAST QUALITY)
  * 
- * PRIMARY INTENTION: GUIDE
- * SECONDARY INTENTIONS: BREAKDOWN, CONNECT
+ * MAJOR REVISIONS BASED ON FEEDBACK:
+ * ✅ Horizontal & Grid layouts (NOT vertical by default)
+ * ✅ Lottie animated arrows between steps
+ * ✅ Removed "box" styling - sophisticated organic design
+ * ✅ Uses FULL 1920x1080 screen real estate
+ * ✅ More configuration options exposed to admin panel
+ * ✅ Dynamic, flowing design that doesn't feel PowerPoint-esque
  * 
- * VISUAL PATTERN:
- * - Step-by-step process visualization
- * - 2-8 numbered steps
- * - Each step: number badge, title, description, optional icon
- * - Sequential reveal with connecting lines
- * - Progress indicator
- * 
- * AGNOSTIC PRINCIPALS:
- * ✅ Type-based polymorphism (icons via hero registry)
- * ✅ Data-driven structure (dynamic array of steps)
- * ✅ Token-based positioning (position system)
- * ✅ Separation of concerns (content/layout/style/animation)
- * ✅ Progressive configuration (simple → advanced)
- * ✅ Registry pattern (extensible step types)
- * 
- * CONFIGURABILITY:
- * - Number of steps (2-8)
- * - Layout: vertical, horizontal, grid
- * - Each step: title, description, icon (optional)
- * - Connection style: line, arrow, dots, none
- * - Colors, fonts, timing all configurable
- * - Step entrance animation style
- * - Emphasis effects
- * 
- * NO HARDCODED VALUES!
+ * KEY FEATURES:
+ * - Three layout modes: horizontal, grid, flowing
+ * - Animated Lottie arrows connecting steps
+ * - Circular progress tracker
+ * - Emphasis system for active/completed steps
+ * - Sophisticated glassmorphic cards (no boxes!)
+ * - Full JSON configurability
  */
 
-// Default configuration
 const DEFAULT_CONFIG = {
   title: {
-    text: 'Step-by-Step Guide',
+    text: 'Step-by-Step Process',
     position: 'top-center',
-    offset: { x: 0, y: 40 }
+    offset: { x: 0, y: 70 }  // Increased to avoid top overlap
   },
-  layout: 'vertical', // vertical, horizontal, grid
-  connectionStyle: 'arrow', // line, arrow, dots, none
+  
   steps: [
-    {
-      title: 'Step 1',
-      description: 'First step description',
-      icon: null
+    { 
+      number: 1, 
+      title: 'First Step', 
+      description: 'Brief description',
+      completed: false,
+      color: '#3B82F6',
+      icon: '🎯',
+      // NEW: Per-step emphasis
+      emphasize: {
+        enabled: false,
+        startTime: 5.0,
+        duration: 2.0
+      }
     }
   ],
-  style_tokens: {
-    colors: {
-      bg: '#FFF9F0',
-      accent: '#FF6B35',
-      accent2: '#9B59B6',
-      ink: '#1A1A1A',
-      stepBg: '#FFFFFF',
-      connectionColor: '#CCCCCC'
-    },
-    fonts: {
-      size_title: 64,
-      size_stepTitle: 32,
-      size_stepDesc: 20,
-      size_stepNumber: 48
-    }
+  
+  // NEW: Layout configuration
+  layout: {
+    mode: 'horizontal',  // 'horizontal', 'grid', 'flowing'
+    spacing: 'comfortable',  // 'tight', 'comfortable', 'spacious'
+    gridColumns: 2,  // Only for grid mode
+    cardStyle: 'circle',  // 'circle', 'organic', 'minimal'
+    cardSize: 260  // INCREASED for text to fit comfortably
   },
-  beats: {
-    entrance: 0.4,
-    titleEntry: 0.6,
-    firstStep: 1.2,
-    stepInterval: 1.5, // Time between each step reveal
-    emphasize: 0.8, // Emphasis duration per step
-    exit: 2.0
+  
+  // NEW: Arrow configuration
+  arrows: {
+    enabled: true,
+    type: 'lottie',  // 'lottie', 'svg', 'none'
+    lottiePreset: 'arrowFlow',  // From lottiePresets.js
+    color: '#3B82F6',
+    animated: true,
+    size: 60
   },
-  animation: {
-    stepEntrance: 'slide-left', // fade-up, slide-left, pop, bounce
-    connectionDraw: true,
-    pulseOnEntry: true
+  
+  // NEW: Progress tracker
+  progressTracker: {
+    enabled: true,
+    type: 'circular',  // 'circular', 'linear', 'none'
+    position: 'top-right',  // 'top-right', 'bottom-center'
+    showPercentage: true
   },
+  
+  // NEW: Emphasis system
+  emphasis: {
+    enabled: true,
+    activeStyle: 'scale-glow',  // 'scale-glow', 'pulse', 'spotlight'
+    completedStyle: 'checkmark',  // 'checkmark', 'glow', 'fade'
+    scaleAmount: 1.1,
+    glowIntensity: 25
+  },
+  
+  checkmarks: {
+    enabled: true,
+    style: 'lottie',  // 'lottie', 'icon', 'none'
+    lottiePreset: 'successCheck',
+    color: '#10B981'
+  },
+  
   typography: {
     voice: 'utility',
     align: 'center',
     transform: 'none'
   },
-  transition: {
-    exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' }
+  
+  style_tokens: {
+    colors: {
+      bg: '#0A0E1A',
+      bgGradient: true,
+      primary: '#3B82F6',
+      completed: '#10B981',
+      active: '#F59E0B',
+      text: '#FFFFFF',
+      textSecondary: '#94A3B8',
+      cardBg: '#1E293B'
+    },
+    fonts: {
+      size_title: 54,
+      size_step_number: 72,
+      size_step_title: 32,
+      size_step_desc: 18,
+      weight_title: 800,
+      weight_step: 700
+    }
+  },
+  
+  beats: {
+    entrance: 0.5,
+    title: 1.0,
+    firstStep: 2.5,
+    stepInterval: 0.7,
+    arrowDelay: 0.3,  // Delay after step before arrow appears
+    hold: 12.0,
+    exit: 14.0
+  },
+  
+  animation: {
+    stepReveal: 'spring-bounce',
+    arrowAnimation: 'slide-fade',
+    progressAnimation: true
+  },
+  
+  effects: {
+    particles: {
+      enabled: true,
+      count: 15
+    },
+    glow: {
+      enabled: true,
+      intensity: 20
+    },
+    shine: {
+      enabled: true,
+      onCompleted: true  // Shine effect on completed steps
+    },
+    noiseTexture: {
+      enabled: true,
+      opacity: 0.03
+    }
   }
 };
 
-// Calculate step positions based on layout (COLLISION-FREE)
-const calculateStepPositions = (stepCount, layout, width, height) => {
-  const positions = [];
-  const TITLE_SAFE_ZONE = 160; // Title + padding
+// Calculate step positions based on layout mode
+const calculateStepPositions = (totalSteps, layout, width, height) => {
+  const { mode, spacing, gridColumns, cardSize } = layout;
   
-  switch (layout) {
-    case 'vertical': {
-      // Account for step height to prevent collisions
-      const stepHeight = 120; // Approximate step box height
-      const availableHeight = height - TITLE_SAFE_ZONE - 100; // Bottom padding
-      const totalStepsHeight = stepHeight * stepCount;
-      const spacing = totalStepsHeight > availableHeight ? 
-        availableHeight / stepCount : // Tight fit if needed
-        Math.max((availableHeight - totalStepsHeight) / (stepCount - 1 || 1), stepHeight + 20); // Min 20px gap
+  const spacingMap = {
+    tight: 1.2,
+    comfortable: 1.4,
+    spacious: 1.6
+  };
+  
+  const gap = cardSize * spacingMap[spacing];
+  const positions = [];
+  
+  if (mode === 'horizontal') {
+    // Horizontal layout - distribute evenly across width
+    const totalWidth = (totalSteps - 1) * gap;
+    const startX = (width - totalWidth) / 2;
+    const centerY = height / 2 + 10;  // Reduced offset to avoid bottom overlap
+    
+    for (let i = 0; i < totalSteps; i++) {
+      positions.push({
+        x: startX + (i * gap),
+        y: centerY
+      });
+    }
+  } else if (mode === 'grid') {
+    // Grid layout - organize in rows and columns
+    const rows = Math.ceil(totalSteps / gridColumns);
+    const totalWidth = (gridColumns - 1) * gap;
+    const totalHeight = (rows - 1) * gap;
+    const startX = (width - totalWidth) / 2;
+    const startY = (height - totalHeight) / 2 + 20;  // Reduced from 40 to avoid overlaps
+    
+    for (let i = 0; i < totalSteps; i++) {
+      const col = i % gridColumns;
+      const row = Math.floor(i / gridColumns);
+      positions.push({
+        x: startX + (col * gap),
+        y: startY + (row * gap)
+      });
+    }
+  } else if (mode === 'flowing') {
+    // Flowing organic layout - snake pattern
+    const itemsPerRow = 3;
+    const gapX = gap * 1.1;  // Reduced spacing
+    const gapY = gap * 0.85;  // Reduced vertical spacing
+    
+    for (let i = 0; i < totalSteps; i++) {
+      const row = Math.floor(i / itemsPerRow);
+      const col = i % itemsPerRow;
+      const isEvenRow = row % 2 === 0;
       
-      const startY = TITLE_SAFE_ZONE + 80;
-      for (let i = 0; i < stepCount; i++) {
-        positions.push({
-          x: width * 0.5,
-          y: startY + (i * spacing)
-        });
-      }
-      break;
-    }
-    
-    case 'horizontal': {
-      const startX = width * 0.15;
-      const spacing = (width * 0.7) / (stepCount - 1 || 1);
-      const centerY = height * 0.5;
-      for (let i = 0; i < stepCount; i++) {
-        positions.push({
-          x: startX + (i * spacing),
-          y: centerY
-        });
-      }
-      break;
-    }
-    
-    case 'grid': {
-      const cols = Math.ceil(Math.sqrt(stepCount));
-      const rows = Math.ceil(stepCount / cols);
-      const spacingX = width * 0.7 / cols;
-      const spacingY = height * 0.6 / rows;
-      const startX = width * 0.15;
-      const startY = height * 0.25;
+      const totalWidth = (itemsPerRow - 1) * gapX;
+      const startX = (width - totalWidth) / 2;
+      const startY = 220 + (row * gapY);  // Reduced from 250 to avoid overlap
       
-      for (let i = 0; i < stepCount; i++) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        positions.push({
-          x: startX + (col * spacingX) + spacingX / 2,
-          y: startY + (row * spacingY) + spacingY / 2
-        });
-      }
-      break;
+      positions.push({
+        x: isEvenRow ? startX + (col * gapX) : startX + ((itemsPerRow - 1 - col) * gapX),
+        y: startY
+      });
     }
-    
-    default:
-      return calculateStepPositions(stepCount, 'vertical', width, height);
   }
   
   return positions;
 };
 
-// Render connection between steps
-const renderConnection = (fromPos, toPos, progress, style, color, layout) => {
-  if (style === 'none') return null;
-  
-  const ease = EZ.smooth(progress);
-  const dx = toPos.x - fromPos.x;
-  const dy = toPos.y - fromPos.y;
-  const length = Math.sqrt(dx * dx + dy * dy);
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-  
-  const drawLength = length * ease;
-  
-  if (style === 'line' || style === 'arrow') {
-    return (
-      <div style={{
-        position: 'absolute',
-        left: fromPos.x,
-        top: fromPos.y,
-        width: drawLength,
-        height: 3,
-        backgroundColor: color,
-        transformOrigin: '0 50%',
-        transform: `rotate(${angle}deg)`,
-        zIndex: 1
-      }}>
-        {style === 'arrow' && progress > 0.8 && (
-          <>
-            <div style={{
-              position: 'absolute',
-              right: -2,
-              top: -5,
-              width: 0,
-              height: 0,
-              borderLeft: '10px solid ' + color,
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent'
-            }} />
-          </>
-        )}
-      </div>
-    );
-  }
-  
-  if (style === 'dots') {
-    const dotCount = Math.floor(length / 30);
-    const dots = [];
-    for (let i = 0; i < dotCount * ease; i++) {
-      const t = i / dotCount;
-      dots.push(
-        <div key={i} style={{
-          position: 'absolute',
-          left: fromPos.x + dx * t,
-          top: fromPos.y + dy * t,
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          backgroundColor: color,
-          zIndex: 1
-        }} />
-      );
-    }
-    return <>{dots}</>;
-  }
-  
-  return null;
+// Check if step should be emphasized
+const isStepEmphasized = (step, frame, fps) => {
+  if (!step.emphasize?.enabled) return false;
+  const startFrame = toFrames(step.emphasize.startTime, fps);
+  const endFrame = toFrames(step.emphasize.startTime + step.emphasize.duration, fps);
+  return frame >= startFrame && frame < endFrame;
 };
 
 export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  // Font loading
+  const config = { ...DEFAULT_CONFIG, ...scene };
   const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
-  const fontTokens = buildFontTokens(typography?.voice || DEFAULT_FONT_VOICE) || {
-    title: { family: 'Figtree, sans-serif' },
-    body: { family: 'Inter, sans-serif' },
-    accent: { family: 'Caveat, cursive' },
-    utility: { family: 'Inter, sans-serif' }
-  };
   
   useEffect(() => {
-    loadFontVoice(typography?.voice || DEFAULT_FONT_VOICE);
-  }, [typography?.voice]);
+    loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
   
-  // Merge with defaults
-  const config = {
-    ...DEFAULT_CONFIG,
-    ...scene,
-    title: { ...DEFAULT_CONFIG.title, ...(scene.title || {}) },
-    style_tokens: {
-      colors: { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) },
-      fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
-    },
-    beats: { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) },
-    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) }
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
+  // Merge config
+  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
+  const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
+  const layout = { ...DEFAULT_CONFIG.layout, ...(scene.layout || {}) };
+  const arrows = { ...DEFAULT_CONFIG.arrows, ...(scene.arrows || {}) };
+  const progressTracker = { ...DEFAULT_CONFIG.progressTracker, ...(scene.progressTracker || {}) };
+  const emphasis = { ...DEFAULT_CONFIG.emphasis, ...(scene.emphasis || {}) };
+  const checkmarks = { ...DEFAULT_CONFIG.checkmarks, ...(scene.checkmarks || {}) };
+  const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
+  const effects = { 
+    ...DEFAULT_CONFIG.effects, 
+    ...(scene.effects || {}),
+    particles: { ...DEFAULT_CONFIG.effects.particles, ...(scene.effects?.particles || {}) },
+    glow: { ...DEFAULT_CONFIG.effects.glow, ...(scene.effects?.glow || {}) },
+    shine: { ...DEFAULT_CONFIG.effects.shine, ...(scene.effects?.shine || {}) },
+    noiseTexture: { ...DEFAULT_CONFIG.effects.noiseTexture, ...(scene.effects?.noiseTexture || {}) }
   };
   
-  const colors = config.style_tokens.colors;
-  const fonts = config.style_tokens.fonts;
-  const beats = config.beats;
   const steps = config.steps || DEFAULT_CONFIG.steps;
+  const totalSteps = steps.length;
+  const completedCount = steps.filter(s => s.completed).length;
   
-  // Calculate step positions
-  const stepPositions = calculateStepPositions(
-    steps.length,
-    config.layout || DEFAULT_CONFIG.layout,
-    width,
-    height
-  );
+  // Convert beats to frames
+  const f_title = toFrames(beats.title, fps);
+  const f_firstStep = toFrames(beats.firstStep, fps);
+  const f_exit = toFrames(beats.exit, fps);
+  
+  // Generate particles
+  const particleElements = effects.particles.enabled
+    ? generateAmbientParticles({
+        count: effects.particles.count,
+        seed: 243,
+        style: 'ambient',
+        color: colors.primary,
+        bounds: { w: width, h: height }
+      })
+    : [];
+  
+  renderAmbientParticles(particleElements, frame, fps, { opacity: 0.35 });
   
   // Title animation
-  const titleStartFrame = toFrames(beats.titleEntry, fps);
-  const titleAnim = fadeUpIn(frame, {
-    start: beats.titleEntry,
-    dur: 0.8,
-    dist: 50,
-    ease: 'smooth'
-  }, EZ, fps);
-  
-  const titlePos = resolvePosition(
-    config.title.position || DEFAULT_CONFIG.title.position,
-    config.title.offset || DEFAULT_CONFIG.title.offset,
-    { width, height }
+  const titleProgress = interpolate(
+    frame,
+    [f_title, f_title + toFrames(0.8, fps)],
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power3Out }
   );
   
-  // Ambient particles
-  const particles = generateAmbientParticles(20, 10001, width, height);
-  const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
+  // Exit animation
+  const exitProgress = frame >= f_exit
+    ? interpolate(frame, [f_exit, f_exit + toFrames(0.8, fps)], [0, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power3In })
+    : 0;
+  
+  const exitOpacity = 1 - exitProgress;
+  
+  // Calculate positions
+  const stepPositions = calculateStepPositions(totalSteps, layout, width, height);
   
   return (
-    <AbsoluteFill className="overflow-hidden" style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
-      {/* Ambient particles */}
-      <svg
-        style={{
+    <AbsoluteFill style={{ backgroundColor: colors.bg, fontFamily: fontTokens.body.family }}>
+      {/* Gradient background */}
+      {colors.bgGradient && (
+        <div style={{
           position: 'absolute',
-          width: '100%',
-          height: '100%',
-          zIndex: 0,
-          opacity: 0.3
-        }}
-        viewBox="0 0 1920 1080"
-      >
+          inset: 0,
+          background: `radial-gradient(circle at 50% 40%, ${colors.bg}DD 0%, ${colors.bg} 100%)`,
+          zIndex: 0
+        }} />
+      )}
+      
+      {/* Noise texture */}
+      {effects.noiseTexture?.enabled && (
+        <NoiseTexture opacity={effects.noiseTexture.opacity} />
+      )}
+      
+      {/* Particle Background */}
+      <svg style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
         {particleElements.map(p => p.element)}
       </svg>
-      {/* Title - Fixed at top in safe zone */}
-      {frame >= titleStartFrame && (
-        <div className="absolute left-0 right-0 text-center px-safe-x z-[100]" style={{
-          top: 70,
+      
+      {/* Title */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: config.title.offset.y,
+          transform: `translate(-50%, ${(1 - titleProgress) * 30}px)`,
           fontSize: fonts.size_title,
-          fontWeight: 900,
+          fontWeight: fonts.weight_title,
           fontFamily: fontTokens.title.family,
-          color: colors.accent,
-          opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.translateY}px) scale(${titleAnim.scale})`
+          color: colors.text,
+          opacity: titleProgress * exitOpacity,
+          textAlign: 'center',
+          letterSpacing: '0.02em',
+          zIndex: 10
+        }}
+      >
+        {config.title.text}
+      </div>
+      
+      {/* Circular Progress Tracker */}
+      {progressTracker.enabled && progressTracker.type === 'circular' && (
+        <div style={{
+          position: 'absolute',
+          top: progressTracker.position === 'top-right' ? 60 : 'auto',
+          bottom: progressTracker.position === 'bottom-center' ? 60 : 'auto',
+          right: progressTracker.position === 'top-right' ? 80 : 'auto',
+          left: progressTracker.position === 'bottom-center' ? '50%' : 'auto',
+          transform: progressTracker.position === 'bottom-center' ? 'translateX(-50%)' : 'none',
+          width: 120,
+          height: 120,
+          zIndex: 10,
+          opacity: titleProgress * exitOpacity
         }}>
-          {config.title.text}
+          <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
+            {/* Background circle */}
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke={`${colors.textSecondary}30`}
+              strokeWidth="8"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke={colors.completed}
+              strokeWidth="8"
+              strokeDasharray={2 * Math.PI * 54}
+              strokeDashoffset={2 * Math.PI * 54 * (1 - (completedCount / totalSteps))}
+              strokeLinecap="round"
+              style={{
+                filter: `drop-shadow(0 0 10px ${colors.completed}80)`,
+                transition: 'stroke-dashoffset 0.6s ease'
+              }}
+            />
+          </svg>
+          {/* Center text */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: 32,
+            fontWeight: 700,
+            fontFamily: fontTokens.accent.family,
+            color: colors.text,
+            textAlign: 'center'
+          }}>
+            {progressTracker.showPercentage 
+              ? `${Math.round((completedCount / totalSteps) * 100)}%`
+              : `${completedCount}/${totalSteps}`
+            }
+          </div>
         </div>
       )}
       
-      {/* Steps */}
-      {steps.map((step, index) => {
-        const stepStartTime = beats.firstStep + (index * beats.stepInterval);
-        const stepStartFrame = toFrames(stepStartTime, fps);
-        const stepEndFrame = stepStartFrame + toFrames(beats.emphasize, fps);
+      {/* Lottie Arrows between steps */}
+      {arrows.enabled && arrows.type === 'lottie' && (
+        <div style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}>
+          {steps.slice(0, -1).map((step, i) => {
+            const nextPos = stepPositions[i + 1];
+            const currPos = stepPositions[i];
+            
+            const stepBeat = f_firstStep + toFrames(beats.stepInterval * i, fps);
+            const arrowBeat = stepBeat + toFrames(beats.arrowDelay, fps);
+            
+            if (frame < arrowBeat) return null;
+            
+            const arrowEntrance = getCardEntrance(frame, {
+              startFrame: beats.firstStep + i * beats.stepInterval + beats.arrowDelay,
+              duration: 0.5,
+              direction: 'right',
+              distance: 30,
+              withGlow: false
+            }, fps);
+            
+            if (arrowEntrance.opacity === 0) return null;
+            
+            // Calculate arrow position between steps
+            const midX = (currPos.x + nextPos.x) / 2;
+            const midY = (currPos.y + nextPos.y) / 2;
+            
+            // Calculate angle
+            const dx = nextPos.x - currPos.x;
+            const dy = nextPos.y - currPos.y;
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            
+            return (
+              <div
+                key={`arrow-${i}`}
+                style={{
+                  position: 'absolute',
+                  left: midX,
+                  top: midY,
+                  transform: `translate(-50%, -50%) rotate(${angle}deg) scale(${arrowEntrance.scale})`,
+                  opacity: arrowEntrance.opacity * exitOpacity,
+                  width: arrows.size,
+                  height: arrows.size
+                }}
+              >
+                <AnimatedLottie
+                  animationData={getLottiePreset(arrows.lottiePreset || 'arrowFlow')?.data}
+                  loop={arrows.animated}
+                  autoplay
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+      
+      {/* Step Cards - Circular Design (NO BOXES!) */}
+      {steps.map((step, i) => {
+        const pos = stepPositions[i];
         
-        if (frame < stepStartFrame) return null;
+        const stepEntrance = getCardEntrance(frame, {
+          startFrame: beats.firstStep + i * beats.stepInterval,
+          duration: 0.7,
+          direction: 'up',
+          distance: 60,
+          withGlow: effects.glow.enabled,
+          glowColor: `${step.color}40`
+        }, fps);
         
-        const stepProgress = Math.min((frame - stepStartFrame) / toFrames(0.6, fps), 1);
-        const pos = stepPositions[index];
+        if (stepEntrance.opacity === 0) return null;
         
-        // Step entrance animation based on configured style
-        let stepAnim = { opacity: 1, translateX: 0, translateY: 0, scale: 1 };
-        switch (config.animation.stepEntrance) {
-          case 'fade-up':
-            stepAnim = fadeUpIn(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              dist: 40,
-              ease: 'smooth'
-            }, EZ, fps);
-            break;
-          case 'slide-left':
-            stepAnim = slideInLeft(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              dist: 100,
-              ease: 'power3Out'
-            }, EZ, fps);
-            break;
-          case 'pop':
-            stepAnim = popInSpring(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              ease: 'backOut'
-            }, EZ, fps);
-            break;
-          default:
-            stepAnim = fadeUpIn(frame, {
-              start: stepStartTime,
-              dur: 0.6,
-              dist: 40,
-              ease: 'smooth'
-            }, EZ, fps);
-        }
+        // Icon pop
+        const iconPop = step.icon ? getIconPop(frame, {
+          startFrame: beats.firstStep + i * beats.stepInterval + 0.3,
+          duration: 0.5,
+          withBounce: true
+        }, fps) : null;
         
-        // Pulse emphasis
-        let pulseScale = 1;
-        if (config.animation.pulseOnEntry && frame >= stepStartFrame && frame <= stepEndFrame) {
-          pulseScale = pulseEmphasis(frame, {
-            start: stepStartTime + 0.6,
-            dur: 0.4,
-            ease: 'smooth'
-          }, EZ, fps).scale;
-        }
+        // Check emphasis
+        const isEmphasized = isStepEmphasized(step, frame, fps);
+        const emphasisScale = isEmphasized ? emphasis.scaleAmount : 1.0;
+        const emphasisGlow = isEmphasized ? {
+          boxShadow: `0 0 ${emphasis.glowIntensity}px ${step.color}, 0 0 ${emphasis.glowIntensity * 1.5}px ${step.color}80`
+        } : {};
         
-        // Connection to previous step
-        const showConnection = index > 0 && frame >= stepStartFrame;
-        const connectionProgress = Math.min((frame - stepStartFrame) / toFrames(0.5, fps), 1);
+        const isCompleted = step.completed;
         
         return (
-          <React.Fragment key={index}>
-            {/* Connection line */}
-            {showConnection && config.animation.connectionDraw && renderConnection(
-              stepPositions[index - 1],
-              pos,
-              connectionProgress,
-              config.connectionStyle || DEFAULT_CONFIG.connectionStyle,
-              colors.connectionColor,
-              config.layout
-            )}
-            
-            {/* Step container - Centered with flexbox */}
-            <div style={{
+          <div
+            key={`step-${i}`}
+            style={{
               position: 'absolute',
               left: pos.x,
               top: pos.y,
-              transform: `translate(-50%, -50%) translateX(${stepAnim.translateX}px) scale(${stepAnim.scale * pulseScale})`,
-              opacity: stepAnim.opacity,
-              zIndex: 10 + index,
+              transform: `translate(-50%, -50%) scale(${stepEntrance.scale * emphasisScale})`,
+              opacity: stepEntrance.opacity * exitOpacity,
+              zIndex: isEmphasized ? 10 : 3,
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {/* Circular card design */}
+            <div style={{
+              width: layout.cardSize,
+              height: layout.cardSize,
+              minWidth: layout.cardSize,  // Enforce uniform size
+              minHeight: layout.cardSize,  // Enforce uniform size
+              borderRadius: '50%',
+              background: isCompleted 
+                ? `linear-gradient(135deg, ${colors.completed}DD 0%, ${colors.completed}99 100%)`
+                : `linear-gradient(135deg, ${step.color}DD 0%, ${step.color}99 100%)`,
+              border: `4px solid ${colors.text}${isEmphasized ? 'FF' : '20'}`,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: 20
+              justifyContent: 'center',
+              padding: 28,  // Increased padding
+              boxSizing: 'border-box',  // Include padding in size calculation
+              position: 'relative',
+              overflow: 'hidden',
+              ...emphasisGlow,
+              backdropFilter: 'blur(12px)'
             }}>
-              {/* Step number badge */}
-              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{
-                width: 70,
-                height: 70,
-                backgroundColor: colors.accent,
-                fontSize: fonts.size_stepNumber - 6,
-                fontWeight: 900,
-                fontFamily: fontTokens.title.family,
-                color: '#FFFFFF',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+              {/* Shine effect on completed */}
+              {effects.shine?.enabled && effects.shine?.onCompleted && isCompleted && (
+                <ShineEffect duration={2.0} delay={i * 0.3} />
+              )}
+              
+              {/* Step number or checkmark */}
+              <div style={{
+                fontSize: Math.min(fonts.size_step_number, 56),  // Max 56px
+                fontWeight: fonts.weight_step,
+                fontFamily: fontTokens.accent.family,
+                color: colors.text,
+                marginBottom: 8,
+                position: 'relative',
+                zIndex: 2,
+                flexShrink: 0
               }}>
-                {index + 1}
+                {isCompleted && checkmarks.enabled ? (
+                  checkmarks.style === 'lottie' ? (
+                    <div style={{ width: 70, height: 70 }}>
+                      <AnimatedLottie
+                        animationData={getLottiePreset(checkmarks.lottiePreset)?.data}
+                        loop={false}
+                        autoplay
+                      />
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: 50 }}>✓</span>
+                  )
+                ) : (
+                  <span>{step.number}</span>
+                )}
               </div>
               
-              {/* Step content box */}
-              <div style={{
-                backgroundColor: colors.stepBg,
-                padding: '16px 24px',
-                borderRadius: 12,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
-                border: `3px solid ${colors.accent2}`,
-                minWidth: 300,
-                maxWidth: 420,
-                width: 380
-              }}>
-                {/* Step title */}
-                <div className="mb-2 leading-tight" style={{
-                  fontSize: Math.min(fonts.size_stepTitle, 28),
-                  fontWeight: 800,
-                  fontFamily: fontTokens.title.family,
-                  color: colors.ink
+              {/* Icon */}
+              {step.icon && iconPop && !isCompleted && (
+                <div style={{
+                  fontSize: 36,  // Slightly smaller icon
+                  marginBottom: 6,
+                  opacity: iconPop.opacity,
+                  transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`,
+                  zIndex: 2,
+                  flexShrink: 0
                 }}>
-                  {step.title}
+                  {step.icon}
                 </div>
-                
-                {/* Step description */}
-                {step.description && (
-                  <div style={{
-                    fontSize: Math.min(fonts.size_stepDesc, 18),
-                    fontWeight: 400,
-                    fontFamily: 'Inter, sans-serif',
-                    color: colors.ink,
-                    lineHeight: 1.4,
-                    opacity: 0.85
-                  }}>
-                    {step.description}
-                  </div>
-                )}
-                
-                {/* Step icon (if provided) */}
-                {step.icon && (
-                  <div style={{
-                    marginTop: 12,
-                    display: 'flex',
-                    justifyContent: 'center'
-                  }}>
-                    {renderHero(
-                      mergeHeroConfig({
-                        ...step.icon,
-                        size: 60
-                      }),
-                      frame,
-                      beats,
-                      colors,
-                      EZ,
-                      fps
-                    )}
-                  </div>
-                )}
+              )}
+              
+              {/* Title */}
+              <div
+                style={{
+                  fontSize: Math.min(fonts.size_step_title, 26),  // Max 26px
+                  fontWeight: fonts.weight_step,
+                  fontFamily: fontTokens.accent.family,
+                  color: colors.text,
+                  textAlign: 'center',
+                  marginBottom: 6,
+                  lineHeight: 1.1,
+                  zIndex: 2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
+                }}
+              >
+                {step.title}
+              </div>
+              
+              {/* Description */}
+              <div
+                style={{
+                  fontSize: Math.min(fonts.size_step_desc, 15),  // Max 15px
+                  fontFamily: fontTokens.body.family,
+                  color: colors.text,
+                  textAlign: 'center',
+                  opacity: 0.9,
+                  lineHeight: 1.3,
+                  zIndex: 2,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,  // Limit to 2 lines
+                  WebkitBoxOrient: 'vertical',
+                  maxWidth: '100%'
+                }}
+              >
+                {step.description}
               </div>
             </div>
-          </React.Fragment>
+          </div>
         );
       })}
     </AbsoluteFill>
   );
 };
 
-// Required exports
-export const TEMPLATE_ID = 'Guide10StepSequence';
-export const TEMPLATE_VERSION = '6.0.0';
-
-// Attach version to component for TemplateRouter detection
-Guide10StepSequence.TEMPLATE_VERSION = '6.0.0';
-Guide10StepSequence.TEMPLATE_ID = 'Guide10StepSequence';
-export const LEARNING_INTENTIONS = {
-  primary: ['guide'],
-  secondary: ['breakdown', 'connect'],
-  tags: ['process', 'tutorial', 'instructions', 'sequential']
-};
-
+// Duration calculation
 export const getDuration = (scene, fps) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const steps = config.steps || DEFAULT_CONFIG.steps;
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const steps = config.steps || DEFAULT_CONFIG.steps;
   
-  const totalDuration = beats.firstStep + (steps.length * beats.stepInterval) + beats.exit;
+  const stepsDuration = beats.firstStep + (beats.stepInterval * steps.length) + 2.0;
+  const totalDuration = Math.max(beats.exit, stepsDuration) + 1.0;
+  
   return toFrames(totalDuration, fps);
 };
 
-export const CAPABILITIES = {
-  usesSVG: false,
-  usesRoughJS: false,
-  usesLottie: false,
-  requiresAudio: false,
-  dynamicSteps: true,
-  maxSteps: 8,
-  minSteps: 2,
-  layoutOptions: ['vertical', 'horizontal', 'grid']
-};
+// Metadata
+export const TEMPLATE_VERSION = '6.0';
+export const TEMPLATE_ID = 'Guide10StepSequence';
+export const PRIMARY_INTENTION = 'GUIDE';
+export const SECONDARY_INTENTIONS = ['BREAKDOWN', 'APPLY'];
 
-// Configuration schema for AdminConfig integration
+// Extended config schema
 export const CONFIG_SCHEMA = {
   title: {
-    type: 'object',
-    fields: {
-      text: { type: 'string', required: true },
-      position: { type: 'position-token', default: 'top-center' },
-      offset: { type: 'offset', default: { x: 0, y: 40 } }
+    text: { type: 'text', label: 'Title' }
+  },
+  steps: {
+    type: 'array',
+    label: 'Process Steps',
+    itemSchema: {
+      number: { type: 'number', label: 'Step Number' },
+      title: { type: 'text', label: 'Step Title' },
+      description: { type: 'text', label: 'Description' },
+      completed: { type: 'checkbox', label: 'Completed' },
+      color: { type: 'color', label: 'Color' },
+      icon: { type: 'text', label: 'Icon (emoji)' },
+      emphasize: {
+        enabled: { type: 'checkbox', label: 'Enable Emphasis' },
+        startTime: { type: 'number', label: 'Emphasis Start (s)', min: 0, max: 20, step: 0.5 },
+        duration: { type: 'number', label: 'Emphasis Duration (s)', min: 0.5, max: 5, step: 0.5 }
+      }
     }
   },
   layout: {
-    type: 'enum',
-    options: ['vertical', 'horizontal', 'grid'],
-    default: 'vertical'
-  },
-  connectionStyle: {
-    type: 'enum',
-    options: ['line', 'arrow', 'dots', 'none'],
-    default: 'arrow'
-  },
-  steps: {
-    type: 'dynamic-array',
-    min: 2,
-    max: 8,
-    itemSchema: {
-      title: { type: 'string', required: true },
-      description: { type: 'string', required: false },
-      icon: { type: 'polymorphic-hero', required: false }
+    mode: { 
+      type: 'select', 
+      label: 'Layout Mode',
+      options: ['horizontal', 'grid', 'flowing'],
+      default: 'horizontal'
+    },
+    spacing: { 
+      type: 'select', 
+      label: 'Spacing',
+      options: ['tight', 'comfortable', 'spacious']
+    },
+    gridColumns: { 
+      type: 'number', 
+      label: 'Grid Columns (for grid mode)', 
+      min: 2, 
+      max: 4 
+    },
+    cardSize: { 
+      type: 'slider', 
+      label: 'Card Size', 
+      min: 180, 
+      max: 280, 
+      step: 20 
     }
   },
-  style_tokens: {
-    type: 'style-tokens',
-    colors: ['bg', 'accent', 'accent2', 'ink', 'stepBg', 'connectionColor'],
-    fonts: ['size_title', 'size_stepTitle', 'size_stepDesc', 'size_stepNumber']
+  arrows: {
+    enabled: { type: 'checkbox', label: 'Show Arrows' },
+    type: { 
+      type: 'select', 
+      label: 'Arrow Type',
+      options: ['lottie', 'svg', 'none']
+    },
+    lottiePreset: { 
+      type: 'select', 
+      label: 'Lottie Animation',
+      options: ['arrowFlow', 'arrowBounce', 'arrowGlow']
+    },
+    animated: { type: 'checkbox', label: 'Animated' },
+    size: { type: 'slider', label: 'Arrow Size', min: 40, max: 100, step: 10 }
   },
-  beats: {
-    type: 'timeline',
-    beats: ['entrance', 'titleEntry', 'firstStep', 'stepInterval', 'emphasize', 'exit']
+  progressTracker: {
+    enabled: { type: 'checkbox', label: 'Show Progress Tracker' },
+    type: { 
+      type: 'select', 
+      label: 'Tracker Type',
+      options: ['circular', 'linear', 'none']
+    },
+    position: { 
+      type: 'select', 
+      label: 'Position',
+      options: ['top-right', 'bottom-center']
+    },
+    showPercentage: { type: 'checkbox', label: 'Show as Percentage' }
   },
-  animation: {
-    type: 'animation-config',
-    options: {
-      stepEntrance: ['fade-up', 'slide-left', 'pop', 'bounce'],
-      connectionDraw: 'boolean',
-      pulseOnEntry: 'boolean'
+  emphasis: {
+    enabled: { type: 'checkbox', label: 'Enable Emphasis System' },
+    activeStyle: { 
+      type: 'select', 
+      options: ['scale-glow', 'pulse', 'spotlight'] 
+    },
+    scaleAmount: { 
+      type: 'slider', 
+      label: 'Scale Amount', 
+      min: 1.0, 
+      max: 1.3, 
+      step: 0.05 
+    },
+    glowIntensity: { 
+      type: 'slider', 
+      label: 'Glow Intensity', 
+      min: 10, 
+      max: 40, 
+      step: 5 
+    }
+  },
+  checkmarks: {
+    enabled: { type: 'checkbox', label: 'Show Checkmarks on Completed' },
+    style: { 
+      type: 'select', 
+      options: ['lottie', 'icon'] 
+    },
+    lottiePreset: { 
+      type: 'select', 
+      options: ['successCheck', 'celebrationCheck']
+    }
+  },
+  effects: {
+    shine: {
+      enabled: { type: 'checkbox', label: 'Shine Effect' },
+      onCompleted: { type: 'checkbox', label: 'Only on Completed Steps' }
+    },
+    noiseTexture: {
+      enabled: { type: 'checkbox', label: 'Film Grain Texture' },
+      opacity: { type: 'slider', min: 0, max: 0.1, step: 0.01 }
     }
   }
 };
