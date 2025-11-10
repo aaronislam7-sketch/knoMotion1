@@ -99,10 +99,10 @@ const DEFAULT_CONFIG = {
   
   // NEW: Visual enhancements configuration
   visual: {
-    cardStyle: 'glassmorphic', // 'glassmorphic', 'solid', 'gradient', 'minimal'
+    cardStyle: 'sketch', // 'sketch' for notebook aesthetic!
     badgeStyle: 'circular', // 'circular', 'rounded-square', 'hexagon'
     showCheckmarks: true,
-    checkmarkStyle: 'lottie', // 'lottie', 'emoji', 'icon'
+    checkmarkStyle: 'emoji', // 'emoji' for hand-drawn feel
     lottiePreset: 'successCheck'
   },
   
@@ -110,23 +110,23 @@ const DEFAULT_CONFIG = {
   effects: {
     particles: {
       enabled: true,
-      count: 30,
-      seed: 7001, // Numeric seed for this template
-      opacity: 0.3
+      count: 15, // Fewer for notebook aesthetic
+      seed: 7001,
+      opacity: 0.15 // Subtle
     },
     spotlight: {
-      enabled: true,
+      enabled: false, // Too dramatic for notebook
       x: 50,
       y: 50,
       size: 900,
       opacity: 0.15
     },
     noiseTexture: {
-      enabled: true,
+      enabled: false, // Clean notebook paper
       opacity: 0.03
     },
     cardGlow: {
-      enabled: true,
+      enabled: false, // Sketch style instead
       intensity: 25
     }
   },
@@ -154,19 +154,19 @@ const DEFAULT_CONFIG = {
   
   style_tokens: {
     colors: {
-      bg: '#0F0F1E', // Dark elegant background
-      bgGradient: true,
-      title: '#FFFFFF',
-      subtitle: '#A0AEC0',
-      cardBg: 'rgba(255, 255, 255, 0.08)',
-      cardBorder: 'rgba(255, 255, 255, 0.15)',
-      accent: '#10B981', // Success green
-      accent2: '#3B82F6', // Blue
-      accent3: '#8B5CF6', // Purple
-      text: '#FFFFFF',
-      textSecondary: '#CBD5E0',
-      iconBg: '#10B981',
-      particleColor: 'rgba(16, 185, 129, 0.4)'
+      bg: '#FFF9F0', // Notebook paper - warm cream (Knode brand!)
+      bgGradient: false, // Keep it simple and clean
+      title: '#1A1A1A', // Ink color
+      subtitle: '#5A5A5A', // Gray ink
+      cardBg: '#FFFFFF', // White paper cards
+      cardBorder: 'rgba(26, 26, 26, 0.15)', // Subtle ink border
+      accent: '#FF6B35', // Knode brand orange!
+      accent2: '#9B59B6', // Knode brand purple!
+      accent3: '#2ECC71', // Success green
+      text: '#1A1A1A', // Ink color
+      textSecondary: '#5A5A5A', // Gray ink
+      iconBg: '#FF6B35',
+      particleColor: 'rgba(255, 107, 53, 0.3)' // Orange particles
     },
     fonts: {
       size_title: 64, // Larger title
@@ -181,12 +181,12 @@ const DEFAULT_CONFIG = {
   
   beats: {
     entrance: 0.5,
-    title: 1.0,
-    subtitle: 1.5,
-    firstTakeaway: 2.5,
-    takeawayInterval: 2.5, // Longer for VO pacing
-    hold: 14.0,
-    exit: 16.0
+    title: 0.8, // Quicker title
+    subtitle: 1.3,
+    firstTakeaway: 1.8, // Start cards sooner!
+    takeawayInterval: 1.5, // Faster pacing
+    hold: 10.0,
+    exit: 12.0
   },
   
   animation: {
@@ -312,13 +312,13 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         fontFamily: fontTokens.body.family 
       }}
     >
-      {/* Background gradient overlay */}
+      {/* Notebook paper texture - subtle */}
       {colors.bgGradient && (
         <div
           className="absolute inset-0 z-0"
           style={{
-            background: `radial-gradient(circle at 30% 20%, ${colors.accent}15 0%, transparent 50%),
-                         radial-gradient(circle at 70% 80%, ${colors.accent2}12 0%, transparent 50%)`
+            background: `radial-gradient(circle at 50% 50%, ${colors.bg} 0%, #FFF5E6 100%)`,
+            opacity: 0.5
           }}
         />
       )}
@@ -456,17 +456,19 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
                 zIndex: isEmphasized ? 50 : 30
               }}
             >
-              {/* Glassmorphic card with Tailwind */}
-              <GlassmorphicPane
-                innerRadius={16}
-                glowOpacity={0.15}
-                borderOpacity={0.2}
-                padding={layout.padding}
-                backgroundColor={colors.cardBg}
+              {/* Sketch-style card (notebook aesthetic!) */}
+              <div
+                className="card-sketch"
                 style={{
-                  borderRadius: '1.5rem',
+                  padding: layout.padding,
+                  backgroundColor: colors.cardBg,
+                  borderRadius: '1.2rem',
                   border: `2px solid ${colors.cardBorder}`,
-                  ...emphasisGlow
+                  boxShadow: isEmphasized 
+                    ? `0 0 ${emphasis.glowIntensity}px ${getAccentColor(i)}80, 6px 6px 0 rgba(0, 0, 0, 0.12)`
+                    : '6px 6px 0 rgba(0, 0, 0, 0.12), 1px 1px 0 rgba(0, 0, 0, 0.06)', // Sketch shadow!
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
                 <div className="flex items-center gap-6">
@@ -532,7 +534,7 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
                     {takeaway.text}
                   </div>
                 </div>
-              </GlassmorphicPane>
+              </div>
               
               {/* Particle burst positioned at card center */}
               {burstParticles.length > 0 && (
