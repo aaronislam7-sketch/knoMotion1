@@ -28,6 +28,9 @@ import testConceptBreakdownRevised from './scenes/explain_2a_concept_breakdown_r
 import testStepSequenceRevised from './scenes/guide_10_step_sequence_revised.json';
 import testStepSequenceGrid from './scenes/guide_10_step_sequence_grid_layout.json';
 
+// Import BROADCAST QUALITY scenes
+import reflect4ABroadcastExample from './scenes/reflect_4a_key_takeaways_broadcast_example.json';
+
 // Template mapping - all v5 templates route through TemplateRouter
 const templateMap = {
   // v5 template keys
@@ -53,6 +56,9 @@ const templateMap = {
   // TEST templates (Revised)
   'TEST_Explain2AConceptBreakdown_V6': TemplateRouter,
   'TEST_Guide10StepSequence_V6': TemplateRouter,
+  
+  // V6 templates (Direct IDs)
+  'Reflect4AKeyTakeaways_V6': TemplateRouter,
   
   // Legacy fallbacks (for old scenes)
   'hook': TemplateRouter,
@@ -82,6 +88,10 @@ const sampleScenes = {
   'TEST_Explain2AConceptBreakdown_V6': testConceptBreakdownRevised,
   'TEST_Guide10StepSequence_V6': testStepSequenceRevised,
   'TEST_Guide10StepSequence_V6_Grid': testStepSequenceGrid,
+  
+  // BROADCAST QUALITY scenes
+  'reflect_4a_broadcast': reflect4ABroadcastExample,
+  'Reflect4AKeyTakeaways_V6': reflect4ABroadcastExample,
 };
 
 // Scene validation function
