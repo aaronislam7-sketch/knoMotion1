@@ -23,6 +23,11 @@ import apply3BV5Scene from './scenes/apply_3b_scenario_v5.json';
 import reflect4AV5Scene from './scenes/reflect_4a_takeaways_v5.json';
 import reflect4DV5Scene from './scenes/reflect_4d_forward_v5.json';
 
+// Import TEST scenes (Revised templates)
+import testConceptBreakdownRevised from './scenes/explain_2a_concept_breakdown_revised.json';
+import testStepSequenceRevised from './scenes/guide_10_step_sequence_revised.json';
+import testStepSequenceGrid from './scenes/guide_10_step_sequence_grid_layout.json';
+
 // Template mapping - all v5 templates route through TemplateRouter
 const templateMap = {
   // v5 template keys
@@ -44,6 +49,10 @@ const templateMap = {
   'Apply3BScenarioChoice': TemplateRouter,
   'Reflect4AKeyTakeaways': TemplateRouter,
   'Reflect4DForwardLink': TemplateRouter,
+  
+  // TEST templates (Revised)
+  'TEST_Explain2AConceptBreakdown_V6': TemplateRouter,
+  'TEST_Guide10StepSequence_V6': TemplateRouter,
   
   // Legacy fallbacks (for old scenes)
   'hook': TemplateRouter,
@@ -68,6 +77,11 @@ const sampleScenes = {
   'explain_example': explainGrowthMindsetScene,
   'apply_example': applyGrowthMindsetScene,
   'reflect_example': reflectGrowthMindsetScene,
+  
+  // TEST scenes (Revised templates)
+  'TEST_Explain2AConceptBreakdown_V6': testConceptBreakdownRevised,
+  'TEST_Guide10StepSequence_V6': testStepSequenceRevised,
+  'TEST_Guide10StepSequence_V6_Grid': testStepSequenceGrid,
 };
 
 // Scene validation function
