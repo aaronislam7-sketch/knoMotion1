@@ -1,0 +1,164 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "reflect_4a_broadcast_quality",
+  "template_id": "Reflect4AKeyTakeaways",
+  "learning_intentions": {
+    "primary": ["BREAKDOWN"],
+    "secondary": ["GUIDE", "REVEAL"],
+    "tags": ["summary", "reflection", "key-points", "broadcast-quality"]
+  },
+  
+  "title": {
+    "text": "Key Takeaways",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 80 }
+  },
+  
+  "subtitle": {
+    "text": "Remember these essential insights",
+    "enabled": true
+  },
+  
+  "takeaways": [
+    {
+      "text": "Understanding fundamentals creates a strong foundation for advanced learning",
+      "icon": "💡",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 4.0,
+        "duration": 2.5
+      }
+    },
+    {
+      "text": "Consistent practice transforms knowledge into lasting skills and expertise",
+      "icon": "🎯",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 7.0,
+        "duration": 2.5
+      }
+    },
+    {
+      "text": "Real-world application accelerates mastery and reveals deeper insights",
+      "icon": "🚀",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 10.0,
+        "duration": 2.5
+      }
+    },
+    {
+      "text": "Continuous reflection strengthens retention and builds wisdom",
+      "icon": "🧠",
+      "emphasize": {
+        "enabled": true,
+        "startTime": 13.0,
+        "duration": 2.5
+      }
+    }
+  ],
+  
+  "visual": {
+    "cardStyle": "glassmorphic",
+    "badgeStyle": "circular",
+    "showCheckmarks": true,
+    "checkmarkStyle": "lottie",
+    "lottiePreset": "successCheck"
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 35,
+      "seed": 7001,
+      "opacity": 0.3
+    },
+    "spotlight": {
+      "enabled": true,
+      "x": 50,
+      "y": 50,
+      "size": 950,
+      "opacity": 0.18
+    },
+    "noiseTexture": {
+      "enabled": true,
+      "opacity": 0.03
+    },
+    "cardGlow": {
+      "enabled": true,
+      "intensity": 28
+    }
+  },
+  
+  "emphasis": {
+    "enabled": true,
+    "style": "scale-glow",
+    "scaleAmount": 1.1,
+    "glowIntensity": 35
+  },
+  
+  "layout": {
+    "cardWidth": 1150,
+    "cardGap": 36,
+    "iconSize": 85,
+    "padding": 34
+  },
+  
+  "typography": {
+    "voice": "utility",
+    "align": "left",
+    "transform": "none"
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0A0A14",
+      "bgGradient": true,
+      "title": "#FFFFFF",
+      "subtitle": "#A0AEC0",
+      "cardBg": "rgba(255, 255, 255, 0.09)",
+      "cardBorder": "rgba(255, 255, 255, 0.18)",
+      "accent": "#10B981",
+      "accent2": "#3B82F6",
+      "accent3": "#8B5CF6",
+      "text": "#FFFFFF",
+      "textSecondary": "#E2E8F0",
+      "iconBg": "#10B981",
+      "particleColor": "rgba(16, 185, 129, 0.4)"
+    },
+    "fonts": {
+      "size_title": 68,
+      "size_subtitle": 30,
+      "size_takeaway": 38,
+      "weight_title": 900,
+      "weight_subtitle": 500,
+      "weight_takeaway": 600,
+      "line_height_takeaway": 1.45
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "subtitle": 1.6,
+    "firstTakeaway": 2.8,
+    "takeawayInterval": 2.8,
+    "hold": 16.0,
+    "exit": 18.0
+  },
+  
+  "animation": {
+    "cardEntrance": "spring-bounce",
+    "iconPop": "bounce",
+    "particleBurst": true,
+    "easing": "power3Out"
+  },
+  
+  "transition": {
+    "exit": {
+      "style": "fade",
+      "durationInFrames": 28,
+      "easing": "smooth"
+    }
+  }
+}
