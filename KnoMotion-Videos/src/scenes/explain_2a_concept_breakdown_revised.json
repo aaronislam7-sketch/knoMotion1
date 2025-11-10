@@ -1,5 +1,6 @@
 {
-  "id": "explain_2a_concept_breakdown_revised",
+  "template_id": "TEST_Explain2AConceptBreakdown_V6",
+  "scene_id": "explain_2a_concept_breakdown_revised",
   "title": {
     "text": "The Learning Cycle",
     "position": "top-center",

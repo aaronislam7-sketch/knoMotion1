@@ -1,5 +1,6 @@
 {
-  "id": "guide_10_step_sequence_revised",
+  "template_id": "TEST_Guide10StepSequence_V6",
+  "scene_id": "guide_10_step_sequence_revised",
   "title": {
     "text": "Content Creation Workflow",
     "position": "top-center",

@@ -304,6 +304,32 @@ const TEMPLATE_CATALOG = [
     version: 'v6.0',
     isNew: true,
     hasConfig: true
+  },
+  
+  // REVISED TEMPLATES (Testing Broadcast Quality)
+  {
+    id: 'TEST_Explain2AConceptBreakdown_V6',
+    name: '🧪 TEST: Concept Breakdown (Revised)',
+    intentions: { primary: 'BREAKDOWN', secondary: ['CONNECT', 'GUIDE'] },
+    description: '🎬 BROADCAST QUALITY - Full screen usage, emphasis system for VO, circular badges, sophisticated visuals',
+    duration: '14-18s',
+    icon: '🧩',
+    color: '#FF0099',
+    version: 'v6.0-REVISED',
+    isNew: true,
+    hasConfig: true
+  },
+  {
+    id: 'TEST_Guide10StepSequence_V6',
+    name: '🧪 TEST: Step Sequence (Revised)',
+    intentions: { primary: 'GUIDE', secondary: ['BREAKDOWN', 'CONNECT'] },
+    description: '🎬 BROADCAST QUALITY - Horizontal/grid layouts, Lottie arrows, circular cards, progress tracker',
+    duration: '14-16s',
+    icon: '🗺️',
+    color: '#FF0099',
+    version: 'v6.0-REVISED',
+    isNew: true,
+    hasConfig: true
   }
 ];
 
