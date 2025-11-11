@@ -75,7 +75,7 @@ const DEFAULT_CONFIG = {
   
   // NEW: Arrow configuration
   arrows: {
-    enabled: true,
+    enabled: false,  // DISABLED - Lottie preset doesn't exist
     type: 'lottie',  // 'lottie', 'svg', 'none'
     lottiePreset: 'arrowFlow',  // From lottiePresets.js
     color: '#3B82F6',
@@ -102,7 +102,7 @@ const DEFAULT_CONFIG = {
   
   checkmarks: {
     enabled: true,
-    style: 'lottie',  // 'lottie', 'icon', 'none'
+    style: 'icon',  // CHANGED from 'lottie' to 'icon' - Lottie preset doesn't exist
     lottiePreset: 'successCheck',
     color: '#10B981'
   },
@@ -255,7 +255,11 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
     loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
   
-  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE) || {
+    title: { family: 'Figtree, sans-serif' },
+    body: { family: 'Inter, sans-serif' },
+    accent: { family: 'Caveat, cursive' }
+  };
   
   // Merge config
   const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
