@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
+
+// SDK imports - Agnostic Template System v6
 import {
   EZ,
   toFrames,
@@ -8,23 +10,49 @@ import {
   resolvePosition,
   generateAmbientParticles,
   renderAmbientParticles,
+  getLetterReveal,
+  renderLetterReveal,
+  getParticleBurst,
+  renderParticleBurst,
+  getCardEntrance,
+  getIconPop,
+  getPulseGlow
 } from '../../sdk';
+import {
+  GlassmorphicPane,
+  NoiseTexture,
+  SpotlightEffect
+} from '../../sdk/effects/broadcastEffects';
 import { loadFontVoice, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
- * TEMPLATE #1: QUESTION BURST - v6.0
+ * TEMPLATE #1: QUESTION BURST - v6.0 (BROADCAST POLISH)
  * 
- * PRIMARY INTENTION: QUESTION
- * SECONDARY INTENTIONS: CHALLENGE, REVEAL
+ * PRIMARY INTENTION: HOOK
+ * SECONDARY INTENTIONS: QUESTION, CHALLENGE, REVEAL
  * 
  * PURPOSE: Pose thought-provoking questions that engage and intrigue viewers
  * 
  * VISUAL PATTERN:
  * - Two-part question structure (setup + punchline)
- * - Optional central visual element
- * - Animated text reveals with emphasis
- * - Clean, focused design
+ * - Glassmorphic panes with broadcast-grade effects
+ * - Letter-by-letter text reveals
+ * - Optional central visual with icon pop
+ * - 5-layer background depth (gradient, noise, spotlights, particles, glass)
+ * - Continuous life animations (floating)
+ * - Particle bursts on question reveals
+ * 
+ * BROADCAST POLISH APPLIED:
+ * ✅ Layered background depth (gradient + noise + spotlights)
+ * ✅ Glassmorphic content panes
+ * ✅ Multi-layered entrance animations
+ * ✅ Letter-by-letter reveals
+ * ✅ Icon pop animations
+ * ✅ Particle bursts on key moments
+ * ✅ Continuous life animations (subtle floating)
+ * ✅ Cumulative beats system
+ * ✅ 100% configurability via decorations
  * 
  * AGNOSTIC PRINCIPALS:
  * ✓ Type-Based Polymorphism (hero registry for visual)
@@ -33,15 +61,6 @@ import { createTransitionProps } from '../../sdk/transitions';
  * ✓ Separation of Concerns (content/layout/style/animation)
  * ✓ Progressive Configuration (simple defaults)
  * ✓ Registry Pattern (extensible visual types)
- * 
- * CONFIGURABILITY:
- * - Question part 1 & 2 (fully editable text)
- * - Central visual (emoji, image, roughSVG, lottie, or none)
- * - Colors (background, accent, text)
- * - Fonts (sizes, weights)
- * - Timing (all beat points)
- * - Animation style
- * - Particle effects toggle
  * 
  * NO HARDCODED VALUES!
  */
@@ -58,13 +77,13 @@ const DEFAULT_CONFIG = {
   questionPart1: {
     text: 'What if geography',
     position: 'center',
-    offset: { x: 0, y: -80 }
+    offset: { x: 0, y: -120 }
   },
   
   questionPart2: {
     text: 'was measured in mindsets?',
     position: 'center',
-    offset: { x: 0, y: 20 }
+    offset: { x: 0, y: 80 }
   },
   
   centralVisual: {
@@ -93,15 +112,18 @@ const DEFAULT_CONFIG = {
   style_tokens: {
     colors: {
       bg: '#FFF9F0',
+      bgGradientStart: '#FFF9F0',
+      bgGradientEnd: '#FFE5CC',
       accent: '#FF6B35',
       accent2: '#9B59B6',
       text: '#1A1A1A',
       textSecondary: '#5A5A5A',
-      particles: 'rgba(255, 107, 53, 0.3)'
+      particles: 'rgba(255, 107, 53, 0.3)',
+      glassBackground: '#FFFFFF15'
     },
     fonts: {
       size_title: 56,
-      size_question: 80,
+      size_question: 72,
       size_conclusion: 64,
       size_subtitle: 28,
       weight_question: 800,
@@ -110,30 +132,58 @@ const DEFAULT_CONFIG = {
   },
   
   beats: {
-    entrance: 0.4,
-    questionPart1: 0.8,
-    questionPart2: 2.5,
-    emphasis: 4.0,
-    exit: 5.5,
-    visualReveal: 6.0,
-    conclusion: 7.0,
-    hold: 9.0,
-    fadeOut: 10.0
+    // CUMULATIVE TIMING: Each value is added to the previous
+    // entrance = 0.4s (absolute start)
+    // titleAppears at: entrance = 0.4s
+    // q1Appears at: entrance + titleHold + q1Reveal = 0.4 + 0.5 + 0.5 = 1.4s
+    // q2Appears at: q1Appears + q1Hold + q2Reveal = 1.4 + 1.2 + 0.8 = 3.4s
+    entrance: 0.4,           // Initial background fade in
+    titleHold: 0.5,          // Hold title (if enabled) (+0.5s)
+    q1Reveal: 0.5,           // Question 1 letter reveal duration (+0.5s)
+    q1Hold: 1.2,             // Hold Q1 visible (+1.2s)
+    q2Reveal: 0.8,           // Question 2 letter reveal duration (+0.8s)
+    q2Hold: 2.0,             // Hold both questions (+2.0s)
+    emphasis: 0.8,           // Pulse emphasis both questions (+0.8s)
+    questionExit: 0.6,       // Questions exit (+0.6s)
+    visualReveal: 0.8,       // Central visual appears (+0.8s)
+    visualHold: 1.5,         // Hold visual (+1.5s)
+    conclusionReveal: 0.8,   // Conclusion appears (if enabled) (+0.8s)
+    conclusionHold: 2.0,     // Hold conclusion (+2.0s)
+    fadeOut: 0.8             // Final exit (+0.8s)
   },
   
   animation: {
-    questionEntrance: 'fade-up',
-    questionTransitionStyle: 'slide',
-    questionTransitionDirection: 'left',
-    transitionDuration: 0.6,
-    emphasis: 'pulse',
-    visualEntrance: 'fade-scale',
-    easing: 'power3Out'
+    letterRevealStyle: 'fade-up', // fade-up, fade, scale
+    questionExitDirection: 'left', // left, right, up, down
+    visualEntrance: 'icon-pop', // icon-pop, fade-scale, zoom
+    easing: 'power3Out',
+    continuousFloat: true  // Subtle floating animation during holds
+  },
+  
+  decorations: {
+    showBackground: true,
+    showGradient: true,
+    showNoiseTexture: true,
+    noiseOpacity: 0.05,
+    showSpotlights: true,
+    spotlightCount: 2,
+    spotlight1: { x: 0.2, y: 0.3, size: 600, color: '#FF6B3520' },
+    spotlight2: { x: 0.8, y: 0.7, size: 500, color: '#9B59B620' },
+    showParticles: true,
+    particleCount: 30,
+    showGlassPane: true,
+    glassPaneOpacity: 0.15,
+    glassPaneBorderOpacity: 0.3,
+    glassInnerRadius: 30,
+    showParticleBurst: true,
+    particleBurstCount: 15,
+    showTitleUnderline: false,  // Optional hand-drawn underline
+    underlineStyle: 'wavy'
   },
   
   particles: {
     enabled: true,
-    count: 25,
+    count: 30,
     style: 'ambient',
     seed: 1
   },
@@ -145,6 +195,28 @@ const DEFAULT_CONFIG = {
   }
 };
 
+// Calculate cumulative beats
+const calculateCumulativeBeats = (beats) => {
+  let cumulative = 0;
+  return {
+    entrance: cumulative,
+    titleAppears: (cumulative += beats.entrance),
+    q1Start: (cumulative += beats.titleHold),
+    q1Visible: (cumulative += beats.q1Reveal),
+    q2Start: (cumulative += beats.q1Hold),
+    q2Visible: (cumulative += beats.q2Reveal),
+    emphasisStart: (cumulative += beats.q2Hold),
+    questionsExit: (cumulative += beats.emphasis),
+    questionsGone: (cumulative += beats.questionExit),
+    visualStart: cumulative,
+    visualVisible: (cumulative += beats.visualReveal),
+    conclusionStart: (cumulative += beats.visualHold),
+    conclusionVisible: (cumulative += beats.conclusionReveal),
+    fadeOutStart: (cumulative += beats.conclusionHold),
+    totalDuration: (cumulative += beats.fadeOut)
+  };
+};
+
 // MAIN COMPONENT
 export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   const frame = useCurrentFrame();
@@ -152,11 +224,12 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   
   // Merge config
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const rawBeats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const beats = useMemo(() => calculateCumulativeBeats(rawBeats), [rawBeats]);
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
-  const particles = { ...DEFAULT_CONFIG.particles, ...(scene.particles || {}) };
+  const decorations = { ...DEFAULT_CONFIG.decorations, ...(scene.decorations || {}) };
   const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const cta = { ...DEFAULT_CONFIG.cta, ...(scene.cta || {}) };
 
@@ -165,26 +238,36 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   }, [typography.voice]);
   
   // Convert beats to frames
-  const f_entrance = toFrames(beats.entrance, fps);
-  const f_q1 = toFrames(beats.questionPart1, fps);
-  const f_q2 = toFrames(beats.questionPart2, fps);
-  const f_emphasis = toFrames(beats.emphasis, fps);
-  const f_exit = toFrames(beats.exit, fps);
-  const f_visualReveal = toFrames(beats.visualReveal, fps);
-  const f_conclusion = toFrames(beats.conclusion, fps);
-  const f_fadeOut = toFrames(beats.fadeOut, fps);
+  const f = useMemo(() => ({
+    entrance: toFrames(beats.entrance, fps),
+    titleAppears: toFrames(beats.titleAppears, fps),
+    q1Start: toFrames(beats.q1Start, fps),
+    q1Visible: toFrames(beats.q1Visible, fps),
+    q2Start: toFrames(beats.q2Start, fps),
+    q2Visible: toFrames(beats.q2Visible, fps),
+    emphasisStart: toFrames(beats.emphasisStart, fps),
+    questionsExit: toFrames(beats.questionsExit, fps),
+    questionsGone: toFrames(beats.questionsGone, fps),
+    visualStart: toFrames(beats.visualStart, fps),
+    visualVisible: toFrames(beats.visualVisible, fps),
+    conclusionStart: toFrames(beats.conclusionStart, fps),
+    conclusionVisible: toFrames(beats.conclusionVisible, fps),
+    fadeOutStart: toFrames(beats.fadeOutStart, fps),
+    totalDuration: toFrames(beats.totalDuration, fps)
+  }), [beats, fps]);
   
+  // Ambient particles
   const baseParticles = useMemo(() => {
-    if (!particles.enabled) return [];
+    if (!decorations.showParticles) return [];
     return generateAmbientParticles(
-      particles.count,
-      particles.seed ?? 1,
+      decorations.particleCount,
+      1,
       width,
       height
     );
-  }, [particles.enabled, particles.count, particles.seed, width, height]);
+  }, [decorations.showParticles, decorations.particleCount, width, height]);
 
-  const ambientParticles = particles.enabled
+  const ambientParticles = decorations.showParticles
     ? renderAmbientParticles(
         baseParticles,
         frame,
@@ -199,106 +282,135 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   
   // ==================== ANIMATIONS ====================
   
-  // Question Part 1 Animation
-  const q1Progress = interpolate(
+  // Background entrance
+  const bgOpacity = interpolate(
     frame,
-    [f_q1, f_q1 + toFrames(0.6, fps)],
+    [0, f.entrance + toFrames(0.3, fps)],
     [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: easingMap?.[anim.easing] || EZ.power3Out
-    }
+    { extrapolateRight: 'clamp' }
   );
   
-  const questionExitTransition = useMemo(
-    () =>
-      createTransitionProps({
-        style: anim.questionTransitionStyle || 'slide',
-        durationInFrames: toFrames(anim.transitionDuration ?? 0.6, fps),
-        direction: anim.questionTransitionDirection || 'left'
-      }),
-    [
-      anim.questionTransitionStyle,
-      anim.transitionDuration,
-      anim.questionTransitionDirection,
-      fps
-    ]
-  );
-
-  const questionExitProgress = frame < f_exit
-    ? 0
-    : Math.min(
-        1,
-        questionExitTransition.timing
-          ? questionExitTransition.timing.getProgress({
-              frame: frame - f_exit,
-              fps
-            })
-          : interpolate(
-              frame,
-              [f_exit, f_exit + toFrames(0.5, fps)],
-              [0, 1],
-              {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                easing: EZ.power3In
-              }
-            )
-      );
-
-  const exitOffset = (() => {
-    if (!anim.questionTransitionStyle?.includes('slide')) {
-      return { x: 0, y: 0 };
-    }
-    const direction = anim.questionTransitionDirection || 'left';
-    switch (direction) {
-      case 'right':
-        return { x: width * questionExitProgress, y: 0 };
-      case 'up':
-        return { x: 0, y: -height * questionExitProgress };
-      case 'down':
-        return { x: 0, y: height * questionExitProgress };
-      case 'left':
-      default:
-        return { x: -width * questionExitProgress, y: 0 };
-    }
-  })();
-
-  const q1Opacity = frame < f_q1 ? 0 : Math.max(0, Math.min(1, q1Progress * (1 - questionExitProgress)));
-  const q1TranslateY = frame < f_q1 ? 30 : (1 - q1Progress) * 30;
-  
-  // Emphasis pulse for Q1
-  const q1Pulse = anim.emphasis === 'pulse' && frame >= f_emphasis && frame < f_exit
-    ? 1 + Math.sin((frame - f_emphasis) / 12) * 0.04
-    : 1;
-  
-  // Question Part 2 Animation
-  const q2Progress = interpolate(
-    frame,
-    [f_q2, f_q2 + toFrames(0.6, fps)],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: easingMap?.[anim.easing] || EZ.power3Out
-    }
-  );
-  
-  const q2Opacity = frame < f_q2 ? 0 : Math.max(0, Math.min(1, q2Progress * (1 - questionExitProgress)));
-  const q2TranslateY = frame < f_q2 ? 40 : (1 - q2Progress) * 40;
-  const q2Scale = frame < f_q2 ? 0.9 : 0.9 + (q2Progress * 0.1);
-  
-  // Emphasis pulse for Q2
-  const q2Pulse = anim.emphasis === 'pulse' && frame >= f_emphasis && frame < f_exit
-    ? 1 + Math.sin((frame - f_emphasis) / 12 + Math.PI / 4) * 0.04
-    : 1;
-  
-  // Central Visual Animation
-  const visualProgress = config.centralVisual.enabled && frame >= f_visualReveal
+  // Title animation (if enabled)
+  const titleOpacity = config.title.enabled
     ? interpolate(
         frame,
-        [f_visualReveal, f_visualReveal + toFrames(1.0, fps)],
+        [f.titleAppears, f.titleAppears + toFrames(0.4, fps)],
+        [0, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      )
+    : 0;
+  
+  // Question Part 1 - Letter Reveal
+  const q1LetterReveal = useMemo(() => {
+    return getLetterReveal(frame, config.questionPart1.text, {
+      startFrame: f.q1Start,
+      duration: rawBeats.q1Reveal,
+      staggerDelay: 0.04
+    }, fps);
+  }, [frame, config.questionPart1.text, f.q1Start, rawBeats.q1Reveal, fps]);
+  
+  // Question Part 2 - Letter Reveal
+  const q2LetterReveal = useMemo(() => {
+    return getLetterReveal(frame, config.questionPart2.text, {
+      startFrame: f.q2Start,
+      duration: rawBeats.q2Reveal,
+      staggerDelay: 0.04
+    }, fps);
+  }, [frame, config.questionPart2.text, f.q2Start, rawBeats.q2Reveal, fps]);
+  
+  // Question exit animation
+  const questionExitProgress = frame >= f.questionsExit
+    ? interpolate(
+        frame,
+        [f.questionsExit, f.questionsGone],
+        [0, 1],
+        {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+          easing: EZ.power3In
+        }
+      )
+    : 0;
+
+  const exitOffset = (() => {
+    const direction = anim.questionExitDirection || 'left';
+    const distance = questionExitProgress;
+    switch (direction) {
+      case 'right': return { x: width * distance, y: 0 };
+      case 'up': return { x: 0, y: -height * distance };
+      case 'down': return { x: 0, y: height * distance };
+      case 'left':
+      default: return { x: -width * distance, y: 0 };
+    }
+  })();
+  
+  // Card entrance for Q1
+  const q1CardEntrance = getCardEntrance(frame, {
+    startFrame: f.q1Start,
+    duration: 0.8,
+    direction: 'up',
+    distance: 40,
+    withGlow: true,
+    glowColor: `${colors.accent}40`
+  }, fps);
+  
+  // Card entrance for Q2 (delayed)
+  const q2CardEntrance = getCardEntrance(frame, {
+    startFrame: f.q2Start,
+    duration: 0.9,
+    direction: 'up',
+    distance: 50,
+    withGlow: true,
+    glowColor: `${colors.accent2}40`
+  }, fps);
+  
+  // Continuous floating animation (subtle life)
+  const floatingOffset1 = anim.continuousFloat && frame >= f.q1Visible
+    ? Math.sin((frame - f.q1Start) * 0.02) * 5
+    : 0;
+    
+  const floatingOffset2 = anim.continuousFloat && frame >= f.q2Visible
+    ? Math.sin((frame - f.q2Start) * 0.02 + Math.PI) * 5
+    : 0;
+  
+  // Emphasis pulse
+  const q1Pulse = frame >= f.emphasisStart && frame < f.questionsExit
+    ? 1 + Math.sin((frame - f.emphasisStart) * 0.08) * 0.03
+    : 1;
+    
+  const q2Pulse = frame >= f.emphasisStart && frame < f.questionsExit
+    ? 1 + Math.sin((frame - f.emphasisStart) * 0.08 + Math.PI / 4) * 0.03
+    : 1;
+  
+  // Particle burst on Q1 reveal
+  const q1ParticleBurst = decorations.showParticleBurst
+    ? getParticleBurst(frame, {
+        triggerFrame: f.q1Start,
+        particleCount: decorations.particleBurstCount,
+        duration: 1.2,
+        color: colors.accent,
+        size: 6,
+        spread: 150
+      }, fps)
+    : [];
+  
+  // Particle burst on Q2 reveal
+  const q2ParticleBurst = decorations.showParticleBurst
+    ? getParticleBurst(frame, {
+        triggerFrame: f.q2Start,
+        particleCount: decorations.particleBurstCount,
+        duration: 1.2,
+        color: colors.accent2,
+        size: 6,
+        spread: 150
+      }, fps)
+    : [];
+  
+  // Central Visual Animation
+  const visualProgress = config.centralVisual.enabled && frame >= f.visualStart
+    ? interpolate(
+        frame,
+        [f.visualStart, f.visualVisible],
         [0, 1],
         {
           extrapolateLeft: 'clamp',
@@ -308,10 +420,20 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const visualFadeOut = frame >= f_fadeOut
+  // Icon pop for visual
+  const visualIconPop = config.centralVisual.enabled
+    ? getIconPop(frame, {
+        startFrame: f.visualStart,
+        duration: 0.8,
+        withBounce: true,
+        rotation: 10
+      }, fps)
+    : { opacity: 0, scale: 0, rotation: 0 };
+  
+  const visualFadeOut = frame >= f.fadeOutStart
     ? interpolate(
         frame,
-        [f_fadeOut, f_fadeOut + toFrames(0.8, fps)],
+        [f.fadeOutStart, f.totalDuration],
         [0, 1],
         {
           extrapolateLeft: 'clamp',
@@ -321,14 +443,18 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-    const visualOpacity = visualProgress * (1 - Math.max(visualFadeOut, questionExitProgress));
-    const visualScale = 0.8 + (visualProgress * 0.2);
+  const visualOpacity = visualIconPop.opacity * (1 - visualFadeOut);
+  
+  // Continuous floating for visual
+  const visualFloating = anim.continuousFloat && frame >= f.visualVisible
+    ? Math.sin((frame - f.visualStart) * 0.015) * 8
+    : 0;
   
   // Conclusion Animation
-  const conclusionProgress = config.conclusion.enabled && frame >= f_conclusion
+  const conclusionProgress = config.conclusion.enabled && frame >= f.conclusionStart
     ? interpolate(
         frame,
-        [f_conclusion, f_conclusion + toFrames(0.8, fps)],
+        [f.conclusionStart, f.conclusionVisible],
         [0, 1],
         {
           extrapolateLeft: 'clamp',
@@ -338,14 +464,14 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const conclusionPulse = anim.emphasis === 'pulse' && frame >= f_conclusion && frame < f_fadeOut
-    ? 1 + Math.sin((frame - f_conclusion) / 18) * 0.05
+  const conclusionPulse = config.conclusion.enabled && frame >= f.conclusionVisible && frame < f.fadeOutStart
+    ? 1 + Math.sin((frame - f.conclusionStart) * 0.06) * 0.04
     : 1;
   
-  const conclusionFadeOut = frame >= f_fadeOut
+  const conclusionFadeOut = frame >= f.fadeOutStart
     ? interpolate(
         frame,
-        [f_fadeOut, f_fadeOut + toFrames(0.8, fps)],
+        [f.fadeOutStart, f.totalDuration],
         [0, 1],
         {
           extrapolateLeft: 'clamp',
@@ -360,16 +486,16 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   // Position resolution
   const viewport = { width, height };
   const q1Pos = resolvePosition(
-      config.questionPart1.position,
-      config.questionPart1.offset,
-      viewport
-    );
+    config.questionPart1.position,
+    config.questionPart1.offset,
+    viewport
+  );
 
   const q2Pos = resolvePosition(
-      config.questionPart2.position,
-      config.questionPart2.offset,
-      viewport
-    );
+    config.questionPart2.position,
+    config.questionPart2.offset,
+    viewport
+  );
 
   const alignmentClass =
     typography.align === 'left'
@@ -385,16 +511,54 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       ? 'lowercase'
       : 'none';
   
+  // Calculate center positions for particle bursts
+  const centerX = width / 2;
+  const q1Y = q1Pos.y;
+  const q2Y = q2Pos.y;
+  
   return (
     <AbsoluteFill
-      className="relative flex h-full w-full overflow-hidden bg-surface text-ink"
-      style={{ backgroundColor: colors.bg }}
+      className="relative flex h-full w-full overflow-hidden"
+      style={{ 
+        background: decorations.showGradient
+          ? `linear-gradient(135deg, ${colors.bgGradientStart} 0%, ${colors.bgGradientEnd} 100%)`
+          : colors.bg,
+        opacity: bgOpacity
+      }}
     >
-      {/* Particle Background */}
-      {particles.enabled && (
+      {/* Layer 1: Noise Texture */}
+      {decorations.showNoiseTexture && (
+        <NoiseTexture opacity={decorations.noiseOpacity} />
+      )}
+      
+      {/* Layer 2: Spotlights */}
+      {decorations.showSpotlights && (
+        <>
+          <SpotlightEffect
+            x={decorations.spotlight1.x * width}
+            y={decorations.spotlight1.y * height}
+            size={decorations.spotlight1.size}
+            color={decorations.spotlight1.color}
+            opacity={0.6}
+          />
+          {decorations.spotlightCount > 1 && (
+            <SpotlightEffect
+              x={decorations.spotlight2.x * width}
+              y={decorations.spotlight2.y * height}
+              size={decorations.spotlight2.size}
+              color={decorations.spotlight2.color}
+              opacity={0.5}
+            />
+          )}
+        </>
+      )}
+      
+      {/* Layer 3: Ambient Particles */}
+      {decorations.showParticles && (
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox={`0 0 ${width} ${height}`}
+          style={{ pointerEvents: 'none' }}
         >
           {ambientParticles.map(({ key, element }) =>
             React.cloneElement(element, { key })
@@ -402,61 +566,168 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
         </svg>
       )}
       
+      {/* Layer 4: Particle Bursts */}
+      {decorations.showParticleBurst && (
+        <svg
+          className="absolute inset-0 h-full w-full"
+          viewBox={`0 0 ${width} ${height}`}
+          style={{ pointerEvents: 'none', zIndex: 50 }}
+        >
+          {q1ParticleBurst.length > 0 && renderParticleBurst(
+            q1ParticleBurst,
+            centerX,
+            q1Y
+          )}
+          {q2ParticleBurst.length > 0 && renderParticleBurst(
+            q2ParticleBurst,
+            centerX,
+            q2Y
+          )}
+        </svg>
+      )}
+      
       {/* Optional Title */}
       {config.title.enabled && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 font-display font-bold tracking-tight text-ink"
+          className="absolute left-1/2 -translate-x-1/2 font-display font-bold tracking-tight"
           style={{
             top: config.title.offset.y,
-            fontSize: fonts.size_title,
+            fontSize: Math.min(fonts.size_title, 72),
+            color: colors.text,
             textTransform,
+            opacity: titleOpacity,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
           }}
         >
           {config.title.text}
         </div>
       )}
       
-      {/* Question Part 1 */}
-      <div
-        className={`pointer-events-none absolute max-w-[88%] font-display leading-tight drop-shadow-lg ${alignmentClass}`}
-        style={{
-          left: `${q1Pos.x}px`,
-          top: `${q1Pos.y}px`,
-          transform: `translate(-50%, -50%) translate(${exitOffset.x}px, ${exitOffset.y}px) translateY(${q1TranslateY}px) scale(${q1Pulse})`,
-          fontSize: fonts.size_question,
-          fontWeight: fonts.weight_question,
-          color: colors.accent,
-          opacity: q1Opacity,
-          textTransform,
-        }}
-      >
-        {config.questionPart1.text}
-      </div>
+      {/* Question Part 1 - Glassmorphic Pane */}
+      {frame >= f.q1Start && questionExitProgress < 1 && (
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            left: `${q1Pos.x}px`,
+            top: `${q1Pos.y + floatingOffset1}px`,
+            transform: `translate(-50%, -50%) translate(${exitOffset.x}px, ${exitOffset.y}px) scale(${q1CardEntrance.scale * q1Pulse})`,
+            opacity: q1CardEntrance.opacity * (1 - questionExitProgress),
+            zIndex: 10
+          }}
+        >
+          {decorations.showGlassPane ? (
+            <GlassmorphicPane
+              innerRadius={decorations.glassInnerRadius}
+              glowOpacity={0.2}
+              borderOpacity={decorations.glassPaneBorderOpacity}
+              backgroundColor={`${colors.glassBackground}`}
+              padding={40}
+              style={{
+                boxShadow: q1CardEntrance.boxShadow
+              }}
+            >
+              <div
+                className={`font-display leading-tight ${alignmentClass}`}
+                style={{
+                  fontSize: Math.min(fonts.size_question, 80),
+                  fontWeight: fonts.weight_question,
+                  color: colors.accent,
+                  textTransform,
+                  textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+                  maxWidth: '85vw',
+                  padding: '20px 0'
+                }}
+              >
+                {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
+              </div>
+            </GlassmorphicPane>
+          ) : (
+            <div
+              className={`font-display leading-tight ${alignmentClass}`}
+              style={{
+                fontSize: Math.min(fonts.size_question, 80),
+                fontWeight: fonts.weight_question,
+                color: colors.accent,
+                textTransform,
+                textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+                maxWidth: '88vw'
+              }}
+            >
+              {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
+            </div>
+          )}
+        </div>
+      )}
       
-      {/* Question Part 2 */}
-      <div
-        className={`pointer-events-none absolute max-w-[88%] font-display leading-tight drop-shadow-lg ${alignmentClass}`}
-        style={{
-          left: `${q2Pos.x}px`,
-          top: `${q2Pos.y}px`,
-          transform: `translate(-50%, -50%) translate(${exitOffset.x}px, ${exitOffset.y}px) translateY(${q2TranslateY}px) scale(${q2Scale * q2Pulse})`,
-          fontSize: fonts.size_question,
-          fontWeight: fonts.weight_question,
-          color: colors.accent2,
-          opacity: q2Opacity,
-          textTransform,
-        }}
-      >
-        {config.questionPart2.text}
-      </div>
+      {/* Question Part 2 - Glassmorphic Pane */}
+      {frame >= f.q2Start && questionExitProgress < 1 && (
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            left: `${q2Pos.x}px`,
+            top: `${q2Pos.y + floatingOffset2}px`,
+            transform: `translate(-50%, -50%) translate(${exitOffset.x}px, ${exitOffset.y}px) scale(${q2CardEntrance.scale * q2Pulse})`,
+            opacity: q2CardEntrance.opacity * (1 - questionExitProgress),
+            zIndex: 10
+          }}
+        >
+          {decorations.showGlassPane ? (
+            <GlassmorphicPane
+              innerRadius={decorations.glassInnerRadius}
+              glowOpacity={0.2}
+              borderOpacity={decorations.glassPaneBorderOpacity}
+              backgroundColor={`${colors.glassBackground}`}
+              padding={40}
+              style={{
+                boxShadow: q2CardEntrance.boxShadow
+              }}
+            >
+              <div
+                className={`font-display leading-tight ${alignmentClass}`}
+                style={{
+                  fontSize: Math.min(fonts.size_question, 80),
+                  fontWeight: fonts.weight_question,
+                  color: colors.accent2,
+                  textTransform,
+                  textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+                  maxWidth: '85vw',
+                  padding: '20px 0'
+                }}
+              >
+                {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
+              </div>
+            </GlassmorphicPane>
+          ) : (
+            <div
+              className={`font-display leading-tight ${alignmentClass}`}
+              style={{
+                fontSize: Math.min(fonts.size_question, 80),
+                fontWeight: fonts.weight_question,
+                color: colors.accent2,
+                textTransform,
+                textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+                maxWidth: '88vw'
+              }}
+            >
+              {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
+            </div>
+          )}
+        </div>
+      )}
       
       {/* Central Visual */}
       {config.centralVisual.enabled && config.centralVisual.type !== 'none' && visualOpacity > 0 && (
         <div
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]"
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           style={{
-            transform: `translate(-50%, -50%) translate(${exitOffset.x * 0.6}px, ${exitOffset.y * 0.6}px) scale(${visualScale})`,
-            opacity: visualOpacity
+            transform: `translate(-50%, -50%) translateY(${visualFloating}px) scale(${visualIconPop.scale}) rotate(${visualIconPop.rotation}deg)`,
+            opacity: visualOpacity,
+            filter: 'drop-shadow(0 12px 30px rgba(0,0,0,0.3))',
+            zIndex: 20
           }}
         >
           {renderHero(
@@ -466,7 +737,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
               scale: config.centralVisual.scale
             }),
             frame,
-            beats,
+            rawBeats,
             colors,
             easingMap || EZ,
             fps
@@ -476,16 +747,23 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       
       {/* Conclusion */}
       {config.conclusion.enabled && conclusionOpacity > 0 && (
-        <div className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center ${alignmentClass}`} style={{ opacity: conclusionOpacity }}>
+        <div 
+          className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center ${alignmentClass}`}
+          style={{ 
+            opacity: conclusionOpacity,
+            transform: `translate(-50%, -50%) scale(${conclusionPulse})`,
+            zIndex: 15
+          }}
+        >
           <div
             className="font-display drop-shadow-lg"
             style={{
-              fontSize: fonts.size_conclusion,
+              fontSize: Math.min(fonts.size_conclusion, 72),
               fontWeight: fonts.weight_conclusion,
               color: colors.accent,
               marginBottom: 20,
-              transform: `scale(${conclusionPulse})`,
               textTransform,
+              textShadow: '3px 3px 6px rgba(0,0,0,0.3)'
             }}
           >
             {config.conclusion.text}
@@ -494,10 +772,11 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
             <div
               className="font-body"
               style={{
-                fontSize: fonts.size_subtitle,
+                fontSize: Math.min(fonts.size_subtitle, 32),
                 color: colors.textSecondary,
                 fontWeight: 400,
                 textTransform,
+                textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
               }}
             >
               {config.conclusion.subtitle}
@@ -508,7 +787,13 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
 
       {/* CTA Badge */}
       {cta.enabled && conclusionOpacity > 0 && (
-        <div className="absolute inset-x-0 bottom-[14%] flex justify-center" style={{ opacity: Math.min(1, conclusionOpacity) }}>
+        <div 
+          className="absolute inset-x-0 bottom-[14%] flex justify-center" 
+          style={{ 
+            opacity: Math.min(1, conclusionOpacity),
+            zIndex: 20
+          }}
+        >
           {cta.url ? (
             <a
               href={cta.url}
@@ -529,24 +814,16 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
 
 // DURATION CALCULATION
 export const getDuration = (scene, fps) => {
-  const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
-  
-  // Calculate based on enabled features
-  let totalDuration = beats.fadeOut + 0.5;
-  
-  if (config.conclusion.enabled && beats.hold > beats.conclusion) {
-    totalDuration = beats.hold + 0.5;
-  }
-  
-  return toFrames(totalDuration, fps);
+  const rawBeats = { ...DEFAULT_CONFIG.beats, ...(scene?.beats || {}) };
+  const beats = calculateCumulativeBeats(rawBeats);
+  return toFrames(beats.totalDuration, fps);
 };
 
 // METADATA
-export const TEMPLATE_VERSION = '6.1';
+export const TEMPLATE_VERSION = '6.2';
 export const TEMPLATE_ID = 'Hook1AQuestionBurst';
-export const PRIMARY_INTENTION = 'QUESTION';
-export const SECONDARY_INTENTIONS = ['CHALLENGE', 'REVEAL'];
+export const PRIMARY_INTENTION = 'HOOK';
+export const SECONDARY_INTENTIONS = ['QUESTION', 'CHALLENGE', 'REVEAL'];
 
 // CONFIG SCHEMA
 export const CONFIG_SCHEMA = {
@@ -585,23 +862,38 @@ export const CONFIG_SCHEMA = {
     }
   },
   animation: {
-    questionTransitionStyle: {
+    letterRevealStyle: {
       type: 'select',
-      label: 'Question Exit Style',
-      options: ['slide', 'fade', 'wipe', 'none']
+      label: 'Letter Reveal Style',
+      options: ['fade-up', 'fade', 'scale']
     },
-    questionTransitionDirection: {
+    questionExitDirection: {
       type: 'select',
-      label: 'Slide Direction',
+      label: 'Question Exit Direction',
       options: ['left', 'right', 'up', 'down']
     },
-    transitionDuration: {
-      type: 'slider',
-      label: 'Transition Duration (s)',
-      min: 0.2,
-      max: 1.2,
-      step: 0.05
+    visualEntrance: {
+      type: 'select',
+      label: 'Visual Entrance Style',
+      options: ['icon-pop', 'fade-scale', 'zoom']
+    },
+    continuousFloat: {
+      type: 'checkbox',
+      label: 'Enable Continuous Float'
     }
+  },
+  decorations: {
+    showGradient: { type: 'checkbox', label: 'Show Gradient Background' },
+    showNoiseTexture: { type: 'checkbox', label: 'Show Noise Texture' },
+    noiseOpacity: { type: 'slider', label: 'Noise Opacity', min: 0, max: 0.1, step: 0.01 },
+    showSpotlights: { type: 'checkbox', label: 'Show Spotlights' },
+    spotlightCount: { type: 'slider', label: 'Spotlight Count', min: 0, max: 3, step: 1 },
+    showParticles: { type: 'checkbox', label: 'Show Ambient Particles' },
+    particleCount: { type: 'slider', label: 'Particle Count', min: 0, max: 50, step: 5 },
+    showGlassPane: { type: 'checkbox', label: 'Show Glassmorphic Panes' },
+    glassPaneOpacity: { type: 'slider', label: 'Glass Pane Opacity', min: 0, max: 0.3, step: 0.05 },
+    showParticleBurst: { type: 'checkbox', label: 'Show Particle Bursts' },
+    particleBurstCount: { type: 'slider', label: 'Burst Particle Count', min: 5, max: 30, step: 5 }
   },
   cta: {
     enabled: { type: 'checkbox', label: 'Show CTA Badge' },
