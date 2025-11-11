@@ -1,11 +1,11 @@
 {
   "schema_version": "6.0",
-  "scene_id": "reveal_9_mystery_reveal",
+  "scene_id": "reveal_9_mystery_reveal_polished_v2",
   "template_id": "Reveal9ProgressiveUnveil",
   "learning_intentions": {
     "primary": ["reveal"],
     "secondary": ["question", "breakdown"],
-    "tags": ["progressive", "suspense", "unveiling"]
+    "tags": ["progressive", "suspense", "unveiling", "broadcast-grade", "cumulative-beats"]
   },
   
   "title": {
@@ -16,42 +16,53 @@
   
   "revealStyle": "curtain",
   
+  "stageIndicator": {
+    "show": true,
+    "position": "top-right",
+    "style": "both",
+    "size": 42
+  },
+  
   "stages": [
     {
-      "headline": "Stage 1: The Question",
-      "description": "What lies behind the curtain?",
+      "headline": "The Question",
+      "description": "What lies behind the curtain of curiosity?",
       "visual": null,
-      "position": "center"
+      "emoji": "❓",
+      "showEmoji": true
     },
     {
-      "headline": "Stage 2: The First Clue",
-      "description": "A pattern begins to emerge...",
+      "headline": "The First Clue",
+      "description": "A pattern begins to emerge from the shadows...",
       "visual": {
         "type": "roughSVG",
         "shape": "circle",
         "size": 150
       },
-      "position": "center"
+      "emoji": "🔍",
+      "showEmoji": true
     },
     {
-      "headline": "Stage 3: The Connection",
+      "headline": "The Connection",
       "description": "Everything is linked by a central concept",
       "visual": {
         "type": "roughSVG",
         "shape": "rect",
         "size": 180
       },
-      "position": "center"
+      "emoji": "🔗",
+      "showEmoji": true
     },
     {
-      "headline": "Stage 4: The Answer",
+      "headline": "The Answer Emerges",
       "description": "Now you see the complete picture!",
       "visual": {
         "type": "roughSVG",
         "shape": "star",
         "size": 200
       },
-      "position": "center"
+      "emoji": "✨",
+      "showEmoji": true
     }
   ],
   
@@ -61,25 +72,57 @@
       "accent": "#FF6B35",
       "accent2": "#9B59B6",
       "ink": "#EAEAEA",
-      "curtain": "#16213E"
+      "curtain": "#16213E",
+      "stageIndicator": "#FFD700"
     },
     "fonts": {
-      "size_title": 72,
-      "size_headline": 52,
-      "size_description": 28
+      "size_title": 68,
+      "size_headline": 50,
+      "size_description": 28,
+      "size_stage_indicator": 38
     }
   },
   
   "beats": {
     "entrance": 0.4,
-    "titleEntry": 0.6,
-    "stageInterval": 3.5,
-    "stageTransition": 1.0,
+    "titleEntry": 0.2,
+    "titleHold": 1.0,
+    "firstStageReveal": 1.0,
+    "stageContentDelay": 0.3,
+    "stageHold": 2.5,
+    "nextStageTransition": 0.8,
     "exit": 2.0
   },
   
   "animation": {
     "entrance": "fade-up",
-    "transitionEasing": "power3InOut"
+    "transitionEasing": "power3InOut",
+    "continuousFloat": true,
+    "staggerContent": true
+  },
+  
+  "decorations": {
+    "showTitleUnderline": true,
+    "underlineColor": null,
+    "underlineStyle": "wavy",
+    "showParticles": true,
+    "particleCount": 25,
+    "showSpotlights": true,
+    "showNoiseTexture": true,
+    "noiseOpacity": 0.04,
+    "curtainGlow": true
+  },
+  
+  "typography": {
+    "voice": "notebook",
+    "align": "center",
+    "transform": "none"
+  },
+  
+  "transition": {
+    "exit": {
+      "style": "fade",
+      "durationInFrames": 20
+    }
   }
 }

@@ -434,6 +434,678 @@ Templates must look **broadcast quality**, not presentation slides.
 - ❌ Small elements with wasted space
 - ❌ Generic bullet points
 
+---
+
+### Broadcast-Grade Polish Principles
+
+**Learned from Compare11BeforeAfter_V6 Enhancement (Template #11)**
+
+#### 1. **Layered Background Depth**
+Instead of flat colors, create depth with multiple layers:
+
+```jsx
+// ❌ BAD: Flat color
+style={{ backgroundColor: '#FFE5E5' }}
+
+// ✅ GOOD: Gradient with depth
+style={{ 
+  background: `linear-gradient(135deg, 
+    ${color}F0 0%,   // Slightly transparent at start
+    ${color}CC 50%,  // More transparent in middle
+    ${color}F0 100%  // Back to slightly transparent
+  )`
+}}
+```
+
+**Stack for depth:**
+1. Base gradient background
+2. Noise texture overlay (0.03-0.05 opacity)
+3. Spotlight effects (2-3 strategically placed)
+4. Ambient particles (20-30 floating)
+5. Content with glassmorphic panes
+
+#### 2. **Glassmorphic Content Cards**
+Wrap all major content in glassmorphic panes for premium feel:
+
+```jsx
+import { GlassmorphicPane } from '../sdk/effects/broadcastEffects';
+
+<GlassmorphicPane
+  innerRadius={30}           // Rounded corners
+  glowOpacity={0.2}          // Outer glow intensity
+  borderOpacity={0.4}        // Border transparency
+  backgroundColor="#FF6B3515" // Tinted glass color
+  padding={40}
+  style={{
+    maxWidth: '85%',         // Don't fill entire space
+    ...animations           // Apply entrance animations
+  }}
+>
+  {/* Your content */}
+</GlassmorphicPane>
+```
+
+**Key principles:**
+- Always add subtle glow (0.15-0.25 opacity)
+- Use semi-transparent backgrounds (15-20% opacity of accent color)
+- Add backdrop blur for true glass effect
+- Include subtle inner highlight (inset shadow)
+
+#### 3. **Multi-Layered Entrance Animations**
+Combine multiple animation types for sophistication:
+
+```jsx
+// ❌ BAD: Single fade-in
+const anim = fadeIn(frame, startFrame, duration, fps);
+
+// ✅ GOOD: Multi-layered card entrance
+const cardAnim = getCardEntrance(frame, {
+  startFrame: beats.reveal,
+  duration: 1.0,
+  direction: 'left',      // Slide direction
+  distance: 120,          // Slide distance
+  withGlow: true,         // Add glow pulse
+  glowColor: '#FF6B3540'  // Glow color with opacity
+}, fps);
+
+// Layers included:
+// 1. Opacity fade (0 → 1)
+// 2. Slide motion (distance → 0)
+// 3. Scale spring (0.95 → 1.0)
+// 4. Box shadow glow (pulsing)
+```
+
+**Stagger for impact:**
+- Main container: T+0.0s
+- Icon/label: T+0.3s
+- Headline: T+0.5s (or simultaneous with container)
+- Description: T+0.5s (or simultaneous with container)
+
+#### 4. **Micro-Delights on Key Elements**
+Add small, delightful animations to draw attention:
+
+**Icon Pop Animation:**
+```jsx
+const iconAnim = getIconPop(frame, {
+  startFrame: beats.reveal + 0.3,
+  duration: 0.6,
+  withBounce: true,  // Spring bounce effect
+  rotation: 15       // Slight rotation on entry
+}, fps);
+
+// Apply to icons, emojis, badges
+<span style={{
+  opacity: iconAnim.opacity,
+  transform: `scale(${iconAnim.scale}) rotate(${iconAnim.rotation}deg)`
+}}>
+  ✨
+</span>
+```
+
+**Letter-by-Letter Title Reveal:**
+```jsx
+const letterReveal = getLetterReveal(frame, titleText, {
+  startFrame: beats.title,
+  duration: 0.05,      // Per-letter duration
+  staggerDelay: 0.05   // Delay between letters
+}, fps);
+
+{renderLetterReveal(letterReveal.letters, letterReveal.letterOpacities)}
+```
+
+#### 5. **Particle Bursts on Key Moments**
+Emphasize transitions and reveals with particle effects:
+
+```jsx
+// Burst on transition/reveal
+const burstParticles = getParticleBurst(frame, {
+  triggerFrame: beats.transitionStart,
+  particleCount: 20,
+  duration: 1.2,
+  color: colors.accent,
+  size: 8,
+  spread: 200  // Explosion radius
+}, fps);
+
+{transitionBurstParticles.length > 0 && renderParticleBurst(
+  transitionBurstParticles,
+  centerX,
+  centerY
+)}
+```
+
+**When to use:**
+- On major reveals (after state appears)
+- On emphasis moments (pulse effects)
+- On completion (success states)
+
+#### 6. **Pulsing Glow for Emphasis**
+Add breathing life to emphasized elements:
+
+```jsx
+const pulseGlow = getPulseGlow(frame, {
+  frequency: 0.08,      // Pulse speed (lower = slower)
+  intensity: 30,        // Glow size variation
+  color: `${colors.accent}60`,  // Semi-transparent color
+  startFrame: beats.emphasize
+});
+
+<div style={{
+  ...pulseGlow,  // Applies animated box-shadow
+  transform: `scale(${pulseScale})`  // Combine with scale
+}}>
+  {content}
+</div>
+```
+
+#### 7. **Doodle/Notebook Brand Elements**
+Add hand-drawn, organic elements for Knode branding:
+
+**Hand-drawn underlines:**
+```jsx
+<svg width="300" height="20" style={{ margin: '10px auto 0' }}>
+  <path 
+    d="M 10,10 Q 75,5 150,10 T 290,10"  // Wavy line
+    stroke={colors.accent} 
+    strokeWidth="3" 
+    fill="none" 
+    strokeLinecap="round"
+    opacity="0.7"
+  />
+</svg>
+```
+
+**Decorative elements:**
+- Hand-drawn arrows (→, ←, ↑, ↓)
+- Sketchy circles/stars around key text
+- Wavy underlines on titles
+- Doodle icons (⚠️ for before, ✨ for after)
+
+#### 8. **Enhanced Divider/Slider Effects**
+Make interactive elements feel premium:
+
+**Before:**
+```jsx
+// ❌ Simple line
+<div style={{
+  width: 4,
+  height: '100%',
+  backgroundColor: colors.divider
+}} />
+```
+
+**After:**
+```jsx
+// ✅ Gradient line with glow
+<div style={{
+  width: 6,
+  height: '100%',
+  background: `linear-gradient(to right, 
+    transparent,
+    ${colors.divider}40,
+    ${colors.divider},
+    ${colors.divider}40,
+    transparent
+  )`,
+  boxShadow: `
+    0 0 ${glowIntensity}px ${colors.divider}80,
+    0 0 40px rgba(0,0,0,0.3)
+  `
+}} />
+```
+
+**Glassmorphic handle:**
+- Backdrop blur effect
+- Border with color
+- Multiple shadows (drop + glow + inner highlight)
+- Animated icon inside
+
+#### 9. **Performance Optimizations**
+Maintain smooth 30fps with these practices:
+
+```jsx
+// Memoize expensive calculations
+const particles = useMemo(() => 
+  generateAmbientParticles(30, seed, width, height),
+  [width, height]
+);
+
+// Cap particle counts
+const safeCount = Math.min(config.particleCount, 50);
+
+// Use CSS transforms (GPU accelerated)
+transform: `translate(${x}px, ${y}px) scale(${s})`  // ✅ Good
+left: x, top: y  // ❌ Bad (triggers layout)
+```
+
+#### 10. **Typography & Text Treatment**
+Professional text styling throughout:
+
+```jsx
+// Titles
+style={{
+  fontSize: Math.min(config.size, 72),  // Cap to prevent overflow
+  fontWeight: 900,
+  textShadow: '3px 3px 6px rgba(0,0,0,0.3)',  // Depth
+  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',  // Extra depth
+  lineHeight: 1.3  // Breathing room
+}}
+
+// Body text
+style={{
+  fontSize: Math.min(config.size, 22),
+  lineHeight: 1.6,  // Readability
+  color: `${colors.text}CC`  // Slightly transparent for hierarchy
+}}
+```
+
+#### 11. **Continuous Life Animations** ⭐ NEW
+
+Add subtle continuous movement to prevent static moments, even during "hold" states:
+
+```jsx
+// Subtle sine wave floating (5px movement)
+const floatingOffset = config.animation.continuousFloat 
+  ? Math.sin((frame - startFrame) * 0.02) * 5 
+  : 0;
+
+// Apply to transforms
+transform: `translate(${x}px, ${y + floatingOffset}px) scale(${scale})`
+```
+
+**Key principles:**
+- **Frequency:** 0.02 for subtle, gentle movement (too high = distracting)
+- **Amplitude:** 3-7px maximum (barely noticeable but adds life)
+- **Phase shift:** Offset different elements (`+ Math.PI`) for variety
+- **Configurable:** Always allow toggling via JSON (`continuousFloat: true/false`)
+- **When:** Apply to main content cards, not small UI elements
+
+**When to use:**
+- Long hold moments (2+ seconds visible)
+- Background elements throughout
+- Main content panes
+
+**When NOT to use:**
+- During fast transitions
+- On text (causes readability issues)
+- On elements with their own complex animations
+
+**Reference:** See `Compare11BeforeAfter_V6.jsx` (before/after card floating) for implementation.
+
+---
+
+#### 12. **Dynamic Array Timing** ⭐ NEW
+
+When dealing with variable-length content arrays (e.g., 2-5 stages), calculate cumulative beats dynamically:
+
+```jsx
+const calculateCumulativeBeats = (beats, stageCount) => {
+  const { entrance, titleEntry, stageHold, stageTransition } = beats;
+  
+  let cumulative = entrance + titleEntry;
+  const result = { stages: [] };
+  
+  for (let i = 0; i < stageCount; i++) {
+    result.stages.push({
+      start: cumulative,
+      end: (cumulative += stageHold + stageTransition)
+    });
+  }
+  
+  result.totalDuration = cumulative;
+  return result;
+};
+
+// Usage
+const beats = useMemo(() => 
+  calculateCumulativeBeats(rawBeats, stages.length),
+  [rawBeats, stages.length]
+);
+```
+
+**Key principles:**
+- **Memoize calculation:** Use `useMemo` with dependencies on beats config and array length
+- **Loop through array:** Calculate each item's timing cumulatively
+- **Return structured object:** Organized by item index for easy access
+- **Handle first/last differently:** First stage might have longer reveal, last might skip transition
+- **Total duration calculation:** Sum all stages for `getDuration` export
+
+**When to use:**
+- Multi-step sequences (reveal stages, tutorial steps)
+- Dynamic content lists
+- Progress-based animations
+- Sequential unveiling
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (stage timing calculation) for implementation.
+
+---
+
+#### 13. **Persistent Stage Indicators** ⭐ NEW
+
+Add corner indicators to show progress through multi-stage sequences:
+
+```jsx
+const stageIndicator = {
+  show: true,
+  position: 'top-right', // top-left, top-right, bottom-left, bottom-right
+  style: 'both', // number, emoji, both
+  size: 48
+};
+
+// Render with icon pop animation
+<div style={{
+  position: 'absolute',
+  [position.includes('top') ? 'top' : 'bottom']: 30,
+  [position.includes('left') ? 'left' : 'right']: 30,
+  fontSize: stageIndicator.size,
+  fontWeight: 900,
+  opacity: iconPopAnim.opacity,
+  transform: `scale(${iconPopAnim.scale})`,
+  zIndex: 150
+}}>
+  {stage.emoji} Stage {index + 1}
+</div>
+```
+
+**Key principles:**
+- **Corner positioning:** Keep out of main content area (top-left/top-right/bottom corners)
+- **Configurable visibility:** Always allow toggling via `show` boolean
+- **Style options:** Number only, emoji only, or both combined
+- **Pop entrance:** Use `getIconPop` for engaging appearance
+- **Z-index layering:** Above content (150+) but below overlays
+- **Size constraints:** 36-48px typically, never exceed 60px
+
+**When to use:**
+- Multi-stage reveals
+- Tutorial sequences
+- Progress tracking
+- Chapter/section markers
+
+**When NOT to use:**
+- Single-stage templates
+- When screen real estate is limited
+- With central progress bars (redundant)
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (stage indicator) for implementation.
+
+---
+
+#### 14. **Curtain/Overlay Effects** ⭐ NEW
+
+Full-screen reveal overlays with multiple styles and dynamic effects:
+
+```jsx
+const renderCurtainOverlay = (style, progress, colors, width, height, config) => {
+  const ease = EZ.power3InOut(progress);
+  const glowIntensity = interpolate(progress, [0, 0.5, 1], [0, 20, 0]);
+  
+  // Glow effect during reveal
+  const boxShadow = config.curtainGlow 
+    ? `inset 0 0 ${glowIntensity}px ${colors.accent}60`
+    : 'none';
+  
+  switch (style) {
+    case 'curtain':
+      return (
+        <div style={{
+          /* Split curtain opening from center */
+          background: `linear-gradient(to left, ${colors.curtain}, ${colors.curtain}F0)`,
+          transform: `translateX(${leftX}px)`,
+          boxShadow
+        }} />
+      );
+    case 'circular':
+      return (
+        <div style={{
+          background: `radial-gradient(circle, transparent ${scale * 30}%, ${colors.curtain} ${scale * 31}%)`,
+          borderRadius: '50%'
+        }} />
+      );
+  }
+};
+```
+
+**Key principles:**
+- **Gradient edges:** Use gradients instead of flat colors for depth
+- **Glow during transition:** Add `boxShadow` glow that peaks mid-animation
+- **Z-index 100:** Above all content but below UI controls
+- **Easing:** Always use `power3InOut` for smooth, dramatic reveals
+- **Multiple styles:** Offer 4-6 styles (curtain, fade, slide-left/right, zoom, circular)
+- **Configurable color:** Curtain color should match or contrast with `bg`
+
+**Available styles:**
+- **Curtain:** Split from center (dramatic)
+- **Fade:** Simple opacity (subtle)
+- **Slide-left/right:** Directional wipe (guided)
+- **Zoom:** Scale explosion (energetic)
+- **Circular:** Radial expand (focus)
+
+**When to use:**
+- Progressive reveals
+- Before/after transitions
+- Mystery/suspense moments
+- Chapter transitions
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (renderRevealOverlay) for implementation.
+
+---
+
+#### 15. **Per-Item Content Stagger** ⭐ NEW
+
+Stagger multiple elements within a single content item for sophisticated reveals:
+
+```jsx
+const config = {
+  animation: {
+    staggerContent: true // Enable/disable stagger
+  }
+};
+
+// Define delays
+const headlineDelay = config.animation.staggerContent ? 0.0 : 0;
+const descriptionDelay = config.animation.staggerContent ? 0.2 : 0;
+const visualDelay = config.animation.staggerContent ? 0.4 : 0;
+
+// Apply to each element
+<div style={{
+  opacity: interpolate(
+    contentProgress,
+    [descriptionDelay, descriptionDelay + 0.3],
+    [0, 1],
+    { extrapolateRight: 'clamp' }
+  )
+}}>
+  {description}
+</div>
+```
+
+**Key principles:**
+- **0.2s intervals:** Standard stagger delay between elements
+- **Configurable toggle:** Always allow disabling via `staggerContent: false`
+- **Order matters:** Headline → Description → Visual (top to bottom)
+- **Smooth fade range:** 0.3s fade duration per element (not instant)
+- **Extrapolate clamp:** Prevent opacity going above 1 or below 0
+- **Use single progress value:** All elements reference same `contentProgress`
+
+**Typical stagger sequence:**
+1. **Headline:** 0.0s (immediate)
+2. **Description:** +0.2s
+3. **Visual/Image:** +0.4s
+4. **Supporting elements:** +0.6s
+
+**When to use:**
+- Multi-element content cards
+- Information hierarchy (title first, then details)
+- Rich content reveals (text + images)
+- Educational content progression
+
+**When NOT to use:**
+- Single-element displays
+- Fast-paced content (< 2s hold time)
+- When all elements are equally important
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (stage content stagger) for implementation.
+
+---
+
+#### 16. **Pulsing Highlight Animations** ⭐ NEW
+
+Add continuous pulsing to highlighted/winner elements for sustained visual emphasis:
+
+```jsx
+// Calculate pulse intensity (continuous sine wave)
+const highlightPulse = config.animation.continuousPulse && highlightProgress > 0
+  ? Math.sin((frame - highlightStartFrame) * 0.08) * 0.3 + 0.7
+  : 1;
+
+// Apply to glow intensity
+const glowIntensity = isHighlighted ? 15 + (highlightPulse * 10) : 0;
+
+// Apply to scale
+transform: `scale(${1 + (highlightPulse * 0.02)})`
+
+// Apply to box shadow
+boxShadow: `0 0 ${glowIntensity}px ${colors.highlight}80`
+```
+
+**Key principles:**
+- **Frequency: 0.08** for gentle pulsing (0.06-0.10 range, slower than float)
+- **Amplitude: 0.3** centered around 0.7 (range 0.4 to 1.0, never fully off)
+- **Additive not multiplicative:** Add pulse to base value (15 + pulse*10, not 15*pulse)
+- **Multi-property:** Apply to both glow intensity AND scale for richness
+- **Configurable:** Always allow toggling via `continuousPulse: boolean`
+- **Only when active:** Start pulsing only after highlight is triggered
+
+**Use cases:**
+- Winner/highlighted columns in comparison grids
+- Selected items in multi-choice scenarios
+- Correct answers in quizzes
+- Featured/recommended options
+- Active/current step indicators
+
+**When NOT to use:**
+- On all elements (overwhelming, no focus)
+- During transitions (conflicts with entrance/exit)
+- With very small elements (< 50px, too subtle)
+- When element already has complex animation
+
+**Difference from Continuous Float:**
+- **Float:** Position-based (translateY), for ambient life
+- **Pulse:** Intensity-based (opacity/glow/scale), for emphasis/attention
+
+**Reference:** See `Compare12MatrixGrid_V6.jsx` (winner column highlight pulse) for implementation.
+
+---
+
+### Complete Polish Checklist
+
+When uplifting a template to broadcast-grade, ensure:
+
+**Visual Layers (5 required):**
+- [ ] Gradient background (not flat)
+- [ ] Noise texture overlay
+- [ ] Spotlight effects (2-3)
+- [ ] Ambient particles (20-30)
+- [ ] Glassmorphic content panes
+
+**Animation Layers (3+ required):**
+- [ ] Opacity fade
+- [ ] Position animation (slide/scale)
+- [ ] Spring/elastic easing
+- [ ] Optional: Glow pulse
+- [ ] Optional: Rotation
+
+**Micro-Delights (2+ required):**
+- [ ] Icon pop animations
+- [ ] Letter-by-letter reveals
+- [ ] Particle bursts on key moments
+- [ ] Pulsing glow on emphasis
+- [ ] Staggered entrance timing
+
+**Brand Elements:**
+- [ ] Doodle-style decorations
+- [ ] Hand-drawn underlines/arrows
+- [ ] Organic shapes (not boxes)
+- [ ] Notebook-style typography
+
+**Polish Details:**
+- [ ] Font sizes capped with Math.min()
+- [ ] Text shadows for depth
+- [ ] Drop shadows on elements
+- [ ] Semi-transparent overlays
+- [ ] Breathing room (padding/margins)
+- [ ] Color with opacity for hierarchy
+- [ ] Continuous life animations (subtle floating during holds)
+- [ ] Dynamic array timing (for variable-length content)
+- [ ] Persistent stage indicators (corner progress markers)
+- [ ] Curtain/overlay effects (full-screen reveals with glow)
+- [ ] Per-item content stagger (headline → description → visual)
+- [ ] Pulsing highlight animations (glow/scale for emphasis) ⭐ NEW
+
+---
+
+### Cumulative Beats System
+
+**NEW: Relative timing makes adjustments easy!**
+
+Instead of absolute timestamps, beats are now **cumulative durations** that add together:
+
+**❌ OLD (Absolute Timing):**
+```json
+"beats": {
+  "entrance": 0.4,
+  "titleEntry": 0.6,      // Must manually calculate: 0.4 + 0.2
+  "beforeReveal": 1.6,    // Must manually calculate: 0.6 + 1.0
+  "transitionStart": 3.6  // Must manually calculate: 1.6 + 2.0
+}
+```
+**Problem:** Changing `entrance` requires recalculating ALL subsequent beats!
+
+**✅ NEW (Cumulative Timing):**
+```json
+"beats": {
+  "entrance": 0.4,       // Start at 0.4s
+  "titleEntry": 0.2,     // +0.2s (appears at 0.6s)
+  "titleHold": 0.8,      // +0.8s (holds until 1.4s) 
+  "beforeReveal": 1.0,   // +1.0s (appears at 2.4s)
+  "beforeHold": 2.0,     // +2.0s (holds until 4.4s)
+  "transitionDuration": 2.0  // +2.0s (completes at 6.4s)
+}
+```
+**Benefit:** Change `entrance` to `0.8s` and everything shifts automatically!
+
+**Implementation:**
+```jsx
+// In template file
+const calculateCumulativeBeats = (beats) => {
+  let cumulative = 0;
+  return {
+    entrance: cumulative,
+    title: (cumulative += beats.entrance),
+    titleEnd: (cumulative += beats.titleEntry + beats.titleHold),
+    beforeStart: (cumulative = cumulative - beats.titleHold + beats.beforeReveal),
+    // ... etc
+    totalDuration: cumulative
+  };
+};
+
+// Use in component
+const rawBeats = config.beats;  // From JSON
+const beats = calculateCumulativeBeats(rawBeats);  // Absolute timestamps
+
+// Apply to animations
+const titleStartFrame = toFrames(beats.title, fps);
+const beforeStartFrame = toFrames(beats.beforeStart, fps);
+```
+
+**Benefits:**
+- ✅ Easy to adjust timing without recalculating
+- ✅ Clear duration for each segment
+- ✅ Automatic total duration calculation
+- ✅ JSON configs are more intuitive
+
+---
+
 ### Screen Real Estate Usage
 
 **Target: 90-95% of 1920x1080 canvas**

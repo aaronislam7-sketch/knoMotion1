@@ -1,11 +1,11 @@
 {
   "schema_version": "6.0",
-  "scene_id": "compare_11_transformation",
+  "scene_id": "compare_11_transformation_polished_v2",
   "template_id": "Compare11BeforeAfter",
   "learning_intentions": {
     "primary": ["compare"],
     "secondary": ["inspire", "reveal"],
-    "tags": ["transformation", "contrast", "change"]
+    "tags": ["transformation", "contrast", "change", "broadcast-grade", "cumulative-beats"]
   },
   
   "title": {
@@ -26,7 +26,9 @@
       "shape": "messy",
       "size": 200
     },
-    "backgroundColor": "#FFE5E5"
+    "backgroundColor": "#FFE5E5",
+    "emoji": "⚠️",
+    "showEmoji": true
   },
   
   "after": {
@@ -38,38 +40,61 @@
       "shape": "organized",
       "size": 200
     },
-    "backgroundColor": "#E5FFE5"
+    "backgroundColor": "#E5FFE5",
+    "emoji": "✨",
+    "showEmoji": true
   },
   
   "style_tokens": {
     "colors": {
-      "bg": "#F5F5F5",
+      "bg": "#F8F7F4",
       "accent": "#FF6B35",
       "accent2": "#00C853",
-      "ink": "#1A1A1A",
-      "divider": "#333333"
+      "ink": "#2C2C2C",
+      "divider": "#4A4A4A"
     },
     "fonts": {
-      "size_title": 64,
-      "size_label": 24,
-      "size_headline": 42,
-      "size_description": 24
+      "size_title": 68,
+      "size_label": 26,
+      "size_headline": 44,
+      "size_description": 22
     }
   },
   
   "beats": {
     "entrance": 0.4,
-    "titleEntry": 0.6,
-    "beforeReveal": 1.2,
-    "transitionStart": 3.5,
-    "transitionDuration": 1.8,
-    "afterEmphasize": 1.0,
-    "exit": 2.0
+    "titleEntry": 0.2,
+    "titleHold": 0.8,
+    "beforeReveal": 1.0,
+    "beforeHold": 2.0,
+    "transitionDuration": 2.0,
+    "afterReveal": 0.3,
+    "afterHold": 2.0,
+    "afterEmphasize": 0.8,
+    "exit": 1.5
   },
   
   "animation": {
     "beforeEntrance": "slide-right",
     "afterEntrance": "slide-left",
-    "pulseAfter": true
+    "pulseAfter": true,
+    "continuousFloat": true
+  },
+  
+  "decorations": {
+    "showTitleUnderline": true,
+    "underlineColor": null,
+    "underlineStyle": "wavy",
+    "showParticles": true,
+    "particleCount": 30,
+    "showSpotlights": true,
+    "showNoiseTexture": true,
+    "noiseOpacity": 0.04
+  },
+  
+  "typography": {
+    "voice": "notebook",
+    "align": "center",
+    "transform": "none"
   }
 }
