@@ -23,7 +23,7 @@ import {
   NoiseTexture,
   SpotlightEffect
 } from '../../sdk/effects/broadcastEffects';
-import { loadFontVoice, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
@@ -228,6 +228,8 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   useEffect(() => {
     void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
+  
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   // Convert beats to frames
   const f = useMemo(() => ({
@@ -681,6 +683,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   style={{
                     fontSize: Math.min(fonts.size_whisper, 48),
                     fontWeight: fonts.weight_whisper,
+                    fontFamily: fontTokens.body.family,
                     color: colors.textSecondary,
                     textTransform,
                     maxWidth: '85vw',
@@ -696,6 +699,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: Math.min(fonts.size_whisper, 48),
                   fontWeight: fonts.weight_whisper,
+                  fontFamily: fontTokens.body.family,
                   color: colors.textSecondary,
                   textTransform,
                   maxWidth: '90%',
@@ -766,6 +770,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   style={{
                     fontSize: Math.min(fonts.size_question, 80),
                     fontWeight: fonts.weight_question,
+                    fontFamily: fontTokens.title.family,
                     color: colors.text,
                     textTransform,
                     maxWidth: '85vw',
@@ -784,6 +789,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: Math.min(fonts.size_question, 80),
                   fontWeight: fonts.weight_question,
+                  fontFamily: fontTokens.title.family,
                   color: colors.text,
                   textTransform,
                   maxWidth: '90%',
@@ -827,6 +833,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   style={{
                     fontSize: Math.min(fonts.size_hint, 32),
                     fontWeight: fonts.weight_hint,
+                    fontFamily: fontTokens.body.family,
                     color: colors.textSecondary,
                     textTransform,
                     maxWidth: '85vw',
@@ -842,6 +849,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: Math.min(fonts.size_hint, 32),
                   fontWeight: fonts.weight_hint,
+                  fontFamily: fontTokens.body.family,
                   color: colors.textSecondary,
                   textTransform,
                   maxWidth: '90%',

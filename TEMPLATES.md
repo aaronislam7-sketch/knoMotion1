@@ -1337,6 +1337,80 @@ Before considering a template complete:
 
 ---
 
+## ⚠️ Common Mistakes to Avoid
+
+### 🚨 CRITICAL: Missing Font System Setup (Text Not Rendering)
+
+**Symptom:** Template builds successfully but no text appears when rendered.
+
+**Root Cause:** Missing `buildFontTokens` or not applying `fontFamily` to text elements.
+
+**The Fix (Required for ALL templates):**
+
+**Step 1: Import `buildFontTokens`**
+```jsx
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
+```
+
+**Step 2: Call `buildFontTokens` in component**
+```jsx
+export const YourTemplate = ({ scene }) => {
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+  
+  // ✅ CRITICAL: Add this line
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
+  // ... rest of component
+};
+```
+
+**Step 3: Apply `fontFamily` to ALL text elements**
+```jsx
+// ❌ BAD - No fontFamily (text won't render)
+<div style={{
+  fontSize: fonts.size_title,
+  fontWeight: fonts.weight_title,
+  color: colors.text
+}}>
+  {config.title.text}
+</div>
+
+// ✅ GOOD - fontFamily applied
+<div style={{
+  fontSize: fonts.size_title,
+  fontWeight: fonts.weight_title,
+  fontFamily: fontTokens.title.family,  // ← REQUIRED
+  color: colors.text
+}}>
+  {config.title.text}
+</div>
+```
+
+**Font Token Types:**
+- `fontTokens.title.family` - For titles, headlines, questions
+- `fontTokens.body.family` - For body text, descriptions, hints
+- `fontTokens.accent.family` - For labels, badges, special emphasis
+
+**Why This Happens:**
+The font system loads custom fonts asynchronously. Without `buildFontTokens`, React doesn't know which font family to use, and browsers may fail to render text with undefined font families.
+
+**Quick Check:**
+```bash
+# Search for missing buildFontTokens in your template
+grep -L "buildFontTokens" src/templates/v6/YourTemplate_V6.jsx
+# If your file appears, you need to add it!
+
+# Search for text without fontFamily
+grep -A5 "fontSize.*size_" src/templates/v6/YourTemplate_V6.jsx | grep -v "fontFamily"
+# Any results mean text elements are missing fontFamily
+```
+
+---
+
 ## 🔗 Related Documentation
 
 - **[CONFIGURATION.md](./CONFIGURATION.md)** - JSON schema and configuration guide

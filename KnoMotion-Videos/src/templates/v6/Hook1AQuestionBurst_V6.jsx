@@ -23,7 +23,7 @@ import {
   NoiseTexture,
   SpotlightEffect
 } from '../../sdk/effects/broadcastEffects';
-import { loadFontVoice, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
@@ -236,6 +236,8 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   useEffect(() => {
     void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
+  
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   // Convert beats to frames
   const f = useMemo(() => ({
@@ -593,6 +595,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
           style={{
             top: config.title.offset.y,
             fontSize: Math.min(fonts.size_title, 72),
+            fontFamily: fontTokens.title.family,
             color: colors.text,
             textTransform,
             opacity: titleOpacity,
@@ -631,6 +634,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: Math.min(fonts.size_question, 80),
                   fontWeight: fonts.weight_question,
+                  fontFamily: fontTokens.title.family,
                   color: colors.accent,
                   textTransform,
                   textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
@@ -648,6 +652,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
               style={{
                 fontSize: Math.min(fonts.size_question, 80),
                 fontWeight: fonts.weight_question,
+                fontFamily: fontTokens.title.family,
                 color: colors.accent,
                 textTransform,
                 textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
@@ -689,6 +694,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                 style={{
                   fontSize: Math.min(fonts.size_question, 80),
                   fontWeight: fonts.weight_question,
+                  fontFamily: fontTokens.title.family,
                   color: colors.accent2,
                   textTransform,
                   textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
@@ -706,6 +712,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
               style={{
                 fontSize: Math.min(fonts.size_question, 80),
                 fontWeight: fonts.weight_question,
+                fontFamily: fontTokens.title.family,
                 color: colors.accent2,
                 textTransform,
                 textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
@@ -760,6 +767,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
             style={{
               fontSize: Math.min(fonts.size_conclusion, 72),
               fontWeight: fonts.weight_conclusion,
+              fontFamily: fontTokens.title.family,
               color: colors.accent,
               marginBottom: 20,
               textTransform,
@@ -773,6 +781,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
               className="font-body"
               style={{
                 fontSize: Math.min(fonts.size_subtitle, 32),
+                fontFamily: fontTokens.body.family,
                 color: colors.textSecondary,
                 fontWeight: 400,
                 textTransform,
