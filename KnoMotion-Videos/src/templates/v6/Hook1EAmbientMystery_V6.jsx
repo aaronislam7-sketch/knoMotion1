@@ -690,7 +690,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                     textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                   }}
                 >
-                  {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities)}
+                  {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
                 </div>
               </GlassmorphicPane>
             ) : (
@@ -706,7 +706,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                 }}
               >
-                {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities)}
+                {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
               </div>
             )}
           </div>
@@ -780,7 +780,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                       : '0 4px 12px rgba(0,0,0,0.6)'
                   }}
                 >
-                  {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities)}
+                  {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
                 </div>
               </GlassmorphicPane>
             ) : (
@@ -799,7 +799,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                     : '0 4px 12px rgba(0,0,0,0.6)'
                 }}
               >
-                {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities)}
+                {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
               </div>
             )}
           </div>
@@ -840,7 +840,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                     textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                   }}
                 >
-                  {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities)}
+                  {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
                 </div>
               </GlassmorphicPane>
             ) : (
@@ -856,7 +856,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                 }}
               >
-                {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities)}
+                {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
               </div>
             )}
           </div>

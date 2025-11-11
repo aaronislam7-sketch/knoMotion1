@@ -643,7 +643,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                   padding: '20px 0'
                 }}
               >
-                {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
+                {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
               </div>
             </GlassmorphicPane>
           ) : (
@@ -660,7 +660,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                 maxWidth: '88vw'
               }}
             >
-              {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
+              {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
             </div>
           )}
         </div>
@@ -703,7 +703,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                   padding: '20px 0'
                 }}
               >
-                {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
+                {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
               </div>
             </GlassmorphicPane>
           ) : (
@@ -720,7 +720,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                 maxWidth: '88vw'
               }}
             >
-              {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
+              {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
             </div>
           )}
         </div>

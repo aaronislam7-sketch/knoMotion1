@@ -1395,6 +1395,37 @@ export const YourTemplate = ({ scene }) => {
 - `fontTokens.body.family` - For body text, descriptions, hints
 - `fontTokens.accent.family` - For labels, badges, special emphasis
 
+**🔥 CRITICAL: Letter Reveal Functions Need FontFamily Too!**
+
+If you use `renderLetterReveal()` for animated text reveals, you **MUST** pass `fontFamily` as the third parameter:
+
+```jsx
+// ❌ BAD - Letter reveal text won't render
+{renderLetterReveal(
+  titleLetterReveal.letters, 
+  titleLetterReveal.letterOpacities
+)}
+
+// ✅ GOOD - Pass fontFamily in style object
+{renderLetterReveal(
+  titleLetterReveal.letters, 
+  titleLetterReveal.letterOpacities,
+  { fontFamily: fontTokens.title.family }  // ← REQUIRED third parameter
+)}
+```
+
+**Common letter reveal use cases:**
+```jsx
+// Title/Headline/Question text
+{renderLetterReveal(letters, opacities, { fontFamily: fontTokens.title.family })}
+
+// Body/Description/Hint text
+{renderLetterReveal(letters, opacities, { fontFamily: fontTokens.body.family })}
+
+// Label/Badge text
+{renderLetterReveal(letters, opacities, { fontFamily: fontTokens.accent.family })}
+```
+
 **Why This Happens:**
 The font system loads custom fonts asynchronously. Without `buildFontTokens`, React doesn't know which font family to use, and browsers may fail to render text with undefined font families.
 
@@ -1407,6 +1438,11 @@ grep -L "buildFontTokens" src/templates/v6/YourTemplate_V6.jsx
 # Search for text without fontFamily
 grep -A5 "fontSize.*size_" src/templates/v6/YourTemplate_V6.jsx | grep -v "fontFamily"
 # Any results mean text elements are missing fontFamily
+
+# Search for renderLetterReveal without fontFamily (the 3rd parameter)
+grep "renderLetterReveal.*letterOpacities)" src/templates/v6/YourTemplate_V6.jsx
+# If you find results, they're missing the fontFamily style parameter!
+# Should be: renderLetterReveal(letters, opacities, { fontFamily: fontTokens.X.family })
 ```
 
 ---

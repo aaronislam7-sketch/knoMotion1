@@ -357,7 +357,7 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
             }}
           >
-            {renderLetterReveal(titleLetterReveal.letters, titleLetterReveal.letterOpacities)}
+            {renderLetterReveal(titleLetterReveal.letters, titleLetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
           </div>
         </div>
       )}
