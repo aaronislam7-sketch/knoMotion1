@@ -464,9 +464,25 @@ style={{
 4. Ambient particles (20-30 floating)
 5. Content with glassmorphic panes
 
-#### 2. **Glassmorphic Content Cards**
-Wrap all major content in glassmorphic panes for premium feel:
+#### 2. **Glassmorphic Content Cards** ⚠️ USE SELECTIVELY
 
+Wrap content in glassmorphic panes **when it adds value**, not by default.
+
+**✅ WHEN TO USE:**
+- Content cards with multiple elements (image + text + description)
+- Information panels that need visual containment
+- Before/After comparison states
+- Multi-item grids or lists where grouping helps comprehension
+- When content needs separation from busy backgrounds
+
+**❌ WHEN NOT TO USE:**
+- Large, bold headline text (looks better clean and direct)
+- Single questions or statements (glassmorphic panes add unnecessary weight)
+- Minimal designs (defeats the purpose of minimalism)
+- Templates where simplicity is the aesthetic (Hook templates, Quote templates)
+- When it creates "PowerPoint slide" feeling
+
+**Implementation (when appropriate):**
 ```jsx
 import { GlassmorphicPane } from '../sdk/effects/broadcastEffects';
 
@@ -486,10 +502,26 @@ import { GlassmorphicPane } from '../sdk/effects/broadcastEffects';
 ```
 
 **Key principles:**
-- Always add subtle glow (0.15-0.25 opacity)
+- Add subtle glow (0.15-0.25 opacity) when using
 - Use semi-transparent backgrounds (15-20% opacity of accent color)
 - Add backdrop blur for true glass effect
 - Include subtle inner highlight (inset shadow)
+- **Always make it configurable:** `decorations.showGlassPane: true/false`
+
+**Example - Question Burst Template:**
+```jsx
+// ❌ WRONG - Unnecessary boxing of bold question
+<GlassmorphicPane>
+  <div style={{ fontSize: 72, fontWeight: 800 }}>
+    What if geography was measured in mindsets?
+  </div>
+</GlassmorphicPane>
+
+// ✅ CORRECT - Bold text stands alone
+<div style={{ fontSize: 72, fontWeight: 800 }}>
+  What if geography was measured in mindsets?
+</div>
+```
 
 #### 3. **Multi-Layered Entrance Animations**
 Combine multiple animation types for sophistication:
@@ -999,14 +1031,22 @@ boxShadow: `0 0 ${glowIntensity}px ${colors.highlight}80`
 
 ### Complete Polish Checklist
 
+**⚠️ IMPORTANT: These are a MENU, not a MANDATE!**
+
+The principles below are **design options** to consider, not requirements to apply blindly to every element. Use design judgment:
+- **Don't over-apply** - Not every text element needs a glassmorphic pane
+- **Preserve template identity** - Simple, bold text can be more impactful than boxes
+- **Avoid PowerPoint feel** - Too many boxes/cards = presentation slides
+- **When in doubt, less is more** - Start minimal, add effects only where they enhance
+
 When uplifting a template to broadcast-grade, ensure:
 
-**Visual Layers (5 required):**
+**Visual Layers (5 available, use 3-5):**
 - [ ] Gradient background (not flat)
 - [ ] Noise texture overlay
 - [ ] Spotlight effects (2-3)
 - [ ] Ambient particles (20-30)
-- [ ] Glassmorphic content panes
+- [ ] Glassmorphic content panes **WHERE APPROPRIATE**
 
 **Animation Layers (3+ required):**
 - [ ] Opacity fade
