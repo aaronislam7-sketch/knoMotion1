@@ -604,6 +604,61 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
         DEBUG: Can you see this text?
       </div>
       
+      {/* DEBUG: Test question text WITHOUT animation */}
+      <div style={{
+        position: 'absolute',
+        top: 300,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontSize: 64,
+        fontFamily: fontTokens.title.family,
+        color: colors.accent,
+        zIndex: 999,
+        backgroundColor: 'rgba(0,255,0,0.3)',
+        padding: '20px',
+        maxWidth: '80%',
+        textAlign: 'center'
+      }}>
+        {config.questionPart1.text}
+      </div>
+      
+      <div style={{
+        position: 'absolute',
+        top: 500,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontSize: 64,
+        fontFamily: fontTokens.title.family,
+        color: colors.accent2,
+        zIndex: 999,
+        backgroundColor: 'rgba(0,0,255,0.3)',
+        padding: '20px',
+        maxWidth: '80%',
+        textAlign: 'center'
+      }}>
+        {config.questionPart2.text}
+      </div>
+      
+      {/* DEBUG: Test letter reveal data */}
+      <div style={{
+        position: 'absolute',
+        top: 700,
+        left: 20,
+        fontSize: 20,
+        fontFamily: 'monospace',
+        color: '#FFFFFF',
+        zIndex: 999,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        padding: '10px'
+      }}>
+        Frame: {frame}<br/>
+        Q1 Start (beats): {beats.q1Start}s<br/>
+        Q1 Start (frames): {f.q1Start}<br/>
+        Q1 Letters: {q1LetterReveal.letters.length}<br/>
+        Q1 First Opacity: {q1LetterReveal.letterOpacities[0]?.toFixed(3)}<br/>
+        Q1 Last Opacity: {q1LetterReveal.letterOpacities[q1LetterReveal.letterOpacities.length - 1]?.toFixed(3)}
+      </div>
+      
       {/* Optional Title */}
       {config.title.enabled && (
         <div
