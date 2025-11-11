@@ -81,14 +81,18 @@ const DEFAULT_CONFIG = {
     headline: 'Starting Point',
     description: 'Where we began',
     visual: null,
-    backgroundColor: '#FFE5E5'
+    backgroundColor: '#FFE5E5',
+    emoji: '⚠️',  // Configurable decorative emoji
+    showEmoji: true
   },
   after: {
     label: 'AFTER',
     headline: 'End Result',
     description: 'Where we arrived',
     visual: null,
-    backgroundColor: '#E5FFE5'
+    backgroundColor: '#E5FFE5',
+    emoji: '✨',  // Configurable decorative emoji
+    showEmoji: true
   },
   style_tokens: {
     colors: {
@@ -106,18 +110,36 @@ const DEFAULT_CONFIG = {
     }
   },
   beats: {
-    entrance: 0.4,
-    titleEntry: 0.6,
-    beforeReveal: 1.2,
-    transitionStart: 3.0,
-    transitionDuration: 1.5,
-    afterEmphasize: 1.0,
-    exit: 2.0
+    // CUMULATIVE TIMING: Each value is added to the previous
+    // entrance = 0.4s
+    // title appears at: entrance + titleEntry = 0.4 + 0.2 = 0.6s
+    // before appears at: entrance + titleEntry + beforeReveal = 0.4 + 0.2 + 1.0 = 1.6s
+    entrance: 0.4,           // Initial fade in (absolute start)
+    titleEntry: 0.2,         // After entrance (+0.2s)
+    titleHold: 0.8,          // Hold title visible (+0.8s) 
+    beforeReveal: 1.0,       // Before section appears (+1.0s)
+    beforeHold: 2.0,         // Hold before visible (+2.0s)
+    transitionDuration: 2.0, // Slider animation duration (+2.0s)
+    afterReveal: 0.3,        // After appears during transition (+0.3s)
+    afterHold: 2.0,          // Hold after visible (+2.0s)
+    afterEmphasize: 0.8,     // Pulse emphasis (+0.8s)
+    exit: 1.5                // Exit animation (+1.5s)
   },
   animation: {
     beforeEntrance: 'slide-right',
     afterEntrance: 'slide-left',
-    pulseAfter: true
+    pulseAfter: true,
+    continuousFloat: true  // Subtle floating animation throughout
+  },
+  decorations: {
+    showTitleUnderline: true,
+    underlineColor: null,  // null = use accent color
+    underlineStyle: 'wavy', // wavy, straight, dashed
+    showParticles: true,
+    particleCount: 30,
+    showSpotlights: true,
+    showNoiseTexture: true,
+    noiseOpacity: 0.04
   },
   typography: {
     voice: 'utility',
@@ -127,6 +149,44 @@ const DEFAULT_CONFIG = {
   transition: {
     exit: { style: 'fade', durationInFrames: 18, easing: 'smooth' }
   }
+};
+
+/**
+ * Calculate cumulative beat timings
+ * Converts relative durations to absolute timestamps
+ */
+const calculateCumulativeBeats = (beats) => {
+  const {
+    entrance = 0.4,
+    titleEntry = 0.2,
+    titleHold = 0.8,
+    beforeReveal = 1.0,
+    beforeHold = 2.0,
+    transitionDuration = 2.0,
+    afterReveal = 0.3,
+    afterHold = 2.0,
+    afterEmphasize = 0.8,
+    exit = 1.5
+  } = beats;
+  
+  let cumulative = 0;
+  
+  return {
+    entrance: cumulative,
+    title: (cumulative += entrance),
+    titleEnd: (cumulative += titleEntry + titleHold),
+    beforeStart: (cumulative = cumulative - titleHold + beforeReveal),
+    beforeEnd: (cumulative += beforeHold),
+    transitionStart: cumulative,
+    transitionEnd: (cumulative += transitionDuration),
+    afterStart: cumulative - transitionDuration + afterReveal,
+    afterEnd: (cumulative += afterHold),
+    emphasizeStart: cumulative,
+    emphasizeEnd: (cumulative += afterEmphasize),
+    exitStart: cumulative,
+    exitEnd: (cumulative += exit),
+    totalDuration: cumulative
+  };
 };
 
 // Render split divider with broadcast-grade polish
@@ -292,30 +352,35 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
       fonts: { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) }
     },
     beats: { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) },
-    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) }
+    animation: { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) },
+    decorations: { ...DEFAULT_CONFIG.decorations, ...(scene.decorations || {}) }
   };
   
   const colors = config.style_tokens.colors;
   const fonts = config.style_tokens.fonts;
-  const beats = config.beats;
+  const rawBeats = config.beats;
+  
+  // Calculate cumulative beat timings (relative → absolute)
+  const beats = calculateCumulativeBeats(rawBeats);
   
   // Ambient particles (memoized for performance)
+  const particleCount = config.decorations.showParticles ? config.decorations.particleCount : 0;
   const particles = useMemo(() => 
-    generateAmbientParticles(30, 11001, width, height),
-    [width, height]
+    generateAmbientParticles(particleCount, 11001, width, height),
+    [particleCount, width, height]
   );
   const particleElements = renderAmbientParticles(particles, frame, fps, [colors.accent, colors.accent2, colors.bg]);
   
   // Title animation with letter reveal
-  const titleStartFrame = toFrames(beats.titleEntry, fps);
+  const titleStartFrame = toFrames(beats.title, fps);
   const titleLetterReveal = getLetterReveal(frame, config.title.text, {
-    startFrame: beats.titleEntry,
+    startFrame: beats.title,
     duration: 0.05,
     staggerDelay: 0.05
   }, fps);
   
   const titleAnim = fadeUpIn(frame, {
-    start: beats.titleEntry,
+    start: beats.title,
     dur: 0.8,
     dist: 50,
     ease: 'smooth'
@@ -328,9 +393,9 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   );
   
   // Before state animation with card entrance
-  const beforeStartFrame = toFrames(beats.beforeReveal, fps);
+  const beforeStartFrame = toFrames(beats.beforeStart, fps);
   const beforeCardAnim = getCardEntrance(frame, {
-    startFrame: beats.beforeReveal,
+    startFrame: beats.beforeStart,
     duration: 1.0,
     direction: 'left',
     distance: 120,
@@ -340,22 +405,27 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   
   // Label icon pop
   const beforeLabelIconAnim = getIconPop(frame, {
-    startFrame: beats.beforeReveal + 0.3,
+    startFrame: beats.beforeStart + 0.3,
     duration: 0.6,
     withBounce: true
   }, fps);
   
+  // Continuous floating animation for before section
+  const beforeFloat = config.animation.continuousFloat 
+    ? Math.sin((frame - beforeStartFrame) * 0.02) * 5 
+    : 0;
+  
   // Transition animation
   const transitionStartFrame = toFrames(beats.transitionStart, fps);
-  const transitionEndFrame = toFrames(beats.transitionStart + beats.transitionDuration, fps);
+  const transitionEndFrame = toFrames(beats.transitionEnd, fps);
   const transitionProgress = frame >= transitionStartFrame && frame <= transitionEndFrame
     ? (frame - transitionStartFrame) / (transitionEndFrame - transitionStartFrame)
     : frame > transitionEndFrame ? 1 : 0;
   
   // After state animation with card entrance
-  const afterStartFrame = toFrames(beats.transitionStart + 0.3, fps);
+  const afterStartFrame = toFrames(beats.afterStart, fps);
   const afterCardAnim = getCardEntrance(frame, {
-    startFrame: beats.transitionStart + 0.3,
+    startFrame: beats.afterStart,
     duration: 1.0,
     direction: 'right',
     distance: 120,
@@ -365,19 +435,23 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
   
   // Label icon pop
   const afterLabelIconAnim = getIconPop(frame, {
-    startFrame: beats.transitionStart + 0.6,
+    startFrame: beats.afterStart + 0.3,
     duration: 0.6,
     withBounce: true
   }, fps);
   
+  // Continuous floating animation for after section
+  const afterFloat = config.animation.continuousFloat 
+    ? Math.sin((frame - afterStartFrame) * 0.02 + Math.PI) * 5 
+    : 0;
+  
   // After emphasis pulse with glow
-  const afterEmphasizeStart = beats.transitionStart + beats.transitionDuration;
-  const afterEmphasizeFrame = toFrames(afterEmphasizeStart, fps);
+  const afterEmphasizeFrame = toFrames(beats.emphasizeStart, fps);
   let afterPulseScale = 1;
   let afterPulseGlow = { boxShadow: 'none' };
   if (config.animation.pulseAfter && frame >= afterEmphasizeFrame) {
     afterPulseScale = pulseEmphasis(frame, {
-      start: afterEmphasizeStart,
+      start: beats.emphasizeStart,
       dur: 0.6,
       ease: 'smooth'
     }, EZ, fps).scale;
@@ -420,24 +494,30 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
       background: `linear-gradient(135deg, ${colors.bg} 0%, ${colors.bg}E6 50%, ${colors.bg} 100%)`,
       fontFamily: fontTokens.body.family 
     }}>
-      {/* Noise texture overlay */}
-      <NoiseTexture opacity={0.04} scale={1.5} />
+      {/* Noise texture overlay - CONFIGURABLE */}
+      {config.decorations.showNoiseTexture && (
+        <NoiseTexture opacity={config.decorations.noiseOpacity} scale={1.5} />
+      )}
       
-      {/* Spotlight effects for before/after sections */}
-      <SpotlightEffect 
-        x={25} 
-        y={50} 
-        size={600} 
-        color={colors.accent} 
-        opacity={0.15} 
-      />
-      <SpotlightEffect 
-        x={75} 
-        y={50} 
-        size={600} 
-        color={colors.accent2} 
-        opacity={0.15} 
-      />
+      {/* Spotlight effects for before/after sections - CONFIGURABLE */}
+      {config.decorations.showSpotlights && (
+        <>
+          <SpotlightEffect 
+            x={25} 
+            y={50} 
+            size={600} 
+            color={colors.accent} 
+            opacity={0.15} 
+          />
+          <SpotlightEffect 
+            x={75} 
+            y={50} 
+            size={600} 
+            color={colors.accent2} 
+            opacity={0.15} 
+          />
+        </>
+      )}
       
       {/* Ambient particles */}
       <svg
@@ -472,26 +552,49 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
           }}>
             {renderLetterReveal(titleLetterReveal.letters, titleLetterReveal.letterOpacities)}
           </div>
-          {/* Doodle underline */}
-          <svg 
-            width="300" 
-            height="20" 
-            style={{ 
-              margin: '10px auto 0',
-              display: 'block',
-              opacity: titleLetterReveal.isComplete ? 1 : 0,
-              transition: 'opacity 0.3s ease'
-            }}
-          >
-            <path 
-              d="M 10,10 Q 75,5 150,10 T 290,10" 
-              stroke={colors.accent} 
-              strokeWidth="3" 
-              fill="none" 
-              strokeLinecap="round"
-              opacity="0.7"
-            />
-          </svg>
+          {/* Doodle underline - CONFIGURABLE */}
+          {config.decorations.showTitleUnderline && (
+            <svg 
+              width="300" 
+              height="20" 
+              style={{ 
+                margin: '10px auto 0',
+                display: 'block',
+                opacity: titleLetterReveal.isComplete ? 1 : 0,
+                transition: 'opacity 0.3s ease'
+              }}
+            >
+              {config.decorations.underlineStyle === 'wavy' && (
+                <path 
+                  d="M 10,10 Q 75,5 150,10 T 290,10" 
+                  stroke={config.decorations.underlineColor || colors.accent} 
+                  strokeWidth="3" 
+                  fill="none" 
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+              )}
+              {config.decorations.underlineStyle === 'straight' && (
+                <line 
+                  x1="10" y1="10" x2="290" y2="10"
+                  stroke={config.decorations.underlineColor || colors.accent} 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+              )}
+              {config.decorations.underlineStyle === 'dashed' && (
+                <line 
+                  x1="10" y1="10" x2="290" y2="10"
+                  stroke={config.decorations.underlineColor || colors.accent} 
+                  strokeWidth="3" 
+                  strokeDasharray="5,5"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+              )}
+            </svg>
+          )}
         </div>
       )}
       
@@ -522,11 +625,11 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
             style={{
               maxWidth: '85%',
               opacity: beforeCardAnim.opacity,
-              transform: `translate(${beforeCardAnim.translateX}px, ${beforeCardAnim.translateY}px) scale(${beforeCardAnim.scale})`,
+              transform: `translate(${beforeCardAnim.translateX}px, ${beforeCardAnim.translateY + beforeFloat}px) scale(${beforeCardAnim.scale})`,
               boxShadow: beforeCardAnim.boxShadow
             }}
           >
-            {/* Label with icon animation */}
+            {/* Label with icon animation - CONFIGURABLE EMOJI */}
             <div 
               className="uppercase tracking-wider mb-5 flex items-center justify-center gap-2" 
               style={{
@@ -538,12 +641,14 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
                 transform: `scale(${beforeLabelIconAnim.scale}) rotate(${beforeLabelIconAnim.rotation}deg)`
               }}
             >
-              <span style={{ 
-                display: 'inline-block',
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-              }}>
-                ⚠️
-              </span>
+              {config.before.showEmoji && (
+                <span style={{ 
+                  display: 'inline-block',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                }}>
+                  {config.before.emoji}
+                </span>
+              )}
               {config.before.label}
             </div>
             
@@ -626,12 +731,12 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
             style={{
               maxWidth: '85%',
               opacity: afterCardAnim.opacity,
-              transform: `translate(${afterCardAnim.translateX}px, ${afterCardAnim.translateY}px) scale(${afterCardAnim.scale * afterPulseScale})`,
+              transform: `translate(${afterCardAnim.translateX}px, ${afterCardAnim.translateY + afterFloat}px) scale(${afterCardAnim.scale * afterPulseScale})`,
               boxShadow: afterCardAnim.boxShadow,
               ...afterPulseGlow
             }}
           >
-            {/* Label with icon animation */}
+            {/* Label with icon animation - CONFIGURABLE EMOJI */}
             <div 
               className="uppercase tracking-wider mb-5 flex items-center justify-center gap-2" 
               style={{
@@ -643,12 +748,14 @@ export const Compare11BeforeAfter = ({ scene, styles, presets, easingMap }) => {
                 transform: `scale(${afterLabelIconAnim.scale}) rotate(${afterLabelIconAnim.rotation}deg)`
               }}
             >
-              <span style={{ 
-                display: 'inline-block',
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-              }}>
-                ✨
-              </span>
+              {config.after.showEmoji && (
+                <span style={{ 
+                  display: 'inline-block',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                }}>
+                  {config.after.emoji}
+                </span>
+              )}
               {config.after.label}
             </div>
             
@@ -726,10 +833,12 @@ export const LEARNING_INTENTIONS = {
 
 export const getDuration = (scene, fps) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const rawBeats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   
-  const totalDuration = beats.transitionStart + beats.transitionDuration + beats.afterEmphasize + beats.exit;
-  return toFrames(totalDuration, fps);
+  // Calculate cumulative beats to get total duration
+  const beats = calculateCumulativeBeats(rawBeats);
+  
+  return toFrames(beats.totalDuration, fps);
 };
 
 export const CAPABILITIES = {
@@ -769,7 +878,9 @@ export const CONFIG_SCHEMA = {
       headline: { type: 'string', required: true },
       description: { type: 'string', required: false },
       visual: { type: 'polymorphic-hero', required: false },
-      backgroundColor: { type: 'color', default: '#FFE5E5' }
+      backgroundColor: { type: 'color', default: '#FFE5E5' },
+      emoji: { type: 'string', default: '⚠️', label: 'Decorative Emoji' },
+      showEmoji: { type: 'boolean', default: true, label: 'Show Emoji' }
     }
   },
   after: {
@@ -779,7 +890,9 @@ export const CONFIG_SCHEMA = {
       headline: { type: 'string', required: true },
       description: { type: 'string', required: false },
       visual: { type: 'polymorphic-hero', required: false },
-      backgroundColor: { type: 'color', default: '#E5FFE5' }
+      backgroundColor: { type: 'color', default: '#E5FFE5' },
+      emoji: { type: 'string', default: '✨', label: 'Decorative Emoji' },
+      showEmoji: { type: 'boolean', default: true, label: 'Show Emoji' }
     }
   },
   style_tokens: {
@@ -789,14 +902,40 @@ export const CONFIG_SCHEMA = {
   },
   beats: {
     type: 'timeline',
-    beats: ['entrance', 'titleEntry', 'beforeReveal', 'transitionStart', 'transitionDuration', 'afterEmphasize', 'exit']
+    description: 'CUMULATIVE timing - each value adds to the previous',
+    beats: [
+      { key: 'entrance', label: 'Entrance (start)', default: 0.4 },
+      { key: 'titleEntry', label: '+ Title Entry', default: 0.2 },
+      { key: 'titleHold', label: '+ Title Hold', default: 0.8 },
+      { key: 'beforeReveal', label: '+ Before Reveal', default: 1.0 },
+      { key: 'beforeHold', label: '+ Before Hold', default: 2.0 },
+      { key: 'transitionDuration', label: '+ Transition', default: 2.0 },
+      { key: 'afterReveal', label: '+ After Reveal', default: 0.3 },
+      { key: 'afterHold', label: '+ After Hold', default: 2.0 },
+      { key: 'afterEmphasize', label: '+ Emphasis', default: 0.8 },
+      { key: 'exit', label: '+ Exit', default: 1.5 }
+    ]
   },
   animation: {
     type: 'animation-config',
     options: {
       beforeEntrance: ['slide-right', 'fade-up', 'pop'],
       afterEntrance: ['slide-left', 'fade-up', 'pop'],
-      pulseAfter: 'boolean'
+      pulseAfter: { type: 'boolean', default: true, label: 'Pulse After Section' },
+      continuousFloat: { type: 'boolean', default: true, label: 'Continuous Floating' }
+    }
+  },
+  decorations: {
+    type: 'object',
+    fields: {
+      showTitleUnderline: { type: 'boolean', default: true, label: 'Show Title Underline' },
+      underlineColor: { type: 'color', default: null, label: 'Underline Color (null = accent)' },
+      underlineStyle: { type: 'select', options: ['wavy', 'straight', 'dashed'], default: 'wavy', label: 'Underline Style' },
+      showParticles: { type: 'boolean', default: true, label: 'Show Particles' },
+      particleCount: { type: 'number', min: 0, max: 50, default: 30, label: 'Particle Count' },
+      showSpotlights: { type: 'boolean', default: true, label: 'Show Spotlights' },
+      showNoiseTexture: { type: 'boolean', default: true, label: 'Show Noise Texture' },
+      noiseOpacity: { type: 'number', min: 0, max: 0.1, step: 0.01, default: 0.04, label: 'Noise Opacity' }
     }
   },
   typography: {

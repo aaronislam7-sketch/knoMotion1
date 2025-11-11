@@ -742,6 +742,68 @@ When uplifting a template to broadcast-grade, ensure:
 
 ---
 
+### Cumulative Beats System
+
+**NEW: Relative timing makes adjustments easy!**
+
+Instead of absolute timestamps, beats are now **cumulative durations** that add together:
+
+**❌ OLD (Absolute Timing):**
+```json
+"beats": {
+  "entrance": 0.4,
+  "titleEntry": 0.6,      // Must manually calculate: 0.4 + 0.2
+  "beforeReveal": 1.6,    // Must manually calculate: 0.6 + 1.0
+  "transitionStart": 3.6  // Must manually calculate: 1.6 + 2.0
+}
+```
+**Problem:** Changing `entrance` requires recalculating ALL subsequent beats!
+
+**✅ NEW (Cumulative Timing):**
+```json
+"beats": {
+  "entrance": 0.4,       // Start at 0.4s
+  "titleEntry": 0.2,     // +0.2s (appears at 0.6s)
+  "titleHold": 0.8,      // +0.8s (holds until 1.4s) 
+  "beforeReveal": 1.0,   // +1.0s (appears at 2.4s)
+  "beforeHold": 2.0,     // +2.0s (holds until 4.4s)
+  "transitionDuration": 2.0  // +2.0s (completes at 6.4s)
+}
+```
+**Benefit:** Change `entrance` to `0.8s` and everything shifts automatically!
+
+**Implementation:**
+```jsx
+// In template file
+const calculateCumulativeBeats = (beats) => {
+  let cumulative = 0;
+  return {
+    entrance: cumulative,
+    title: (cumulative += beats.entrance),
+    titleEnd: (cumulative += beats.titleEntry + beats.titleHold),
+    beforeStart: (cumulative = cumulative - beats.titleHold + beats.beforeReveal),
+    // ... etc
+    totalDuration: cumulative
+  };
+};
+
+// Use in component
+const rawBeats = config.beats;  // From JSON
+const beats = calculateCumulativeBeats(rawBeats);  // Absolute timestamps
+
+// Apply to animations
+const titleStartFrame = toFrames(beats.title, fps);
+const beforeStartFrame = toFrames(beats.beforeStart, fps);
+```
+
+**Benefits:**
+- ✅ Easy to adjust timing without recalculating
+- ✅ Clear duration for each segment
+- ✅ Automatic total duration calculation
+- ✅ JSON configs are more intuitive
+
+---
+
 ### Screen Real Estate Usage
 
 **Target: 90-95% of 1920x1080 canvas**
