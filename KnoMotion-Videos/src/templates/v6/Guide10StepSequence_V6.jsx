@@ -179,28 +179,28 @@ const DEFAULT_CONFIG = {
   // DECORATIONS: 100% configurable micro-delights and animations
   decorations: {
     titleLetterReveal: {
-      enabled: true,
+      enabled: false,  // DISABLED - causing rendering issues
       staggerDelay: 0.04,
       fadeInDuration: 0.3
     },
     stepBurst: {
-      enabled: true,
+      enabled: false,  // DISABLED - causing rendering issues
       particleCount: 15,
       spread: 100,
       duration: 1.0
     },
     stepFloat: {
-      enabled: true,
+      enabled: false,  // DISABLED - causing rendering issues
       distance: 6,
       speed: 0.025
     },
     iconPop: {
-      enabled: true,
+      enabled: false,  // DISABLED - causing rendering issues
       withBounce: true,
       duration: 0.5
     },
     arrowAnimation: {
-      enabled: true,
+      enabled: false,  // DISABLED - causing rendering issues
       withGlow: false
     }
   }
