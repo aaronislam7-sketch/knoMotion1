@@ -1463,7 +1463,60 @@ grep -E "getParticleBurst.*triggerFrame: f\." src/templates/v6/YourTemplate_V6.j
 
 ---
 
-### 🚨 CRITICAL #2: Font System Setup (Text Rendering)
+### 🚨 CRITICAL #2: getLetterReveal Function Signature
+
+**Problem:** Incorrectly passing text inside config object causes `text.split is not a function` error.
+
+**Root Cause:**
+The `getLetterReveal` function signature expects text as a **separate parameter**:
+```javascript
+getLetterReveal(frame, text, config, fps)
+```
+
+**❌ WRONG - Text inside config:**
+```javascript
+const titleLetterReveal = getLetterReveal(frame, {
+  startFrame: beats.title + 0.2,
+  text: config.title.text,  // ❌ Wrong position
+  staggerDelay: 0.04,
+  duration: 0.3
+}, fps);
+```
+
+**✅ CORRECT - Text as 2nd parameter:**
+```javascript
+const titleLetterReveal = getLetterReveal(frame, config.title.text, {
+  startFrame: beats.title + 0.2,  // ✅ Text extracted
+  staggerDelay: 0.04,
+  duration: 0.3
+}, fps);
+```
+
+**Render Usage:**
+```javascript
+// Extract letters and letterOpacities from result
+{titleLetterReveal ? (
+  renderLetterReveal(
+    titleLetterReveal.letters,           // ✅ First param
+    titleLetterReveal.letterOpacities,   // ✅ Second param
+    {                                     // ✅ Third param (styles)
+      fontSize: fonts.size_title,
+      fontFamily: fontTokens.title.family,
+      color: colors.text
+    }
+  )
+) : (
+  <div>{config.title.text}</div>
+)}
+```
+
+**Detection:**
+```bash
+# Find incorrect usage
+grep -rn "getLetterReveal.*text:" KnoMotion-Videos/src/templates/v6/
+```
+
+## 🚨 CRITICAL #3: Font System Setup (Text Rendering)
 
 **Symptom:** Text renders but uses wrong font or doesn't match configured typography.voice.
 
