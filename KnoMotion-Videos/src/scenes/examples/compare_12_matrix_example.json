@@ -108,7 +108,7 @@
   },
   
   "typography": {
-    "voice": "utility",
+    "voice": "notebook",
     "align": "center",
     "transform": "none"
   },

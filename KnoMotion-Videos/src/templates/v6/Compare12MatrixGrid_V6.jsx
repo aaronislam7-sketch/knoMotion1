@@ -157,7 +157,7 @@ const DEFAULT_CONFIG = {
   },
   
   typography: {
-    voice: 'utility',
+    voice: 'notebook',
     align: 'center',
     transform: 'none'
   },
