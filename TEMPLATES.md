@@ -948,6 +948,55 @@ const visualDelay = config.animation.staggerContent ? 0.4 : 0;
 
 ---
 
+#### 16. **Pulsing Highlight Animations** ⭐ NEW
+
+Add continuous pulsing to highlighted/winner elements for sustained visual emphasis:
+
+```jsx
+// Calculate pulse intensity (continuous sine wave)
+const highlightPulse = config.animation.continuousPulse && highlightProgress > 0
+  ? Math.sin((frame - highlightStartFrame) * 0.08) * 0.3 + 0.7
+  : 1;
+
+// Apply to glow intensity
+const glowIntensity = isHighlighted ? 15 + (highlightPulse * 10) : 0;
+
+// Apply to scale
+transform: `scale(${1 + (highlightPulse * 0.02)})`
+
+// Apply to box shadow
+boxShadow: `0 0 ${glowIntensity}px ${colors.highlight}80`
+```
+
+**Key principles:**
+- **Frequency: 0.08** for gentle pulsing (0.06-0.10 range, slower than float)
+- **Amplitude: 0.3** centered around 0.7 (range 0.4 to 1.0, never fully off)
+- **Additive not multiplicative:** Add pulse to base value (15 + pulse*10, not 15*pulse)
+- **Multi-property:** Apply to both glow intensity AND scale for richness
+- **Configurable:** Always allow toggling via `continuousPulse: boolean`
+- **Only when active:** Start pulsing only after highlight is triggered
+
+**Use cases:**
+- Winner/highlighted columns in comparison grids
+- Selected items in multi-choice scenarios
+- Correct answers in quizzes
+- Featured/recommended options
+- Active/current step indicators
+
+**When NOT to use:**
+- On all elements (overwhelming, no focus)
+- During transitions (conflicts with entrance/exit)
+- With very small elements (< 50px, too subtle)
+- When element already has complex animation
+
+**Difference from Continuous Float:**
+- **Float:** Position-based (translateY), for ambient life
+- **Pulse:** Intensity-based (opacity/glow/scale), for emphasis/attention
+
+**Reference:** See `Compare12MatrixGrid_V6.jsx` (winner column highlight pulse) for implementation.
+
+---
+
 ### Complete Polish Checklist
 
 When uplifting a template to broadcast-grade, ensure:
@@ -987,10 +1036,11 @@ When uplifting a template to broadcast-grade, ensure:
 - [ ] Breathing room (padding/margins)
 - [ ] Color with opacity for hierarchy
 - [ ] Continuous life animations (subtle floating during holds)
-- [ ] Dynamic array timing (for variable-length content) ⭐ NEW
-- [ ] Persistent stage indicators (corner progress markers) ⭐ NEW
-- [ ] Curtain/overlay effects (full-screen reveals with glow) ⭐ NEW
-- [ ] Per-item content stagger (headline → description → visual) ⭐ NEW
+- [ ] Dynamic array timing (for variable-length content)
+- [ ] Persistent stage indicators (corner progress markers)
+- [ ] Curtain/overlay effects (full-screen reveals with glow)
+- [ ] Per-item content stagger (headline → description → visual)
+- [ ] Pulsing highlight animations (glow/scale for emphasis) ⭐ NEW
 
 ---
 
