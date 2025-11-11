@@ -1339,13 +1339,97 @@ Before considering a template complete:
 
 ## ⚠️ Common Mistakes to Avoid
 
-### 🚨 CRITICAL: Missing Font System Setup (Text Not Rendering)
+### 🚨 CRITICAL #1: Animation Functions Expect SECONDS Not FRAMES
 
-**Symptom:** Template builds successfully but no text appears when rendered.
+**Symptom:** Template builds successfully but animations never trigger (text/elements invisible or appear instantly without animation).
+
+**Root Cause:** ALL SDK animation functions expect timing parameters in SECONDS, but we're passing pre-converted FRAMES, causing double-conversion.
+
+**The Problem:**
+```jsx
+// ❌ WRONG - Double conversion (seconds → frames → frames again)
+const f = {
+  q1Start: toFrames(beats.q1Start, fps)  // Convert to frames
+};
+
+const q1CardEntrance = getCardEntrance(frame, {
+  startFrame: f.q1Start,  // ← FRAMES (already converted) - WRONG!
+  duration: 0.8
+}, fps);
+// getCardEntrance internally does: toFrames(f.q1Start, fps)
+// Result: 0.9s → 27f → toFrames(27, 30) → 810 frames!
+// Animation never triggers (starts way in future)
+```
+
+**The Solution:**
+```jsx
+// ✅ CORRECT - Pass SECONDS, let functions convert internally
+const q1CardEntrance = getCardEntrance(frame, {
+  startFrame: beats.q1Start,  // ← SECONDS (e.g., 0.9)
+  duration: 0.8
+}, fps);
+// getCardEntrance does: toFrames(0.9, 30) → 27 frames ✓
+```
+
+**Functions That Expect SECONDS:**
+- `getCardEntrance(frame, { startFrame: SECONDS, duration: SECONDS }, fps)`
+- `getIconPop(frame, { startFrame: SECONDS, duration: SECONDS }, fps)`
+- `getParticleBurst(frame, { triggerFrame: SECONDS, duration: SECONDS }, fps)`
+- `getLetterReveal(frame, text, { startFrame: SECONDS, duration: SECONDS }, fps)`
+- `getScaleEmphasis(frame, { triggerFrame: SECONDS, duration: SECONDS }, fps)`
+- `getPulseGlow(frame, { startFrame: SECONDS, ... })` (if applicable)
+
+**The Pattern:**
+```jsx
+// Pre-convert beats to frames for interpolate() calls
+const f = useMemo(() => ({
+  titleStart: toFrames(beats.titleStart, fps),
+  q1Start: toFrames(beats.q1Start, fps),
+  // ...
+}), [beats, fps]);
+
+// Use FRAMES (f.xxx) for:
+const titleProgress = interpolate(frame, [f.titleStart, f.titleStart + 30], ...);
+if (frame >= f.q1Start) { ... }
+
+// Use SECONDS (beats.xxx) for SDK animation functions:
+const cardAnim = getCardEntrance(frame, { startFrame: beats.q1Start }, fps);
+const letterReveal = getLetterReveal(frame, text, { startFrame: beats.titleStart }, fps);
+```
+
+**Quick Fix Checklist:**
+```jsx
+// ❌ Find and replace these patterns:
+getCardEntrance(frame, { startFrame: f.xxxStart
+getIconPop(frame, { startFrame: f.xxxStart
+getParticleBurst(frame, { triggerFrame: f.xxxStart
+getLetterReveal(frame, text, { startFrame: f.xxxStart
+
+// ✅ With these patterns:
+getCardEntrance(frame, { startFrame: beats.xxxStart
+getIconPop(frame, { startFrame: beats.xxxStart
+getParticleBurst(frame, { triggerFrame: beats.xxxStart
+getLetterReveal(frame, text, { startFrame: beats.xxxStart
+```
+
+**Quick Check:**
+```bash
+# Find animation functions using FRAMES (wrong):
+grep -E "get(Card|Icon|Particle|Letter).*startFrame: f\." src/templates/v6/YourTemplate_V6.jsx
+grep -E "getParticleBurst.*triggerFrame: f\." src/templates/v6/YourTemplate_V6.jsx
+
+# Should return no results! If it does, change f.xxxStart to beats.xxxStart
+```
+
+---
+
+### 🚨 CRITICAL #2: Font System Setup (Text Rendering)
+
+**Symptom:** Text renders but uses wrong font or doesn't match configured typography.voice.
 
 **Root Cause:** Missing `buildFontTokens` or not applying `fontFamily` to text elements.
 
-**The Fix (Required for ALL templates):**
+**The Fix:**
 
 **Step 1: Import `buildFontTokens`**
 ```jsx
@@ -1361,7 +1445,6 @@ export const YourTemplate = ({ scene }) => {
     void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
   
-  // ✅ CRITICAL: Add this line
   const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   // ... rest of component
@@ -1370,16 +1453,6 @@ export const YourTemplate = ({ scene }) => {
 
 **Step 3: Apply `fontFamily` to ALL text elements**
 ```jsx
-// ❌ BAD - No fontFamily (text won't render)
-<div style={{
-  fontSize: fonts.size_title,
-  fontWeight: fonts.weight_title,
-  color: colors.text
-}}>
-  {config.title.text}
-</div>
-
-// ✅ GOOD - fontFamily applied
 <div style={{
   fontSize: fonts.size_title,
   fontWeight: fonts.weight_title,
@@ -1390,59 +1463,31 @@ export const YourTemplate = ({ scene }) => {
 </div>
 ```
 
+**Step 4: Do NOT use `className="font-display"`**
+```jsx
+// ❌ WRONG - className overrides inline fontFamily
+<div className="font-display" style={{ fontFamily: fontTokens.title.family }}>
+
+// ✅ CORRECT - Use inline style only
+<div style={{ fontFamily: fontTokens.title.family }}>
+```
+
 **Font Token Types:**
 - `fontTokens.title.family` - For titles, headlines, questions
 - `fontTokens.body.family` - For body text, descriptions, hints
 - `fontTokens.accent.family` - For labels, badges, special emphasis
 
-**🔥 CRITICAL: Letter Reveal Functions Need FontFamily Too!**
-
-If you use `renderLetterReveal()` for animated text reveals, you **MUST** pass `fontFamily` as the third parameter:
-
-```jsx
-// ❌ BAD - Letter reveal text won't render
-{renderLetterReveal(
-  titleLetterReveal.letters, 
-  titleLetterReveal.letterOpacities
-)}
-
-// ✅ GOOD - Pass fontFamily in style object
-{renderLetterReveal(
-  titleLetterReveal.letters, 
-  titleLetterReveal.letterOpacities,
-  { fontFamily: fontTokens.title.family }  // ← REQUIRED third parameter
-)}
-```
-
-**Common letter reveal use cases:**
-```jsx
-// Title/Headline/Question text
-{renderLetterReveal(letters, opacities, { fontFamily: fontTokens.title.family })}
-
-// Body/Description/Hint text
-{renderLetterReveal(letters, opacities, { fontFamily: fontTokens.body.family })}
-
-// Label/Badge text
-{renderLetterReveal(letters, opacities, { fontFamily: fontTokens.accent.family })}
-```
-
-**Why This Happens:**
-The font system loads custom fonts asynchronously. Without `buildFontTokens`, React doesn't know which font family to use, and browsers may fail to render text with undefined font families.
-
 **Quick Check:**
 ```bash
-# Search for missing buildFontTokens in your template
+# Search for missing buildFontTokens
 grep -L "buildFontTokens" src/templates/v6/YourTemplate_V6.jsx
-# If your file appears, you need to add it!
 
 # Search for text without fontFamily
 grep -A5 "fontSize.*size_" src/templates/v6/YourTemplate_V6.jsx | grep -v "fontFamily"
-# Any results mean text elements are missing fontFamily
 
-# Search for renderLetterReveal without fontFamily (the 3rd parameter)
-grep "renderLetterReveal.*letterOpacities)" src/templates/v6/YourTemplate_V6.jsx
-# If you find results, they're missing the fontFamily style parameter!
-# Should be: renderLetterReveal(letters, opacities, { fontFamily: fontTokens.X.family })
+# Search for problematic font-display className
+grep "className.*font-display" src/templates/v6/YourTemplate_V6.jsx
+# Should return nothing! Remove if found.
 ```
 
 ---
