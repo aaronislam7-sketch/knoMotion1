@@ -361,11 +361,10 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   
   // Letter-by-letter reveal for title
   const titleLetterReveal = decorations.titleLetterReveal?.enabled
-    ? getLetterReveal(frame, {
+    ? getLetterReveal(frame, config.title.text, {
         startFrame: beats.title + 0.2, // CRITICAL: Pass SECONDS
-        text: config.title.text,
         staggerDelay: decorations.titleLetterReveal.staggerDelay,
-        fadeInDuration: decorations.titleLetterReveal.fadeInDuration
+        duration: decorations.titleLetterReveal.fadeInDuration
       }, fps)
     : null;
   
@@ -415,7 +414,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
         }}
       >
         {titleLetterReveal ? (
-          renderLetterReveal(titleLetterReveal, {
+          renderLetterReveal(titleLetterReveal.letters, titleLetterReveal.letterOpacities, {
             fontSize: fonts.size_title,
             fontWeight: fonts.weight_title,
             fontFamily: fontTokens.title.family,

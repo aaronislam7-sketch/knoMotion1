@@ -241,11 +241,10 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
   
   // Letter-by-letter reveal for question
   const questionLetterReveal = decorations.questionLetterReveal?.enabled
-    ? getLetterReveal(frame, {
+    ? getLetterReveal(frame, config.question.text, {
         startFrame: beats.question + 0.2, // CRITICAL: Pass SECONDS
-        text: config.question.text,
         staggerDelay: decorations.questionLetterReveal.staggerDelay,
-        fadeInDuration: decorations.questionLetterReveal.fadeInDuration
+        duration: decorations.questionLetterReveal.fadeInDuration
       }, fps)
     : null;
   
@@ -362,7 +361,7 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
           </div>
         )}
         {questionLetterReveal ? (
-          renderLetterReveal(questionLetterReveal, {
+          renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities, {
             fontSize: fonts.size_question,
             fontWeight: fonts.weight_question,
             fontFamily: fontTokens.title.family,
