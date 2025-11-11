@@ -464,9 +464,25 @@ style={{
 4. Ambient particles (20-30 floating)
 5. Content with glassmorphic panes
 
-#### 2. **Glassmorphic Content Cards**
-Wrap all major content in glassmorphic panes for premium feel:
+#### 2. **Glassmorphic Content Cards** ⚠️ USE SELECTIVELY
 
+Wrap content in glassmorphic panes **when it adds value**, not by default.
+
+**✅ WHEN TO USE:**
+- Content cards with multiple elements (image + text + description)
+- Information panels that need visual containment
+- Before/After comparison states
+- Multi-item grids or lists where grouping helps comprehension
+- When content needs separation from busy backgrounds
+
+**❌ WHEN NOT TO USE:**
+- Large, bold headline text (looks better clean and direct)
+- Single questions or statements (glassmorphic panes add unnecessary weight)
+- Minimal designs (defeats the purpose of minimalism)
+- Templates where simplicity is the aesthetic (Hook templates, Quote templates)
+- When it creates "PowerPoint slide" feeling
+
+**Implementation (when appropriate):**
 ```jsx
 import { GlassmorphicPane } from '../sdk/effects/broadcastEffects';
 
@@ -486,10 +502,26 @@ import { GlassmorphicPane } from '../sdk/effects/broadcastEffects';
 ```
 
 **Key principles:**
-- Always add subtle glow (0.15-0.25 opacity)
+- Add subtle glow (0.15-0.25 opacity) when using
 - Use semi-transparent backgrounds (15-20% opacity of accent color)
 - Add backdrop blur for true glass effect
 - Include subtle inner highlight (inset shadow)
+- **Always make it configurable:** `decorations.showGlassPane: true/false`
+
+**Example - Question Burst Template:**
+```jsx
+// ❌ WRONG - Unnecessary boxing of bold question
+<GlassmorphicPane>
+  <div style={{ fontSize: 72, fontWeight: 800 }}>
+    What if geography was measured in mindsets?
+  </div>
+</GlassmorphicPane>
+
+// ✅ CORRECT - Bold text stands alone
+<div style={{ fontSize: 72, fontWeight: 800 }}>
+  What if geography was measured in mindsets?
+</div>
+```
 
 #### 3. **Multi-Layered Entrance Animations**
 Combine multiple animation types for sophistication:
@@ -999,14 +1031,22 @@ boxShadow: `0 0 ${glowIntensity}px ${colors.highlight}80`
 
 ### Complete Polish Checklist
 
+**⚠️ IMPORTANT: These are a MENU, not a MANDATE!**
+
+The principles below are **design options** to consider, not requirements to apply blindly to every element. Use design judgment:
+- **Don't over-apply** - Not every text element needs a glassmorphic pane
+- **Preserve template identity** - Simple, bold text can be more impactful than boxes
+- **Avoid PowerPoint feel** - Too many boxes/cards = presentation slides
+- **When in doubt, less is more** - Start minimal, add effects only where they enhance
+
 When uplifting a template to broadcast-grade, ensure:
 
-**Visual Layers (5 required):**
+**Visual Layers (5 available, use 3-5):**
 - [ ] Gradient background (not flat)
 - [ ] Noise texture overlay
 - [ ] Spotlight effects (2-3)
 - [ ] Ambient particles (20-30)
-- [ ] Glassmorphic content panes
+- [ ] Glassmorphic content panes **WHERE APPROPRIATE**
 
 **Animation Layers (3+ required):**
 - [ ] Opacity fade
@@ -1334,6 +1374,214 @@ Before considering a template complete:
 - [ ] Timing controls work
 - [ ] Preview renders correctly
 - [ ] No console errors
+
+---
+
+## ⚠️ Common Mistakes to Avoid
+
+### 🚨 CRITICAL #1: Animation Functions Expect SECONDS Not FRAMES
+
+**Symptom:** Template builds successfully but animations never trigger (text/elements invisible or appear instantly without animation).
+
+**Root Cause:** ALL SDK animation functions expect timing parameters in SECONDS, but we're passing pre-converted FRAMES, causing double-conversion.
+
+**The Problem:**
+```jsx
+// ❌ WRONG - Double conversion (seconds → frames → frames again)
+const f = {
+  q1Start: toFrames(beats.q1Start, fps)  // Convert to frames
+};
+
+const q1CardEntrance = getCardEntrance(frame, {
+  startFrame: f.q1Start,  // ← FRAMES (already converted) - WRONG!
+  duration: 0.8
+}, fps);
+// getCardEntrance internally does: toFrames(f.q1Start, fps)
+// Result: 0.9s → 27f → toFrames(27, 30) → 810 frames!
+// Animation never triggers (starts way in future)
+```
+
+**The Solution:**
+```jsx
+// ✅ CORRECT - Pass SECONDS, let functions convert internally
+const q1CardEntrance = getCardEntrance(frame, {
+  startFrame: beats.q1Start,  // ← SECONDS (e.g., 0.9)
+  duration: 0.8
+}, fps);
+// getCardEntrance does: toFrames(0.9, 30) → 27 frames ✓
+```
+
+**Functions That Expect SECONDS:**
+- `getCardEntrance(frame, { startFrame: SECONDS, duration: SECONDS }, fps)`
+- `getIconPop(frame, { startFrame: SECONDS, duration: SECONDS }, fps)`
+- `getParticleBurst(frame, { triggerFrame: SECONDS, duration: SECONDS }, fps)`
+- `getLetterReveal(frame, text, { startFrame: SECONDS, duration: SECONDS }, fps)`
+- `getScaleEmphasis(frame, { triggerFrame: SECONDS, duration: SECONDS }, fps)`
+- `getPulseGlow(frame, { startFrame: SECONDS, ... })` (if applicable)
+
+**The Pattern:**
+```jsx
+// Pre-convert beats to frames for interpolate() calls
+const f = useMemo(() => ({
+  titleStart: toFrames(beats.titleStart, fps),
+  q1Start: toFrames(beats.q1Start, fps),
+  // ...
+}), [beats, fps]);
+
+// Use FRAMES (f.xxx) for:
+const titleProgress = interpolate(frame, [f.titleStart, f.titleStart + 30], ...);
+if (frame >= f.q1Start) { ... }
+
+// Use SECONDS (beats.xxx) for SDK animation functions:
+const cardAnim = getCardEntrance(frame, { startFrame: beats.q1Start }, fps);
+const letterReveal = getLetterReveal(frame, text, { startFrame: beats.titleStart }, fps);
+```
+
+**Quick Fix Checklist:**
+```jsx
+// ❌ Find and replace these patterns:
+getCardEntrance(frame, { startFrame: f.xxxStart
+getIconPop(frame, { startFrame: f.xxxStart
+getParticleBurst(frame, { triggerFrame: f.xxxStart
+getLetterReveal(frame, text, { startFrame: f.xxxStart
+
+// ✅ With these patterns:
+getCardEntrance(frame, { startFrame: beats.xxxStart
+getIconPop(frame, { startFrame: beats.xxxStart
+getParticleBurst(frame, { triggerFrame: beats.xxxStart
+getLetterReveal(frame, text, { startFrame: beats.xxxStart
+```
+
+**Quick Check:**
+```bash
+# Find animation functions using FRAMES (wrong):
+grep -E "get(Card|Icon|Particle|Letter).*startFrame: f\." src/templates/v6/YourTemplate_V6.jsx
+grep -E "getParticleBurst.*triggerFrame: f\." src/templates/v6/YourTemplate_V6.jsx
+
+# Should return no results! If it does, change f.xxxStart to beats.xxxStart
+```
+
+---
+
+### 🚨 CRITICAL #2: getLetterReveal Function Signature
+
+**Problem:** Incorrectly passing text inside config object causes `text.split is not a function` error.
+
+**Root Cause:**
+The `getLetterReveal` function signature expects text as a **separate parameter**:
+```javascript
+getLetterReveal(frame, text, config, fps)
+```
+
+**❌ WRONG - Text inside config:**
+```javascript
+const titleLetterReveal = getLetterReveal(frame, {
+  startFrame: beats.title + 0.2,
+  text: config.title.text,  // ❌ Wrong position
+  staggerDelay: 0.04,
+  duration: 0.3
+}, fps);
+```
+
+**✅ CORRECT - Text as 2nd parameter:**
+```javascript
+const titleLetterReveal = getLetterReveal(frame, config.title.text, {
+  startFrame: beats.title + 0.2,  // ✅ Text extracted
+  staggerDelay: 0.04,
+  duration: 0.3
+}, fps);
+```
+
+**Render Usage:**
+```javascript
+// Extract letters and letterOpacities from result
+{titleLetterReveal ? (
+  renderLetterReveal(
+    titleLetterReveal.letters,           // ✅ First param
+    titleLetterReveal.letterOpacities,   // ✅ Second param
+    {                                     // ✅ Third param (styles)
+      fontSize: fonts.size_title,
+      fontFamily: fontTokens.title.family,
+      color: colors.text
+    }
+  )
+) : (
+  <div>{config.title.text}</div>
+)}
+```
+
+**Detection:**
+```bash
+# Find incorrect usage
+grep -rn "getLetterReveal.*text:" KnoMotion-Videos/src/templates/v6/
+```
+
+## 🚨 CRITICAL #3: Font System Setup (Text Rendering)
+
+**Symptom:** Text renders but uses wrong font or doesn't match configured typography.voice.
+
+**Root Cause:** Missing `buildFontTokens` or not applying `fontFamily` to text elements.
+
+**The Fix:**
+
+**Step 1: Import `buildFontTokens`**
+```jsx
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
+```
+
+**Step 2: Call `buildFontTokens` in component**
+```jsx
+export const YourTemplate = ({ scene }) => {
+  const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
+  
+  useEffect(() => {
+    void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
+  }, [typography.voice]);
+  
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
+  // ... rest of component
+};
+```
+
+**Step 3: Apply `fontFamily` to ALL text elements**
+```jsx
+<div style={{
+  fontSize: fonts.size_title,
+  fontWeight: fonts.weight_title,
+  fontFamily: fontTokens.title.family,  // ← REQUIRED
+  color: colors.text
+}}>
+  {config.title.text}
+</div>
+```
+
+**Step 4: Do NOT use `className="font-display"`**
+```jsx
+// ❌ WRONG - className overrides inline fontFamily
+<div className="font-display" style={{ fontFamily: fontTokens.title.family }}>
+
+// ✅ CORRECT - Use inline style only
+<div style={{ fontFamily: fontTokens.title.family }}>
+```
+
+**Font Token Types:**
+- `fontTokens.title.family` - For titles, headlines, questions
+- `fontTokens.body.family` - For body text, descriptions, hints
+- `fontTokens.accent.family` - For labels, badges, special emphasis
+
+**Quick Check:**
+```bash
+# Search for missing buildFontTokens
+grep -L "buildFontTokens" src/templates/v6/YourTemplate_V6.jsx
+
+# Search for text without fontFamily
+grep -A5 "fontSize.*size_" src/templates/v6/YourTemplate_V6.jsx | grep -v "fontFamily"
+
+# Search for problematic font-display className
+grep "className.*font-display" src/templates/v6/YourTemplate_V6.jsx
+# Should return nothing! Remove if found.
+```
 
 ---
 

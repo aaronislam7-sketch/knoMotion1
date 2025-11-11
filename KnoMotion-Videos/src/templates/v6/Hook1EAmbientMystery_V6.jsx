@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
+
+// SDK imports - Agnostic Template System v6
 import {
   EZ,
   toFrames,
@@ -7,25 +9,52 @@ import {
   mergeHeroConfig,
   resolvePosition,
   generateAmbientParticles,
-  renderAmbientParticles
+  renderAmbientParticles,
+  getLetterReveal,
+  renderLetterReveal,
+  getParticleBurst,
+  renderParticleBurst,
+  getCardEntrance,
+  getIconPop,
+  getPulseGlow
 } from '../../sdk';
-import { loadFontVoice, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
+import {
+  GlassmorphicPane,
+  NoiseTexture,
+  SpotlightEffect
+} from '../../sdk/effects/broadcastEffects';
+import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
- * TEMPLATE #2: AMBIENT MYSTERY - v6.0
+ * TEMPLATE #2: AMBIENT MYSTERY - v6.0 (BROADCAST POLISH)
  * 
- * PRIMARY INTENTION: REVEAL
- * SECONDARY INTENTIONS: INSPIRE, QUESTION
+ * PRIMARY INTENTION: HOOK
+ * SECONDARY INTENTIONS: REVEAL, INSPIRE, QUESTION
  * 
- * PURPOSE: Create atmospheric intrigue and suspense
+ * PURPOSE: Create atmospheric intrigue and suspense with mystery
  * 
  * VISUAL PATTERN:
- * - Dark, mysterious atmosphere
- * - Fog/particle effects
+ * - Dark, mysterious atmosphere with fog layers
  * - Sequential text reveals (whisper → question → hint)
- * - Optional central visual element
- * - Glow and atmospheric effects
+ * - Glassmorphic panes with atmospheric depth
+ * - Letter-by-letter reveals for mystique
+ * - Optional central visual with glow
+ * - 5-layer background (gradient, noise, spotlights, fog, particles)
+ * - Continuous floating animations
+ * - Particle bursts on reveals
+ * 
+ * BROADCAST POLISH APPLIED:
+ * ✅ Layered background depth (dark gradient, noise, spotlights, fog)
+ * ✅ Glassmorphic panes for text elements
+ * ✅ Multi-layered card entrance animations
+ * ✅ Letter-by-letter reveals for whisper/question/hint
+ * ✅ Icon pop animation for central visual
+ * ✅ Particle bursts on text reveals
+ * ✅ Continuous floating animations (mysterious drift)
+ * ✅ Enhanced pulsing glow effects
+ * ✅ Cumulative beats system
+ * ✅ 100% configurability via decorations
  * 
  * AGNOSTIC PRINCIPALS:
  * ✓ Type-Based Polymorphism (hero registry for visual)
@@ -35,15 +64,6 @@ import { createTransitionProps } from '../../sdk/transitions';
  * ✓ Progressive Configuration (simple defaults)
  * ✓ Registry Pattern (extensible visual types)
  * 
- * CONFIGURABILITY:
- * - Whisper, question, and hint text (all editable)
- * - Central visual (emoji, image, or none)
- * - Colors (dark theme palette)
- * - Fonts (sizes, weights)
- * - Timing (all beat points)
- * - Fog/particle effects toggle
- * - Glow intensity
- * 
  * NO HARDCODED VALUES!
  */
 
@@ -52,7 +72,7 @@ const DEFAULT_CONFIG = {
   whisper: {
     text: 'In the depths of knowledge...',
     position: 'top-center',
-    offset: { x: 0, y: 100 },
+    offset: { x: 0, y: 120 },
     enabled: true
   },
   
@@ -65,7 +85,7 @@ const DEFAULT_CONFIG = {
   hint: {
     text: 'Sometimes the answer is in the shadows',
     position: 'bottom-center',
-    offset: { x: 0, y: -100 },
+    offset: { x: 0, y: -120 },
     enabled: true
   },
   
@@ -78,26 +98,29 @@ const DEFAULT_CONFIG = {
     enabled: false
   },
   
-    typography: {
-      voice: 'story',
-      align: 'center',
-      transform: 'none'
-    },
+  typography: {
+    voice: 'story',
+    align: 'center',
+    transform: 'none'
+  },
 
   style_tokens: {
     colors: {
-      bg: '#1A1F2E',
-      fog: 'rgba(74, 85, 104, 0.3)',
+      bg: '#0F1419',
+      bgGradientStart: '#0F1419',
+      bgGradientEnd: '#1A1F2E',
+      fog: 'rgba(74, 85, 104, 0.25)',
       accent: '#8E44AD',
       accent2: '#6C7A89',
       text: '#E8F4FD',
       textSecondary: '#9CA3AF',
-      glow: '#F39C12'
+      glow: '#F39C12',
+      glassBackground: '#FFFFFF08'
     },
     fonts: {
-      size_whisper: 38,
-      size_question: 72,
-      size_hint: 28,
+      size_whisper: 36,
+      size_question: 68,
+      size_hint: 26,
       weight_whisper: 400,
       weight_question: 700,
       weight_hint: 400
@@ -105,42 +128,85 @@ const DEFAULT_CONFIG = {
   },
   
   beats: {
-    entrance: 0.5,
-    fog: 1.0,
-    whisper: 2.5,
-    question: 4.0,
-    glow: 5.5,
-    hint: 8.0,
-    settle: 10.0,
-    exit: 12.0
+    // CUMULATIVE TIMING: Each value is added to the previous
+    // entrance = 0.5s (absolute start)
+    // fogStart at: entrance = 0.5s
+    // whisperStart at: entrance + fogBuild = 0.5 + 1.5 = 2.0s
+    // questionStart at: whisperStart + whisperHold + whisperFade = 2.0 + 1.5 + 0.5 = 4.0s
+    entrance: 0.5,           // Initial background fade
+    fogBuild: 1.5,           // Fog layers build up (+1.5s)
+    whisperReveal: 1.0,      // Whisper letter reveal duration (+1.0s)
+    whisperHold: 1.5,        // Hold whisper visible (+1.5s)
+    whisperFade: 0.5,        // Whisper fades out (+0.5s)
+    questionReveal: 1.2,     // Question letter reveal (+1.2s)
+    questionHold: 2.0,       // Hold question (+2.0s)
+    glowEmphasis: 1.0,       // Glow emphasis starts (+1.0s)
+    hintReveal: 1.0,         // Hint letter reveal (+1.0s)
+    hintHold: 2.0,           // Hold hint (+2.0s)
+    settle: 1.0,             // Final settle (+1.0s)
+    exit: 1.0                // Exit animation (+1.0s)
   },
   
   animation: {
+    letterRevealStyle: 'fade-up',
     cameraZoom: true,
-    zoomAmount: 0.08
+    zoomAmount: 0.08,
+    continuousFloat: true,   // Mysterious drifting motion
+    continuousPulse: true    // Pulsing glow throughout
   },
   
-  effects: {
-    particles: {
-      enabled: true,
-      count: 20,
-      style: 'ambient',
-      seed: 542
-    },
-    fog: {
-      enabled: true,
-      intensity: 0.3
-    },
-    glow: {
-      enabled: true,
-      intensity: 0.6
-    }
+  decorations: {
+    showBackground: true,
+    showGradient: true,
+    showNoiseTexture: true,
+    noiseOpacity: 0.06,
+    showSpotlights: true,
+    spotlightCount: 2,
+    spotlight1: { x: 0.25, y: 0.35, size: 500, color: '#8E44AD15' },
+    spotlight2: { x: 0.75, y: 0.65, size: 450, color: '#F39C1210' },
+    showFog: true,
+    fogLayers: 2,
+    fogIntensity: 0.25,
+    showVignette: true,
+    vignetteIntensity: 0.45,
+    showParticles: true,
+    particleCount: 25,
+    showGlassPane: true,
+    glassPaneOpacity: 0.08,
+    glassPaneBorderOpacity: 0.25,
+    glassInnerRadius: 30,
+    showParticleBurst: true,
+    particleBurstCount: 12,
+    showGlow: true,
+    glowIntensity: 0.6,
+    glowColor: '#F39C12'
   },
 
   signature: {
     enabled: false,
     text: 'Swipe to reveal more'
   }
+};
+
+// Calculate cumulative beats
+const calculateCumulativeBeats = (beats) => {
+  let cumulative = 0;
+  return {
+    entrance: cumulative,
+    fogStart: (cumulative += beats.entrance),
+    fogBuilt: (cumulative += beats.fogBuild),
+    whisperStart: cumulative,
+    whisperVisible: (cumulative += beats.whisperReveal),
+    whisperEnd: (cumulative += beats.whisperHold),
+    questionStart: (cumulative += beats.whisperFade),
+    questionVisible: (cumulative += beats.questionReveal),
+    glowStart: (cumulative += beats.questionHold),
+    hintStart: (cumulative += beats.glowEmphasis),
+    hintVisible: (cumulative += beats.hintReveal),
+    settleStart: (cumulative += beats.hintHold),
+    exitStart: (cumulative += beats.settle),
+    totalDuration: (cumulative += beats.exit)
+  };
 };
 
 // MAIN COMPONENT
@@ -150,99 +216,74 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   
   // Merge config
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const rawBeats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const beats = useMemo(() => calculateCumulativeBeats(rawBeats), [rawBeats]);
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
-  const effects = { 
-    ...DEFAULT_CONFIG.effects, 
-    ...(scene.effects || {}),
-    particles: { ...DEFAULT_CONFIG.effects.particles, ...(scene.effects?.particles || {}) },
-    fog: { ...DEFAULT_CONFIG.effects.fog, ...(scene.effects?.fog || {}) },
-    glow: { ...DEFAULT_CONFIG.effects.glow, ...(scene.effects?.glow || {}) }
-  };
+  const decorations = { ...DEFAULT_CONFIG.decorations, ...(scene.decorations || {}) };
   const typography = { ...DEFAULT_CONFIG.typography, ...(scene.typography || {}) };
   const signature = { ...DEFAULT_CONFIG.signature, ...(scene.signature || {}) };
-  
-  if (scene.effects?.fogIntensity !== undefined) {
-    effects.fog.intensity = scene.effects.fogIntensity;
-  }
-
-  if (scene.effects?.glowIntensity !== undefined) {
-    effects.glow.intensity = scene.effects.glowIntensity;
-  }
 
   useEffect(() => {
     void loadFontVoice(typography.voice || DEFAULT_FONT_VOICE);
   }, [typography.voice]);
   
+  const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
+  
   // Convert beats to frames
-  const f_entrance = toFrames(beats.entrance, fps);
-  const f_fog = toFrames(beats.fog, fps);
-  const f_whisper = toFrames(beats.whisper, fps);
-  const f_question = toFrames(beats.question, fps);
-  const f_glow = toFrames(beats.glow, fps);
-  const f_hint = toFrames(beats.hint, fps);
-  const f_settle = toFrames(beats.settle, fps);
-  const f_exit = toFrames(beats.exit, fps);
+  const f = useMemo(() => ({
+    entrance: toFrames(beats.entrance, fps),
+    fogStart: toFrames(beats.fogStart, fps),
+    fogBuilt: toFrames(beats.fogBuilt, fps),
+    whisperStart: toFrames(beats.whisperStart, fps),
+    whisperVisible: toFrames(beats.whisperVisible, fps),
+    whisperEnd: toFrames(beats.whisperEnd, fps),
+    questionStart: toFrames(beats.questionStart, fps),
+    questionVisible: toFrames(beats.questionVisible, fps),
+    glowStart: toFrames(beats.glowStart, fps),
+    hintStart: toFrames(beats.hintStart, fps),
+    hintVisible: toFrames(beats.hintVisible, fps),
+    settleStart: toFrames(beats.settleStart, fps),
+    exitStart: toFrames(beats.exitStart, fps),
+    totalDuration: toFrames(beats.totalDuration, fps)
+  }), [beats, fps]);
   
   // Generate particles
   const baseParticles = useMemo(() => {
-    if (!effects.particles.enabled) return [];
+    if (!decorations.showParticles) return [];
     return generateAmbientParticles(
-      effects.particles.count,
-      effects.particles.seed ?? 542,
+      decorations.particleCount,
+      542,
       width,
       height
     );
-  }, [effects.particles.enabled, effects.particles.count, effects.particles.seed, width, height]);
+  }, [decorations.showParticles, decorations.particleCount, width, height]);
 
-  const ambientParticles = effects.particles.enabled
+  const ambientParticles = decorations.showParticles
     ? renderAmbientParticles(
         baseParticles,
         frame,
         fps,
-        [colors.fog, `${colors.text}33`, colors.accent2]
+        [colors.fog, `${colors.text}25`, colors.accent2]
       )
     : [];
-
-  const exitTransition = useMemo(
-    () =>
-      createTransitionProps({
-        style: 'fade',
-        durationInFrames: toFrames(0.8, fps)
-      }),
-    [fps]
-  );
-
-  const exitProgress = frame < f_exit
-    ? 0
-    : Math.min(
-        1,
-        exitTransition.timing
-          ? exitTransition.timing.getProgress({
-              frame: frame - f_exit,
-              fps
-            })
-          : interpolate(
-              frame,
-              [f_exit, f_exit + toFrames(0.8, fps)],
-              [0, 1],
-              {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                easing: EZ.power3In
-              }
-            )
-      );
   
   // ==================== ANIMATIONS ====================
   
-  // Camera zoom (subtle push-in)
+  // Background entrance
+  const bgOpacity = interpolate(
+    frame,
+    [0, f.entrance + toFrames(0.5, fps)],
+    [0, 1],
+    { extrapolateRight: 'clamp' }
+  );
+  
+  // Camera zoom (subtle push-in for mystery)
   const cameraZoom = anim.cameraZoom
     ? interpolate(
         frame,
-        [0, f_question, f_settle],
+        [0, f.questionVisible, f.settleStart],
         [1 + anim.zoomAmount, 1.0, 1 + (anim.zoomAmount * 0.25)],
         {
           extrapolateLeft: 'clamp',
@@ -253,23 +294,11 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
     : 1;
   
   // Vignette intensity
-  const vignetteOpacity = interpolate(
-    frame,
-    [0, f_fog, f_settle],
-    [0, 0.5, 0.35],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: EZ.smooth
-    }
-  );
-  
-  // Fog layers animation
-  const fogOpacity = effects.fog.enabled
+  const vignetteOpacity = decorations.showVignette
     ? interpolate(
         frame,
-        [0, f_fog, f_fog + toFrames(2.0, fps)],
-        [0, effects.fog.intensity, effects.fog.intensity],
+        [0, f.fogBuilt, f.settleStart],
+        [0, decorations.vignetteIntensity, decorations.vignetteIntensity * 0.75],
         {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp',
@@ -278,24 +307,47 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  // Whisper animation
-  const whisperProgress = config.whisper.enabled
+  // Fog layers animation
+  const fogOpacity = decorations.showFog
     ? interpolate(
         frame,
-        [f_whisper, f_whisper + toFrames(1.0, fps)],
-        [0, 1],
+        [f.fogStart, f.fogBuilt],
+        [0, decorations.fogIntensity],
         {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp',
-          easing: EZ.power3Out
+          easing: EZ.smooth
         }
       )
     : 0;
   
-  const whisperFadeOut = frame >= f_question
+  // Whisper - Letter Reveal
+  const whisperLetterReveal = config.whisper.enabled
+    ? useMemo(() => {
+        return getLetterReveal(frame, config.whisper.text, {
+          startFrame: beats.whisperStart,
+          duration: rawBeats.whisperReveal,
+          staggerDelay: 0.05
+        }, fps);
+      }, [frame, config.whisper.text, beats.whisperStart, rawBeats.whisperReveal, fps])
+    : { letters: [], letterOpacities: [] };
+  
+  // Whisper card entrance
+  const whisperCardEntrance = config.whisper.enabled
+    ? getCardEntrance(frame, {
+        startFrame: beats.whisperStart,
+        duration: 1.0,
+        direction: 'up',
+        distance: 30,
+        withGlow: true,
+        glowColor: `${colors.accent2}30`
+      }, fps)
+    : { opacity: 0, scale: 1, translateY: 0, boxShadow: 'none' };
+  
+  const whisperFadeOut = config.whisper.enabled && frame >= f.whisperEnd
     ? interpolate(
         frame,
-        [f_question, f_question + toFrames(0.5, fps)],
+        [f.whisperEnd, f.questionStart],
         [0, 1],
         {
           extrapolateLeft: 'clamp',
@@ -305,34 +357,128 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const whisperOpacity = whisperProgress * (1 - whisperFadeOut);
+  const whisperOpacity = whisperCardEntrance.opacity * (1 - whisperFadeOut);
   
-  // Question animation
-  const questionProgress = interpolate(
-    frame,
-    [f_question, f_question + toFrames(1.2, fps)],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: EZ.power3Out
-    }
-  );
-  
-  const questionOpacity = questionProgress * (1 - exitProgress);
-  const questionY = (1 - questionProgress) * 40;
-  const questionScale = 0.95 + (questionProgress * 0.05);
-  
-  // Glow pulse
-  const glowPulse = effects.glow.enabled && frame >= f_glow
-    ? effects.glow.intensity + Math.sin((frame - f_glow) / 20) * 0.15
+  // Continuous floating for whisper
+  const whisperFloat = anim.continuousFloat && frame >= f.whisperVisible
+    ? Math.sin((frame - f.whisperStart) * 0.015) * 6
     : 0;
   
-  // Hint animation
-  const hintProgress = config.hint.enabled && frame >= f_hint
+  // Particle burst on whisper reveal
+  const whisperParticleBurst = decorations.showParticleBurst && config.whisper.enabled
+    ? getParticleBurst(frame, {
+        triggerFrame: beats.whisperStart,
+        particleCount: decorations.particleBurstCount,
+        duration: 1.5,
+        color: colors.accent2,
+        size: 5,
+        spread: 120
+      }, fps)
+    : [];
+  
+  // Question - Letter Reveal
+  const questionLetterReveal = useMemo(() => {
+    return getLetterReveal(frame, config.question.text, {
+      startFrame: beats.questionStart,
+      duration: rawBeats.questionReveal,
+      staggerDelay: 0.04
+    }, fps);
+  }, [frame, config.question.text, beats.questionStart, rawBeats.questionReveal, fps]);
+  
+  // Question card entrance
+  const questionCardEntrance = getCardEntrance(frame, {
+    startFrame: beats.questionStart,
+    duration: 1.2,
+    direction: 'up',
+    distance: 40,
+    withGlow: true,
+    glowColor: `${colors.accent}40`
+  }, fps);
+  
+  const questionExitProgress = frame >= f.exitStart
     ? interpolate(
         frame,
-        [f_hint, f_hint + toFrames(1.0, fps)],
+        [f.exitStart, f.totalDuration],
+        [0, 1],
+        {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+          easing: EZ.power3In
+        }
+      )
+    : 0;
+  
+  const questionOpacity = questionCardEntrance.opacity * (1 - questionExitProgress);
+  
+  // Continuous floating for question
+  const questionFloat = anim.continuousFloat && frame >= f.questionVisible
+    ? Math.sin((frame - f.questionStart) * 0.018 + Math.PI * 0.5) * 7
+    : 0;
+  
+  // Particle burst on question reveal
+  const questionParticleBurst = decorations.showParticleBurst
+    ? getParticleBurst(frame, {
+        triggerFrame: beats.questionStart,
+        particleCount: decorations.particleBurstCount * 1.5,
+        duration: 1.8,
+        color: colors.accent,
+        size: 6,
+        spread: 150
+      }, fps)
+    : [];
+  
+  // Glow pulse (continuous after glow starts)
+  const glowPulse = decorations.showGlow && frame >= f.glowStart && anim.continuousPulse
+    ? decorations.glowIntensity + Math.sin((frame - f.glowStart) * 0.06) * 0.2
+    : decorations.glowIntensity;
+  
+  // Hint - Letter Reveal
+  const hintLetterReveal = config.hint.enabled
+    ? useMemo(() => {
+        return getLetterReveal(frame, config.hint.text, {
+          startFrame: beats.hintStart,
+          duration: rawBeats.hintReveal,
+          staggerDelay: 0.05
+        }, fps);
+      }, [frame, config.hint.text, beats.hintStart, rawBeats.hintReveal, fps])
+    : { letters: [], letterOpacities: [] };
+  
+  // Hint card entrance
+  const hintCardEntrance = config.hint.enabled
+    ? getCardEntrance(frame, {
+        startFrame: beats.hintStart,
+        duration: 1.0,
+        direction: 'up',
+        distance: 30,
+        withGlow: true,
+        glowColor: `${colors.textSecondary}30`
+      }, fps)
+    : { opacity: 0, scale: 1, translateY: 0, boxShadow: 'none' };
+  
+  const hintOpacity = hintCardEntrance.opacity * (1 - questionExitProgress);
+  
+  // Continuous floating for hint
+  const hintFloat = anim.continuousFloat && frame >= f.hintVisible
+    ? Math.sin((frame - f.hintStart) * 0.016 + Math.PI) * 5
+    : 0;
+  
+  // Particle burst on hint reveal
+  const hintParticleBurst = decorations.showParticleBurst && config.hint.enabled
+    ? getParticleBurst(frame, {
+        triggerFrame: beats.hintStart,
+        particleCount: decorations.particleBurstCount,
+        duration: 1.4,
+        color: colors.textSecondary,
+        size: 4,
+        spread: 100
+      }, fps)
+    : [];
+  
+  // Central visual animation (if enabled)
+  const visualProgress = config.centralVisual.enabled && frame >= f.questionStart
+    ? interpolate(
+        frame,
+        [f.questionStart, f.questionVisible + toFrames(0.5, fps)],
         [0, 1],
         {
           extrapolateLeft: 'clamp',
@@ -342,25 +488,22 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const hintOpacity = hintProgress * (1 - exitProgress);
-  const hintY = (1 - hintProgress) * 30;
+  // Icon pop for visual
+  const visualIconPop = config.centralVisual.enabled
+    ? getIconPop(frame, {
+        startFrame: beats.questionStart,
+        duration: 1.0,
+        withBounce: true,
+        rotation: 0
+      }, fps)
+    : { opacity: 0, scale: 0, rotation: 0 };
   
-  // Central visual animation
-  const visualProgress = config.centralVisual.enabled && frame >= f_question
-    ? interpolate(
-        frame,
-        [f_question, f_question + toFrames(1.5, fps)],
-        [0, 1],
-        {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-          easing: EZ.power3Out
-        }
-      )
+  const visualOpacity = visualIconPop.opacity * (1 - questionExitProgress);
+  
+  // Continuous floating for visual
+  const visualFloat = anim.continuousFloat && frame >= f.questionVisible
+    ? Math.sin((frame - f.questionStart) * 0.012) * 10
     : 0;
-  
-  const visualOpacity = visualProgress * (1 - exitProgress);
-  const visualScale = 0.8 + (visualProgress * 0.2);
   
   const alignmentClass =
     typography.align === 'left'
@@ -376,10 +519,21 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
       ? 'lowercase'
       : 'none';
 
+  // Calculate positions for particle bursts
+  const centerX = width / 2;
+  const whisperY = config.whisper.offset.y;
+  const questionY = height / 2;
+  const hintY = height - Math.abs(config.hint.offset.y);
+
   return (
     <AbsoluteFill
-      className="relative flex h-full w-full overflow-hidden bg-surface text-ink"
-      style={{ backgroundColor: colors.bg }}
+      className="relative flex h-full w-full overflow-hidden"
+      style={{ 
+        background: decorations.showGradient
+          ? `linear-gradient(135deg, ${colors.bgGradientStart} 0%, ${colors.bgGradientEnd} 100%)`
+          : colors.bg,
+        opacity: bgOpacity
+      }}
     >
       {/* Camera Container */}
       <div
@@ -390,20 +544,35 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
           transformOrigin: 'center center'
         }}
       >
-        {/* Particle Background */}
-          {effects.particles.enabled && (
-            <svg
-              className="absolute inset-0 h-full w-full opacity-60"
-              viewBox={`0 0 ${width} ${height}`}
-            >
-              {ambientParticles.map(({ key, element }) =>
-                React.cloneElement(element, { key })
-              )}
-            </svg>
-          )}
+        {/* Layer 1: Noise Texture */}
+        {decorations.showNoiseTexture && (
+          <NoiseTexture opacity={decorations.noiseOpacity} />
+        )}
         
-        {/* Fog Layers */}
-        {effects.fog.enabled && (
+        {/* Layer 2: Spotlights (subtle for mystery) */}
+        {decorations.showSpotlights && (
+          <>
+            <SpotlightEffect
+              x={decorations.spotlight1.x * width}
+              y={decorations.spotlight1.y * height}
+              size={decorations.spotlight1.size}
+              color={decorations.spotlight1.color}
+              opacity={0.5}
+            />
+            {decorations.spotlightCount > 1 && (
+              <SpotlightEffect
+                x={decorations.spotlight2.x * width}
+                y={decorations.spotlight2.y * height}
+                size={decorations.spotlight2.size}
+                color={decorations.spotlight2.color}
+                opacity={0.4}
+              />
+            )}
+          </>
+        )}
+        
+        {/* Layer 3: Fog Layers (mysterious atmosphere) */}
+        {decorations.showFog && (
           <>
             <div
               style={{
@@ -417,52 +586,131 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                 animation: 'drift1 20s ease-in-out infinite'
               }}
             />
-            <div
-              style={{
-                position: 'absolute',
-                width: '120%',
-                height: '120%',
-                left: '-10%',
-                top: '-10%',
-                background: `radial-gradient(circle at 70% 60%, ${colors.fog}, transparent 50%)`,
-                opacity: fogOpacity * 0.6,
-                animation: 'drift2 25s ease-in-out infinite'
-              }}
-            />
+            {decorations.fogLayers > 1 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '120%',
+                  height: '120%',
+                  left: '-10%',
+                  top: '-10%',
+                  background: `radial-gradient(circle at 70% 60%, ${colors.fog}, transparent 50%)`,
+                  opacity: fogOpacity * 0.6,
+                  animation: 'drift2 25s ease-in-out infinite'
+                }}
+              />
+            )}
           </>
         )}
         
-        {/* Vignette */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%)',
-            opacity: vignetteOpacity,
-            pointerEvents: 'none'
-          }}
-        />
+        {/* Layer 4: Ambient Particles */}
+        {decorations.showParticles && (
+          <svg
+            className="absolute inset-0 h-full w-full"
+            viewBox={`0 0 ${width} ${height}`}
+            style={{ pointerEvents: 'none', opacity: 0.6 }}
+          >
+            {ambientParticles.map(({ key, element }) =>
+              React.cloneElement(element, { key })
+            )}
+          </svg>
+        )}
         
-          {/* Whisper Text */}
-          {config.whisper.enabled && whisperOpacity > 0 && (
-            <div
-              className={`absolute left-1/2 font-body italic tracking-[0.08em] ${alignmentClass}`}
-              style={{
-                top: config.whisper.offset.y,
-                fontSize: fonts.size_whisper,
-                fontWeight: fonts.weight_whisper,
-                color: colors.textSecondary,
-                opacity: whisperOpacity,
-                letterSpacing: '0.05em',
-                maxWidth: '90%',
-                textTransform,
-                transform: 'translateX(-50%)'
-              }}
-            >
-              {config.whisper.text}
-            </div>
-          )}
+        {/* Layer 5: Vignette */}
+        {decorations.showVignette && (
+          <div
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              background: 'radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%)',
+              opacity: vignetteOpacity,
+              pointerEvents: 'none'
+            }}
+          />
+        )}
+        
+        {/* Particle Bursts */}
+        {decorations.showParticleBurst && (
+          <svg
+            className="absolute inset-0 h-full w-full"
+            viewBox={`0 0 ${width} ${height}`}
+            style={{ pointerEvents: 'none', zIndex: 50 }}
+          >
+            {whisperParticleBurst.length > 0 && renderParticleBurst(
+              whisperParticleBurst,
+              centerX,
+              whisperY
+            )}
+            {questionParticleBurst.length > 0 && renderParticleBurst(
+              questionParticleBurst,
+              centerX,
+              questionY
+            )}
+            {hintParticleBurst.length > 0 && renderParticleBurst(
+              hintParticleBurst,
+              centerX,
+              hintY
+            )}
+          </svg>
+        )}
+        
+        {/* Whisper Text */}
+        {config.whisper.enabled && whisperOpacity > 0 && (
+          <div
+            className="pointer-events-none absolute"
+            style={{
+              left: '50%',
+              top: config.whisper.offset.y + whisperFloat,
+              transform: `translate(-50%, 0) scale(${whisperCardEntrance.scale})`,
+              opacity: whisperOpacity,
+              zIndex: 10
+            }}
+          >
+            {decorations.showGlassPane ? (
+              <GlassmorphicPane
+                innerRadius={decorations.glassInnerRadius}
+                glowOpacity={0.15}
+                borderOpacity={decorations.glassPaneBorderOpacity}
+                backgroundColor={colors.glassBackground}
+                padding={30}
+                style={{
+                  boxShadow: whisperCardEntrance.boxShadow
+                }}
+              >
+                <div
+                  className={`font-body italic tracking-[0.05em] ${alignmentClass}`}
+                  style={{
+                    fontSize: Math.min(fonts.size_whisper, 48),
+                    fontWeight: fonts.weight_whisper,
+                    fontFamily: fontTokens.body.family,
+                    color: colors.textSecondary,
+                    textTransform,
+                    maxWidth: '85vw',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
+                  }}
+                >
+                  {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities)}
+                </div>
+              </GlassmorphicPane>
+            ) : (
+              <div
+                className={`font-body italic tracking-[0.05em] ${alignmentClass}`}
+                style={{
+                  fontSize: Math.min(fonts.size_whisper, 48),
+                  fontWeight: fonts.weight_whisper,
+                  fontFamily: fontTokens.body.family,
+                  color: colors.textSecondary,
+                  textTransform,
+                  maxWidth: '90%',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
+                }}
+              >
+                {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities)}
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Central Visual */}
         {config.centralVisual.enabled && config.centralVisual.type !== 'none' && visualOpacity > 0 && (
@@ -471,9 +719,12 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
               position: 'absolute',
               left: '50%',
               top: '50%',
-              transform: `translate(-50%, calc(-50% + ${config.centralVisual.offset.y}px)) scale(${visualScale})`,
+              transform: `translate(-50%, calc(-50% + ${config.centralVisual.offset.y + visualFloat}px)) scale(${visualIconPop.scale}) rotate(${visualIconPop.rotation}deg)`,
               opacity: visualOpacity,
-              filter: effects.glow.enabled ? `drop-shadow(0 0 ${glowPulse * 30}px ${colors.glow})` : 'none'
+              filter: decorations.showGlow
+                ? `drop-shadow(0 0 ${glowPulse * 40}px ${decorations.glowColor})`
+                : 'none',
+              zIndex: 15
             }}
           >
             {renderHero(
@@ -483,7 +734,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                 scale: config.centralVisual.scale
               }),
               frame,
-              beats,
+              rawBeats,
               colors,
               easingMap || EZ,
               fps
@@ -491,60 +742,140 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
           </div>
         )}
         
-          {/* Question Text */}
-          {questionOpacity > 0 && (
-            <div
-              className={`absolute left-1/2 top-1/2 font-display leading-tight drop-shadow-lg ${alignmentClass}`}
-              style={{
-                transform: `translate(-50%, calc(-50% + ${questionY}px)) scale(${questionScale})`,
-                fontSize: fonts.size_question,
-                fontWeight: fonts.weight_question,
-                color: colors.text,
-                opacity: questionOpacity,
-                maxWidth: '90%',
-                lineHeight: 1.3,
-                textShadow: effects.glow.enabled
-                  ? `0 0 ${glowPulse * 40}px ${colors.accent}, 0 2px 10px rgba(0,0,0,0.5)`
-                  : '0 2px 10px rgba(0,0,0,0.5)',
-                textTransform
-              }}
-            >
-              {config.question.text}
-            </div>
-          )}
-        
-          {/* Hint Text */}
-          {config.hint.enabled && hintOpacity > 0 && (
-            <div
-              className={`absolute left-1/2 font-body italic ${alignmentClass}`}
-              style={{
-                bottom: config.hint.offset.y * -1,
-                transform: `translate(-50%, ${hintY}px)`,
-                fontSize: fonts.size_hint,
-                fontWeight: fonts.weight_hint,
-                color: colors.textSecondary,
-                opacity: hintOpacity,
-                maxWidth: '90%',
-                textTransform
-              }}
-            >
-              {config.hint.text}
-            </div>
-          )}
-
-          {signature.enabled && (
-            <div className="absolute inset-x-0 bottom-[12%] flex justify-center">
-              <div
-                className="badge-chalk bg-opacity-80 text-sm tracking-widest shadow-lg"
-                style={{ opacity: Math.min(1, questionOpacity) }}
+        {/* Question Text */}
+        {questionOpacity > 0 && (
+          <div
+            className="pointer-events-none absolute"
+            style={{
+              left: '50%',
+              top: `50%`,
+              transform: `translate(-50%, calc(-50% + ${questionFloat}px)) scale(${questionCardEntrance.scale})`,
+              opacity: questionOpacity,
+              zIndex: 10
+            }}
+          >
+            {decorations.showGlassPane ? (
+              <GlassmorphicPane
+                innerRadius={decorations.glassInnerRadius}
+                glowOpacity={0.2}
+                borderOpacity={decorations.glassPaneBorderOpacity}
+                backgroundColor={colors.glassBackground}
+                padding={40}
+                style={{
+                  boxShadow: questionCardEntrance.boxShadow
+                }}
               >
-                {signature.text}
+                <div
+                  className={`leading-tight ${alignmentClass}`}
+                  style={{
+                    fontSize: Math.min(fonts.size_question, 80),
+                    fontWeight: fonts.weight_question,
+                    fontFamily: fontTokens.title.family,
+                    color: colors.text,
+                    textTransform,
+                    maxWidth: '85vw',
+                    lineHeight: 1.3,
+                    textShadow: decorations.showGlow
+                      ? `0 0 ${glowPulse * 50}px ${colors.accent}, 0 4px 12px rgba(0,0,0,0.6)`
+                      : '0 4px 12px rgba(0,0,0,0.6)'
+                  }}
+                >
+                  {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities)}
+                </div>
+              </GlassmorphicPane>
+            ) : (
+              <div
+                className={`leading-tight ${alignmentClass}`}
+                style={{
+                  fontSize: Math.min(fonts.size_question, 80),
+                  fontWeight: fonts.weight_question,
+                  fontFamily: fontTokens.title.family,
+                  color: colors.text,
+                  textTransform,
+                  maxWidth: '90%',
+                  lineHeight: 1.3,
+                  textShadow: decorations.showGlow
+                    ? `0 0 ${glowPulse * 50}px ${colors.accent}, 0 4px 12px rgba(0,0,0,0.6)`
+                    : '0 4px 12px rgba(0,0,0,0.6)'
+                }}
+              >
+                {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities)}
               </div>
+            )}
+          </div>
+        )}
+        
+        {/* Hint Text */}
+        {config.hint.enabled && hintOpacity > 0 && (
+          <div
+            className="pointer-events-none absolute"
+            style={{
+              left: '50%',
+              bottom: Math.abs(config.hint.offset.y) - hintFloat,
+              transform: `translate(-50%, 0) scale(${hintCardEntrance.scale})`,
+              opacity: hintOpacity,
+              zIndex: 10
+            }}
+          >
+            {decorations.showGlassPane ? (
+              <GlassmorphicPane
+                innerRadius={decorations.glassInnerRadius}
+                glowOpacity={0.12}
+                borderOpacity={decorations.glassPaneBorderOpacity * 0.8}
+                backgroundColor={colors.glassBackground}
+                padding={25}
+                style={{
+                  boxShadow: hintCardEntrance.boxShadow
+                }}
+              >
+                <div
+                  className={`font-body italic ${alignmentClass}`}
+                  style={{
+                    fontSize: Math.min(fonts.size_hint, 32),
+                    fontWeight: fonts.weight_hint,
+                    fontFamily: fontTokens.body.family,
+                    color: colors.textSecondary,
+                    textTransform,
+                    maxWidth: '85vw',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
+                  }}
+                >
+                  {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities)}
+                </div>
+              </GlassmorphicPane>
+            ) : (
+              <div
+                className={`font-body italic ${alignmentClass}`}
+                style={{
+                  fontSize: Math.min(fonts.size_hint, 32),
+                  fontWeight: fonts.weight_hint,
+                  fontFamily: fontTokens.body.family,
+                  color: colors.textSecondary,
+                  textTransform,
+                  maxWidth: '90%',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
+                }}
+              >
+                {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Signature Badge */}
+        {signature.enabled && questionOpacity > 0 && (
+          <div className="absolute inset-x-0 bottom-[10%] flex justify-center" style={{ zIndex: 20 }}>
+            <div
+              className="badge-chalk bg-opacity-80 text-sm tracking-widest shadow-lg"
+              style={{ opacity: Math.min(1, questionOpacity) }}
+            >
+              {signature.text}
             </div>
-          )}
+          </div>
+        )}
       </div>
       
-      {/* CSS Animations */}
+      {/* CSS Animations for Fog */}
       <style>{`
         @keyframes drift1 {
           0%, 100% { transform: translate(0, 0); }
@@ -561,18 +892,16 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
 
 // DURATION CALCULATION
 export const getDuration = (scene, fps) => {
-  const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
-  
-  const totalDuration = beats.exit + 1.0;
-  return toFrames(totalDuration, fps);
+  const rawBeats = { ...DEFAULT_CONFIG.beats, ...(scene?.beats || {}) };
+  const beats = calculateCumulativeBeats(rawBeats);
+  return toFrames(beats.totalDuration, fps);
 };
 
 // METADATA
-export const TEMPLATE_VERSION = '6.1';
+export const TEMPLATE_VERSION = '6.2';
 export const TEMPLATE_ID = 'Hook1EAmbientMystery';
-export const PRIMARY_INTENTION = 'REVEAL';
-export const SECONDARY_INTENTIONS = ['INSPIRE', 'QUESTION'];
+export const PRIMARY_INTENTION = 'HOOK';
+export const SECONDARY_INTENTIONS = ['REVEAL', 'INSPIRE', 'QUESTION'];
 
 // CONFIG SCHEMA
 export const CONFIG_SCHEMA = {
@@ -590,7 +919,8 @@ export const CONFIG_SCHEMA = {
   centralVisual: {
     enabled: { type: 'checkbox', label: 'Show Visual' },
     type: { type: 'select', label: 'Visual Type', options: ['emoji', 'image', 'roughSVG', 'none'] },
-    value: { type: 'text', label: 'Visual Value' }
+    value: { type: 'text', label: 'Visual Value' },
+    scale: { type: 'slider', label: 'Scale', min: 1, max: 4, step: 0.1 }
   },
   typography: {
     voice: {
@@ -609,21 +939,51 @@ export const CONFIG_SCHEMA = {
       options: ['none', 'uppercase', 'lowercase']
     }
   },
-  effects: {
-    fogIntensity: {
-      type: 'slider',
-      label: 'Fog Intensity',
-      min: 0,
-      max: 0.8,
-      step: 0.05
+  animation: {
+    letterRevealStyle: {
+      type: 'select',
+      label: 'Letter Reveal Style',
+      options: ['fade-up', 'fade', 'scale']
     },
-    glowIntensity: {
+    cameraZoom: {
+      type: 'checkbox',
+      label: 'Enable Camera Zoom'
+    },
+    zoomAmount: {
       type: 'slider',
-      label: 'Glow Intensity',
+      label: 'Zoom Amount',
       min: 0,
-      max: 1,
-      step: 0.05
+      max: 0.15,
+      step: 0.01
+    },
+    continuousFloat: {
+      type: 'checkbox',
+      label: 'Enable Continuous Float'
+    },
+    continuousPulse: {
+      type: 'checkbox',
+      label: 'Enable Continuous Pulse'
     }
+  },
+  decorations: {
+    showGradient: { type: 'checkbox', label: 'Show Gradient Background' },
+    showNoiseTexture: { type: 'checkbox', label: 'Show Noise Texture' },
+    noiseOpacity: { type: 'slider', label: 'Noise Opacity', min: 0, max: 0.15, step: 0.01 },
+    showSpotlights: { type: 'checkbox', label: 'Show Spotlights' },
+    spotlightCount: { type: 'slider', label: 'Spotlight Count', min: 0, max: 3, step: 1 },
+    showFog: { type: 'checkbox', label: 'Show Fog Layers' },
+    fogLayers: { type: 'slider', label: 'Fog Layer Count', min: 1, max: 3, step: 1 },
+    fogIntensity: { type: 'slider', label: 'Fog Intensity', min: 0, max: 0.6, step: 0.05 },
+    showVignette: { type: 'checkbox', label: 'Show Vignette' },
+    vignetteIntensity: { type: 'slider', label: 'Vignette Intensity', min: 0, max: 0.8, step: 0.05 },
+    showParticles: { type: 'checkbox', label: 'Show Ambient Particles' },
+    particleCount: { type: 'slider', label: 'Particle Count', min: 0, max: 50, step: 5 },
+    showGlassPane: { type: 'checkbox', label: 'Show Glassmorphic Panes' },
+    glassPaneOpacity: { type: 'slider', label: 'Glass Pane Opacity', min: 0, max: 0.2, step: 0.02 },
+    showParticleBurst: { type: 'checkbox', label: 'Show Particle Bursts' },
+    particleBurstCount: { type: 'slider', label: 'Burst Particle Count', min: 5, max: 25, step: 5 },
+    showGlow: { type: 'checkbox', label: 'Show Glow Effects' },
+    glowIntensity: { type: 'slider', label: 'Glow Intensity', min: 0, max: 1, step: 0.05 }
   },
   signature: {
     enabled: { type: 'checkbox', label: 'Show Signature Badge' },
