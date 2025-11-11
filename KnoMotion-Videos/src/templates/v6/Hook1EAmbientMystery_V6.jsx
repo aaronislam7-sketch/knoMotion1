@@ -335,7 +335,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Whisper card entrance
   const whisperCardEntrance = config.whisper.enabled
     ? getCardEntrance(frame, {
-        startFrame: f.whisperStart,
+        startFrame: beats.whisperStart,
         duration: 1.0,
         direction: 'up',
         distance: 30,
@@ -367,7 +367,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Particle burst on whisper reveal
   const whisperParticleBurst = decorations.showParticleBurst && config.whisper.enabled
     ? getParticleBurst(frame, {
-        triggerFrame: f.whisperStart,
+        triggerFrame: beats.whisperStart,
         particleCount: decorations.particleBurstCount,
         duration: 1.5,
         color: colors.accent2,
@@ -387,7 +387,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   
   // Question card entrance
   const questionCardEntrance = getCardEntrance(frame, {
-    startFrame: f.questionStart,
+    startFrame: beats.questionStart,
     duration: 1.2,
     direction: 'up',
     distance: 40,
@@ -418,7 +418,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Particle burst on question reveal
   const questionParticleBurst = decorations.showParticleBurst
     ? getParticleBurst(frame, {
-        triggerFrame: f.questionStart,
+        triggerFrame: beats.questionStart,
         particleCount: decorations.particleBurstCount * 1.5,
         duration: 1.8,
         color: colors.accent,
@@ -446,7 +446,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Hint card entrance
   const hintCardEntrance = config.hint.enabled
     ? getCardEntrance(frame, {
-        startFrame: f.hintStart,
+        startFrame: beats.hintStart,
         duration: 1.0,
         direction: 'up',
         distance: 30,
@@ -465,7 +465,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Particle burst on hint reveal
   const hintParticleBurst = decorations.showParticleBurst && config.hint.enabled
     ? getParticleBurst(frame, {
-        triggerFrame: f.hintStart,
+        triggerFrame: beats.hintStart,
         particleCount: decorations.particleBurstCount,
         duration: 1.4,
         color: colors.textSecondary,
@@ -491,7 +491,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Icon pop for visual
   const visualIconPop = config.centralVisual.enabled
     ? getIconPop(frame, {
-        startFrame: f.questionStart,
+        startFrame: beats.questionStart,
         duration: 1.0,
         withBounce: true,
         rotation: 0

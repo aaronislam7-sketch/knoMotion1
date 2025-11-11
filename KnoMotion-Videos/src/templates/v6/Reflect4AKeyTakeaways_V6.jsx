@@ -256,7 +256,7 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   }, [frame, config.title.text, beats.titleStart, rawBeats.titleReveal, fps]);
   
   const titleCardEntrance = getCardEntrance(frame, {
-    startFrame: f.titleStart,
+    startFrame: beats.titleStart,
     duration: 0.8,
     direction: 'up',
     distance: 30,
