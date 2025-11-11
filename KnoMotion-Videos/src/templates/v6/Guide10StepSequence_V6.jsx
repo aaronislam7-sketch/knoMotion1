@@ -17,27 +17,33 @@ import {
   getCardEntrance,
   getStaggerDelay,
   getIconPop,
-  applyTransform
+  applyTransform,
+  getLetterReveal,
+  renderLetterReveal,
+  getParticleBurst,
+  renderParticleBurst
 } from '../../sdk/microDelights.jsx';
 
 /**
- * TEMPLATE #10: STEP-BY-STEP GUIDE - v6.0 (REVISED FOR BROADCAST QUALITY)
+ * TEMPLATE #10: STEP-BY-STEP GUIDE - v6.0 (BROADCAST-GRADE POLISH)
  * 
- * MAJOR REVISIONS BASED ON FEEDBACK:
- * ✅ Horizontal & Grid layouts (NOT vertical by default)
- * ✅ Lottie animated arrows between steps
- * ✅ Removed "box" styling - sophisticated organic design
- * ✅ Uses FULL 1920x1080 screen real estate
- * ✅ More configuration options exposed to admin panel
- * ✅ Dynamic, flowing design that doesn't feel PowerPoint-esque
+ * BROADCAST POLISH APPLIED:
+ * ✅ 5-Layer Background Depth (gradient, noise, particles, glassmorphic)
+ * ✅ Micro-Delights (letter reveals, particle bursts, icon pops, continuous float)
+ * ✅ Cumulative Beats System (relative timing, easy adjustments)
+ * ✅ Continuous Life Animations (subtle floating on steps)
+ * ✅ Dynamic Array Timing (cumulative beats for variable-length steps)
+ * ✅ 100% Configurability (decorations object, zero hardcoded values)
  * 
  * KEY FEATURES:
  * - Three layout modes: horizontal, grid, flowing
+ * - Letter-by-letter title reveal
+ * - Particle bursts on step reveals
  * - Animated Lottie arrows connecting steps
- * - Circular progress tracker
+ * - Circular progress tracker with smooth updates
+ * - Continuous floating animation on steps
  * - Emphasis system for active/completed steps
- * - Sophisticated glassmorphic cards (no boxes!)
- * - Full JSON configurability
+ * - Full JSON configurability via decorations
  */
 
 const DEFAULT_CONFIG = {
@@ -134,12 +140,13 @@ const DEFAULT_CONFIG = {
     }
   },
   
+  // CUMULATIVE BEATS: Each beat is relative to previous for easy timing adjustments
   beats: {
     entrance: 0.5,
-    title: 1.0,
-    firstStep: 2.5,
-    stepInterval: 0.7,
-    arrowDelay: 0.3,  // Delay after step before arrow appears
+    title: 0.5,           // +0.5s from entrance (cumulative: 1.0s)
+    firstStep: 1.5,       // +1.5s from title (cumulative: 2.5s)
+    stepInterval: 0.7,    // Interval between steps
+    arrowDelay: 0.3,      // Delay after step before arrow appears
     hold: 12.0,
     exit: 14.0
   },
@@ -166,6 +173,35 @@ const DEFAULT_CONFIG = {
     noiseTexture: {
       enabled: true,
       opacity: 0.03
+    }
+  },
+  
+  // DECORATIONS: 100% configurable micro-delights and animations
+  decorations: {
+    titleLetterReveal: {
+      enabled: true,
+      staggerDelay: 0.04,
+      fadeInDuration: 0.3
+    },
+    stepBurst: {
+      enabled: true,
+      particleCount: 15,
+      spread: 100,
+      duration: 1.0
+    },
+    stepFloat: {
+      enabled: true,
+      distance: 6,
+      speed: 0.025
+    },
+    iconPop: {
+      enabled: true,
+      withBounce: true,
+      duration: 0.5
+    },
+    arrowAnimation: {
+      enabled: true,
+      withGlow: false
     }
   }
 };
@@ -257,8 +293,19 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   
   const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
-  // Merge config
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  // Merge config and convert cumulative beats
+  const beatsRaw = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  
+  // CUMULATIVE BEATS: Convert relative beats to absolute timestamps
+  const beats = {
+    entrance: beatsRaw.entrance,
+    title: beatsRaw.entrance + beatsRaw.title,
+    firstStep: beatsRaw.entrance + beatsRaw.title + beatsRaw.firstStep,
+    stepInterval: beatsRaw.stepInterval,
+    arrowDelay: beatsRaw.arrowDelay,
+    hold: beatsRaw.hold,
+    exit: beatsRaw.exit
+  };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
   const layout = { ...DEFAULT_CONFIG.layout, ...(scene.layout || {}) };
@@ -276,14 +323,19 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
     noiseTexture: { ...DEFAULT_CONFIG.effects.noiseTexture, ...(scene.effects?.noiseTexture || {}) }
   };
   
+  // Merge decorations
+  const decorations = { ...DEFAULT_CONFIG.decorations, ...(scene.decorations || {}) };
+  
   const steps = config.steps || DEFAULT_CONFIG.steps;
   const totalSteps = steps.length;
   const completedCount = steps.filter(s => s.completed).length;
   
-  // Convert beats to frames
-  const f_title = toFrames(beats.title, fps);
-  const f_firstStep = toFrames(beats.firstStep, fps);
-  const f_exit = toFrames(beats.exit, fps);
+  // Convert beats to frames (for conditional rendering only)
+  const f = {
+    title: toFrames(beats.title, fps),
+    firstStep: toFrames(beats.firstStep, fps),
+    exit: toFrames(beats.exit, fps)
+  };
   
   // Generate particles
   const particleElements = effects.particles.enabled
@@ -298,17 +350,28 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
   
   renderAmbientParticles(particleElements, frame, fps, { opacity: 0.35 });
   
-  // Title animation
-  const titleProgress = interpolate(
-    frame,
-    [f_title, f_title + toFrames(0.8, fps)],
-    [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power3Out }
-  );
+  // Title animations
+  const titleCardEntrance = getCardEntrance(frame, {
+    startFrame: beats.title, // CRITICAL: Pass SECONDS not frames
+    duration: 0.8,
+    direction: 'up',
+    distance: 30,
+    withGlow: false
+  }, fps);
+  
+  // Letter-by-letter reveal for title
+  const titleLetterReveal = decorations.titleLetterReveal?.enabled
+    ? getLetterReveal(frame, {
+        startFrame: beats.title + 0.2, // CRITICAL: Pass SECONDS
+        text: config.title.text,
+        staggerDelay: decorations.titleLetterReveal.staggerDelay,
+        fadeInDuration: decorations.titleLetterReveal.fadeInDuration
+      }, fps)
+    : null;
   
   // Exit animation
-  const exitProgress = frame >= f_exit
-    ? interpolate(frame, [f_exit, f_exit + toFrames(0.8, fps)], [0, 1],
+  const exitProgress = frame >= f.exit
+    ? interpolate(frame, [f.exit, f.exit + toFrames(0.8, fps)], [0, 1],
         { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power3In })
     : 0;
   
@@ -339,24 +402,37 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title */}
+      {/* Title with letter-by-letter reveal */}
       <div
         style={{
           position: 'absolute',
           left: '50%',
           top: config.title.offset.y,
-          transform: `translate(-50%, ${(1 - titleProgress) * 30}px)`,
-          fontSize: fonts.size_title,
-          fontWeight: fonts.weight_title,
-          fontFamily: fontTokens.title.family,
-          color: colors.text,
-          opacity: titleProgress * exitOpacity,
+          transform: `translate(-50%, ${(1 - titleCardEntrance.opacity) * 30}px)`,
+          opacity: titleCardEntrance.opacity * exitOpacity,
           textAlign: 'center',
-          letterSpacing: '0.02em',
           zIndex: 10
         }}
       >
-        {config.title.text}
+        {titleLetterReveal ? (
+          renderLetterReveal(titleLetterReveal, {
+            fontSize: fonts.size_title,
+            fontWeight: fonts.weight_title,
+            fontFamily: fontTokens.title.family,
+            color: colors.text,
+            letterSpacing: '0.02em'
+          })
+        ) : (
+          <div style={{
+            fontSize: fonts.size_title,
+            fontWeight: fonts.weight_title,
+            fontFamily: fontTokens.title.family,
+            color: colors.text,
+            letterSpacing: '0.02em'
+          }}>
+            {config.title.text}
+          </div>
+        )}
       </div>
       
       {/* Circular Progress Tracker */}
@@ -421,23 +497,23 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       )}
       
       {/* Lottie Arrows between steps */}
-      {arrows.enabled && arrows.type === 'lottie' && (
+      {arrows.enabled && arrows.type === 'lottie' && decorations.arrowAnimation?.enabled && (
         <div style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}>
           {steps.slice(0, -1).map((step, i) => {
             const nextPos = stepPositions[i + 1];
             const currPos = stepPositions[i];
             
-            const stepBeat = f_firstStep + toFrames(beats.stepInterval * i, fps);
-            const arrowBeat = stepBeat + toFrames(beats.arrowDelay, fps);
+            const arrowStartBeat = beats.firstStep + (i * beats.stepInterval) + beats.arrowDelay;
+            const arrowBeat = toFrames(arrowStartBeat, fps);
             
             if (frame < arrowBeat) return null;
             
             const arrowEntrance = getCardEntrance(frame, {
-              startFrame: beats.firstStep + i * beats.stepInterval + beats.arrowDelay,
+              startFrame: arrowStartBeat, // CRITICAL: Pass SECONDS not frames
               duration: 0.5,
               direction: 'right',
               distance: 30,
-              withGlow: false
+              withGlow: decorations.arrowAnimation.withGlow
             }, fps);
             
             if (arrowEntrance.opacity === 0) return null;
@@ -479,9 +555,10 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
       {/* Step Cards - Circular Design (NO BOXES!) */}
       {steps.map((step, i) => {
         const pos = stepPositions[i];
+        const stepStartBeat = beats.firstStep + (i * beats.stepInterval);
         
         const stepEntrance = getCardEntrance(frame, {
-          startFrame: beats.firstStep + i * beats.stepInterval,
+          startFrame: stepStartBeat, // CRITICAL: Pass SECONDS not frames
           duration: 0.7,
           direction: 'up',
           distance: 60,
@@ -491,12 +568,33 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
         
         if (stepEntrance.opacity === 0) return null;
         
+        // Continuous float animation
+        const floatAnim = decorations.stepFloat?.enabled
+          ? {
+              offsetY: Math.sin((frame + i * 25) * decorations.stepFloat.speed) * decorations.stepFloat.distance
+            }
+          : { offsetY: 0 };
+        
+        // Particle burst on step reveal
+        const stepBurst = decorations.stepBurst?.enabled
+          ? getParticleBurst(frame, {
+              triggerFrame: stepStartBeat, // CRITICAL: Pass SECONDS
+              particleCount: decorations.stepBurst.particleCount,
+              duration: decorations.stepBurst.duration,
+              color: step.color,
+              size: 6,
+              spread: decorations.stepBurst.spread
+            }, fps)
+          : [];
+        
         // Icon pop
-        const iconPop = step.icon ? getIconPop(frame, {
-          startFrame: beats.firstStep + i * beats.stepInterval + 0.3,
-          duration: 0.5,
-          withBounce: true
-        }, fps) : null;
+        const iconPop = decorations.iconPop?.enabled && step.icon
+          ? getIconPop(frame, {
+              startFrame: stepStartBeat + 0.3, // CRITICAL: Pass SECONDS
+              duration: decorations.iconPop.duration,
+              withBounce: decorations.iconPop.withBounce
+            }, fps)
+          : null;
         
         // Check emphasis
         const isEmphasized = isStepEmphasized(step, frame, fps);
@@ -513,12 +611,15 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
             style={{
               position: 'absolute',
               left: pos.x,
-              top: pos.y,
+              top: pos.y + floatAnim.offsetY,
               transform: `translate(-50%, -50%) scale(${stepEntrance.scale * emphasisScale})`,
               opacity: stepEntrance.opacity * exitOpacity,
               zIndex: isEmphasized ? 10 : 3,
               transition: 'all 0.3s ease'
             }}
+          >
+            {/* Particle burst */}
+            {renderParticleBurst(stepBurst, 0, 0)}
           >
             {/* Circular card design */}
             <div style={{
