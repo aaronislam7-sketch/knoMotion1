@@ -588,6 +588,22 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
         </svg>
       )}
       
+      {/* DEBUG: Test plain text */}
+      <div style={{
+        position: 'absolute',
+        top: 100,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontSize: 48,
+        fontFamily: fontTokens.title.family,
+        color: '#FF0000',
+        zIndex: 999,
+        backgroundColor: 'yellow',
+        padding: '20px'
+      }}>
+        DEBUG: Can you see this text?
+      </div>
+      
       {/* Optional Title */}
       {config.title.enabled && (
         <div
