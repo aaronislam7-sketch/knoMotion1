@@ -70,7 +70,7 @@ const DEFAULT_CONFIG = {
     spacing: 'comfortable',  // 'tight', 'comfortable', 'spacious'
     gridColumns: 2,  // Only for grid mode
     cardStyle: 'circle',  // 'circle', 'organic', 'minimal'
-    cardSize: 260  // INCREASED for text to fit comfortably
+    cardSize: 180  // REDUCED to fit on screen (was 260, too large)
   },
   
   // NEW: Arrow configuration
@@ -108,7 +108,7 @@ const DEFAULT_CONFIG = {
   },
   
   typography: {
-    voice: 'utility',
+    voice: 'notebook',  // Knode brand: notebook aesthetic
     align: 'center',
     transform: 'none'
   },
@@ -126,9 +126,9 @@ const DEFAULT_CONFIG = {
     },
     fonts: {
       size_title: 54,
-      size_step_number: 72,
-      size_step_title: 32,
-      size_step_desc: 18,
+      size_step_number: 48,  // Reduced from 72 to fit in smaller cards
+      size_step_title: 24,   // Reduced from 32 to fit better
+      size_step_desc: 16,    // Reduced from 18
       weight_title: 800,
       weight_step: 700
     }
@@ -175,9 +175,9 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
   const { mode, spacing, gridColumns, cardSize } = layout;
   
   const spacingMap = {
-    tight: 1.2,
-    comfortable: 1.4,
-    spacious: 1.6
+    tight: 1.15,        // Reduced to keep on-screen
+    comfortable: 1.3,   // Reduced to keep on-screen
+    spacious: 1.45      // Reduced to keep on-screen
   };
   
   const gap = cardSize * spacingMap[spacing];
@@ -186,8 +186,8 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
   if (mode === 'horizontal') {
     // Horizontal layout - distribute evenly across width
     const totalWidth = (totalSteps - 1) * gap;
-    const startX = (width - totalWidth) / 2;
-    const centerY = height / 2 + 10;  // Reduced offset to avoid bottom overlap
+    const startX = Math.max((width - totalWidth) / 2, cardSize / 2 + 50); // Ensure left margin
+    const centerY = height / 2 + 30;
     
     for (let i = 0; i < totalSteps; i++) {
       positions.push({
@@ -549,11 +549,11 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               
               {/* Step number or checkmark */}
               <div style={{
-                fontSize: Math.min(fonts.size_step_number, 56),  // Max 56px
+                fontSize: Math.min(fonts.size_step_number, 40),  // Reduced from 56 to fit smaller cards
                 fontWeight: fonts.weight_step,
                 fontFamily: fontTokens.accent.family,
                 color: colors.text,
-                marginBottom: 8,
+                marginBottom: 6,
                 position: 'relative',
                 zIndex: 2,
                 flexShrink: 0
@@ -578,8 +578,8 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Icon */}
               {step.icon && iconPop && !isCompleted && (
                 <div style={{
-                  fontSize: 36,  // Slightly smaller icon
-                  marginBottom: 6,
+                  fontSize: 28,  // Reduced from 36 to fit smaller cards
+                  marginBottom: 4,
                   opacity: iconPop.opacity,
                   transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`,
                   zIndex: 2,
@@ -592,12 +592,12 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Title */}
               <div
                 style={{
-                  fontSize: Math.min(fonts.size_step_title, 26),  // Max 26px
+                  fontSize: Math.min(fonts.size_step_title, 20),  // Reduced from 26 for smaller cards
                   fontWeight: fonts.weight_step,
                   fontFamily: fontTokens.accent.family,
                   color: colors.text,
                   textAlign: 'center',
-                  marginBottom: 6,
+                  marginBottom: 4,
                   lineHeight: 1.1,
                   zIndex: 2,
                   overflow: 'hidden',
@@ -611,12 +611,12 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
               {/* Description */}
               <div
                 style={{
-                  fontSize: Math.min(fonts.size_step_desc, 15),  // Max 15px
+                  fontSize: Math.min(fonts.size_step_desc, 13),  // Reduced from 15 for smaller cards
                   fontFamily: fontTokens.body.family,
                   color: colors.text,
                   textAlign: 'center',
                   opacity: 0.9,
-                  lineHeight: 1.3,
+                  lineHeight: 1.2,
                   zIndex: 2,
                   overflow: 'hidden',
                   display: '-webkit-box',

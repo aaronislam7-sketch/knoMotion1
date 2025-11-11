@@ -1039,6 +1039,33 @@ The principles below are **design options** to consider, not requirements to app
 - **Avoid PowerPoint feel** - Too many boxes/cards = presentation slides
 - **When in doubt, less is more** - Start minimal, add effects only where they enhance
 
+### 🎨 Creative Freedom: When to Redesign Layouts
+
+**Don't be constrained by existing layouts if they can be rendered better!**
+
+When uplifting a template, **evaluate if the existing layout serves the content well**:
+
+**✅ Signs You Should Redesign:**
+- Elements going off-screen or overlapping
+- Text cut off or cramped in containers
+- Complex calculations causing positioning issues
+- Layout doesn't use screen space effectively
+- Design feels rigid or "PowerPoint-esque"
+- Current approach fights against the content
+
+**Redesign Principles:**
+1. **Content First**: What does this template need to communicate? Design around that.
+2. **Screen Space**: 1920x1080 is generous - use it! But keep margins for comfort.
+3. **Simplicity**: Fewer, larger elements > many cramped elements
+4. **Knode Brand**: Notebook aesthetic, hand-drawn feel, organic not geometric
+5. **Test**: Render early, render often. Don't assume calculations will work.
+
+**Example - Step Sequence:**
+```
+❌ BAD: 260px circular cards × 5 steps = 1300px (off-screen!)
+✅ GOOD: Smaller cards (180px) or linear timeline layout
+```
+
 When uplifting a template to broadcast-grade, ensure:
 
 **Visual Layers (5 available, use 3-5):**
