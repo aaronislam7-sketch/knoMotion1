@@ -21,30 +21,28 @@ import {
   getParticleBurst,
   renderParticleBurst,
   getScaleEmphasis,
-  applyTransform,
-  getLetterReveal,
-  renderLetterReveal
+  applyTransform
 } from '../../sdk/microDelights.jsx';
 
 /**
- * TEMPLATE #3: CONCEPT BREAKDOWN - v6.0 (BROADCAST-GRADE POLISH)
+ * TEMPLATE #3: CONCEPT BREAKDOWN - v6.0 (REVISED FOR BROADCAST QUALITY)
  * 
- * BROADCAST POLISH APPLIED:
- * ✅ 5-Layer Background Depth (gradient, noise, spotlights, particles, glassmorphic)
- * ✅ Micro-Delights (letter reveals, particle bursts, icon pops, pulsing glows)
- * ✅ Cumulative Beats System (relative timing, easy adjustments)
- * ✅ Continuous Life Animations (subtle floating on parts)
- * ✅ Dynamic Array Timing (cumulative beats for variable-length parts)
- * ✅ 100% Configurability (decorations object, zero hardcoded values)
+ * MAJOR REVISIONS BASED ON FEEDBACK:
+ * ✅ Uses FULL 1920x1080 screen real estate
+ * ✅ Individual part emphasis system (for VO pacing)
+ * ✅ Sophisticated visual treatment (no boxes, organic design)
+ * ✅ Clean center hub with proper sizing
+ * ✅ Dynamic, flowing layout that doesn't feel PowerPoint-esque
+ * ✅ Configurable emphasis timing per part
  * 
  * KEY FEATURES:
- * - Large radius for proper screen usage
+ * - Large radius (500px) for proper screen usage
  * - Emphasis system: highlight individual parts for VO narration
  * - Organic spoke connections with animated flow
- * - Letter-by-letter title reveal
- * - Particle bursts on center reveal
- * - Continuous floating animation on parts
- * - Full JSON configurability via decorations
+ * - Center hub: large, clean, no overlap
+ * - Parts: circular badges with icons, not boxes
+ * - Sophisticated glassmorphic styling
+ * - Full JSON configurability
  */
 
 const DEFAULT_CONFIG = {
@@ -136,14 +134,13 @@ const DEFAULT_CONFIG = {
     }
   },
   
-  // CUMULATIVE BEATS: Each beat is relative to previous, making timing adjustments easy
   beats: {
     entrance: 0.5,
-    title: 0.5,              // +0.5s from entrance (cumulative: 1.0s)
-    centerReveal: 1.0,       // +1.0s from title (cumulative: 2.0s)
-    firstPart: 1.5,          // +1.5s from center (cumulative: 3.5s)
-    partInterval: 0.8,       // Interval between parts
-    connections: 0.5,        // +0.5s from first part (overlaps with parts)
+    title: 1.0,
+    centerReveal: 2.0,
+    firstPart: 3.5,
+    partInterval: 0.8,      // Slightly longer for better pacing
+    connections: 3.0,
     hold: 12.0,
     exit: 14.0
   },
@@ -174,36 +171,6 @@ const DEFAULT_CONFIG = {
     noiseTexture: {
       enabled: true,
       opacity: 0.03
-    }
-  },
-  
-  // DECORATIONS: 100% configurable micro-delights and animations
-  decorations: {
-    titleLetterReveal: {
-      enabled: true,
-      staggerDelay: 0.04,
-      fadeInDuration: 0.3
-    },
-    centerBurst: {
-      enabled: true,
-      particleCount: 20,
-      spread: 150,
-      duration: 1.5
-    },
-    partFloat: {
-      enabled: true,
-      distance: 8,
-      speed: 0.03
-    },
-    iconPop: {
-      enabled: true,
-      withBounce: true,
-      duration: 0.5
-    },
-    connectionFlow: {
-      enabled: true,
-      particlesEnabled: true,
-      drawAnimation: true
     }
   }
 };
@@ -246,35 +213,13 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
   // Merge config
-  const beatsRaw = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
-  
-  // CUMULATIVE BEATS: Convert relative beats to absolute timestamps
-  const beats = {
-    entrance: beatsRaw.entrance,
-    title: beatsRaw.entrance + beatsRaw.title,
-    centerReveal: beatsRaw.entrance + beatsRaw.title + beatsRaw.centerReveal,
-    firstPart: beatsRaw.entrance + beatsRaw.title + beatsRaw.centerReveal + beatsRaw.firstPart,
-    partInterval: beatsRaw.partInterval,
-    connections: beatsRaw.entrance + beatsRaw.title + beatsRaw.centerReveal + beatsRaw.firstPart + beatsRaw.connections,
-    hold: beatsRaw.hold,
-    exit: beatsRaw.exit
-  };
+  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const colors = { ...DEFAULT_CONFIG.style_tokens.colors, ...(scene.style_tokens?.colors || {}) };
   const fonts = { ...DEFAULT_CONFIG.style_tokens.fonts, ...(scene.style_tokens?.fonts || {}) };
   const layout = { ...DEFAULT_CONFIG.layout, ...(scene.layout || {}) };
   const visualStyle = { ...DEFAULT_CONFIG.visualStyle, ...(scene.visualStyle || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
   const emphasisConfig = { ...DEFAULT_CONFIG.emphasis, ...(scene.emphasis || {}) };
-  
-  // Merge center config with proper defaults
-  const centerConfig = {
-    ...DEFAULT_CONFIG.center,
-    ...(scene.center || {}),
-    glass: {
-      ...DEFAULT_CONFIG.center.glass,
-      ...(scene.center?.glass || {})
-    }
-  };
   const effects = { 
     ...DEFAULT_CONFIG.effects, 
     ...(scene.effects || {}),
@@ -284,20 +229,14 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
     noiseTexture: { ...DEFAULT_CONFIG.effects.noiseTexture, ...(scene.effects?.noiseTexture || {}) }
   };
   
-  // Merge decorations
-  const decorations = { ...DEFAULT_CONFIG.decorations, ...(scene.decorations || {}) };
-  
   const parts = config.parts || DEFAULT_CONFIG.parts;
   const totalParts = parts.length;
   
-  // Convert beats to frames (for conditional rendering only)
-  const f = {
-    title: toFrames(beats.title, fps),
-    centerReveal: toFrames(beats.centerReveal, fps),
-    firstPart: toFrames(beats.firstPart, fps),
-    connections: toFrames(beats.connections, fps),
-    exit: toFrames(beats.exit, fps)
-  };
+  // Convert beats to frames
+  const f_title = toFrames(beats.title, fps);
+  const f_center = toFrames(beats.centerReveal, fps);
+  const f_firstPart = toFrames(beats.firstPart, fps);
+  const f_exit = toFrames(beats.exit, fps);
   
   // Generate particles
   const particleElements = effects.particles.enabled
@@ -312,27 +251,17 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   
   renderAmbientParticles(particleElements, frame, fps, { opacity: 0.4 });
   
-  // Title animations
-  const titleCardEntrance = getCardEntrance(frame, {
-    startFrame: beats.title, // CRITICAL: Pass SECONDS not frames
-    duration: 0.8,
-    direction: 'up',
-    distance: 30,
-    withGlow: false
-  }, fps);
-  
-  // Letter-by-letter reveal for title
-  const titleLetterReveal = decorations.titleLetterReveal?.enabled
-    ? getLetterReveal(frame, config.title.text, {
-        startFrame: beats.title + 0.2, // CRITICAL: Pass SECONDS not frames
-        staggerDelay: decorations.titleLetterReveal.staggerDelay,
-        duration: decorations.titleLetterReveal.fadeInDuration
-      }, fps)
-    : null;
+  // Title animation
+  const titleProgress = interpolate(
+    frame,
+    [f_title, f_title + toFrames(0.8, fps)],
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power3Out }
+  );
   
   // Center entrance
   const centerEntrance = getCardEntrance(frame, {
-    startFrame: beats.centerReveal, // CRITICAL: Pass SECONDS not frames
+    startFrame: beats.centerReveal,
     duration: 1.0,
     direction: 'up',
     distance: 80,
@@ -345,25 +274,25 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         frequency: effects.glow.frequency,
         intensity: effects.glow.intensity,
         color: `${colors.center}80`,
-        startFrame: beats.centerReveal // CRITICAL: Pass SECONDS not frames (if needed by getPulseGlow)
+        startFrame: f_center
       })
     : {};
   
   // Particle burst
-  const centerBurstParticles = decorations.centerBurst?.enabled
+  const centerBurstParticles = anim.centerBurst
     ? getParticleBurst(frame, {
-        triggerFrame: beats.centerReveal, // CRITICAL: Pass SECONDS not frames
-        particleCount: decorations.centerBurst.particleCount,
-        duration: decorations.centerBurst.duration,
+        triggerFrame: beats.centerReveal,
+        particleCount: 20,
+        duration: 1.5,
         color: colors.center,
         size: 10,
-        spread: decorations.centerBurst.spread
+        spread: 150
       }, fps)
     : [];
   
   // Exit animation
-  const exitProgress = frame >= f.exit
-    ? interpolate(frame, [f.exit, f.exit + toFrames(0.8, fps)], [0, 1],
+  const exitProgress = frame >= f_exit
+    ? interpolate(frame, [f_exit, f_exit + toFrames(0.8, fps)], [0, 1],
         { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power3In })
     : 0;
   
@@ -406,41 +335,28 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         {particleElements.map(p => p.element)}
       </svg>
       
-      {/* Title with letter-by-letter reveal */}
+      {/* Title */}
       <div
         style={{
           position: 'absolute',
           left: '50%',
           top: config.title.offset.y,
-          transform: `translate(-50%, ${(1 - titleCardEntrance.opacity) * 30}px)`,
-          opacity: titleCardEntrance.opacity * exitOpacity,
+          transform: `translate(-50%, ${(1 - titleProgress) * 30}px)`,
+          fontSize: fonts.size_title,
+          fontWeight: fonts.weight_title,
+          fontFamily: fontTokens.title.family,
+          color: colors.text,
+          opacity: titleProgress * exitOpacity,
           textAlign: 'center',
+          letterSpacing: '0.02em',
           zIndex: 10
         }}
       >
-        {titleLetterReveal ? (
-          renderLetterReveal(titleLetterReveal.letters, titleLetterReveal.letterOpacities, {
-            fontSize: fonts.size_title,
-            fontWeight: fonts.weight_title,
-            fontFamily: fontTokens.title.family,
-            color: colors.text,
-            letterSpacing: '0.02em'
-          })
-        ) : (
-          <div style={{
-            fontSize: fonts.size_title,
-            fontWeight: fonts.weight_title,
-            fontFamily: fontTokens.title.family,
-            color: colors.text,
-            letterSpacing: '0.02em'
-          }}>
-            {config.title.text}
-          </div>
-        )}
+        {config.title.text}
       </div>
       
       {/* Connections with flow animation */}
-      {decorations.connectionFlow?.drawAnimation && frame >= f.connections && (
+      {anim.connectionDraw && frame >= toFrames(beats.connections, fps) && (
         <svg style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}>
           <defs>
             <linearGradient id="connectionGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -451,14 +367,13 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
           </defs>
           
           {parts.map((part, i) => {
-            const partStartBeat = beats.firstPart + (i * beats.partInterval);
-            const partBeat = toFrames(partStartBeat, fps);
+            const partBeat = f_firstPart + toFrames(beats.partInterval * i, fps);
             if (frame < partBeat) return null;
             
             const pos = calculateSpokePosition(i, totalParts, layout.radius, centerX, centerY);
             const pathLength = Math.sqrt(Math.pow(pos.x - centerX, 2) + Math.pow(pos.y - centerY, 2));
             const drawProgress = getPathDraw(frame, {
-              startFrame: beats.connections + i * 0.15, // CRITICAL: Pass SECONDS
+              startFrame: beats.connections + i * 0.15,
               duration: 0.8,
               pathLength
             }, fps);
@@ -485,7 +400,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
                 />
                 
                 {/* Flowing particle */}
-                {decorations.connectionFlow?.particlesEnabled && drawProgress.strokeDashoffset === 0 && (
+                {anim.connectionParticles && drawProgress.strokeDashoffset === 0 && (
                   <circle
                     cx={centerX + (pos.x - centerX) * (Math.sin((frame - partBeat) * 0.06) * 0.5 + 0.5)}
                     cy={centerY + (pos.y - centerY) * (Math.sin((frame - partBeat) * 0.06) * 0.5 + 0.5)}
@@ -518,8 +433,8 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         >
           <GlassmorphicPane
             innerRadius={layout.centerSize / 2}
-            glowOpacity={centerConfig.glass.glowOpacity}
-            borderOpacity={centerConfig.glass.borderOpacity}
+            glowOpacity={config.center.glass.glowOpacity}
+            borderOpacity={config.center.glass.borderOpacity}
             padding={0}
             backgroundColor={`${colors.center}15`}
             style={{
@@ -534,9 +449,9 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               ...centerGlow
             }}
           >
-            {centerConfig.visual?.enabled && (
+            {config.center.visual?.enabled && (
               <div style={{ fontSize: layout.centerSize * 0.35, marginBottom: 8 }}>
-                {centerConfig.visual.value}
+                {config.center.visual.value}
               </div>
             )}
             <div
@@ -550,7 +465,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
                 padding: '0 20px'
               }}
             >
-              {centerConfig.text}
+              {config.center.text}
             </div>
           </GlassmorphicPane>
         </div>
@@ -558,11 +473,10 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
       
       {/* Parts - Circular Badges (Not Boxes!) */}
       {parts.map((part, i) => {
-        const partStartBeat = beats.firstPart + (i * beats.partInterval);
-        const partBeat = toFrames(partStartBeat, fps);
+        const partBeat = f_firstPart + toFrames(beats.partInterval * i, fps);
         
         const partEntrance = getCardEntrance(frame, {
-          startFrame: partStartBeat, // CRITICAL: Pass SECONDS not frames
+          startFrame: beats.firstPart + i * beats.partInterval,
           duration: 0.7,
           direction: 'up',
           distance: 50,
@@ -574,21 +488,12 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         
         const pos = calculateSpokePosition(i, totalParts, layout.radius, centerX, centerY);
         
-        // Continuous float animation (inline)
-        const floatAnim = decorations.partFloat?.enabled
-          ? {
-              offsetY: Math.sin((frame + i * 30) * decorations.partFloat.speed) * decorations.partFloat.distance
-            }
-          : { offsetY: 0 };
-        
         // Icon pop
-        const iconPop = decorations.iconPop?.enabled && part.icon
-          ? getIconPop(frame, {
-              startFrame: partStartBeat + 0.3, // CRITICAL: Pass SECONDS
-              duration: decorations.iconPop.duration,
-              withBounce: decorations.iconPop.withBounce
-            }, fps)
-          : null;
+        const iconPop = part.icon ? getIconPop(frame, {
+          startFrame: beats.firstPart + i * beats.partInterval + 0.3,
+          duration: 0.5,
+          withBounce: true
+        }, fps) : null;
         
         // Emphasis check
         const isEmphasized = isPartEmphasized(part, frame, fps);
@@ -608,7 +513,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
             style={{
               position: 'absolute',
               left: pos.x,
-              top: pos.y + floatAnim.offsetY,
+              top: pos.y,
               transform: `translate(-50%, -50%) scale(${partEntrance.scale * emphasisScale.scale})`,
               opacity: partEntrance.opacity * exitOpacity,
               zIndex: isEmphasized ? 10 : 3,
@@ -694,15 +599,11 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
 // Duration calculation
 export const getDuration = (scene, fps) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beatsRaw = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const parts = config.parts || DEFAULT_CONFIG.parts;
   
-  // CUMULATIVE BEATS: Calculate actual timeline
-  const lastPartBeat = beatsRaw.entrance + beatsRaw.title + beatsRaw.centerReveal + beatsRaw.firstPart + (beatsRaw.partInterval * parts.length);
-  const exitBeat = beatsRaw.exit;
-  
-  // Use whichever is later: exit beat or last part + buffer
-  const totalDuration = Math.max(exitBeat, lastPartBeat + 2.0) + 1.0;
+  const partsDuration = beats.firstPart + (beats.partInterval * parts.length) + 2.0;
+  const totalDuration = Math.max(beats.exit, partsDuration) + 1.0;
   
   return toFrames(totalDuration, fps);
 };
