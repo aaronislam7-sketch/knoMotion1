@@ -734,6 +734,220 @@ transform: `translate(${x}px, ${y + floatingOffset}px) scale(${scale})`
 
 ---
 
+#### 12. **Dynamic Array Timing** ⭐ NEW
+
+When dealing with variable-length content arrays (e.g., 2-5 stages), calculate cumulative beats dynamically:
+
+```jsx
+const calculateCumulativeBeats = (beats, stageCount) => {
+  const { entrance, titleEntry, stageHold, stageTransition } = beats;
+  
+  let cumulative = entrance + titleEntry;
+  const result = { stages: [] };
+  
+  for (let i = 0; i < stageCount; i++) {
+    result.stages.push({
+      start: cumulative,
+      end: (cumulative += stageHold + stageTransition)
+    });
+  }
+  
+  result.totalDuration = cumulative;
+  return result;
+};
+
+// Usage
+const beats = useMemo(() => 
+  calculateCumulativeBeats(rawBeats, stages.length),
+  [rawBeats, stages.length]
+);
+```
+
+**Key principles:**
+- **Memoize calculation:** Use `useMemo` with dependencies on beats config and array length
+- **Loop through array:** Calculate each item's timing cumulatively
+- **Return structured object:** Organized by item index for easy access
+- **Handle first/last differently:** First stage might have longer reveal, last might skip transition
+- **Total duration calculation:** Sum all stages for `getDuration` export
+
+**When to use:**
+- Multi-step sequences (reveal stages, tutorial steps)
+- Dynamic content lists
+- Progress-based animations
+- Sequential unveiling
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (stage timing calculation) for implementation.
+
+---
+
+#### 13. **Persistent Stage Indicators** ⭐ NEW
+
+Add corner indicators to show progress through multi-stage sequences:
+
+```jsx
+const stageIndicator = {
+  show: true,
+  position: 'top-right', // top-left, top-right, bottom-left, bottom-right
+  style: 'both', // number, emoji, both
+  size: 48
+};
+
+// Render with icon pop animation
+<div style={{
+  position: 'absolute',
+  [position.includes('top') ? 'top' : 'bottom']: 30,
+  [position.includes('left') ? 'left' : 'right']: 30,
+  fontSize: stageIndicator.size,
+  fontWeight: 900,
+  opacity: iconPopAnim.opacity,
+  transform: `scale(${iconPopAnim.scale})`,
+  zIndex: 150
+}}>
+  {stage.emoji} Stage {index + 1}
+</div>
+```
+
+**Key principles:**
+- **Corner positioning:** Keep out of main content area (top-left/top-right/bottom corners)
+- **Configurable visibility:** Always allow toggling via `show` boolean
+- **Style options:** Number only, emoji only, or both combined
+- **Pop entrance:** Use `getIconPop` for engaging appearance
+- **Z-index layering:** Above content (150+) but below overlays
+- **Size constraints:** 36-48px typically, never exceed 60px
+
+**When to use:**
+- Multi-stage reveals
+- Tutorial sequences
+- Progress tracking
+- Chapter/section markers
+
+**When NOT to use:**
+- Single-stage templates
+- When screen real estate is limited
+- With central progress bars (redundant)
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (stage indicator) for implementation.
+
+---
+
+#### 14. **Curtain/Overlay Effects** ⭐ NEW
+
+Full-screen reveal overlays with multiple styles and dynamic effects:
+
+```jsx
+const renderCurtainOverlay = (style, progress, colors, width, height, config) => {
+  const ease = EZ.power3InOut(progress);
+  const glowIntensity = interpolate(progress, [0, 0.5, 1], [0, 20, 0]);
+  
+  // Glow effect during reveal
+  const boxShadow = config.curtainGlow 
+    ? `inset 0 0 ${glowIntensity}px ${colors.accent}60`
+    : 'none';
+  
+  switch (style) {
+    case 'curtain':
+      return (
+        <div style={{
+          /* Split curtain opening from center */
+          background: `linear-gradient(to left, ${colors.curtain}, ${colors.curtain}F0)`,
+          transform: `translateX(${leftX}px)`,
+          boxShadow
+        }} />
+      );
+    case 'circular':
+      return (
+        <div style={{
+          background: `radial-gradient(circle, transparent ${scale * 30}%, ${colors.curtain} ${scale * 31}%)`,
+          borderRadius: '50%'
+        }} />
+      );
+  }
+};
+```
+
+**Key principles:**
+- **Gradient edges:** Use gradients instead of flat colors for depth
+- **Glow during transition:** Add `boxShadow` glow that peaks mid-animation
+- **Z-index 100:** Above all content but below UI controls
+- **Easing:** Always use `power3InOut` for smooth, dramatic reveals
+- **Multiple styles:** Offer 4-6 styles (curtain, fade, slide-left/right, zoom, circular)
+- **Configurable color:** Curtain color should match or contrast with `bg`
+
+**Available styles:**
+- **Curtain:** Split from center (dramatic)
+- **Fade:** Simple opacity (subtle)
+- **Slide-left/right:** Directional wipe (guided)
+- **Zoom:** Scale explosion (energetic)
+- **Circular:** Radial expand (focus)
+
+**When to use:**
+- Progressive reveals
+- Before/after transitions
+- Mystery/suspense moments
+- Chapter transitions
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (renderRevealOverlay) for implementation.
+
+---
+
+#### 15. **Per-Item Content Stagger** ⭐ NEW
+
+Stagger multiple elements within a single content item for sophisticated reveals:
+
+```jsx
+const config = {
+  animation: {
+    staggerContent: true // Enable/disable stagger
+  }
+};
+
+// Define delays
+const headlineDelay = config.animation.staggerContent ? 0.0 : 0;
+const descriptionDelay = config.animation.staggerContent ? 0.2 : 0;
+const visualDelay = config.animation.staggerContent ? 0.4 : 0;
+
+// Apply to each element
+<div style={{
+  opacity: interpolate(
+    contentProgress,
+    [descriptionDelay, descriptionDelay + 0.3],
+    [0, 1],
+    { extrapolateRight: 'clamp' }
+  )
+}}>
+  {description}
+</div>
+```
+
+**Key principles:**
+- **0.2s intervals:** Standard stagger delay between elements
+- **Configurable toggle:** Always allow disabling via `staggerContent: false`
+- **Order matters:** Headline → Description → Visual (top to bottom)
+- **Smooth fade range:** 0.3s fade duration per element (not instant)
+- **Extrapolate clamp:** Prevent opacity going above 1 or below 0
+- **Use single progress value:** All elements reference same `contentProgress`
+
+**Typical stagger sequence:**
+1. **Headline:** 0.0s (immediate)
+2. **Description:** +0.2s
+3. **Visual/Image:** +0.4s
+4. **Supporting elements:** +0.6s
+
+**When to use:**
+- Multi-element content cards
+- Information hierarchy (title first, then details)
+- Rich content reveals (text + images)
+- Educational content progression
+
+**When NOT to use:**
+- Single-element displays
+- Fast-paced content (< 2s hold time)
+- When all elements are equally important
+
+**Reference:** See `Reveal9ProgressiveUnveil_V6.jsx` (stage content stagger) for implementation.
+
+---
+
 ### Complete Polish Checklist
 
 When uplifting a template to broadcast-grade, ensure:
@@ -772,7 +986,11 @@ When uplifting a template to broadcast-grade, ensure:
 - [ ] Semi-transparent overlays
 - [ ] Breathing room (padding/margins)
 - [ ] Color with opacity for hierarchy
-- [ ] Continuous life animations (subtle floating during holds) ⭐ NEW
+- [ ] Continuous life animations (subtle floating during holds)
+- [ ] Dynamic array timing (for variable-length content) ⭐ NEW
+- [ ] Persistent stage indicators (corner progress markers) ⭐ NEW
+- [ ] Curtain/overlay effects (full-screen reveals with glow) ⭐ NEW
+- [ ] Per-item content stagger (headline → description → visual) ⭐ NEW
 
 ---
 
