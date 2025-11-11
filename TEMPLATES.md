@@ -699,6 +699,39 @@ style={{
 }}
 ```
 
+#### 11. **Continuous Life Animations** ⭐ NEW
+
+Add subtle continuous movement to prevent static moments, even during "hold" states:
+
+```jsx
+// Subtle sine wave floating (5px movement)
+const floatingOffset = config.animation.continuousFloat 
+  ? Math.sin((frame - startFrame) * 0.02) * 5 
+  : 0;
+
+// Apply to transforms
+transform: `translate(${x}px, ${y + floatingOffset}px) scale(${scale})`
+```
+
+**Key principles:**
+- **Frequency:** 0.02 for subtle, gentle movement (too high = distracting)
+- **Amplitude:** 3-7px maximum (barely noticeable but adds life)
+- **Phase shift:** Offset different elements (`+ Math.PI`) for variety
+- **Configurable:** Always allow toggling via JSON (`continuousFloat: true/false`)
+- **When:** Apply to main content cards, not small UI elements
+
+**When to use:**
+- Long hold moments (2+ seconds visible)
+- Background elements throughout
+- Main content panes
+
+**When NOT to use:**
+- During fast transitions
+- On text (causes readability issues)
+- On elements with their own complex animations
+
+**Reference:** See `Compare11BeforeAfter_V6.jsx` (before/after card floating) for implementation.
+
 ---
 
 ### Complete Polish Checklist
@@ -739,6 +772,7 @@ When uplifting a template to broadcast-grade, ensure:
 - [ ] Semi-transparent overlays
 - [ ] Breathing room (padding/margins)
 - [ ] Color with opacity for hierarchy
+- [ ] Continuous life animations (subtle floating during holds) ⭐ NEW
 
 ---
 
