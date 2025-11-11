@@ -591,7 +591,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       {/* Optional Title */}
       {config.title.enabled && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 font-display font-bold tracking-tight"
+          className="absolute left-1/2 -translate-x-1/2 font-bold tracking-tight"
           style={{
             top: config.title.offset.y,
             fontSize: Math.min(fonts.size_title, 72),
@@ -630,7 +630,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
               }}
             >
               <div
-                className={`font-display leading-tight ${alignmentClass}`}
+                className={`leading-tight ${alignmentClass}`}
                 style={{
                   fontSize: Math.min(fonts.size_question, 80),
                   fontWeight: fonts.weight_question,
@@ -643,12 +643,12 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                   padding: '20px 0'
                 }}
               >
-                {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
+                {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
               </div>
             </GlassmorphicPane>
           ) : (
             <div
-              className={`font-display leading-tight ${alignmentClass}`}
+              className={`leading-tight ${alignmentClass}`}
               style={{
                 fontSize: Math.min(fonts.size_question, 80),
                 fontWeight: fonts.weight_question,
@@ -660,7 +660,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                 maxWidth: '88vw'
               }}
             >
-              {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
+              {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
             </div>
           )}
         </div>
@@ -690,7 +690,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
               }}
             >
               <div
-                className={`font-display leading-tight ${alignmentClass}`}
+                className={`leading-tight ${alignmentClass}`}
                 style={{
                   fontSize: Math.min(fonts.size_question, 80),
                   fontWeight: fonts.weight_question,
@@ -703,12 +703,12 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                   padding: '20px 0'
                 }}
               >
-                {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
+                {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
               </div>
             </GlassmorphicPane>
           ) : (
             <div
-              className={`font-display leading-tight ${alignmentClass}`}
+              className={`leading-tight ${alignmentClass}`}
               style={{
                 fontSize: Math.min(fonts.size_question, 80),
                 fontWeight: fonts.weight_question,
@@ -720,7 +720,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
                 maxWidth: '88vw'
               }}
             >
-              {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
+              {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
             </div>
           )}
         </div>
@@ -763,7 +763,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
           }}
         >
           <div
-            className="font-display drop-shadow-lg"
+            className="drop-shadow-lg"
             style={{
               fontSize: Math.min(fonts.size_conclusion, 72),
               fontWeight: fonts.weight_conclusion,

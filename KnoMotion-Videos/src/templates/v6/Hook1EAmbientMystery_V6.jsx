@@ -690,7 +690,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                     textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                   }}
                 >
-                  {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
+                  {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities)}
                 </div>
               </GlassmorphicPane>
             ) : (
@@ -706,7 +706,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                 }}
               >
-                {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
+                {renderLetterReveal(whisperLetterReveal.letters, whisperLetterReveal.letterOpacities)}
               </div>
             )}
           </div>
@@ -766,7 +766,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                 }}
               >
                 <div
-                  className={`font-display leading-tight ${alignmentClass}`}
+                  className={`leading-tight ${alignmentClass}`}
                   style={{
                     fontSize: Math.min(fonts.size_question, 80),
                     fontWeight: fonts.weight_question,
@@ -780,12 +780,12 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                       : '0 4px 12px rgba(0,0,0,0.6)'
                   }}
                 >
-                  {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
+                  {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities)}
                 </div>
               </GlassmorphicPane>
             ) : (
               <div
-                className={`font-display leading-tight ${alignmentClass}`}
+                className={`leading-tight ${alignmentClass}`}
                 style={{
                   fontSize: Math.min(fonts.size_question, 80),
                   fontWeight: fonts.weight_question,
@@ -799,7 +799,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                     : '0 4px 12px rgba(0,0,0,0.6)'
                 }}
               >
-                {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities, { fontFamily: fontTokens.title.family })}
+                {renderLetterReveal(questionLetterReveal.letters, questionLetterReveal.letterOpacities)}
               </div>
             )}
           </div>
@@ -840,7 +840,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                     textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                   }}
                 >
-                  {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
+                  {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities)}
                 </div>
               </GlassmorphicPane>
             ) : (
@@ -856,7 +856,7 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
                   textShadow: '2px 2px 4px rgba(0,0,0,0.4)'
                 }}
               >
-                {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities, { fontFamily: fontTokens.body.family })}
+                {renderLetterReveal(hintLetterReveal.letters, hintLetterReveal.letterOpacities)}
               </div>
             )}
           </div>
