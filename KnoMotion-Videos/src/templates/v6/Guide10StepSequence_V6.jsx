@@ -446,7 +446,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
           width: 120,
           height: 120,
           zIndex: 10,
-          opacity: titleProgress * exitOpacity
+          opacity: titleCardEntrance.opacity * exitOpacity
         }}>
           <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
             {/* Background circle */}
@@ -619,7 +619,7 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
           >
             {/* Particle burst */}
             {renderParticleBurst(stepBurst, 0, 0)}
-          >
+            
             {/* Circular card design */}
             <div style={{
               width: layout.cardSize,
@@ -738,11 +738,15 @@ export const Guide10StepSequence = ({ scene, styles, presets, easingMap }) => {
 // Duration calculation
 export const getDuration = (scene, fps) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const beatsRaw = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const steps = config.steps || DEFAULT_CONFIG.steps;
   
-  const stepsDuration = beats.firstStep + (beats.stepInterval * steps.length) + 2.0;
-  const totalDuration = Math.max(beats.exit, stepsDuration) + 1.0;
+  // CUMULATIVE BEATS: Calculate actual timeline
+  const lastStepBeat = beatsRaw.entrance + beatsRaw.title + beatsRaw.firstStep + (beatsRaw.stepInterval * steps.length);
+  const exitBeat = beatsRaw.exit;
+  
+  // Use whichever is later: exit beat or last step + buffer
+  const totalDuration = Math.max(exitBeat, lastStepBeat + 2.0) + 1.0;
   
   return toFrames(totalDuration, fps);
 };

@@ -265,6 +265,16 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
   const visualStyle = { ...DEFAULT_CONFIG.visualStyle, ...(scene.visualStyle || {}) };
   const anim = { ...DEFAULT_CONFIG.animation, ...(scene.animation || {}) };
   const emphasisConfig = { ...DEFAULT_CONFIG.emphasis, ...(scene.emphasis || {}) };
+  
+  // Merge center config with proper defaults
+  const centerConfig = {
+    ...DEFAULT_CONFIG.center,
+    ...(scene.center || {}),
+    glass: {
+      ...DEFAULT_CONFIG.center.glass,
+      ...(scene.center?.glass || {})
+    }
+  };
   const effects = { 
     ...DEFAULT_CONFIG.effects, 
     ...(scene.effects || {}),
@@ -508,8 +518,8 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
         >
           <GlassmorphicPane
             innerRadius={layout.centerSize / 2}
-            glowOpacity={config.center.glass.glowOpacity}
-            borderOpacity={config.center.glass.borderOpacity}
+            glowOpacity={centerConfig.glass.glowOpacity}
+            borderOpacity={centerConfig.glass.borderOpacity}
             padding={0}
             backgroundColor={`${colors.center}15`}
             style={{
@@ -524,9 +534,9 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
               ...centerGlow
             }}
           >
-            {config.center.visual?.enabled && (
+            {centerConfig.visual?.enabled && (
               <div style={{ fontSize: layout.centerSize * 0.35, marginBottom: 8 }}>
-                {config.center.visual.value}
+                {centerConfig.visual.value}
               </div>
             )}
             <div
@@ -540,7 +550,7 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
                 padding: '0 20px'
               }}
             >
-              {config.center.text}
+              {centerConfig.text}
             </div>
           </GlassmorphicPane>
         </div>
@@ -684,11 +694,15 @@ export const Explain2AConceptBreakdown = ({ scene, styles, presets, easingMap })
 // Duration calculation
 export const getDuration = (scene, fps) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const beatsRaw = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
   const parts = config.parts || DEFAULT_CONFIG.parts;
   
-  const partsDuration = beats.firstPart + (beats.partInterval * parts.length) + 2.0;
-  const totalDuration = Math.max(beats.exit, partsDuration) + 1.0;
+  // CUMULATIVE BEATS: Calculate actual timeline
+  const lastPartBeat = beatsRaw.entrance + beatsRaw.title + beatsRaw.centerReveal + beatsRaw.firstPart + (beatsRaw.partInterval * parts.length);
+  const exitBeat = beatsRaw.exit;
+  
+  // Use whichever is later: exit beat or last part + buffer
+  const totalDuration = Math.max(exitBeat, lastPartBeat + 2.0) + 1.0;
   
   return toFrames(totalDuration, fps);
 };

@@ -530,8 +530,20 @@ export const Apply3AMicroQuiz = ({ scene, styles, presets, easingMap }) => {
 
 export const getDuration = (scene, fps) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
-  const beats = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
-  return toFrames(beats.exit + 1.0, fps);
+  const beatsRaw = { ...DEFAULT_CONFIG.beats, ...(scene.beats || {}) };
+  const timer = { ...DEFAULT_CONFIG.timer, ...(scene.timer || {}) };
+  
+  // CUMULATIVE BEATS: Calculate actual end time
+  const cumulativeExit = beatsRaw.entrance + 
+                         beatsRaw.question + 
+                         beatsRaw.choicesReveal + 
+                         beatsRaw.thinking + 
+                         beatsRaw.reveal + 
+                         beatsRaw.hold + 
+                         beatsRaw.exit;
+  
+  // Add buffer for final animations
+  return toFrames(cumulativeExit + 1.0, fps);
 };
 
 export const TEMPLATE_VERSION = '6.0';
