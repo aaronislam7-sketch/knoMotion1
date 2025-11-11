@@ -249,11 +249,11 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   // Title - Letter Reveal
   const titleLetterReveal = useMemo(() => {
     return getLetterReveal(frame, config.title.text, {
-      startFrame: f.titleStart,
+      startFrame: beats.titleStart,
       duration: rawBeats.titleReveal,
       staggerDelay: 0.04
     }, fps);
-  }, [frame, config.title.text, f.titleStart, rawBeats.titleReveal, fps]);
+  }, [frame, config.title.text, beats.titleStart, rawBeats.titleReveal, fps]);
   
   const titleCardEntrance = getCardEntrance(frame, {
     startFrame: f.titleStart,

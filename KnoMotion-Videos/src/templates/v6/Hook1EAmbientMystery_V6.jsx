@@ -325,11 +325,11 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   const whisperLetterReveal = config.whisper.enabled
     ? useMemo(() => {
         return getLetterReveal(frame, config.whisper.text, {
-          startFrame: f.whisperStart,
+          startFrame: beats.whisperStart,
           duration: rawBeats.whisperReveal,
           staggerDelay: 0.05
         }, fps);
-      }, [frame, config.whisper.text, f.whisperStart, rawBeats.whisperReveal, fps])
+      }, [frame, config.whisper.text, beats.whisperStart, rawBeats.whisperReveal, fps])
     : { letters: [], letterOpacities: [] };
   
   // Whisper card entrance
@@ -379,11 +379,11 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   // Question - Letter Reveal
   const questionLetterReveal = useMemo(() => {
     return getLetterReveal(frame, config.question.text, {
-      startFrame: f.questionStart,
+      startFrame: beats.questionStart,
       duration: rawBeats.questionReveal,
       staggerDelay: 0.04
     }, fps);
-  }, [frame, config.question.text, f.questionStart, rawBeats.questionReveal, fps]);
+  }, [frame, config.question.text, beats.questionStart, rawBeats.questionReveal, fps]);
   
   // Question card entrance
   const questionCardEntrance = getCardEntrance(frame, {
@@ -436,11 +436,11 @@ export const Hook1EAmbientMystery = ({ scene, styles, presets, easingMap }) => {
   const hintLetterReveal = config.hint.enabled
     ? useMemo(() => {
         return getLetterReveal(frame, config.hint.text, {
-          startFrame: f.hintStart,
+          startFrame: beats.hintStart,
           duration: rawBeats.hintReveal,
           staggerDelay: 0.05
         }, fps);
-      }, [frame, config.hint.text, f.hintStart, rawBeats.hintReveal, fps])
+      }, [frame, config.hint.text, beats.hintStart, rawBeats.hintReveal, fps])
     : { letters: [], letterOpacities: [] };
   
   // Hint card entrance

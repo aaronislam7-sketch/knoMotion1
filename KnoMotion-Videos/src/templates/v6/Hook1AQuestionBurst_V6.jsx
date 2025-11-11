@@ -305,20 +305,20 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
   // Question Part 1 - Letter Reveal
   const q1LetterReveal = useMemo(() => {
     return getLetterReveal(frame, config.questionPart1.text, {
-      startFrame: f.q1Start,
+      startFrame: beats.q1Start,
       duration: rawBeats.q1Reveal,
       staggerDelay: 0.04
     }, fps);
-  }, [frame, config.questionPart1.text, f.q1Start, rawBeats.q1Reveal, fps]);
+  }, [frame, config.questionPart1.text, beats.q1Start, rawBeats.q1Reveal, fps]);
   
   // Question Part 2 - Letter Reveal
   const q2LetterReveal = useMemo(() => {
     return getLetterReveal(frame, config.questionPart2.text, {
-      startFrame: f.q2Start,
+      startFrame: beats.q2Start,
       duration: rawBeats.q2Reveal,
       staggerDelay: 0.04
     }, fps);
-  }, [frame, config.questionPart2.text, f.q2Start, rawBeats.q2Reveal, fps]);
+  }, [frame, config.questionPart2.text, beats.q2Start, rawBeats.q2Reveal, fps]);
   
   // Question exit animation
   const questionExitProgress = frame >= f.questionsExit
