@@ -608,11 +608,22 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
 };
 
 // Duration calculation
-export const getDuration = (scene, fps) => {
+export const getDuration = (scene, fps = 30) => {
   const rawBeats = { ...DEFAULT_CONFIG.beats, ...(scene?.beats || {}) };
   const takeaways = scene?.takeaways || DEFAULT_CONFIG.takeaways;
   const beats = calculateCumulativeBeats(rawBeats, takeaways.length);
-  return toFrames(beats.totalDuration, fps);
+  
+  // Add 3s buffer to ensure all content is visible
+  const totalDuration = beats.totalDuration + 3.0;
+  
+  console.log(`[Reflect4A] Duration Calculation:`, {
+    takeawayCount: takeaways.length,
+    beatsTotal: beats.totalDuration,
+    withBuffer: totalDuration,
+    frames: toFrames(totalDuration, fps)
+  });
+  
+  return toFrames(totalDuration, fps);
 };
 
 // Metadata
