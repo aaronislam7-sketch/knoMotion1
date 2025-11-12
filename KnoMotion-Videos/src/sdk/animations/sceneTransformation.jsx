@@ -1,5 +1,6 @@
 import { interpolate } from 'remotion';
-import { toFrames, EZ } from '../core/time';
+import { toFrames } from '../core/time';
+import { EZ } from '../core/easing';
 
 /**
  * SDK UTILITY: Scene Transformation

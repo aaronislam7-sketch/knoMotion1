@@ -68,6 +68,9 @@ import testConceptBreakdownRevised from '../scenes/examples/explain_2a_concept_b
 import testStepSequenceRevised from '../scenes/examples/guide_10_step_sequence_revised.json';
 import testStepSequenceGrid from '../scenes/examples/guide_10_step_sequence_grid_layout.json';
 
+// Import STAGING scenes (Templates under review)
+import stagingHook1AUpgraded from '../scenes/examples/hook_1a_upgraded_example.json';
+
 /**
  * Unified Admin Configuration Tool
  * 
@@ -105,7 +108,10 @@ const DEFAULT_SCENES = {
   
   // TEST: Revised Templates (Broadcast Quality)
   'TEST_Explain2AConceptBreakdown_V6': testConceptBreakdownRevised,
-  'TEST_Guide10StepSequence_V6': testStepSequenceRevised
+  'TEST_Guide10StepSequence_V6': testStepSequenceRevised,
+  
+  // STAGING: Templates Under Review
+  'STAGING_Hook1AQuestionBurst_V6_Upgraded': stagingHook1AUpgraded
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
