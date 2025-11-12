@@ -21,13 +21,13 @@
   "questionPart1": {
     "text": "What if losing consciousness",
     "position": "center",
-    "offset": { "x": 0, "y": -120 }
+    "offset": { "x": 0, "y": -80 }
   },
   
   "questionPart2": {
     "text": "made you smarter?",
     "position": "center",
-    "offset": { "x": 0, "y": 80 }
+    "offset": { "x": 0, "y": 40 }
   },
   
   "centralVisual": {
@@ -36,7 +36,8 @@
     "position": "center",
     "offset": { "x": 0, "y": 0 },
     "scale": 3.5,
-    "enabled": true
+    "enabled": true,
+    "exitTransition": "spin-right"
   },
   
   "conclusion": {
@@ -110,13 +111,6 @@
     "spotlight2": { "x": 0.8, "y": 0.7, "size": 500, "color": "#9B59B620" },
     "showParticles": true,
     "particleCount": 30,
-    "showGlassPane": true,
-    "glassPaneForQ1": false,
-    "glassPaneForQ2": true,
-    "glassPaneForConclusion": true,
-    "glassPaneOpacity": 0.15,
-    "glassPaneBorderOpacity": 0.3,
-    "glassInnerRadius": 30,
     "showParticleBurst": true,
     "particleBurstCount": 15,
     "showTitleUnderline": false,

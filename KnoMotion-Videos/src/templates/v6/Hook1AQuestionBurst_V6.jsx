@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
+import { loadFont } from '@remotion/google-fonts/NotoColorEmoji';
 
 // SDK imports - Agnostic Template System v6
 import {
@@ -19,15 +20,17 @@ import {
   getPulseGlow
 } from '../../sdk';
 import {
-  GlassmorphicPane,
   NoiseTexture,
   SpotlightEffect
 } from '../../sdk/effects/broadcastEffects';
 import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fontSystem';
 import { createTransitionProps } from '../../sdk/transitions';
 
+// Load animated emoji font
+const { fontFamily: emojiFont } = loadFont();
+
 /**
- * TEMPLATE #1: QUESTION BURST - v6.0 (BROADCAST POLISH)
+ * TEMPLATE #1: QUESTION BURST - v6.2 (CLEAN & DYNAMIC)
  * 
  * PRIMARY INTENTION: HOOK
  * SECONDARY INTENTIONS: QUESTION, CHALLENGE, REVEAL
@@ -36,16 +39,20 @@ import { createTransitionProps } from '../../sdk/transitions';
  * 
  * VISUAL PATTERN:
  * - Two-part question structure (setup + punchline)
- * - Glassmorphic panes with broadcast-grade effects
- * - Letter-by-letter text reveals
- * - Optional central visual with icon pop
- * - 5-layer background depth (gradient, noise, spotlights, particles, glass)
+ * - Clean text without glassmorphic panes for clarity
+ * - Animated emoji support via Google Fonts
+ * - Letter-by-letter text reveals with proper spacing
+ * - Central visual with hero transition (spin/fade out)
+ * - Layered background depth (gradient, noise, spotlights, particles)
  * - Continuous life animations (floating)
  * - Particle bursts on question reveals
  * 
- * BROADCAST POLISH APPLIED:
+ * V6.2 UPDATES:
+ * ✅ Removed glassmorphic panes (clean, focused text)
+ * ✅ Fixed question spacing (proper vertical gaps)
+ * ✅ Animated emoji support (Google Fonts + animations)
+ * ✅ Hero transition (spins to side/fades for reveal)
  * ✅ Layered background depth (gradient + noise + spotlights)
- * ✅ Glassmorphic content panes
  * ✅ Multi-layered entrance animations
  * ✅ Letter-by-letter reveals
  * ✅ Icon pop animations
@@ -77,13 +84,13 @@ const DEFAULT_CONFIG = {
   questionPart1: {
     text: 'What if geography',
     position: 'center',
-    offset: { x: 0, y: -120 }
+    offset: { x: 0, y: -80 }
   },
   
   questionPart2: {
     text: 'was measured in mindsets?',
     position: 'center',
-    offset: { x: 0, y: 80 }
+    offset: { x: 0, y: 40 }
   },
   
   centralVisual: {
@@ -92,7 +99,8 @@ const DEFAULT_CONFIG = {
     position: 'center',
     offset: { x: 0, y: 0 },
     scale: 3.0,
-    enabled: false // Show after questions fade
+    enabled: false, // Show after questions fade
+    exitTransition: 'spin-right' // 'spin-right', 'spin-left', 'fade', 'scale-down'
   },
   
   conclusion: {
@@ -171,10 +179,6 @@ const DEFAULT_CONFIG = {
     spotlight2: { x: 0.8, y: 0.7, size: 500, color: '#9B59B620' },
     showParticles: true,
     particleCount: 30,
-    showGlassPane: true,
-    glassPaneOpacity: 0.15,
-    glassPaneBorderOpacity: 0.3,
-    glassInnerRadius: 30,
     showParticleBurst: true,
     particleBurstCount: 15,
     showTitleUnderline: false,  // Optional hand-drawn underline
@@ -432,6 +436,59 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       }, fps)
     : { opacity: 0, scale: 0, rotation: 0 };
   
+  // Hero Exit Transition - happens BEFORE conclusion appears
+  // The hero should make way for the reveal (conclusion)
+  const heroExitProgress = config.centralVisual.enabled && config.conclusion.enabled && frame >= f.conclusionStart
+    ? interpolate(
+        frame,
+        [f.conclusionStart - toFrames(0.5, fps), f.conclusionStart],
+        [0, 1],
+        {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+          easing: EZ.power3In
+        }
+      )
+    : 0;
+  
+  // Calculate hero transition based on exitTransition type
+  const heroTransition = (() => {
+    const transitionType = config.centralVisual.exitTransition || 'spin-right';
+    const progress = heroExitProgress;
+    
+    switch (transitionType) {
+      case 'spin-right':
+        return {
+          x: width * 0.4 * progress,
+          rotation: 360 * progress,
+          opacity: 1 - progress,
+          scale: 1 - progress * 0.5
+        };
+      case 'spin-left':
+        return {
+          x: -width * 0.4 * progress,
+          rotation: -360 * progress,
+          opacity: 1 - progress,
+          scale: 1 - progress * 0.5
+        };
+      case 'scale-down':
+        return {
+          x: 0,
+          rotation: 0,
+          opacity: 1 - progress,
+          scale: 1 - progress
+        };
+      case 'fade':
+      default:
+        return {
+          x: 0,
+          rotation: 0,
+          opacity: 1 - progress,
+          scale: 1
+        };
+    }
+  })();
+  
   const visualFadeOut = frame >= f.fadeOutStart
     ? interpolate(
         frame,
@@ -445,10 +502,10 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
       )
     : 0;
   
-  const visualOpacity = visualIconPop.opacity * (1 - visualFadeOut);
+  const visualOpacity = visualIconPop.opacity * heroTransition.opacity * (1 - visualFadeOut);
   
   // Continuous floating for visual
-  const visualFloating = anim.continuousFloat && frame >= f.visualVisible
+  const visualFloating = anim.continuousFloat && frame >= f.visualVisible && heroExitProgress < 0.5
     ? Math.sin((frame - f.visualStart) * 0.015) * 8
     : 0;
   
@@ -528,6 +585,13 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
         opacity: bgOpacity
       }}
     >
+      {/* CSS Animations for Emoji */}
+      <style>{`
+        @keyframes emoji-bounce {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-10px) scale(1.05); }
+        }
+      `}</style>
       {/* Layer 1: Noise Texture */}
       {decorations.showNoiseTexture && (
         <NoiseTexture opacity={decorations.noiseOpacity} />
@@ -606,7 +670,7 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
         </div>
       )}
       
-      {/* Question Part 1 - Glassmorphic Pane */}
+      {/* Question Part 1 - Clean Text */}
       {frame >= f.q1Start && questionExitProgress < 1 && (
         <div
           className="pointer-events-none absolute"
@@ -618,55 +682,26 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
             zIndex: 10
           }}
         >
-          {decorations.showGlassPane ? (
-            <GlassmorphicPane
-              innerRadius={decorations.glassInnerRadius}
-              glowOpacity={0.2}
-              borderOpacity={decorations.glassPaneBorderOpacity}
-              backgroundColor={`${colors.glassBackground}`}
-              padding={40}
-              style={{
-                boxShadow: q1CardEntrance.boxShadow
-              }}
-            >
-              <div
-                className={`leading-tight ${alignmentClass}`}
-                style={{
-                  fontSize: Math.min(fonts.size_question, 80),
-                  fontWeight: fonts.weight_question,
-                  fontFamily: fontTokens.title.family,
-                  color: colors.accent,
-                  textTransform,
-                  textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
-                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
-                  maxWidth: '85vw',
-                  padding: '20px 0'
-                }}
-              >
-                {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
-              </div>
-            </GlassmorphicPane>
-          ) : (
-            <div
-              className={`leading-tight ${alignmentClass}`}
-              style={{
-                fontSize: Math.min(fonts.size_question, 80),
-                fontWeight: fonts.weight_question,
-                fontFamily: fontTokens.title.family,
-                color: colors.accent,
-                textTransform,
-                textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
-                maxWidth: '88vw'
-              }}
-            >
-              {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
-            </div>
-          )}
+          <div
+            className={`leading-tight ${alignmentClass}`}
+            style={{
+              fontSize: Math.min(fonts.size_question, 80),
+              fontWeight: fonts.weight_question,
+              fontFamily: fontTokens.title.family,
+              color: colors.accent,
+              textTransform,
+              textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+              maxWidth: '88vw',
+              paddingBottom: '20px'
+            }}
+          >
+            {renderLetterReveal(q1LetterReveal.letters, q1LetterReveal.letterOpacities)}
+          </div>
         </div>
       )}
       
-      {/* Question Part 2 - Glassmorphic Pane */}
+      {/* Question Part 2 - Clean Text */}
       {frame >= f.q2Start && questionExitProgress < 1 && (
         <div
           className="pointer-events-none absolute"
@@ -678,76 +713,60 @@ export const Hook1AQuestionBurst = ({ scene, styles, presets, easingMap }) => {
             zIndex: 10
           }}
         >
-          {decorations.showGlassPane ? (
-            <GlassmorphicPane
-              innerRadius={decorations.glassInnerRadius}
-              glowOpacity={0.2}
-              borderOpacity={decorations.glassPaneBorderOpacity}
-              backgroundColor={`${colors.glassBackground}`}
-              padding={40}
-              style={{
-                boxShadow: q2CardEntrance.boxShadow
-              }}
-            >
-              <div
-                className={`leading-tight ${alignmentClass}`}
-                style={{
-                  fontSize: Math.min(fonts.size_question, 80),
-                  fontWeight: fonts.weight_question,
-                  fontFamily: fontTokens.title.family,
-                  color: colors.accent2,
-                  textTransform,
-                  textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
-                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
-                  maxWidth: '85vw',
-                  padding: '20px 0'
-                }}
-              >
-                {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
-              </div>
-            </GlassmorphicPane>
-          ) : (
-            <div
-              className={`leading-tight ${alignmentClass}`}
-              style={{
-                fontSize: Math.min(fonts.size_question, 80),
-                fontWeight: fonts.weight_question,
-                fontFamily: fontTokens.title.family,
-                color: colors.accent2,
-                textTransform,
-                textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
-                maxWidth: '88vw'
-              }}
-            >
-              {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
-            </div>
-          )}
+          <div
+            className={`leading-tight ${alignmentClass}`}
+            style={{
+              fontSize: Math.min(fonts.size_question, 80),
+              fontWeight: fonts.weight_question,
+              fontFamily: fontTokens.title.family,
+              color: colors.accent2,
+              textTransform,
+              textShadow: '3px 3px 6px rgba(0,0,0,0.25)',
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+              maxWidth: '88vw',
+              paddingTop: '20px'
+            }}
+          >
+            {renderLetterReveal(q2LetterReveal.letters, q2LetterReveal.letterOpacities)}
+          </div>
         </div>
       )}
       
-      {/* Central Visual */}
+      {/* Central Visual (Animated Emoji) */}
       {config.centralVisual.enabled && config.centralVisual.type !== 'none' && visualOpacity > 0 && (
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           style={{
-            transform: `translate(-50%, -50%) translateY(${visualFloating}px) scale(${visualIconPop.scale}) rotate(${visualIconPop.rotation}deg)`,
+            transform: `translate(-50%, -50%) translateX(${heroTransition.x}px) translateY(${visualFloating}px) scale(${visualIconPop.scale * heroTransition.scale}) rotate(${visualIconPop.rotation + heroTransition.rotation}deg)`,
             opacity: visualOpacity,
             filter: 'drop-shadow(0 12px 30px rgba(0,0,0,0.3))',
-            zIndex: 20
+            zIndex: 20,
+            fontFamily: config.centralVisual.type === 'emoji' ? emojiFont : 'inherit'
           }}
         >
-          {renderHero(
-            mergeHeroConfig({
-              type: config.centralVisual.type,
-              value: config.centralVisual.value,
-              scale: config.centralVisual.scale
-            }),
-            frame,
-            rawBeats,
-            colors,
-            easingMap || EZ,
-            fps
+          {config.centralVisual.type === 'emoji' ? (
+            <span
+              style={{
+                fontSize: `${config.centralVisual.scale * 60}px`,
+                display: 'inline-block',
+                animation: frame >= f.visualVisible && heroExitProgress < 0.3 ? 'emoji-bounce 2s ease-in-out infinite' : 'none'
+              }}
+            >
+              {config.centralVisual.value}
+            </span>
+          ) : (
+            renderHero(
+              mergeHeroConfig({
+                type: config.centralVisual.type,
+                value: config.centralVisual.value,
+                scale: config.centralVisual.scale
+              }),
+              frame,
+              rawBeats,
+              colors,
+              easingMap || EZ,
+              fps
+            )
           )}
         </div>
       )}
