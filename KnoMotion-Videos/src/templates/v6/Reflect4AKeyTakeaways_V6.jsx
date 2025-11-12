@@ -507,8 +507,8 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
                 >
                   {renderParticleBurst(
                     itemBurstParticles,
-                    150,
-                    itemY
+                    position.x,
+                    position.y
                   )}
                 </svg>
               )}
