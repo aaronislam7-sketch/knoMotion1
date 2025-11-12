@@ -67,12 +67,9 @@
   },
   
   "layout": {
-    "style": "staggered",
-    "leftOffset": 0.35,
-    "rightOffset": 0.65,
-    "verticalSpacing": 150,
-    "startY": 320,
-    "emphasisScaleMultiplier": 1.2
+    "verticalSpacing": 120,
+    "itemWidth": 900,
+    "emphasisScaleMultiplier": 1.15
   },
   
   "beats": {
@@ -107,19 +104,14 @@
     "spotlight1": { "x": 0.3, "y": 0.25, "size": 600, "color": "#27AE6015" },
     "spotlight2": { "x": 0.7, "y": 0.75, "size": 550, "color": "#FF6B3512" },
     "showParticles": true,
-    "particleCount": 25,
+    "particleCount": 20,
     "showGlassPane": true,
     "glassPaneOpacity": 0.25,
     "glassPaneBorderOpacity": 0.35,
     "glassInnerRadius": 20,
-    "showParticleBurst": true,
-    "particleBurstCount": 12,
+    "showParticleBurst": false,
     "showIconBadge": true,
     "badgeStyle": "circle",
-    "showFlowLines": true,
-    "flowLineColor": "#27AE60",
-    "flowLineOpacity": 0.3,
-    "flowLineCurvature": 0.5,
     "showEmphasisGlow": true
   },
   

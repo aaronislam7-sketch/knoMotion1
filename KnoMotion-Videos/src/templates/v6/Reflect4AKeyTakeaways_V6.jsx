@@ -9,12 +9,9 @@ import {
   renderAmbientParticles,
   getLetterReveal,
   renderLetterReveal,
-  getParticleBurst,
-  renderParticleBurst,
   getCardEntrance,
   getIconPop,
-  getContinuousLife,
-  renderFlowLines
+  getContinuousLife
 } from '../../sdk';
 import {
   GlassmorphicPane,
@@ -25,48 +22,34 @@ import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fo
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
- * TEMPLATE #7: KEY TAKEAWAYS - v6.3 (ENHANCED POLISH)
+ * TEMPLATE #7: KEY TAKEAWAYS - v6.3 (SIMPLE & POLISHED)
  * 
  * PRIMARY INTENTION: REFLECT
- * SECONDARY INTENTIONS: BREAKDOWN, GUIDE, REVEAL
+ * SECONDARY INTENTIONS: BREAKDOWN, GUIDE
  * 
- * PURPOSE: Summarize key learning points with visual emphasis and hierarchy
+ * PURPOSE: Clean vertical list of key learning points with subtle polish
  * 
  * VISUAL PATTERN:
- * - Title with letter reveal
- * - Sequential takeaway reveals (numbered/icon badges)
- * - Staggered layout (zigzag) for better space usage
- * - Visual hierarchy via scale emphasis
- * - Flow lines connecting sequential items
- * - Continuous breathing + floating during hold
- * - 5-layer background depth
- * - Particle bursts on reveals
+ * - Simple centered vertical list
+ * - Icon badges + text in glassmorphic panes
+ * - Subtle continuous breathing + floating during hold
+ * - Visual emphasis via scale for important items (importance: 2)
+ * - 60fps optimized (no heavy particle bursts)
  * 
- * BROADCAST POLISH APPLIED:
- * ✅ Layered background depth (gradient, noise, spotlights, particles, glass)
- * ✅ Glassmorphic panes for takeaways
- * ✅ Multi-layered entrance animations
- * ✅ Letter-by-letter reveals for title
- * ✅ Icon pop animations for badges
- * ✅ Particle bursts on takeaway reveals
- * ✅ Continuous life animations (breathing + floating) ⭐ NEW
- * ✅ Staggered layout for canvas utilization ⭐ NEW
- * ✅ Visual hierarchy via importance scaling ⭐ NEW
- * ✅ Flow lines connecting items ⭐ NEW
- * ✅ Cumulative beats system
- * ✅ 100% configurability via decorations
+ * POLISH APPLIED:
+ * ✅ Layered background (gradient, noise, spotlights, ambient particles)
+ * ✅ Glassmorphic panes for clean presentation
+ * ✅ Smooth entrance animations (up slide + fade)
+ * ✅ Icon pop with bounce
+ * ✅ Continuous life during hold (subtle breathing + floating)
+ * ✅ Emphasis glow for important items
+ * ✅ 60fps performance (willChange hints, reduced particle count)
  * 
- * POLISH PRINCIPLES APPLIED:
- * - Principle XI: Continuous Life (breathing/floating during hold)
- * - Principle XIV: Animation Lifecycle (pause during exits)
- * - Principle XIX: Screen Real Estate (staggered uses 75-85% vs 52%)
- * - Principle XX: Less is More (subtle emphasis, not overwhelming)
- * 
- * AGNOSTIC PRINCIPALS:
- * ✓ Data-Driven Structure (variable-length takeaways array)
- * ✓ Token-Based Positioning (semantic layout)
- * ✓ Separation of Concerns (content/layout/style/animation)
- * ✓ Progressive Configuration (simple defaults)
+ * PERFORMANCE OPTIMIZATIONS:
+ * - willChange: 'transform, opacity' on animated elements
+ * - Reduced breathing/floating amplitude (50-70% of original)
+ * - Particle bursts disabled by default
+ * - Simple vertical layout (no complex positioning)
  * 
  * NO HARDCODED VALUES!
  */
@@ -125,12 +108,9 @@ const DEFAULT_CONFIG = {
   },
   
   layout: {
-    style: 'staggered',      // 'vertical' | 'staggered'
-    leftOffset: 0.35,        // X position for left items (35% of width)
-    rightOffset: 0.65,       // X position for right items (65% of width)
-    verticalSpacing: 150,    // Vertical gap between items
-    startY: 300,             // Y position of first item
-    emphasisScaleMultiplier: 1.2  // Scale multiplier for importance:2 items
+    verticalSpacing: 120,    // Vertical gap between items
+    itemWidth: 900,          // Width of each takeaway
+    emphasisScaleMultiplier: 1.15  // Scale multiplier for importance:2 items
   },
   
   animation: {
@@ -160,15 +140,11 @@ const DEFAULT_CONFIG = {
     glassPaneOpacity: 0.25,
     glassPaneBorderOpacity: 0.35,
     glassInnerRadius: 20,
-    showParticleBurst: true,
+    showParticleBurst: false,    // Disabled for 60fps
     particleBurstCount: 12,
     showIconBadge: true,
-    badgeStyle: 'circle', // circle, square, organic
-    showFlowLines: true,         // Show connecting lines between items ⭐ NEW
-    flowLineColor: '#27AE60',    // Flow line color
-    flowLineOpacity: 0.3,        // Flow line opacity
-    flowLineCurvature: 0.5,      // How curved (0.3-0.7)
-    showEmphasisGlow: true       // Show persistent glow on importance:2 items ⭐ NEW
+    badgeStyle: 'circle',
+    showEmphasisGlow: true       // Persistent glow on importance:2 items
   },
   
   transition: {
@@ -313,33 +289,9 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   
   const opacity = 1 - exitProgress;
   
-  // Calculate layout positions
+  // Simple vertical list layout
   const centerX = width / 2;
-  const contentStartY = height / 2 - (takeaways.length * 100) / 2;
-  
-  // Calculate item positions (staggered or vertical)
-  const itemPositions = useMemo(() => {
-    return takeaways.map((item, i) => {
-      const isLeft = layout.style === 'staggered' ? (i % 2 === 0) : true;
-      const x = layout.style === 'staggered'
-        ? (isLeft ? width * layout.leftOffset : width * layout.rightOffset)
-        : centerX;
-      const y = layout.startY + (i * layout.verticalSpacing);
-      const importance = item.importance || 1;
-      const scale = importance === 2 ? layout.emphasisScaleMultiplier : 1.0;
-      
-      return { x, y, isLeft, importance, scale };
-    });
-  }, [takeaways, layout, width, centerX]);
-  
-  // Flow line positions for connecting items
-  const flowLinePositions = useMemo(() => {
-    return takeaways.map((item, i) => ({
-      x: itemPositions[i].x,
-      y: itemPositions[i].y,
-      visible: frame >= f.takeaways[i]?.visible
-    }));
-  }, [takeaways, itemPositions, frame, f.takeaways]);
+  const contentStartY = height / 2 - (takeaways.length * layout.verticalSpacing) / 2;
   
   return (
     <AbsoluteFill
@@ -419,39 +371,31 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         </div>
       )}
       
-      {/* Flow Lines Connecting Items */}
-      {decorations.showFlowLines && layout.style === 'staggered' && (
-        <svg
-          className="absolute inset-0"
-          viewBox={`0 0 ${width} ${height}`}
-          style={{ pointerEvents: 'none', zIndex: 2 }}
-        >
-          {renderFlowLines(flowLinePositions, {
-            color: decorations.flowLineColor,
-            opacity: decorations.flowLineOpacity,
-            strokeWidth: 2,
-            curvature: decorations.flowLineCurvature,
-            roughness: 2
-          })}
-        </svg>
-      )}
-      
-      {/* Takeaways List */}
-      <div className="absolute inset-0" style={{ zIndex: 5 }}>
+      {/* Takeaways List - Simple Vertical */}
+      <div 
+        className="absolute left-1/2 flex flex-col items-center"
+        style={{ 
+          top: contentStartY,
+          transform: 'translateX(-50%)',
+          gap: layout.verticalSpacing,
+          zIndex: 5,
+          width: layout.itemWidth
+        }}
+      >
         {takeaways.map((item, i) => {
           const itemBeat = f.takeaways[i];
-          const position = itemPositions[i];
           if (!itemBeat || frame < itemBeat.start) return null;
           
-          // Card entrance for takeaway
-          const entranceDirection = position.isLeft ? 'left' : 'right';
+          const importance = item.importance || 1;
+          const scale = importance === 2 ? layout.emphasisScaleMultiplier : 1.0;
+          
+          // Card entrance
           const itemCardEntrance = getCardEntrance(frame, {
             startFrame: beats.takeaways[i].start,
             duration: rawBeats.takeawayReveal,
-            direction: entranceDirection,
-            distance: 60,
-            withGlow: true,
-            glowColor: `${colors.accent}40`
+            direction: 'up',
+            distance: 40,
+            withGlow: false
           }, fps);
           
           if (itemCardEntrance.opacity === 0) return null;
@@ -461,96 +405,63 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
             startFrame: beats.takeaways[i].start + 0.2,
             duration: 0.5,
             withBounce: true,
-            rotation: 5
+            rotation: 0
           }, fps);
           
-          // Particle burst on reveal
-          const burstCount = position.importance === 2 
-            ? decorations.particleBurstCount * 1.5 
-            : decorations.particleBurstCount;
-          const itemBurstParticles = decorations.showParticleBurst
-            ? getParticleBurst(frame, {
-                triggerFrame: beats.takeaways[i].start,
-                particleCount: burstCount,
-                duration: 1.2,
-                color: colors.accent,
-                size: position.importance === 2 ? 6 : 5,
-                spread: 100
-              }, fps)
-            : [];
-          
-          // Continuous life animations (breathing + floating)
+          // Continuous life (breathing + floating) - optimized for 60fps
           const shouldAnimate = frame >= itemBeat.visible && exitProgress < 0.1;
           const continuousLife = getContinuousLife(frame, {
             startFrame: itemBeat.visible,
             breathingFrequency: anim.breathingFrequency,
-            breathingAmplitude: anim.breathingAmplitude,
+            breathingAmplitude: anim.breathingAmplitude * 0.5, // Reduced for subtlety
             floatingFrequency: anim.floatingFrequency,
-            floatingAmplitude: anim.floatingAmplitude,
-            phaseOffset: i * (Math.PI / 3), // Phase shift per item
+            floatingAmplitude: anim.floatingAmplitude * 0.7, // Reduced
+            phaseOffset: i * (Math.PI / 3),
             enabled: shouldAnimate && (anim.continuousBreathing || anim.continuousFloating)
           });
           
           // Emphasis glow for important items
-          const emphasisGlow = position.importance === 2 && decorations.showEmphasisGlow && shouldAnimate
-            ? `0 0 20px ${colors.accent}60, 0 0 40px ${colors.accent}30`
-            : itemCardEntrance.boxShadow;
+          const emphasisGlow = importance === 2 && decorations.showEmphasisGlow && shouldAnimate
+            ? `0 0 15px ${colors.accent}50, 0 0 30px ${colors.accent}20`
+            : 'none';
           
           return (
-            <React.Fragment key={i}>
-              {/* Particle burst */}
-              {itemBurstParticles.length > 0 && decorations.showParticleBurst && (
-                <svg
-                  className="absolute inset-0"
-                  viewBox={`0 0 ${width} ${height}`}
-                  style={{ pointerEvents: 'none', zIndex: 50 }}
-                >
-                  {renderParticleBurst(
-                    itemBurstParticles,
-                    position.x,
-                    position.y
-                  )}
-                </svg>
-              )}
-              
-              {/* Takeaway item */}
-              <div
-                className="absolute flex items-center"
-                style={{
-                  left: position.isLeft ? position.x : undefined,
-                  right: position.isLeft ? undefined : width - position.x,
-                  top: position.y,
-                  gap: 20,
-                  transform: `translateY(${continuousLife.y}px) translate(-50%, -50%) scale(${itemCardEntrance.scale * position.scale * continuousLife.scale})`,
-                  opacity: itemCardEntrance.opacity * opacity,
-                  maxWidth: layout.style === 'staggered' ? '750px' : '1000px',
-                  zIndex: position.importance === 2 ? 10 : 5
-                }}
-              >
+            <div
+              key={i}
+              className="flex items-center w-full"
+              style={{
+                gap: 20,
+                transform: `translateY(${continuousLife.y}px) scale(${itemCardEntrance.scale * scale * continuousLife.scale})`,
+                opacity: itemCardEntrance.opacity * opacity,
+                willChange: 'transform, opacity', // Performance hint for browser
+                zIndex: importance === 2 ? 10 : 5
+              }}
+            >
                 {/* Icon badge */}
-                {decorations.showIconBadge && (
-                  <div
-                    className="flex-shrink-0 flex items-center justify-center"
-                    style={{
-                      width: 70,
-                      height: 70,
-                      borderRadius: decorations.badgeStyle === 'circle' ? '50%' : decorations.badgeStyle === 'square' ? '12px' : '40%',
-                      background: `linear-gradient(135deg, ${colors.accent}E6 0%, ${colors.accent}B3 100%)`,
-                      border: `3px solid ${colors.accent}`,
-                      fontSize: Math.min(fonts.size_icon, 44),
-                      fontFamily: fontTokens.accent.family,
-                      opacity: iconPop.opacity,
-                      transform: `scale(${iconPop.scale}) rotate(${iconPop.rotation}deg)`,
-                      boxShadow: emphasisGlow,
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    {item.icon || (i + 1)}
-                  </div>
-                )}
+              {decorations.showIconBadge && (
+                <div
+                  className="flex-shrink-0 flex items-center justify-center"
+                  style={{
+                    width: 70,
+                    height: 70,
+                    borderRadius: decorations.badgeStyle === 'circle' ? '50%' : '12px',
+                    background: `linear-gradient(135deg, ${colors.accent}E6 0%, ${colors.accent}B3 100%)`,
+                    border: `3px solid ${colors.accent}`,
+                    fontSize: Math.min(fonts.size_icon, 44),
+                    fontFamily: fontTokens.accent.family,
+                    opacity: iconPop.opacity,
+                    transform: `scale(${iconPop.scale})`,
+                    boxShadow: emphasisGlow !== 'none' ? emphasisGlow : `0 4px 10px ${colors.accent}40`,
+                    backdropFilter: 'blur(10px)',
+                    willChange: 'transform, opacity'
+                  }}
+                >
+                  {item.icon || (i + 1)}
+                </div>
+              )}
                 
-                {/* Text content */}
-                <div className="flex-1">
+              {/* Text content */}
+              <div className="flex-1">
                   {decorations.showGlassPane ? (
                     <GlassmorphicPane
                       innerRadius={decorations.glassInnerRadius}
@@ -598,8 +509,7 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
                     </div>
                   )}
                 </div>
-              </div>
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
