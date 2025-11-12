@@ -19,11 +19,13 @@ export * from './animations/animations';
 export * from './animations/broadcastAnimations';
 export * from './animations/microDelights';
 export * from './animations/advancedEffects';
+export * from './animations/sceneTransformation';
 
 // ==================== EFFECTS ====================
 export * from './effects/broadcastEffects';
 export * from './effects/handwritingEffects';
 export * from './effects/particleSystem';
+export * from './effects/connectingLines';
 
 // ==================== LOTTIE ====================
 export * from './lottie/lottie-helpers';
@@ -60,6 +62,9 @@ export { SceneIdContext, useSceneId, generateSceneId } from './components/SceneI
 // ==================== FONTS ====================
 export * from './fonts/fontSystem';
 export * from './fonts/usePreloadAssets';
+
+// ==================== DECORATIONS ====================
+export * from './decorations/doodleEffects';
 
 // ==================== UTILS ====================
 export * from './utils/rough-utils';

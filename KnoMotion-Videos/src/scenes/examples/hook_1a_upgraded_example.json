@@ -1,0 +1,185 @@
+{
+  "schema_version": "6.0",
+  "scene_id": "hook_1a_upgraded_example",
+  "template_id": "Hook1AQuestionBurst",
+  
+  "meta": {
+    "title": "Sleep Science Hook - Upgraded Interactive Revelation",
+    "description": "Demonstrates new scene transformation, corner icons, connecting lines, and doodle effects",
+    "tags": ["hook", "sleep", "neuroscience", "upgraded"],
+    "difficulty": "beginner",
+    "tone": "intriguing"
+  },
+  
+  "title": {
+    "text": "Think About This",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 60 },
+    "enabled": false
+  },
+  
+  "questionPart1": {
+    "text": "What if losing consciousness",
+    "position": "center",
+    "offset": { "x": 0, "y": -80 }
+  },
+  
+  "questionPart2": {
+    "text": "made you smarter?",
+    "position": "center",
+    "offset": { "x": 0, "y": 40 }
+  },
+  
+  "centralVisual": {
+    "type": "emoji",
+    "value": "🧠",
+    "position": "center",
+    "offset": { "x": 0, "y": 0 },
+    "scale": 3.5,
+    "enabled": true,
+    "exitTransition": "spin-right"
+  },
+  
+  "conclusion": {
+    "text": "Sleep isn't rest. It's renovation.",
+    "subtitle": "Welcome to the science of sleep",
+    "position": "center",
+    "offset": { "x": 0, "y": 0 },
+    "enabled": true
+  },
+  
+  "typography": {
+    "voice": "notebook",
+    "align": "center",
+    "transform": "none"
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF9F0",
+      "bgGradientStart": "#FFF9F0",
+      "bgGradientEnd": "#FFE5CC",
+      "accent": "#FF6B35",
+      "accent2": "#9B59B6",
+      "text": "#1A1A1A",
+      "textSecondary": "#5A5A5A",
+      "particles": "rgba(255, 107, 53, 0.3)",
+      "glassBackground": "#FFFFFF15"
+    },
+    "fonts": {
+      "size_title": 56,
+      "size_question": 72,
+      "size_conclusion": 64,
+      "size_subtitle": 28,
+      "weight_question": 800,
+      "weight_conclusion": 700
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.4,
+    "titleHold": 0.5,
+    "q1Reveal": 0.5,
+    "q1Hold": 1.2,
+    "q2Reveal": 0.8,
+    "q2Hold": 2.0,
+    "emphasis": 0.8,
+    "questionExit": 0.6,
+    "visualReveal": 0.8,
+    "visualHold": 1.5,
+    "conclusionReveal": 0.8,
+    "conclusionHold": 2.0,
+    "fadeOut": 0.8
+  },
+  
+  "animation": {
+    "letterRevealStyle": "fade-up",
+    "questionExitDirection": "left",
+    "visualEntrance": "icon-pop",
+    "easing": "power3Out",
+    "continuousFloat": true
+  },
+  
+  "decorations": {
+    "showBackground": true,
+    "showGradient": true,
+    "showNoiseTexture": true,
+    "noiseOpacity": 0.05,
+    "showSpotlights": true,
+    "spotlightCount": 2,
+    "spotlight1": { "x": 0.2, "y": 0.3, "size": 600, "color": "#FF6B3520" },
+    "spotlight2": { "x": 0.8, "y": 0.7, "size": 500, "color": "#9B59B620" },
+    "showParticles": true,
+    "particleCount": 30,
+    "showParticleBurst": true,
+    "particleBurstCount": 15,
+    "showTitleUnderline": false,
+    "underlineStyle": "wavy"
+  },
+  
+  "cornerIcons": {
+    "enabled": true,
+    "icon1": {
+      "value": "💤",
+      "position": "top-right",
+      "appearsWithQ": 1,
+      "offset": { "x": -120, "y": 120 }
+    },
+    "icon2": {
+      "value": "🧠",
+      "position": "bottom-left",
+      "appearsWithQ": 2,
+      "offset": { "x": 120, "y": -120 }
+    }
+  },
+  
+  "sceneTransformation": {
+    "enabled": true,
+    "triggerTime": 5.5,
+    "bgGradientEnd": "#E8E4FF",
+    "spotlightMove": true,
+    "particleStyleChange": "ambient-to-flow"
+  },
+  
+  "connectingLines": {
+    "enabled": true,
+    "style": "dotted",
+    "color": "#9B59B6",
+    "animationDuration": 0.8,
+    "appearsAt": 5.5
+  },
+  
+  "supportingText": {
+    "enabled": true,
+    "labels": [
+      { "text": "Clears toxins", "position": "top-left", "offset": { "x": -200, "y": -100 } },
+      { "text": "Consolidates memories", "position": "top-right", "offset": { "x": 200, "y": -100 } },
+      { "text": "Rewires neurons", "position": "bottom", "offset": { "x": 0, "y": 150 } }
+    ],
+    "fontSize": 20,
+    "appearsWithVisual": true
+  },
+  
+  "doodleUnderline": {
+    "enabled": true,
+    "targetText": "conclusion",
+    "style": "wavy",
+    "color": "#FF6B35",
+    "animationDuration": 0.6,
+    "strokeWidth": 3,
+    "opacity": 0.8
+  },
+  
+  "particles": {
+    "enabled": true,
+    "count": 30,
+    "style": "ambient",
+    "seed": 1
+  },
+  
+  "cta": {
+    "enabled": false,
+    "label": "Tap to learn more",
+    "url": ""
+  }
+}

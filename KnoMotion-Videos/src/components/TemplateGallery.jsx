@@ -5,9 +5,12 @@ import React, { useState } from 'react';
  * 
  * Interactive gallery for browsing and selecting templates
  * Displays template cards with preview, intentions, and metadata
+ * 
+ * STAGING MODE: Toggle to view templates under review before production release
  */
 
-// Template metadata with learning intentions
+// ==================== PRODUCTION TEMPLATES ====================
+// These are live, tested, and ready for use
 const TEMPLATE_CATALOG = [
   // EXISTING TEMPLATES (Remapped to new intentions)
   {
@@ -333,6 +336,33 @@ const TEMPLATE_CATALOG = [
   }
 ];
 
+// ==================== STAGING TEMPLATES ====================
+// Templates under review - visible only in staging mode
+// Once approved, move to TEMPLATE_CATALOG above
+const STAGING_CATALOG = [
+  {
+    id: 'STAGING_Hook1AQuestionBurst_V6_Upgraded',
+    name: '🧪 Question Burst V6 - Interactive Revelation',
+    intentions: { primary: 'QUESTION', secondary: ['CHALLENGE', 'REVEAL'] },
+    description: '🎬 UPGRADED: Scene transformation, corner icons, connecting lines, doodle effects, supporting text labels. Broadcast-quality polish with 7 visual layers.',
+    duration: '11-13s',
+    icon: '❓',
+    color: '#FF0099',
+    version: 'v6.2-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: true,
+    features: [
+      'Scene transformation (background shifts mid-scene)',
+      'Corner icons (contextual emojis)',
+      'Connecting lines between elements',
+      'Doodle underline effects',
+      'Supporting text labels',
+      'Selective glassmorphic panes'
+    ]
+  }
+];
+
 // Intention badges
 const INTENTION_COLORS = {
   'QUESTION': '#FF6B35',
@@ -360,14 +390,18 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
   const [filterIntention, setFilterIntention] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [stagingMode, setStagingMode] = useState(false);
+  
+  // Select catalog based on mode
+  const activeCatalog = stagingMode ? STAGING_CATALOG : TEMPLATE_CATALOG;
   
   // Filter templates by intention
   const filteredTemplates = filterIntention
-    ? TEMPLATE_CATALOG.filter(t => 
+    ? activeCatalog.filter(t => 
         t.intentions.primary === filterIntention || 
         t.intentions.secondary.includes(filterIntention)
       )
-    : TEMPLATE_CATALOG;
+    : activeCatalog;
   
   // Get unique intentions for filter buttons
   const allIntentions = Object.keys(INTENTION_COLORS);
@@ -388,16 +422,16 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '16px 20px',
-          backgroundColor: '#4CAF50',
+          backgroundColor: stagingMode ? '#FF0099' : '#4CAF50',
           cursor: 'pointer',
           transition: 'all 0.2s',
           userSelect: 'none'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45A049'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = stagingMode ? '#E6008A' : '#45A049'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = stagingMode ? '#FF0099' : '#4CAF50'}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 24 }}>🎨</span>
+          <span style={{ fontSize: 24 }}>{stagingMode ? '🧪' : '🎨'}</span>
           <h2 style={{
             fontSize: 22,
             fontWeight: 800,
@@ -405,33 +439,57 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
             color: '#FFFFFF',
             margin: 0
           }}>
-            Template Gallery {!isCollapsed && `(${filteredTemplates.length})`}
+            {stagingMode ? 'Staging Area' : 'Template Gallery'} {!isCollapsed && `(${filteredTemplates.length})`}
           </h2>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {!isCollapsed && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewMode(viewMode === 'grid' ? 'list' : 'grid');
-              }}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                border: '2px solid rgba(255,255,255,0.4)',
-                borderRadius: 6,
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 13,
-                color: '#FFFFFF',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
-            >
-              {viewMode === 'grid' ? '📋 List' : '🎨 Grid'}
-            </button>
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setStagingMode(!stagingMode);
+                  setFilterIntention(null); // Clear filter when switching
+                }}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: '2px solid rgba(255,255,255,0.4)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: '#FFFFFF',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+              >
+                {stagingMode ? '🎨 Production' : '🧪 Staging'}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewMode(viewMode === 'grid' ? 'list' : 'grid');
+                }}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: '2px solid rgba(255,255,255,0.4)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  color: '#FFFFFF',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+              >
+                {viewMode === 'grid' ? '📋 List' : '🎨 Grid'}
+              </button>
+            </>
           )}
           <span style={{ 
             fontSize: 24, 
@@ -570,6 +628,25 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
                   letterSpacing: 1
                 }}>
                   NEW
+                </div>
+              )}
+              
+              {/* Staging Badge */}
+              {template.isStaging && (
+                <div style={{
+                  position: 'absolute',
+                  top: 12,
+                  left: 12,
+                  backgroundColor: '#FF0099',
+                  color: '#FFFFFF',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  boxShadow: '0 2px 8px rgba(255, 0, 153, 0.4)'
+                }}>
+                  🧪 STAGING
                 </div>
               )}
               
@@ -721,4 +798,4 @@ export const TemplateGallery = ({ onSelectTemplate, selectedTemplateId }) => {
   );
 };
 
-export { TEMPLATE_CATALOG, INTENTION_COLORS, INTENTION_ICONS };
+export { TEMPLATE_CATALOG, STAGING_CATALOG, INTENTION_COLORS, INTENTION_ICONS };
