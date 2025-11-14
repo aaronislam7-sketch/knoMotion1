@@ -71,6 +71,7 @@ import testStepSequenceGrid from '../scenes/examples/guide_10_step_sequence_grid
 // Import STAGING scenes (Templates under review)
 import stagingHook1AUpgraded from '../scenes/examples/hook_1a_upgraded_example.json';
 import stagingReflect4AEnhanced from '../scenes/v6/reflect_4a_deep_learning_enhanced.json';
+import stagingGuide10ZenGarden from '../scenes/examples/guide_10_zen_garden_polished.json';
 
 /**
  * Unified Admin Configuration Tool
@@ -113,7 +114,8 @@ const DEFAULT_SCENES = {
   
   // STAGING: Templates Under Review
   'STAGING_Hook1AQuestionBurst_V6_Upgraded': stagingHook1AUpgraded,
-  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced
+  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced,
+  'STAGING_Guide10StepSequence_V6_ZenGarden': stagingGuide10ZenGarden
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {

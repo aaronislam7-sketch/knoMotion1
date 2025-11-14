@@ -388,6 +388,43 @@ const STAGING_CATALOG = [
       '5. Transition to final list (overlay fades out)',
       '6. Final list with subtle breathing/floating'
     ]
+  },
+  {
+    id: 'STAGING_Guide10StepSequence_V6_ZenGarden',
+    name: '🧪 Step Sequence v6.1 - Zen Garden',
+    intentions: { primary: 'GUIDE', secondary: ['BREAKDOWN', 'CONNECT'] },
+    description: '🎋 ZEN GARDEN POLISH: Continuous floating animation, rounded square cards (21% more readable space), generous 80px gaps, subtle emphasis. Clarity through space, life through subtle motion. 60fps optimized.',
+    duration: '16-20s',
+    icon: '🗺️',
+    color: '#00BCD4',
+    version: 'v6.1-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: true,
+    polishScore: '4/5 (22.5/25)',
+    features: [
+      'Continuous floating (3px amplitude, phase-shifted wave)',
+      'Rounded square cards (240×240, 21% more space than circles)',
+      'Generous spacing (80px gaps, spacious breathing room)',
+      'Completed glow pulse (soft green, 15px, 0.05 freq)',
+      'Staggered cascade reveal (0.4s intervals, top-left → bottom-right)',
+      'Title continuous float (2px, barely noticeable but alive)',
+      'Subtle emphasis mode (1.05x scale, soft glows)',
+      '60fps optimized (willChange hints, GPU transforms)'
+    ],
+    polishPrinciples: [
+      'III: Continuous Life - Cards float throughout',
+      'I: Visual Clarity - Square > circle for readability',
+      'II: Spacing Creates Rhythm - Generous 80px gaps',
+      'XX: Less Is More - Subtle over dramatic',
+      'XXIII: Uniform Sizing - 240×240 enforced',
+      'XXVIII: 60fps Optimization - Reduced amplitudes'
+    ],
+    addressedBlockers: [
+      '✓ Blocker #1 (Static Holds): Continuous float throughout scene',
+      '✓ Blocker #2 (Text Cramming): Square cards = 21% more space',
+      '⚠ Blocker #3 (Narrative Flow): Partial via stagger + arrow loops'
+    ]
   }
 ];
 
