@@ -410,7 +410,7 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
               frame,
               [toFrames(itemBeat.listStart, fps), toFrames(itemBeat.listVisible, fps)],
               [0, 1],
-              { extrapolateRight: 'clamp', easing: EZ.easeInOutCubic }
+              { extrapolateRight: 'clamp', easing: EZ.power3InOut }
             )
           : isInList ? 1 : 0;
         
@@ -451,7 +451,9 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
           ? `0 0 15px ${colors.accent}50, 0 0 30px ${colors.accent}20`
           : 'none';
         
-        const itemOpacity = EZ.easeOutCubic(showcaseProgress) * opacity;
+        // Apply easing to showcase reveal (cubic out)
+        const easedShowcaseProgress = showcaseProgress * showcaseProgress * (3 - 2 * showcaseProgress); // smoothstep
+        const itemOpacity = easedShowcaseProgress * opacity;
         
         return (
           <div
