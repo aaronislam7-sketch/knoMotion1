@@ -23,32 +23,46 @@ import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fo
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
- * TEMPLATE #7: KEY TAKEAWAYS - v6.4 (SHOWCASE FLOW)
+ * TEMPLATE #7: KEY TAKEAWAYS - v6.4 (MODAL SHOWCASE)
  * 
  * PRIMARY INTENTION: REFLECT
  * SECONDARY INTENTIONS: BREAKDOWN, GUIDE, REVEAL
  * 
- * PURPOSE: Showcase each point individually, then build final summary list
+ * PURPOSE: Modal-style showcase with optional Lottie animations per point
  * 
  * FLOW:
- * 1. Title reveal
- * 2. Showcase takeaway #1 (full screen, large) → Shrink & move to list position
- * 3. Showcase takeaway #2 (full screen, large) → Shrink & move to list position  
- * 4. Showcase takeaway #3 (full screen, large) → Shrink & move to list position
- * 5. Final list view with all items + continuous life animations
+ * 1. Title reveal (1.8s)
+ * 2. Modal showcase #1: Background dims (85% black overlay), Lottie plays if provided, card centered (2.5s hold)
+ * 3. Transition: Overlay fades out, card moves to list position (0.6s)
+ * 4. Modal showcase #2: Repeat pattern (2.5s hold)
+ * 5. Transition: Card moves to list position (0.6s)
+ * 6. Modal showcase #3: Repeat pattern (2.5s hold)
+ * 7. Transition: Card moves to list position (0.6s)
+ * 8. Final list: All 3 visible, continuous breathing/floating (3s)
+ * 9. Exit (1s)
  * 
  * VISUAL PATTERN:
- * - Each point gets spotlight moment (centered, large)
- * - Mid-scene transitions shrink items into list positions
- * - Final state: vertical list with subtle breathing/floating
- * - Clean, focused, engaging flow
+ * - Modal overlay dims background during showcase (85% opacity black)
+ * - Optional Lottie animation plays above card (200px × 200px)
+ * - Uniform card sizing (no size variation between showcase and list)
+ * - Smooth transitions with easing
+ * - Final state: vertical list with subtle life animations
  * 
  * POLISH APPLIED:
- * ✅ Mid-scene transitions (showcase → list transitions)
- * ✅ Individual spotlight moments per point
- * ✅ Scene transformation (background shifts per phase)
+ * ✅ Modal-style focus (background dims 85%)
+ * ✅ Lottie animation support per takeaway (optional)
+ * ✅ Uniform card sizing (no showcase size multipliers)
+ * ✅ Mid-scene transitions with fade timing
  * ✅ Continuous life in final state
- * ✅ 60fps optimized
+ * ✅ 60fps optimized (willChange hints)
+ * ✅ Fully configurable (overlay opacity, Lottie size, card scale)
+ * 
+ * NEW CONFIG OPTIONS:
+ * - takeaways[].lottieUrl: Optional Lottie JSON URL
+ * - layout.cardScale: Uniform scale for all cards (default 1.0)
+ * - layout.lottieSize: Size of Lottie placeholder (default 200)
+ * - decorations.modalOverlayOpacity: Modal darkness 0-1 (default 0.85)
+ * - decorations.showLottieAnimation: Toggle Lottie display (default true)
  * 
  * NO HARDCODED VALUES!
  */
