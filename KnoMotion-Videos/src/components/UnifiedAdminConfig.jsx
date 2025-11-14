@@ -71,6 +71,7 @@ import testStepSequenceGrid from '../scenes/examples/guide_10_step_sequence_grid
 // Import STAGING scenes (Templates under review)
 import stagingHook1AUpgraded from '../scenes/examples/hook_1a_upgraded_example.json';
 import stagingReflect4AEnhanced from '../scenes/v6/reflect_4a_deep_learning_enhanced.json';
+import stagingGuide10ZenGarden from '../scenes/examples/guide_10_zen_garden_polished.json';
 
 /**
  * Unified Admin Configuration Tool
@@ -113,7 +114,8 @@ const DEFAULT_SCENES = {
   
   // STAGING: Templates Under Review
   'STAGING_Hook1AQuestionBurst_V6_Upgraded': stagingHook1AUpgraded,
-  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced
+  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced,
+  'STAGING_Guide10StepSequence_V6_ZenGarden': stagingGuide10ZenGarden
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -130,13 +132,19 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
   
   // Update scene when template changes
   useEffect(() => {
-    if (DEFAULT_SCENES[selectedTemplateId] && scene.template_id !== selectedTemplateId) {
-      const newScene = {
-        ...DEFAULT_SCENES[selectedTemplateId],
-        template_id: selectedTemplateId
-      };
-      setScene(newScene);
-      setPlayerKey(prev => prev + 1);
+    if (DEFAULT_SCENES[selectedTemplateId]) {
+      const loadedScene = DEFAULT_SCENES[selectedTemplateId];
+      // For staging templates, preserve the original template_id from the scene JSON
+      // The selectedTemplateId is just for catalog organization (e.g., "STAGING_Guide10_...")
+      // but template_id should point to the actual template component (e.g., "Guide10StepSequence")
+      const shouldUpdate = selectedTemplateId.startsWith('STAGING_') || selectedTemplateId.startsWith('TEST_')
+        ? scene.scene_id !== loadedScene.scene_id  // Compare scene_id for staging/test
+        : scene.template_id !== selectedTemplateId;  // Compare template_id for production
+      
+      if (shouldUpdate) {
+        setScene(loadedScene);  // Use scene as-is, don't override template_id
+        setPlayerKey(prev => prev + 1);
+      }
     }
   }, [selectedTemplateId]);
   

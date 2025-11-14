@@ -1148,22 +1148,45 @@ const beforeStartFrame = toFrames(beats.beforeStart, fps);
 
 ### Screen Real Estate Usage
 
-**Target: 90-95% of 1920x1080 canvas**
+**Target: Varies by layout type (updated 2025-11-14)**
 
+**Safe Area Calculation:**
 ```javascript
-// Calculate safe area
-const safeWidth = 1920 - (marginLeft + marginRight);   // e.g., 1720px
-const safeHeight = 1080 - (titleHeight + margins);     // e.g., 780px
-
-// Size elements boldly
-const elementSize = 200-260px;   // Not 120-140px
-const radius = 400-450px;        // Not 300-350px
+// Calculate safe area (after margins)
+const safeWidth = 1920 - (marginLeft + marginRight);   // e.g., 1760px
+const safeHeight = 1080 - (titleHeight + margins);     // e.g., 880px
+const safeArea = safeWidth * safeHeight;               // Target zone for usage
 ```
 
 **Margins:**
 - Top: 70-80px (title clearance)
 - Bottom: 40-60px
 - Sides: 80-100px
+
+**Usage Targets by Layout Type:**
+
+| Layout Type | Target | Rationale | Example Templates |
+|-------------|--------|-----------|-------------------|
+| **Hub-and-spoke** | 85-95% | Elements radiate from center, no mandatory gaps | Explain2A |
+| **Flowing organic** | 90-95% | Particles/doodles fill space organically | Hook1A, decorative elements |
+| **Grid (tight gaps)** | 75-85% | Small gaps (20-40px) between cards | Compare12 (matrix) |
+| **Grid (spacious)** | 70-80% | Large gaps (60-80px) for breathing room | Guide10, Reflect4A |
+| **Vertical lists** | 60-75% | Stacked items with vertical spacing | Sequential content |
+
+**Why targets vary:**
+- Grids have **mandatory dead space** (gaps between cards)
+- Gaps don't count as "usage" but are required for readability
+- Don't sacrifice breathing room to hit arbitrary percentage
+
+**Sizing Guidelines:**
+```javascript
+// Size elements boldly (within reason)
+const elementSize = 200-400px;   // Not 120-140px (too timid)
+const radius = 400-450px;        // For hub-and-spoke
+const cardSize = 320-420px;      // For grid layouts
+```
+
+**Rule of thumb:** Aim for the high end of your layout type's target range, but never sacrifice readability or breathing room to hit it.
 
 ### Uniform Sizing Enforcement
 
@@ -1337,10 +1360,10 @@ export const getDuration = (config, fps = 30) => { /* ... */ };
 Before considering a template complete:
 
 ### Visual Quality
-- [ ] Uses 90-95% of screen space
-- [ ] Circles/organic shapes (not boxes)
+- [ ] Uses appropriate % of safe area (see targets table: 70-95% depending on layout type)
+- [ ] Circles/organic shapes (not boxes) - OR rounded squares when readability > decoration
 - [ ] Gradient backgrounds
-- [ ] Glassmorphic effects
+- [ ] Glassmorphic effects (when appropriate, not by default)
 - [ ] Particle systems visible
 - [ ] Film grain texture
 - [ ] Professional typography
