@@ -212,17 +212,20 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   
   const fontTokens = buildFontTokens(typography.voice || DEFAULT_FONT_VOICE);
   
-  // Convert beats to frames
+  // Convert beats to frames (showcase flow structure)
   const f = useMemo(() => ({
     entrance: toFrames(beats.entrance, fps),
     titleStart: toFrames(beats.titleStart, fps),
     titleVisible: toFrames(beats.titleVisible, fps),
-    firstTakeaway: toFrames(beats.firstTakeaway, fps),
+    titleEnd: toFrames(beats.titleEnd, fps),
     takeaways: beats.takeaways.map(t => ({
-      start: toFrames(t.start, fps),
-      visible: toFrames(t.visible, fps)
+      showcaseStart: toFrames(t.showcaseStart, fps),
+      showcaseVisible: toFrames(t.showcaseVisible, fps),
+      showcaseEnd: toFrames(t.showcaseEnd, fps),
+      listStart: toFrames(t.listStart, fps),
+      listVisible: toFrames(t.listVisible, fps)
     })),
-    holdStart: toFrames(beats.holdStart, fps),
+    finalListStart: toFrames(beats.finalListStart, fps),
     exitStart: toFrames(beats.exitStart, fps),
     totalDuration: toFrames(beats.totalDuration, fps)
   }), [beats, fps]);
