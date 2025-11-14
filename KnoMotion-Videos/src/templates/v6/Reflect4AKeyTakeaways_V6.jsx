@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
+import { Player } from '@lottiefiles/react-lottie-player';
 
 // SDK imports - Agnostic Template System v6
 import {
@@ -60,9 +61,9 @@ const DEFAULT_CONFIG = {
   },
   
   takeaways: [
-    { text: 'First important point to remember', icon: '💡', importance: 1 },
-    { text: 'Second key insight or lesson', icon: '🎯', importance: 2 },
-    { text: 'Third critical concept or skill', icon: '🚀', importance: 1 }
+    { text: 'First important point to remember', icon: '💡', importance: 1, lottieUrl: null },
+    { text: 'Second key insight or lesson', icon: '🎯', importance: 2, lottieUrl: null },
+    { text: 'Third critical concept or skill', icon: '🚀', importance: 1, lottieUrl: null }
   ],
   
   typography: {
@@ -105,9 +106,11 @@ const DEFAULT_CONFIG = {
   },
   
   layout: {
-    verticalSpacing: 120,    // Vertical gap between items
-    itemWidth: 900,          // Width of each takeaway
-    emphasisScaleMultiplier: 1.15  // Scale multiplier for importance:2 items
+    verticalSpacing: 120,    // Vertical gap between items in final list
+    itemWidth: 900,          // Width of each takeaway card (uniform sizing)
+    cardScale: 1.0,          // Uniform scale for all cards (no size variation)
+    emphasisScaleMultiplier: 1.0,  // No longer used (uniform sizing)
+    lottieSize: 200          // Size of Lottie animation placeholder (width/height)
   },
   
   animation: {
@@ -141,7 +144,9 @@ const DEFAULT_CONFIG = {
     particleBurstCount: 12,
     showIconBadge: true,
     badgeStyle: 'circle',
-    showEmphasisGlow: true       // Persistent glow on importance:2 items
+    showEmphasisGlow: true,      // Persistent glow on importance:2 items
+    modalOverlayOpacity: 0.85,   // Opacity of modal overlay during showcase (0-1)
+    showLottieAnimation: true    // Enable Lottie animations if provided
   },
   
   transition: {
@@ -389,13 +394,43 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         </div>
       )}
       
+      {/* Modal Overlay - dims background during showcase */}
+      {takeaways.map((item, i) => {
+        const itemBeat = f.takeaways[i];
+        if (!itemBeat) return null;
+        
+        const isShowcase = frame >= itemBeat.showcaseStart && frame < itemBeat.listStart;
+        
+        if (!isShowcase) return null;
+        
+        // Fade in/out modal overlay
+        const modalFadeIn = Math.min(1, (frame - itemBeat.showcaseStart) / toFrames(0.4, fps));
+        const modalFadeOut = frame >= itemBeat.listStart - toFrames(0.3, fps)
+          ? Math.max(0, 1 - (frame - (itemBeat.listStart - toFrames(0.3, fps))) / toFrames(0.3, fps))
+          : 1;
+        const modalOpacity = modalFadeIn * modalFadeOut * decorations.modalOverlayOpacity;
+        
+        return (
+          <div
+            key={`modal-${i}`}
+            className="absolute inset-0"
+            style={{
+              backgroundColor: '#000000',
+              opacity: modalOpacity,
+              zIndex: 15,
+              pointerEvents: 'none'
+            }}
+          />
+        );
+      })}
+
       {/* Takeaways - Showcase Flow */}
       {takeaways.map((item, i) => {
         const itemBeat = f.takeaways[i];
         if (!itemBeat || frame < itemBeat.showcaseStart) return null;
         
         const importance = item.importance || 1;
-        const baseScale = importance === 2 ? layout.emphasisScaleMultiplier : 1.0;
+        const baseScale = layout.cardScale;  // Uniform sizing
         
         // Determine item state
         const isShowcase = frame >= itemBeat.showcaseStart && frame < itemBeat.listStart;
@@ -423,12 +458,8 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         const listY = listStartY + (i * layout.verticalSpacing);
         const currentY = isShowcase ? showcaseY : showcaseY + (listY - showcaseY) * transitionProgress;
         
-        // Calculate scale
-        const showcaseScale = 1.4; // Large for showcase
-        const listScale = baseScale;
-        const currentScale = isShowcase 
-          ? showcaseScale 
-          : showcaseScale + (listScale - showcaseScale) * transitionProgress;
+        // Uniform scale (no size changes between showcase and list)
+        const currentScale = baseScale;
         
         // Icon pop
         const iconPop = getIconPop(frame, {
@@ -459,99 +490,122 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         const easedShowcaseProgress = showcaseProgress * showcaseProgress * (3 - 2 * showcaseProgress); // smoothstep
         const itemOpacity = easedShowcaseProgress * opacity;
         
+        // Lottie animation (if provided)
+        const hasLottie = item.lottieUrl && decorations.showLottieAnimation;
+        const lottieOpacity = isShowcase ? itemOpacity : 0;  // Only show in showcase
+        
         return (
-          <div
-            key={i}
-            className="absolute left-1/2 flex items-center"
-            style={{
-              top: currentY,
-              transform: `translate(-50%, -50%) translateY(${continuousLife.y}px) scale(${currentScale * continuousLife.scale})`,
-              opacity: itemOpacity,
-              width: isShowcase ? Math.min(layout.itemWidth * 1.3, 1100) : layout.itemWidth,
-              gap: 24,
-              willChange: 'transform, opacity',
-              zIndex: isShowcase ? 20 : (importance === 2 ? 10 : 5),
-              transition: 'width 0.3s ease-out'
-            }}
-          >
+          <React.Fragment key={i}>
+            {/* Lottie Animation - Modal Style */}
+            {hasLottie && isShowcase && (
+              <div
+                className="absolute left-1/2"
+                style={{
+                  top: centerY - layout.lottieSize - 80,
+                  transform: 'translateX(-50%)',
+                  width: layout.lottieSize,
+                  height: layout.lottieSize,
+                  opacity: lottieOpacity,
+                  zIndex: 25,
+                  pointerEvents: 'none'
+                }}
+              >
+                <Player
+                  autoplay
+                  loop
+                  src={item.lottieUrl}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
+            )}
+            
+            {/* Takeaway Card */}
+            <div
+              className="absolute left-1/2 flex items-center"
+              style={{
+                top: currentY,
+                transform: `translate(-50%, -50%) translateY(${continuousLife.y}px) scale(${currentScale * continuousLife.scale})`,
+                opacity: itemOpacity,
+                width: layout.itemWidth,  // Uniform width
+                gap: 24,
+                willChange: 'transform, opacity',
+                zIndex: isShowcase ? 20 : 5
+              }}
+            >
                 {/* Icon badge */}
             {decorations.showIconBadge && (
               <div
                 className="flex-shrink-0 flex items-center justify-center"
                 style={{
-                  width: isShowcase ? 90 : 70,
-                  height: isShowcase ? 90 : 70,
+                  width: 70,  // Uniform size
+                  height: 70, // Uniform size
                   borderRadius: decorations.badgeStyle === 'circle' ? '50%' : '12px',
                   background: `linear-gradient(135deg, ${colors.accent}E6 0%, ${colors.accent}B3 100%)`,
                   border: `4px solid ${colors.accent}`,
-                  fontSize: isShowcase ? Math.min(fonts.size_icon * 1.3, 56) : Math.min(fonts.size_icon, 44),
+                  fontSize: Math.min(fonts.size_icon, 44),  // Uniform size
                   fontFamily: fontTokens.accent.family,
                   opacity: iconPop.opacity,
                   transform: `scale(${iconPop.scale})`,
                   boxShadow: emphasisGlow !== 'none' ? emphasisGlow : `0 4px 10px ${colors.accent}40`,
                   backdropFilter: 'blur(10px)',
-                  willChange: 'transform, opacity',
-                  transition: 'width 0.3s ease-out, height 0.3s ease-out, font-size 0.3s ease-out'
+                  willChange: 'transform, opacity'
                 }}
               >
                 {item.icon || (i + 1)}
               </div>
             )}
                 
-            {/* Text content */}
-            <div className="flex-1">
-              {decorations.showGlassPane ? (
-                <GlassmorphicPane
-                  innerRadius={decorations.glassInnerRadius}
-                  glowOpacity={0.15}
-                  borderOpacity={decorations.glassPaneBorderOpacity}
-                  backgroundColor={colors.glassBackground}
-                  padding={isShowcase ? 32 : 24}
-                  style={{
-                    boxShadow: isShowcase ? `0 8px 24px ${colors.accent}30` : 'none'
-                  }}
-                >
+              {/* Text content */}
+              <div className="flex-1">
+                {decorations.showGlassPane ? (
+                  <GlassmorphicPane
+                    innerRadius={decorations.glassInnerRadius}
+                    glowOpacity={0.15}
+                    borderOpacity={decorations.glassPaneBorderOpacity}
+                    backgroundColor={colors.glassBackground}
+                    padding={24}  // Uniform padding
+                    style={{
+                      boxShadow: isShowcase ? `0 8px 24px ${colors.accent}30` : 'none'
+                    }}
+                  >
+                    <div
+                      className="leading-snug"
+                      style={{
+                        fontSize: Math.min(fonts.size_takeaway, 28),  // Uniform size
+                        fontWeight: fonts.weight_takeaway,  // Uniform weight
+                        fontFamily: fontTokens.body.family,
+                        color: colors.text,
+                        textAlign: typography.align,
+                        lineHeight: 1.5,
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      {item.text}
+                    </div>
+                  </GlassmorphicPane>
+                ) : (
                   <div
                     className="leading-snug"
                     style={{
-                      fontSize: isShowcase 
-                        ? Math.min(fonts.size_takeaway * 1.2, 36) 
-                        : Math.min(fonts.size_takeaway, 28),
-                      fontWeight: isShowcase ? 700 : fonts.weight_takeaway,
+                      fontSize: Math.min(fonts.size_takeaway, 28),  // Uniform size
+                      fontWeight: fonts.weight_takeaway,  // Uniform weight
                       fontFamily: fontTokens.body.family,
                       color: colors.text,
                       textAlign: typography.align,
                       lineHeight: 1.5,
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-                      transition: 'font-size 0.3s ease-out, font-weight 0.3s ease-out'
+                      padding: 20,  // Uniform padding
+                      backgroundColor: `${colors.glassBackground}80`,
+                      borderRadius: decorations.glassInnerRadius,
+                      backdropFilter: 'blur(5px)',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
                     }}
                   >
                     {item.text}
                   </div>
-                </GlassmorphicPane>
-              ) : (
-                <div
-                  className="leading-snug"
-                  style={{
-                    fontSize: isShowcase ? Math.min(fonts.size_takeaway * 1.2, 36) : Math.min(fonts.size_takeaway, 28),
-                    fontWeight: isShowcase ? 700 : fonts.weight_takeaway,
-                    fontFamily: fontTokens.body.family,
-                    color: colors.text,
-                    textAlign: typography.align,
-                    lineHeight: 1.5,
-                    padding: isShowcase ? 28 : 20,
-                    backgroundColor: `${colors.glassBackground}80`,
-                    borderRadius: decorations.glassInnerRadius,
-                    backdropFilter: 'blur(5px)',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-                    transition: 'font-size 0.3s ease-out, font-weight 0.3s ease-out, padding 0.3s ease-out'
-                  }}
-                >
-                  {item.text}
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          </React.Fragment>
         );
       })}
     </AbsoluteFill>

@@ -363,9 +363,9 @@ const STAGING_CATALOG = [
   },
   {
     id: 'STAGING_Reflect4AKeyTakeaways_V6_Enhanced',
-    name: '🧪 Key Takeaways V6.4 - Showcase Flow',
+    name: '🧪 Key Takeaways V6.4 - Modal Showcase',
     intentions: { primary: 'REFLECT', secondary: ['BREAKDOWN', 'GUIDE', 'REVEAL'] },
-    description: '🎬 SHOWCASE FLOW: Each point gets full-screen spotlight moment, then transitions into final summary list. Engaging presentation-style reveal with mid-scene transitions. 60fps optimized.',
+    description: '🎬 MODAL SHOWCASE: Each point gets full-screen spotlight with darkened background (modal-style). Optional Lottie animations per item. Uniform card sizing. Engaging presentation flow.',
     duration: '18-25s',
     icon: '💡',
     color: '#27AE60',
@@ -374,18 +374,19 @@ const STAGING_CATALOG = [
     isStaging: true,
     hasConfig: true,
     features: [
-      'Showcase each point individually (large, centered, full focus)',
-      'Mid-scene transitions: shrink & move to list position',
-      'Final state: vertical list with continuous breathing/floating',
-      'Visual emphasis on important items (1.15x scale + glow)',
-      '60fps optimized (willChange hints, reduced particles)',
-      'Clean, engaging flow: spotlight → transition → summary'
+      'Modal-style showcase (85% dark overlay dims background)',
+      'Optional Lottie animation placeholder per takeaway',
+      'Uniform card sizing (no size variation)',
+      'Each point gets 2.5s spotlight moment',
+      'Smooth transitions: showcase → final list',
+      '60fps optimized with willChange hints',
+      'Fully configurable: overlay opacity, Lottie size, card scale'
     ],
     flowPattern: [
       '1. Title reveal',
-      '2-4. Showcase each takeaway (2.5s spotlight each)',
-      '5. Shrink & position into final list',
-      '6. Final list with subtle life animations'
+      '2-4. Modal showcase per takeaway (background dims, Lottie plays if provided)',
+      '5. Transition to final list (overlay fades out)',
+      '6. Final list with subtle breathing/floating'
     ]
   }
 ];
