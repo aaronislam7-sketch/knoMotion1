@@ -73,14 +73,14 @@ const DEFAULT_CONFIG = {
     }
   ],
   
-  // NEW: Layout configuration - ZEN GARDEN POLISH
+  // NEW: Layout configuration - ZEN GARDEN POLISH (Screen-optimized)
   layout: {
     mode: 'grid',  // 'horizontal', 'grid', 'flowing'
     spacing: 'spacious',  // 'tight', 'comfortable', 'spacious' - DEFAULT SPACIOUS
-    gridColumns: 2,  // Auto-calculate based on step count
+    gridColumns: 3,  // 3×2 for 6 steps (horizontal spread) - OPTIMIZED for screen usage
     cardShape: 'rounded-square',  // 'circle', 'rounded-square' - CHANGED FOR READABILITY
-    cardSize: 240,  // Reduced from 260, but square = more usable space
-    gap: 80,  // Explicit gap control - INCREASED for breathing room
+    cardSize: 400,  // Increased from 240 for better screen usage (73% safe area)
+    gap: 60,  // Explicit gap control - balanced breathing room
     centerAlign: true  // Center grid on canvas
   },
   
@@ -145,10 +145,10 @@ const DEFAULT_CONFIG = {
       cardBg: '#1E293B'
     },
     fonts: {
-      size_title: 54,
-      size_step_number: 72,
-      size_step_title: 32,
-      size_step_desc: 18,
+      size_title: 64,  // Increased from 54 (more screen space available)
+      size_step_number: 84,  // Increased from 72 (400px cards vs 240px)
+      size_step_title: 38,  // Increased from 32 (proportional to card size)
+      size_step_desc: 20,  // Increased from 18 (better readability)
       weight_title: 800,
       weight_step: 700
     }
