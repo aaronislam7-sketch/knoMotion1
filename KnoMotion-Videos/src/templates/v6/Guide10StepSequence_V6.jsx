@@ -208,7 +208,10 @@ const calculateStepPositions = (totalSteps, layout, width, height) => {
     spacious: 1.6
   };
   
-  const gap = layout.gap || (cardSize * spacingMap[spacing]);
+  // CRITICAL FIX: gap in layout refers to space BETWEEN cards, not distance between centers
+  // So we need to add cardSize to get the actual distance between card centers
+  const explicitGap = layout.gap ? (cardSize + layout.gap) : null;
+  const gap = explicitGap || (cardSize * spacingMap[spacing]);
   const positions = [];
   
   if (mode === 'horizontal') {
