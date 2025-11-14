@@ -22,34 +22,32 @@ import { loadFontVoice, buildFontTokens, DEFAULT_FONT_VOICE } from '../../sdk/fo
 import { createTransitionProps } from '../../sdk/transitions';
 
 /**
- * TEMPLATE #7: KEY TAKEAWAYS - v6.3 (SIMPLE & POLISHED)
+ * TEMPLATE #7: KEY TAKEAWAYS - v6.4 (SHOWCASE FLOW)
  * 
  * PRIMARY INTENTION: REFLECT
- * SECONDARY INTENTIONS: BREAKDOWN, GUIDE
+ * SECONDARY INTENTIONS: BREAKDOWN, GUIDE, REVEAL
  * 
- * PURPOSE: Clean vertical list of key learning points with subtle polish
+ * PURPOSE: Showcase each point individually, then build final summary list
+ * 
+ * FLOW:
+ * 1. Title reveal
+ * 2. Showcase takeaway #1 (full screen, large) → Shrink & move to list position
+ * 3. Showcase takeaway #2 (full screen, large) → Shrink & move to list position  
+ * 4. Showcase takeaway #3 (full screen, large) → Shrink & move to list position
+ * 5. Final list view with all items + continuous life animations
  * 
  * VISUAL PATTERN:
- * - Simple centered vertical list
- * - Icon badges + text in glassmorphic panes
- * - Subtle continuous breathing + floating during hold
- * - Visual emphasis via scale for important items (importance: 2)
- * - 60fps optimized (no heavy particle bursts)
+ * - Each point gets spotlight moment (centered, large)
+ * - Mid-scene transitions shrink items into list positions
+ * - Final state: vertical list with subtle breathing/floating
+ * - Clean, focused, engaging flow
  * 
  * POLISH APPLIED:
- * ✅ Layered background (gradient, noise, spotlights, ambient particles)
- * ✅ Glassmorphic panes for clean presentation
- * ✅ Smooth entrance animations (up slide + fade)
- * ✅ Icon pop with bounce
- * ✅ Continuous life during hold (subtle breathing + floating)
- * ✅ Emphasis glow for important items
- * ✅ 60fps performance (willChange hints, reduced particle count)
- * 
- * PERFORMANCE OPTIMIZATIONS:
- * - willChange: 'transform, opacity' on animated elements
- * - Reduced breathing/floating amplitude (50-70% of original)
- * - Particle bursts disabled by default
- * - Simple vertical layout (no complex positioning)
+ * ✅ Mid-scene transitions (showcase → list transitions)
+ * ✅ Individual spotlight moments per point
+ * ✅ Scene transformation (background shifts per phase)
+ * ✅ Continuous life in final state
+ * ✅ 60fps optimized
  * 
  * NO HARDCODED VALUES!
  */
@@ -94,17 +92,16 @@ const DEFAULT_CONFIG = {
   },
   
   beats: {
-    // CUMULATIVE TIMING: Each value is added to the previous
-    // entrance = 0.5s (absolute start)
-    // titleStart at: entrance = 0.5s
-    // firstTakeaway at: entrance + titleReveal + titleHold = 0.5 + 0.8 + 0.5 = 1.8s
-    entrance: 0.5,           // Initial background fade
-    titleReveal: 0.8,        // Title letter reveal duration (+0.8s)
-    titleHold: 0.5,          // Hold title (+0.5s)
-    takeawayReveal: 0.6,     // Per-takeaway reveal duration (+0.6s per takeaway)
-    takeawayInterval: 0.8,   // Interval between takeaways (+0.8s per takeaway)
-    hold: 3.0,               // Hold final state (+3.0s)
-    exit: 0.8                // Exit animation (+0.8s)
+    // SHOWCASE FLOW TIMING
+    entrance: 0.5,              // Initial background fade
+    titleReveal: 0.8,           // Title letter reveal
+    titleHold: 0.5,             // Hold title
+    showcaseReveal: 0.8,        // Per-item showcase reveal (large, centered)
+    showcaseHold: 2.5,          // Hold each showcase moment
+    showcaseToList: 0.6,        // Transition from showcase to list position
+    listInterval: 0.3,          // Gap between list transitions
+    finalHold: 3.0,             // Hold final list state
+    exit: 0.8                   // Exit animation
   },
   
   layout: {
@@ -156,29 +153,38 @@ const DEFAULT_CONFIG = {
   }
 };
 
-// Calculate cumulative beats
+// Calculate cumulative beats for showcase flow
 const calculateCumulativeBeats = (beats, takeawayCount) => {
   let cumulative = 0;
   const result = {
     entrance: cumulative,
     titleStart: (cumulative += beats.entrance),
     titleVisible: (cumulative += beats.titleReveal),
-    firstTakeaway: (cumulative += beats.titleHold),
+    titleEnd: (cumulative += beats.titleHold),
     takeaways: []
   };
   
+  // Each takeaway: showcase (large) → hold → shrink to list
   for (let i = 0; i < takeawayCount; i++) {
+    const showcaseStart = cumulative;
+    const showcaseVisible = cumulative + beats.showcaseReveal;
+    const showcaseEnd = showcaseVisible + beats.showcaseHold;
+    const listStart = showcaseEnd;
+    const listVisible = listStart + beats.showcaseToList;
+    
     result.takeaways.push({
-      start: cumulative,
-      visible: (cumulative += beats.takeawayReveal)
+      showcaseStart,
+      showcaseVisible,
+      showcaseEnd,
+      listStart,
+      listVisible
     });
-    if (i < takeawayCount - 1) {
-      cumulative += beats.takeawayInterval - beats.takeawayReveal;
-    }
+    
+    cumulative = listVisible + beats.listInterval;
   }
   
-  result.holdStart = (cumulative += beats.takeawayInterval - beats.takeawayReveal);
-  result.exitStart = (cumulative += beats.hold);
+  result.finalListStart = cumulative - beats.listInterval;
+  result.exitStart = (cumulative += beats.finalHold);
   result.totalDuration = (cumulative += beats.exit);
   
   return result;
@@ -289,9 +295,18 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
   
   const opacity = 1 - exitProgress;
   
-  // Simple vertical list layout
+  // Layout calculations
   const centerX = width / 2;
-  const contentStartY = height / 2 - (takeaways.length * layout.verticalSpacing) / 2;
+  const centerY = height / 2;
+  const listStartY = centerY - (takeaways.length * layout.verticalSpacing) / 2;
+  
+  // Determine current phase
+  const currentPhase = useMemo(() => {
+    if (frame < f.titleEnd) return 'title';
+    if (frame < f.finalListStart) return 'showcase';
+    if (frame < f.exitStart) return 'finalList';
+    return 'exit';
+  }, [frame, f.titleEnd, f.finalListStart, f.exitStart]);
   
   return (
     <AbsoluteFill
@@ -371,148 +386,168 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         </div>
       )}
       
-      {/* Takeaways List - Simple Vertical */}
-      <div 
-        className="absolute left-1/2 flex flex-col items-center"
-        style={{ 
-          top: contentStartY,
-          transform: 'translateX(-50%)',
-          gap: layout.verticalSpacing,
-          zIndex: 5,
-          width: layout.itemWidth
-        }}
-      >
-        {takeaways.map((item, i) => {
-          const itemBeat = f.takeaways[i];
-          if (!itemBeat || frame < itemBeat.start) return null;
-          
-          const importance = item.importance || 1;
-          const scale = importance === 2 ? layout.emphasisScaleMultiplier : 1.0;
-          
-          // Card entrance
-          const itemCardEntrance = getCardEntrance(frame, {
-            startFrame: beats.takeaways[i].start,
-            duration: rawBeats.takeawayReveal,
-            direction: 'up',
-            distance: 40,
-            withGlow: false
-          }, fps);
-          
-          if (itemCardEntrance.opacity === 0) return null;
-          
-          // Icon pop
-          const iconPop = getIconPop(frame, {
-            startFrame: beats.takeaways[i].start + 0.2,
-            duration: 0.5,
-            withBounce: true,
-            rotation: 0
-          }, fps);
-          
-          // Continuous life (breathing + floating) - optimized for 60fps
-          const shouldAnimate = frame >= itemBeat.visible && exitProgress < 0.1;
-          const continuousLife = getContinuousLife(frame, {
-            startFrame: itemBeat.visible,
-            breathingFrequency: anim.breathingFrequency,
-            breathingAmplitude: anim.breathingAmplitude * 0.5, // Reduced for subtlety
-            floatingFrequency: anim.floatingFrequency,
-            floatingAmplitude: anim.floatingAmplitude * 0.7, // Reduced
-            phaseOffset: i * (Math.PI / 3),
-            enabled: shouldAnimate && (anim.continuousBreathing || anim.continuousFloating)
-          });
-          
-          // Emphasis glow for important items
-          const emphasisGlow = importance === 2 && decorations.showEmphasisGlow && shouldAnimate
-            ? `0 0 15px ${colors.accent}50, 0 0 30px ${colors.accent}20`
-            : 'none';
-          
-          return (
-            <div
-              key={i}
-              className="flex items-center w-full"
-              style={{
-                gap: 20,
-                transform: `translateY(${continuousLife.y}px) scale(${itemCardEntrance.scale * scale * continuousLife.scale})`,
-                opacity: itemCardEntrance.opacity * opacity,
-                willChange: 'transform, opacity', // Performance hint for browser
-                zIndex: importance === 2 ? 10 : 5
-              }}
-            >
+      {/* Takeaways - Showcase Flow */}
+      {takeaways.map((item, i) => {
+        const itemBeat = f.takeaways[i];
+        if (!itemBeat || frame < itemBeat.showcaseStart) return null;
+        
+        const importance = item.importance || 1;
+        const baseScale = importance === 2 ? layout.emphasisScaleMultiplier : 1.0;
+        
+        // Determine item state
+        const isShowcase = frame >= itemBeat.showcaseStart && frame < itemBeat.listStart;
+        const isTransitioning = frame >= itemBeat.listStart && frame < itemBeat.listVisible;
+        const isInList = frame >= itemBeat.listVisible;
+        
+        // Showcase reveal (large, centered)
+        const showcaseProgress = Math.min(1, Math.max(0, 
+          (frame - toFrames(itemBeat.showcaseStart, fps)) / toFrames(rawBeats.showcaseReveal, fps)
+        ));
+        
+        // Transition to list (shrink + move)
+        const transitionProgress = isTransitioning
+          ? interpolate(
+              frame,
+              [toFrames(itemBeat.listStart, fps), toFrames(itemBeat.listVisible, fps)],
+              [0, 1],
+              { extrapolateRight: 'clamp', easing: EZ.easeInOutCubic }
+            )
+          : isInList ? 1 : 0;
+        
+        // Calculate position
+        const showcaseY = centerY;
+        const listY = listStartY + (i * layout.verticalSpacing);
+        const currentY = isShowcase ? showcaseY : showcaseY + (listY - showcaseY) * transitionProgress;
+        
+        // Calculate scale
+        const showcaseScale = 1.4; // Large for showcase
+        const listScale = baseScale;
+        const currentScale = isShowcase 
+          ? showcaseScale 
+          : showcaseScale + (listScale - showcaseScale) * transitionProgress;
+        
+        // Icon pop
+        const iconPop = getIconPop(frame, {
+          startFrame: itemBeat.showcaseStart,
+          duration: 0.6,
+          withBounce: true,
+          rotation: 0
+        }, fps);
+        
+        // Continuous life (only in final list state)
+        const inFinalList = frame >= f.finalListStart && exitProgress < 0.1;
+        const continuousLife = getContinuousLife(frame, {
+          startFrame: f.finalListStart,
+          breathingFrequency: anim.breathingFrequency,
+          breathingAmplitude: anim.breathingAmplitude * 0.5,
+          floatingFrequency: anim.floatingFrequency,
+          floatingAmplitude: anim.floatingAmplitude * 0.7,
+          phaseOffset: i * (Math.PI / 3),
+          enabled: inFinalList && (anim.continuousBreathing || anim.continuousFloating)
+        });
+        
+        // Emphasis glow
+        const emphasisGlow = importance === 2 && decorations.showEmphasisGlow && inFinalList
+          ? `0 0 15px ${colors.accent}50, 0 0 30px ${colors.accent}20`
+          : 'none';
+        
+        const itemOpacity = EZ.easeOutCubic(showcaseProgress) * opacity;
+        
+        return (
+          <div
+            key={i}
+            className="absolute left-1/2 flex items-center"
+            style={{
+              top: currentY,
+              transform: `translate(-50%, -50%) translateY(${continuousLife.y}px) scale(${currentScale * continuousLife.scale})`,
+              opacity: itemOpacity,
+              width: isShowcase ? Math.min(layout.itemWidth * 1.3, 1100) : layout.itemWidth,
+              gap: 24,
+              willChange: 'transform, opacity',
+              zIndex: isShowcase ? 20 : (importance === 2 ? 10 : 5),
+              transition: 'width 0.3s ease-out'
+            }}
+          >
                 {/* Icon badge */}
-              {decorations.showIconBadge && (
-                <div
-                  className="flex-shrink-0 flex items-center justify-center"
+            {decorations.showIconBadge && (
+              <div
+                className="flex-shrink-0 flex items-center justify-center"
+                style={{
+                  width: isShowcase ? 90 : 70,
+                  height: isShowcase ? 90 : 70,
+                  borderRadius: decorations.badgeStyle === 'circle' ? '50%' : '12px',
+                  background: `linear-gradient(135deg, ${colors.accent}E6 0%, ${colors.accent}B3 100%)`,
+                  border: `4px solid ${colors.accent}`,
+                  fontSize: isShowcase ? Math.min(fonts.size_icon * 1.3, 56) : Math.min(fonts.size_icon, 44),
+                  fontFamily: fontTokens.accent.family,
+                  opacity: iconPop.opacity,
+                  transform: `scale(${iconPop.scale})`,
+                  boxShadow: emphasisGlow !== 'none' ? emphasisGlow : `0 4px 10px ${colors.accent}40`,
+                  backdropFilter: 'blur(10px)',
+                  willChange: 'transform, opacity',
+                  transition: 'width 0.3s ease-out, height 0.3s ease-out, font-size 0.3s ease-out'
+                }}
+              >
+                {item.icon || (i + 1)}
+              </div>
+            )}
+                
+            {/* Text content */}
+            <div className="flex-1">
+              {decorations.showGlassPane ? (
+                <GlassmorphicPane
+                  innerRadius={decorations.glassInnerRadius}
+                  glowOpacity={0.15}
+                  borderOpacity={decorations.glassPaneBorderOpacity}
+                  backgroundColor={colors.glassBackground}
+                  padding={isShowcase ? 32 : 24}
                   style={{
-                    width: 70,
-                    height: 70,
-                    borderRadius: decorations.badgeStyle === 'circle' ? '50%' : '12px',
-                    background: `linear-gradient(135deg, ${colors.accent}E6 0%, ${colors.accent}B3 100%)`,
-                    border: `3px solid ${colors.accent}`,
-                    fontSize: Math.min(fonts.size_icon, 44),
-                    fontFamily: fontTokens.accent.family,
-                    opacity: iconPop.opacity,
-                    transform: `scale(${iconPop.scale})`,
-                    boxShadow: emphasisGlow !== 'none' ? emphasisGlow : `0 4px 10px ${colors.accent}40`,
-                    backdropFilter: 'blur(10px)',
-                    willChange: 'transform, opacity'
+                    boxShadow: isShowcase ? `0 8px 24px ${colors.accent}30` : 'none'
                   }}
                 >
-                  {item.icon || (i + 1)}
+                  <div
+                    className="leading-snug"
+                    style={{
+                      fontSize: isShowcase 
+                        ? Math.min(fonts.size_takeaway * 1.2, 36) 
+                        : Math.min(fonts.size_takeaway, 28),
+                      fontWeight: isShowcase ? 700 : fonts.weight_takeaway,
+                      fontFamily: fontTokens.body.family,
+                      color: colors.text,
+                      textAlign: typography.align,
+                      lineHeight: 1.5,
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+                      transition: 'font-size 0.3s ease-out, font-weight 0.3s ease-out'
+                    }}
+                  >
+                    {item.text}
+                  </div>
+                </GlassmorphicPane>
+              ) : (
+                <div
+                  className="leading-snug"
+                  style={{
+                    fontSize: isShowcase ? Math.min(fonts.size_takeaway * 1.2, 36) : Math.min(fonts.size_takeaway, 28),
+                    fontWeight: isShowcase ? 700 : fonts.weight_takeaway,
+                    fontFamily: fontTokens.body.family,
+                    color: colors.text,
+                    textAlign: typography.align,
+                    lineHeight: 1.5,
+                    padding: isShowcase ? 28 : 20,
+                    backgroundColor: `${colors.glassBackground}80`,
+                    borderRadius: decorations.glassInnerRadius,
+                    backdropFilter: 'blur(5px)',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+                    transition: 'font-size 0.3s ease-out, font-weight 0.3s ease-out, padding 0.3s ease-out'
+                  }}
+                >
+                  {item.text}
                 </div>
               )}
-                
-              {/* Text content */}
-              <div className="flex-1">
-                  {decorations.showGlassPane ? (
-                    <GlassmorphicPane
-                      innerRadius={decorations.glassInnerRadius}
-                      glowOpacity={0.15}
-                      borderOpacity={decorations.glassPaneBorderOpacity}
-                      backgroundColor={colors.glassBackground}
-                      padding={24}
-                      style={{
-                        boxShadow: itemCardEntrance.boxShadow
-                      }}
-                    >
-                      <div
-                        className="leading-snug"
-                        style={{
-                          fontSize: Math.min(fonts.size_takeaway, 32),
-                          fontWeight: fonts.weight_takeaway,
-                          fontFamily: fontTokens.body.family,
-                          color: colors.text,
-                          textAlign: typography.align,
-                          lineHeight: 1.4,
-                          textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        {item.text}
-                      </div>
-                    </GlassmorphicPane>
-                  ) : (
-                    <div
-                      className="leading-snug"
-                      style={{
-                        fontSize: Math.min(fonts.size_takeaway, 32),
-                        fontWeight: fonts.weight_takeaway,
-                        fontFamily: fontTokens.body.family,
-                        color: colors.text,
-                        textAlign: typography.align,
-                        lineHeight: 1.4,
-                        padding: 20,
-                        backgroundColor: `${colors.glassBackground}80`,
-                        borderRadius: decorations.glassInnerRadius,
-                        backdropFilter: 'blur(5px)',
-                        textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      {item.text}
-                    </div>
-                  )}
-                </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </AbsoluteFill>
   );
 };

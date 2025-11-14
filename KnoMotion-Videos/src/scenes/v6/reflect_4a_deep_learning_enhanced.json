@@ -76,9 +76,11 @@
     "entrance": 0.5,
     "titleReveal": 0.8,
     "titleHold": 0.5,
-    "takeawayReveal": 0.6,
-    "takeawayInterval": 0.8,
-    "hold": 6.0,
+    "showcaseReveal": 0.8,
+    "showcaseHold": 2.5,
+    "showcaseToList": 0.6,
+    "listInterval": 0.3,
+    "finalHold": 3.0,
     "exit": 1.0
   },
   

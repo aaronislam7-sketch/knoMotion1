@@ -363,37 +363,30 @@ const STAGING_CATALOG = [
   },
   {
     id: 'STAGING_Reflect4AKeyTakeaways_V6_Enhanced',
-    name: '🧪 Key Takeaways V6.3 - Enhanced Polish',
-    intentions: { primary: 'REFLECT', secondary: ['BREAKDOWN', 'GUIDE'] },
-    description: '🎬 ENHANCED: Continuous life animations (breathing + floating), staggered zigzag layout for 75-85% canvas usage, visual hierarchy via importance scaling, flow lines connecting items. Scores 4.6/5 on polish rubric.',
-    duration: '10-15s',
+    name: '🧪 Key Takeaways V6.4 - Showcase Flow',
+    intentions: { primary: 'REFLECT', secondary: ['BREAKDOWN', 'GUIDE', 'REVEAL'] },
+    description: '🎬 SHOWCASE FLOW: Each point gets full-screen spotlight moment, then transitions into final summary list. Engaging presentation-style reveal with mid-scene transitions. 60fps optimized.',
+    duration: '18-25s',
     icon: '💡',
     color: '#27AE60',
-    version: 'v6.3-STAGING',
+    version: 'v6.4-STAGING',
     isNew: true,
     isStaging: true,
     hasConfig: true,
     features: [
-      'Continuous breathing + floating during hold (solves static state)',
-      'Staggered zigzag layout (75-85% canvas vs 52%)',
-      'Visual hierarchy: importance:2 items get 1.2x scale + glow',
-      'Flow lines connecting sequential takeaways',
-      'Phase-shifted life animations (organic feel)',
-      'Voiceover-ready (calm motion won\'t compete with audio)'
+      'Showcase each point individually (large, centered, full focus)',
+      'Mid-scene transitions: shrink & move to list position',
+      'Final state: vertical list with continuous breathing/floating',
+      'Visual emphasis on important items (1.15x scale + glow)',
+      '60fps optimized (willChange hints, reduced particles)',
+      'Clean, engaging flow: spotlight → transition → summary'
     ],
-    polishImprovements: [
-      'Blocker #1 Fixed: Continuous life during 6s hold',
-      'Blocker #2 Fixed: Visual hierarchy via importance',
-      'Blocker #3 Fixed: 75-85% canvas utilization (up from 52%)'
-    ],
-    rubricScores: {
-      polish: 4.5,
-      branding: 5.0,
-      configurability: 5.0,
-      standardisation: 4.0,
-      scale: 4.5,
-      overall: 4.6
-    }
+    flowPattern: [
+      '1. Title reveal',
+      '2-4. Showcase each takeaway (2.5s spotlight each)',
+      '5. Shrink & position into final list',
+      '6. Final list with subtle life animations'
+    ]
   }
 ];
 
