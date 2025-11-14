@@ -653,6 +653,259 @@ Comment the old structure as deprecated but leave it visible so developers know 
 
 ---
 
+## XXIX. Phase-Shifted Floating for Group Cohesion
+
+### The Identical vs Random Animation Problem
+
+**What we encountered (Guide10 v6.1):** Multiple cards needed continuous floating, but how to coordinate them? Animate identically (robotic) or randomly (chaotic)?
+
+**What we learned:** **Phase-shifted synchronized motion creates organic group cohesion.** Each element follows the same wave pattern but offset by a fixed phase, creating a ripple effect.
+
+**The principle:** **Use phase-shifted sine waves (60° intervals) for grouped floating animations.**
+
+**How we applied it:**
+```javascript
+// Each card floats with same frequency/amplitude but different phase
+const phaseShift = (i * 60) * (Math.PI / 180);  // 60° per card
+const floatingOffset = Math.sin((frame * 0.015) + phaseShift) * 3;
+
+// Result: Card 0 at 0°, Card 1 at 60°, Card 2 at 120°, etc.
+// Creates a visible wave pattern across the grid
+```
+
+**Why 60° intervals?**
+- 6 cards × 60° = 360° (full cycle representation)
+- Visible wave pattern (not too synchronized, not too random)
+- Works for 3-12 elements (divisors of 360°)
+
+**When to use:**
+- Multiple similar elements (cards, badges, icons)
+- Grid layouts where cohesion matters
+- Long hold states (2+ seconds visible)
+
+**When NOT to use:**
+- Elements with different purposes (don't force unity)
+- Fast-paced content (< 1s per element)
+- When random variety is the goal
+
+**For other templates:** Calculate phase shift as `(index * 360 / totalElements)` for even distribution around the cycle.
+
+---
+
+## XXX. Square vs Circle Math: The 21% Space Trade-off
+
+### The Circular Cards Cramming Problem
+
+**What we encountered (Guide10):** 260×260px circular cards had text overflow issues. Solutions tried: smaller fonts, line-clamp, ellipsis. None felt right.
+
+**What we learned:** **Circles waste 21.5% of their bounding box area compared to squares.** This isn't a styling choice—it's geometry penalizing readability.
+
+**The math:**
+```javascript
+// Square in 260×260 box
+const squareArea = 260 * 260 = 67,600 px²  // 100% usable
+
+// Circle in 260×260 box  
+const circleArea = Math.PI * (130)² = 53,093 px²  // 78.5% usable
+
+// Loss: 14,507 px² (21.5% of square area)
+```
+
+**The principle:** **Choose squares over circles when readability > decoration.** Circles are softer and more organic, but squares give 21% more text space.
+
+**How we applied it:**
+```jsx
+// Before: circle
+borderRadius: '50%'  // Beautiful but cramped
+
+// After: rounded square  
+borderRadius: 20  // Professional AND readable
+```
+
+**Trade-offs:**
+- **Circles**: Softer, playful, organic (good for icons, badges, avatars)
+- **Squares**: Structured, professional, spacious (good for text cards, content blocks)
+
+**Decision framework:**
+- Text-heavy content (3+ lines) → Rounded square
+- Icon + label (1-2 lines) → Circle acceptable
+- Mixed (icon + title + description) → Rounded square safer
+
+**For other templates:** Don't default to circles because they "look nicer." Calculate: `(text_lines * avg_chars) > 40` → use square.
+
+---
+
+## XXXI. Gap Calculation: Space Between vs Center Distance
+
+### The Overlapping Cards Disaster
+
+**What we encountered (Guide10):** Cards were completely overlapping despite `gap: 80` in config. Users reported "completely unusable scene."
+
+**Root cause:** Misunderstanding what "gap" means in layout math.
+
+**The principle:** **"Gap" is space BETWEEN elements, not distance between element CENTERS.**
+
+**The bug:**
+```javascript
+// ❌ WRONG - treats gap as center-to-center distance
+const gap = layout.gap;  // 80px
+const positions = [];
+for (let i = 0; i < cols; i++) {
+  positions.push({ x: startX + (i * gap) });  
+}
+// Result: 240px cards with 80px between centers = 160px overlap!
+```
+
+**The fix:**
+```javascript
+// ✅ CORRECT - add cardSize to gap for center distance
+const centerDistance = cardSize + layout.gap;  // 240 + 80 = 320px
+const positions = [];
+for (let i = 0; i < cols; i++) {
+  positions.push({ x: startX + (i * centerDistance) });
+}
+// Result: 240px cards with 80px breathing room between edges
+```
+
+**Visual explanation:**
+```
+WRONG (overlap):
+[---240px---]
+     80px (center distance)
+     [---240px---]  ← Cards overlap by 160px
+
+CORRECT (gap):
+[---240px---] 80px gap [---240px---]
+      ← 320px center distance →
+```
+
+**For other templates:** When calculating grid positions, always add element size to gap: `spacing = elementSize + gap`.
+
+---
+
+## XXXII. Screen Usage Reality: Grid Layouts vs Flowing Layouts
+
+### The 90-95% Target Misunderstanding
+
+**What we encountered (Guide10):** Template used only 31.8% of safe area with default settings. Tried to hit 90-95% target from TEMPLATES.md but couldn't exceed ~73% without extreme measures.
+
+**What we learned:** **The 90-95% screen usage target applies to flowing/hub-and-spoke layouts, not discrete grid layouts with gaps.**
+
+**The math reality:**
+```javascript
+// Grid with mandatory gaps
+const content = 3 * 400px = 1200px  // Card area
+const gaps = 2 * 60px = 120px       // Required spacing (dead space)
+const total = 1320px
+
+// Gaps don't count as "usage" in strict sense
+// Maximum realistic: 70-80% for grid layouts
+```
+
+**The principle:** **Adjust screen usage targets based on layout type:**
+- **Flowing layouts** (hub-and-spoke, particle fields): 85-95% achievable
+- **Grid layouts** (cards with gaps): 70-80% realistic
+- **List layouts** (vertical stacks): 60-75% typical
+
+**Targets by template type:**
+| Template Type | Realistic Target | Example |
+|---------------|------------------|---------|
+| Hub-and-spoke | 85-95% | Explain2A (center + spokes) |
+| Flowing organic | 90-95% | Particles, doodles |
+| Card grids (tight) | 75-85% | 3×3 grid, small gaps |
+| Card grids (spacious) | 70-80% | Guide10 (breathing room) |
+| Vertical lists | 60-75% | Reflect4A (stacked items) |
+
+**How we applied it (Guide10):**
+- Started: 2×3, 240px cards, 80px gaps → 31.8% ❌
+- Optimized: 3×2, 400px cards, 60px gaps → 73.3% ✅
+- Accepted: 73% is appropriate for spacious grid layout
+
+**For other templates:** Don't blindly chase 90%+ if your layout has discrete elements with mandatory gaps. Calculate realistic target based on layout type.
+
+---
+
+## XXXIII. Horizontal Spread > Vertical Stack for 4-8 Items
+
+### The Narrow Column Problem
+
+**What we encountered (Guide10):** Default 2×3 layout created a narrow vertical column (560px wide) with massive empty sides (680px margins each).
+
+**What we learned:** **For 4-8 items, horizontal spread (3-4 columns) beats vertical stacks (2 columns).** Wide beats tall for screen usage and reading flow.
+
+**The comparison (6 items):**
+```
+2×3 LAYOUT (vertical):
+|       [C1] [C2]       |  560px wide
+|       [C3] [C4]       |  880px tall
+|       [C5] [C6]       |  31.8% usage
+└─ Feels: cramped, wasted sides
+
+3×2 LAYOUT (horizontal):
+| [C1] [C2] [C3] |  1320px wide
+| [C4] [C5] [C6] |  860px tall
+└─ Feels: balanced, screen-filling (73.3% usage)
+```
+
+**The principle:** **For N items, prefer `columns = Math.ceil(sqrt(N))` as starting point, favor wider over taller.**
+
+**Math guideline:**
+| Items | Vertical (2-col) | Horizontal (3-col) | Best |
+|-------|------------------|-------------------|------|
+| 4 | 2×2 | 4×1 | 2×2 ✓ |
+| 6 | 2×3 | 3×2 | 3×2 ✓ |
+| 8 | 2×4 | 4×2 | 4×2 ✓ |
+| 9 | 3×3 | 3×3 | 3×3 ✓ |
+| 12 | 2×6 or 3×4 | 4×3 | 4×3 ✓ |
+
+**Why horizontal wins:**
+- Uses full width of 1920px canvas (most screens are wide)
+- Natural left-to-right reading flow
+- Better screen real estate usage
+- Feels less "list-like", more "designed"
+
+**For other templates:** Start with `Math.ceil(Math.sqrt(itemCount))` columns, then adjust based on card aspect ratio and content length.
+
+---
+
+## XXXIV. When to Choose Subtle Over Dramatic
+
+### The Overcomplicated Scene Feedback
+
+**What we learned (across Hook1A, Reflect4A, Guide10):** User consistently said "don't overcomplicate" when we added dramatic effects. The path to polish is often **subtraction and subtlety**, not addition and drama.
+
+**The principle:** **Choose subtle polish when content needs to be scannable; choose dramatic polish when content is sequential storytelling.**
+
+**Decision framework:**
+```
+SUBTLE POLISH (Zen Garden):
+- User scans all items at once
+- Reference content (checklists, steps, guides)
+- Learner controls pace
+→ Gentle floating, soft glows, minimal emphasis
+
+DRAMATIC POLISH (Cinematic):
+- User focuses on one item at a time
+- Narrative content (stories, mysteries, reveals)
+- Content controls pace
+→ Spotlights, particle bursts, scale emphasis
+```
+
+**Examples from our work:**
+- **Hook1A**: Dramatic ✓ (one question, capture attention)
+- **Reflect4A**: Subtle ✓ (learner feedback: "keep it a list")
+- **Guide10**: Subtle ✓ (reference guide, all steps visible)
+
+**Red flags you've over-polished:**
+- User says "too much going on"
+- User asks "why not just...?" (simpler alternative)
+- Effects compete with content for attention
+- You're defending design choices more than showing results
+
+**For other templates:** When in doubt, start subtle. You can always add drama later. Removing drama after user sees it is harder (they liked the excitement).
+
+---
+
 ## XXVI. Optional Media Slots Design
 
 ### The Lottie Integration Problem
@@ -843,46 +1096,53 @@ If you're working on template polish, keep these principles in mind:
 2. **Spacing creates rhythm—use both position and padding**
 3. **Uniform sizing across states—use environment for emphasis**
 4. **Less is more—restraint creates quality, avoid over-engineering**
+5. **Square > circle when readability matters (21% more space)**
+6. **Horizontal spread > vertical stack for 4-8 items**
 
 ### Animation & Motion
-5. **Give elements continuous life, but pause during transitions**
-6. **Exits are as important as entrances—choreograph handoffs**
-7. **Mid-scene transitions beat scene cuts for state changes**
-8. **60fps is non-negotiable—halve amplitudes, add willChange hints**
+7. **Give elements continuous life, but pause during transitions**
+8. **Exits are as important as entrances—choreograph handoffs**
+9. **Mid-scene transitions beat scene cuts for state changes**
+10. **60fps is non-negotiable—halve amplitudes, add willChange hints**
+11. **Phase-shifted floating (60° intervals) for group cohesion**
 
 ### Content Patterns
-9. **Sequential revelation for learning content (one thing at a time)**
-10. **Modal overlay for focus through environmental dimming**
-11. **Optional media slots that degrade gracefully**
+12. **Sequential revelation for learning content (one thing at a time)**
+13. **Modal overlay for focus through environmental dimming**
+14. **Optional media slots that degrade gracefully**
+15. **Subtle polish for scannable content, dramatic for sequential storytelling**
 
 ### Configuration & Code
-12. **Remove configuration that enables bad design**
-13. **Coordinate timing with negative offsets (cumulative beats)**
-14. **Templates should never break from old configs**
-15. **Data structure changes are atomic—update all consumers together**
+16. **Remove configuration that enables bad design**
+17. **Coordinate timing with negative offsets (cumulative beats)**
+18. **Templates should never break from old configs**
+19. **Data structure changes are atomic—update all consumers together**
+20. **Gap = space between elements, not center distance (add element size!)**
 
 ### Architecture
-16. **Build SDK utilities for reusable patterns**
-17. **Z-index should encode narrative importance**
-18. **Use offset for layout, padding for breathing room**
+21. **Build SDK utilities for reusable patterns**
+22. **Z-index should encode narrative importance**
+23. **Use offset for layout, padding for breathing room**
+24. **Screen usage targets vary by layout type (grid: 70-80%, flowing: 85-95%)**
 
 ### Process
-19. **User feedback trumps assumptions—listen immediately**
-20. **Make review frictionless (one-click staging)**
-21. **Fail fast with frequent builds**
-22. **One synthesized doc beats many detailed ones**
+25. **User feedback trumps assumptions—listen immediately**
+26. **Make review frictionless (one-click staging)**
+27. **Fail fast with frequent builds**
+28. **One synthesized doc beats many detailed ones**
 
 ### Quality Gates
-23. **Explicit testing creates confidence**
-24. **Offer stylistic variety within good design**
-25. **Use web fonts intentionally (measure bundle cost)**
+29. **Explicit testing creates confidence**
+30. **Offer stylistic variety within good design**
+31. **Use web fonts intentionally (measure bundle cost)**
 
 ---
 
 **Living Document:** This should be updated as we learn more. Each template polish effort should add new principles or refine existing ones.
 
-**Date:** 2025-11-12  
+**Date:** 2025-11-14 (Updated)  
 **Contributors:** 
 - Cursor Agent (Hook1A v6.2 polish)
-- Cursor Agent (Reflect4A v6.4 modal showcase)  
+- Cursor Agent (Reflect4A v6.4 modal showcase)
+- Cursor Agent (Guide10 v6.1 Zen Garden - screen usage & subtle polish)  
 **Next Update:** After next major template polish effort
