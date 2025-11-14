@@ -403,15 +403,16 @@ export const Reflect4AKeyTakeaways = ({ scene }) => {
         const isInList = frame >= itemBeat.listVisible;
         
         // Showcase reveal (large, centered)
+        // Note: itemBeat values are already in frames from f object
         const showcaseProgress = Math.min(1, Math.max(0, 
-          (frame - toFrames(itemBeat.showcaseStart, fps)) / toFrames(rawBeats.showcaseReveal, fps)
+          (frame - itemBeat.showcaseStart) / toFrames(rawBeats.showcaseReveal, fps)
         ));
         
         // Transition to list (shrink + move)
         const transitionProgress = isTransitioning
           ? interpolate(
               frame,
-              [toFrames(itemBeat.listStart, fps), toFrames(itemBeat.listVisible, fps)],
+              [itemBeat.listStart, itemBeat.listVisible],
               [0, 1],
               { extrapolateRight: 'clamp', easing: EZ.power3InOut }
             )
