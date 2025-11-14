@@ -1,0 +1,135 @@
+{
+  "schema_version": "6.0",
+  "template_id": "Reflect4AKeyTakeaways_V6",
+  "metadata": {
+    "name": "Deep Learning Key Takeaways - Modal Showcase",
+    "description": "Demonstrates v6.4: Modal-style showcase with optional Lottie animations",
+    "primary_intention": "REFLECT",
+    "secondary_intentions": ["BREAKDOWN", "REVEAL"],
+    "duration_estimate": "18-20s",
+    "polish_version": "6.4",
+    "enhancements": [
+      "Modal-style showcase (dims background)",
+      "Individual spotlight per point",
+      "Optional Lottie animations per item",
+      "Uniform card sizing",
+      "Smooth showcase → list transitions"
+    ]
+  },
+  
+  "title": {
+    "text": "Key Takeaways",
+    "position": "top-center",
+    "offset": { "x": 0, "y": 80 }
+  },
+  
+  "takeaways": [
+    {
+      "text": "Neural networks learn by adjusting connection weights through training",
+      "icon": "🧠",
+      "importance": 1,
+      "lottieUrl": null
+    },
+    {
+      "text": "Backpropagation is the core learning algorithm that makes deep learning work",
+      "icon": "🎯",
+      "importance": 2,
+      "lottieUrl": null
+    },
+    {
+      "text": "More data and deeper layers lead to better pattern recognition",
+      "icon": "🚀",
+      "importance": 1,
+      "lottieUrl": null
+    }
+  ],
+  
+  "typography": {
+    "voice": "notebook",
+    "align": "left",
+    "transform": "none"
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#FFF5E8",
+      "bgGradientStart": "#FFF5E8",
+      "bgGradientEnd": "#FFE5CC",
+      "title": "#1A1A1A",
+      "accent": "#27AE60",
+      "text": "#34495E",
+      "bullet": "#CBD5E0",
+      "glassBackground": "#FFFFFF25"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_takeaway": 26,
+      "size_icon": 36,
+      "weight_title": 800,
+      "weight_takeaway": 600
+    }
+  },
+  
+  "layout": {
+    "verticalSpacing": 120,
+    "itemWidth": 900,
+    "cardScale": 1.0,
+    "emphasisScaleMultiplier": 1.0,
+    "lottieSize": 200
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "titleReveal": 0.8,
+    "titleHold": 0.5,
+    "showcaseReveal": 0.8,
+    "showcaseHold": 2.5,
+    "showcaseToList": 0.6,
+    "listInterval": 0.3,
+    "finalHold": 3.0,
+    "exit": 1.0
+  },
+  
+  "animation": {
+    "letterRevealStyle": "fade-up",
+    "takeawayEntrance": "slide-fade",
+    "continuousBreathing": true,
+    "breathingFrequency": 0.03,
+    "breathingAmplitude": 0.03,
+    "continuousFloating": true,
+    "floatingFrequency": 0.02,
+    "floatingAmplitude": 4,
+    "easing": "backOut"
+  },
+  
+  "decorations": {
+    "showBackground": true,
+    "showGradient": true,
+    "showNoiseTexture": true,
+    "noiseOpacity": 0.04,
+    "showSpotlights": true,
+    "spotlightCount": 2,
+    "spotlight1": { "x": 0.3, "y": 0.25, "size": 600, "color": "#27AE6015" },
+    "spotlight2": { "x": 0.7, "y": 0.75, "size": 550, "color": "#FF6B3512" },
+    "showParticles": true,
+    "particleCount": 20,
+    "showGlassPane": true,
+    "glassPaneOpacity": 0.25,
+    "glassPaneBorderOpacity": 0.35,
+    "glassInnerRadius": 20,
+    "showParticleBurst": false,
+    "showIconBadge": true,
+    "badgeStyle": "circle",
+    "showEmphasisGlow": true,
+    "modalOverlayOpacity": 0.85,
+    "showLottieAnimation": true
+  },
+  
+  "transition": {
+    "exit": {
+      "style": "fade",
+      "durationInFrames": 30,
+      "easing": "smooth"
+    }
+  }
+}

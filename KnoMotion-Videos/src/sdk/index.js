@@ -20,12 +20,14 @@ export * from './animations/broadcastAnimations';
 export * from './animations/microDelights';
 export * from './animations/advancedEffects';
 export * from './animations/sceneTransformation';
+export * from './animations/continuousLife';
 
 // ==================== EFFECTS ====================
 export * from './effects/broadcastEffects';
 export * from './effects/handwritingEffects';
 export * from './effects/particleSystem';
 export * from './effects/connectingLines';
+export * from './effects/flowLines';
 
 // ==================== LOTTIE ====================
 export * from './lottie/lottie-helpers';

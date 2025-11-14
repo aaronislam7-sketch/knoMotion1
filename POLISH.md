@@ -460,12 +460,377 @@ This document becomes the acceptance criteria for future changes.
 
 **The overarching principle:** **Broadcast quality comes from restraint, not abundance.** Add one intentional thing instead of five okay things.
 
+**Updated from Reflect4A:** The first iteration added staggered layouts, flow lines, and complex positioning. User feedback: "keep it a list, just make it pretty." The path to polish was **removing complexity**, not adding it.
+
 **For all future work:** When polishing, always ask:
 1. What can we **remove**? (Decoration that doesn't earn its place)
 2. What can we **reduce**? (Excessive motion, spacing, effects)
 3. What can we **refine**? (Make the core elements better)
+4. What can we **simplify**? (Complex systems that could be straightforward)
 
 Only then ask: "What should we add?"
+
+**The over-engineering trap:** When you're excited about a solution, pause and ask: "Is this solving the user's actual problem, or showcasing my cleverness?" If the latter, step back. Simple solutions that work are always better than clever solutions that impress.
+
+---
+
+## XXI. Sequential Revelation Patterns
+
+### The Simultaneous Display Problem
+
+**What we encountered (Reflect4A):** A template showing 3 key takeaways all at once. Learners had to process all three simultaneously, creating cognitive overload.
+
+**What we learned:** For learning content with 3-5 key points, **sequential showcase beats simultaneous display**. Give each idea its moment to land before moving to the next.
+
+**The principle:** **One thing at a time for learning content.** Show, hold, transition, repeat. Let learners process each point fully.
+
+**How we applied it:**
+1. Title reveal (1.8s)
+2. Showcase takeaway #1 (2.5s hold)
+3. Transition to list position (0.6s)
+4. Showcase takeaway #2 (2.5s hold)
+5. Transition to list position (0.6s)
+6. Showcase takeaway #3 (2.5s hold)
+7. Transition to list position (0.6s)
+8. Final summary list (3s - all visible together)
+
+**The timing pattern:** `reveal (0.8s) → hold (2.5s) → transition (0.6s) → interval (0.3s)`. The hold duration is the key—it must be long enough to **read and absorb**, not just see.
+
+**When to use sequential vs simultaneous:**
+- **Sequential:** Learning content where comprehension matters (key takeaways, steps, concepts)
+- **Simultaneous:** Decorative content or when quick scanning is the goal (feature lists, bullet points)
+
+**For other templates:** If your content teaches (not just informs), consider sequential revelation. Calculate hold time as: `(words / 3) + 1` seconds (assumes ~180 words/min reading speed).
+
+---
+
+## XXII. Modal Focus Through Environmental Dimming
+
+### The Background Competition Problem
+
+**What we encountered (Reflect4A):** During showcase, the beautiful gradient background competed with the content for attention. The card was large, but everything around it was equally bright.
+
+**What we learned:** **Size isn't the only way to create focus.** Environmental dimming (modal overlay) creates instant visual hierarchy without changing element dimensions.
+
+**The principle:** **Dim the environment, not just scale the subject.** A modal overlay (85% black) makes the subject pop without increasing its size.
+
+**How we applied it:**
+```javascript
+// Modal overlay during showcase
+<div style={{
+  backgroundColor: '#000000',
+  opacity: 0.85,
+  zIndex: 15,  // Below content, above background
+  transition: '0.4s fade in, 0.3s fade out'
+}} />
+```
+
+**The timing choreography:**
+1. Showcase starts → overlay fades in (0.4s)
+2. Hold with overlay (2.5s)
+3. Transition begins → overlay fades out (0.3s)
+4. Content moves to list, overlay gone
+
+**Why this works:** The overlay creates a **visual tunnel** that guides attention. Background elements (gradient, particles, spotlights) are still visible but subdued. The content becomes the only bright thing on screen.
+
+**Configuration knob:** `decorations.modalOverlayOpacity: 0.85` (0 = no dimming, 1 = pure black). We found 0.85 optimal—dark enough for focus, light enough to maintain context.
+
+**For other templates:** Before scaling elements for emphasis, try environmental dimming. It's less disruptive (no size changes), more cinematic (like stage lighting), and fully reversible (fade out overlay, everything returns to normal).
+
+---
+
+## XXIII. Uniform Sizing Philosophy
+
+### The Size Variation Problem
+
+**What we encountered (Reflect4A):** Initial design had showcase cards at 1.4x scale with 90px icons and 36px text, then shrinking to 1.0x scale with 70px icons and 28px text during transition.
+
+**What we learned:** **Size changes during transitions feel amateurish.** Scaling text mid-animation creates visual instability and hurts readability. The eye struggles to track an element that's constantly changing size.
+
+**The principle:** **Maintain uniform sizing across states. Use position, z-index, and environment for emphasis, not scale.**
+
+**How we applied it:**
+- Icons: 70px × 70px (all states)
+- Text: 28px, weight 600 (all states)
+- Padding: 24px (all states)
+- Width: 900px (all states)
+- Scale: 1.0 (all states)
+
+**What creates emphasis instead:**
+- Modal overlay dims background (environmental focus)
+- Z-index places showcase above other elements (depth)
+- Position centers the showcase (layout focus)
+- Optional Lottie animation above card (visual interest)
+
+**The professional look:** Uniform sizing feels like **broadcast design**. Elements move smoothly between positions without morphing. The content is stable; only the context changes.
+
+**When uniform sizing matters most:**
+- Text content (readability must be constant)
+- Transitions longer than 0.3s (size changes become visible)
+- 60fps targets (scaling is computationally expensive)
+
+**For other templates:** Before adding scale multipliers (1.2x, 1.5x, etc.), ask: "Can I achieve emphasis through position, z-index, or environmental changes instead?" Scale should be reserved for **momentary emphasis** (icon pops, burst effects), not sustained states.
+
+---
+
+## XXIV. User Feedback Primacy
+
+### The Clever Solution Problem
+
+**What we encountered (Reflect4A):** First iteration: staggered zigzag layout, flow lines connecting items, complex positioning math. User response: "I think you may have overcomplicated this scene. It's a list, keep it a list, just make it pretty."
+
+**What we learned:** **When user gives direct feedback, listen immediately. Don't defend your clever solution.** Your sophisticated approach might be over-engineering their simple need.
+
+**The principle:** **User feedback trumps assumptions, every time.** If a user says "this is overcomplicated," they're right—regardless of how clever your solution is technically.
+
+**How we responded:**
+1. **Acknowledged immediately:** "Sorry for overcomplicating it initially"
+2. **Reverted quickly:** Removed staggered layout, flow lines, particle bursts
+3. **Focused on the ask:** "Keep it a list, make it pretty, 60fps"
+4. **Delivered simpler solution:** Modal overlay + uniform cards + sequential showcase
+
+**The ego trap:** When you've spent time on a sophisticated solution, there's temptation to explain why it's actually good. Resist this. The user's confusion or frustration is data—they're telling you it missed the mark.
+
+**Red flags that you've over-engineered:**
+- User says "this seems complicated"
+- User asks "why not just...?" (and their suggestion is simpler)
+- You're defending design choices more than showing results
+- Implementation time exceeds expected value
+
+**For other work:** Create a checkpoint after initial implementation: "Does this solve your problem, or did I overcomplicate?" Invite the "too much" feedback. It's easier to simplify early than to defend complexity later.
+
+---
+
+## XXV. Data Structure Consistency
+
+### The Mismatched Schema Problem
+
+**What we encountered (Reflect4A):** Multiple bugs from changing `calculateCumulativeBeats()` to return new structure `{showcaseStart, showcaseVisible, ...}` but forgetting to update frame conversion code that still expected `{start, visible}`.
+
+**Symptoms:**
+- All items rendering simultaneously (timing broken)
+- Text invisible (opacity calculations wrong)
+- Double frame conversion (converting frames to frames)
+
+**What we learned:** **When refactoring data structures, update ALL dependent code in the same commit.** Don't change the producer without updating all consumers.
+
+**The principle:** **Data structure changes are atomic—change producer and all consumers together, or don't change at all.**
+
+**How we should have done it:**
+1. List all code that consumes the data structure (grep for property names)
+2. Update all consumers in same pass
+3. Add defensive checks (`if (!itemBeat) return null`)
+4. Document new structure in comments
+5. Build immediately to catch missed updates
+
+**The technique that helps:** When changing a data structure:
+```javascript
+// OLD STRUCTURE (DEPRECATED)
+// { start: number, visible: number }
+
+// NEW STRUCTURE
+// {
+//   showcaseStart: number,
+//   showcaseVisible: number,
+//   showcaseEnd: number,
+//   listStart: number,
+//   listVisible: number
+// }
+```
+
+Comment the old structure as deprecated but leave it visible so developers know what changed.
+
+**For other templates:** Large refactors (timing systems, config schemas, state shapes) are high-risk. Use a checklist:
+- [ ] Update producer function
+- [ ] Grep for all property accesses
+- [ ] Update all consumers
+- [ ] Add null checks
+- [ ] Document new structure
+- [ ] Build immediately
+- [ ] Test all code paths
+
+**The meta-lesson:** Consistency is more important than cleverness. A simple, consistently-used structure beats a sophisticated, inconsistently-applied one.
+
+---
+
+## XXVI. Optional Media Slots Design
+
+### The Lottie Integration Problem
+
+**What we encountered (Reflect4A):** User requested: "Add Lottie animation placeholder that can support contextually (but not mandatory) e.g. if the list item was 'we can build quicker' I can include Lottie animation for speed building."
+
+**What we learned:** **Not every content item needs media, but the option should always be there.** Design for the null case first, then add graceful enhancement.
+
+**The principle:** **Provide optional media slots that degrade gracefully.** No media = no broken placeholder. Media present = enhanced experience.
+
+**How we implemented it:**
+```javascript
+// In config
+takeaways: [
+  {
+    text: "...",
+    icon: "🧠",
+    importance: 1,
+    lottieUrl: null  // ← Optional, defaults to null
+  }
+]
+
+// In component (null-safe)
+const hasLottie = item.lottieUrl && decorations.showLottieAnimation;
+
+{hasLottie && isShowcase && (
+  <Player
+    autoplay
+    loop
+    src={item.lottieUrl}
+    style={{ width: layout.lottieSize, height: layout.lottieSize }}
+  />
+)}
+```
+
+**The configuration pattern:**
+- `item.lottieUrl: null` - No animation (default)
+- `item.lottieUrl: "https://..."` - Animation provided
+- `decorations.showLottieAnimation: true` - Global toggle (can disable all animations)
+- `layout.lottieSize: 200` - Size control
+
+**Why this pattern works:**
+1. **Backwards compatible:** Old scenes without `lottieUrl` still work
+2. **Contextual:** Each item can have different animation (or none)
+3. **Toggle-able:** Can disable all animations for performance
+4. **Configurable:** Size is adjustable via JSON
+
+**Extension pattern for other media:**
+```javascript
+{
+  text: "...",
+  icon: "🎯",
+  mediaSlot: {
+    type: null,  // 'lottie' | 'image' | 'video' | null
+    url: null,
+    size: 200,
+    position: 'above'  // 'above' | 'beside' | 'background'
+  }
+}
+```
+
+**For other templates:** When adding media support, always:
+1. Default to `null` (no media)
+2. Check for existence before rendering
+3. Provide global toggle
+4. Make dimensions configurable
+5. Test that null case renders correctly
+
+**The user experience goal:** Content creators should **discover** media slots by seeing the option, not **require** them by breaking when empty.
+
+---
+
+## XXVII. Mid-Scene Transitions
+
+### The Scene Cut Problem
+
+**What we encountered (Reflect4A):** Need to transition from showcase state (card centered, background dimmed) to list state (card in position, background normal).
+
+**What we learned:** **Mid-scene transitions feel more polished than cutting between scenes.** Smooth interpolation creates narrative flow; scene cuts feel abrupt.
+
+**The principle:** **For state changes within one narrative beat, use mid-scene transitions with easing.**
+
+**How we applied it:**
+```javascript
+// Calculate position interpolation
+const showcaseY = centerY;
+const listY = listStartY + (i * layout.verticalSpacing);
+const currentY = isShowcase 
+  ? showcaseY 
+  : showcaseY + (listY - showcaseY) * transitionProgress;
+
+// Smooth easing
+const transitionProgress = interpolate(
+  frame,
+  [itemBeat.listStart, itemBeat.listVisible],
+  [0, 1],
+  { extrapolateRight: 'clamp', easing: EZ.power3InOut }
+);
+```
+
+**The choreography pattern:**
+1. **Showcase state** (2.5s hold)
+2. **Begin transition** → overlay starts fading (0.3s lead time)
+3. **Card moves** → smooth Y position interpolation (0.6s)
+4. **List state** → all transitions complete
+
+**Key insight:** Start overlay fade **before** card movement. This creates a **cascading transition** that feels coordinated, not mechanical.
+
+**Timing formula:**
+```
+overlayFadeOutStart = transitionStart - 0.3s
+cardMoveStart = transitionStart
+bothComplete = transitionStart + 0.6s
+```
+
+**When to use mid-scene vs scene cuts:**
+- **Mid-scene:** Transforming one layout to another (showcase → list, horizontal → vertical)
+- **Scene cuts:** Changing topic entirely (question → answer, problem → solution)
+
+**For other templates:** Mid-scene transitions require:
+1. Shared elements between states (same cards, just repositioned)
+2. Clear transition duration (0.4-0.8s is sweet spot)
+3. Easing function (power3InOut for smooth S-curve)
+4. Choreographed timing (stagger related changes)
+
+The result: one fluid motion instead of a cut. More cinematic, more professional.
+
+---
+
+## XXVIII. 60fps Optimization Techniques
+
+### The Subtle Animation at 60fps Problem
+
+**What we encountered (Reflect4A):** Continuous breathing and floating animations that looked good at 30fps felt jittery at 60fps. User explicitly requested: "keen to force 60FPS to ensure fidelity."
+
+**What we learned:** **Animations designed for 30fps must be reduced by 50-70% for 60fps.** Higher frame rate exposes motion that was smoothed by lower frame rate.
+
+**The principle:** **For 60fps, halve your amplitudes and add willChange hints.**
+
+**How we applied it:**
+```javascript
+// BEFORE (30fps targets)
+breathingAmplitude: 0.04      // 4% scale change
+floatingAmplitude: 12         // 12px Y movement
+
+// AFTER (60fps targets)  
+breathingAmplitude: 0.04 * 0.5   // 2% scale change
+floatingAmplitude: 12 * 0.7      // 8.4px Y movement
+
+// Plus performance hints
+style={{
+  willChange: 'transform, opacity',  // ← Browser optimization hint
+  transform: `translateY(${y}px) scale(${scale})`,
+}}
+```
+
+**The 60fps optimization checklist:**
+- [ ] Reduce animation amplitudes (50-70% of 30fps values)
+- [ ] Add `willChange` hints on animated properties
+- [ ] Use GPU-accelerated properties (transform, opacity)
+- [ ] Avoid animating layout properties (width, height, margin)
+- [ ] Reduce particle counts (20 instead of 40)
+- [ ] Remove particle bursts (expensive)
+
+**Why 60fps matters for learning content:**
+- Dropped frames create cognitive load
+- Jittery motion distracts from content
+- Professional appearance builds trust
+- Smooth = polished in viewers' minds
+
+**Performance testing:**
+1. Open Chrome DevTools → Performance tab
+2. Record during playback
+3. Check for consistent 60fps (16.6ms frame time)
+4. Identify dropped frames (red bars)
+5. Reduce complexity until smooth
+
+**For other templates:** 60fps isn't optional—it's the baseline. If you can't hit 60fps, reduce effects until you can. A simple, smooth template beats a complex, jittery one every time.
 
 ---
 
@@ -473,31 +838,51 @@ Only then ask: "What should we add?"
 
 If you're working on template polish, keep these principles in mind:
 
+### Core Design
 1. **Text should be bare unless contained for a reason**
 2. **Spacing creates rhythm—use both position and padding**
-3. **Give elements continuous life, but pause during transitions**
-4. **Exits are as important as entrances—choreograph handoffs**
-5. **Remove configuration that enables bad design**
-6. **Build SDK utilities for reusable patterns**
-7. **Make review frictionless (one-click staging)**
-8. **60fps is non-negotiable—measure performance**
-9. **Use web fonts intentionally (measure bundle cost)**
-10. **Coordinate timing with negative offsets**
-11. **Templates should never break from old configs**
-12. **Z-index should encode narrative importance**
-13. **Use offset for layout, padding for breathing room**
-14. **Pause continuous animations during major transitions**
-15. **Cumulative beats for coordinated sequences**
-16. **Fail fast with frequent builds**
-17. **Offer stylistic variety within good design**
-18. **One synthesized doc beats many detailed ones**
-19. **Explicit testing creates confidence**
-20. **Less is more—restraint creates quality**
+3. **Uniform sizing across states—use environment for emphasis**
+4. **Less is more—restraint creates quality, avoid over-engineering**
+
+### Animation & Motion
+5. **Give elements continuous life, but pause during transitions**
+6. **Exits are as important as entrances—choreograph handoffs**
+7. **Mid-scene transitions beat scene cuts for state changes**
+8. **60fps is non-negotiable—halve amplitudes, add willChange hints**
+
+### Content Patterns
+9. **Sequential revelation for learning content (one thing at a time)**
+10. **Modal overlay for focus through environmental dimming**
+11. **Optional media slots that degrade gracefully**
+
+### Configuration & Code
+12. **Remove configuration that enables bad design**
+13. **Coordinate timing with negative offsets (cumulative beats)**
+14. **Templates should never break from old configs**
+15. **Data structure changes are atomic—update all consumers together**
+
+### Architecture
+16. **Build SDK utilities for reusable patterns**
+17. **Z-index should encode narrative importance**
+18. **Use offset for layout, padding for breathing room**
+
+### Process
+19. **User feedback trumps assumptions—listen immediately**
+20. **Make review frictionless (one-click staging)**
+21. **Fail fast with frequent builds**
+22. **One synthesized doc beats many detailed ones**
+
+### Quality Gates
+23. **Explicit testing creates confidence**
+24. **Offer stylistic variety within good design**
+25. **Use web fonts intentionally (measure bundle cost)**
 
 ---
 
 **Living Document:** This should be updated as we learn more. Each template polish effort should add new principles or refine existing ones.
 
 **Date:** 2025-11-12  
-**Contributors:** Cursor Agent (Hook1A v6.2 polish)  
+**Contributors:** 
+- Cursor Agent (Hook1A v6.2 polish)
+- Cursor Agent (Reflect4A v6.4 modal showcase)  
 **Next Update:** After next major template polish effort

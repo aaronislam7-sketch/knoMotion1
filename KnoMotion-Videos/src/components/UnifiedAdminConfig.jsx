@@ -70,6 +70,7 @@ import testStepSequenceGrid from '../scenes/examples/guide_10_step_sequence_grid
 
 // Import STAGING scenes (Templates under review)
 import stagingHook1AUpgraded from '../scenes/examples/hook_1a_upgraded_example.json';
+import stagingReflect4AEnhanced from '../scenes/v6/reflect_4a_deep_learning_enhanced.json';
 
 /**
  * Unified Admin Configuration Tool
@@ -111,7 +112,8 @@ const DEFAULT_SCENES = {
   'TEST_Guide10StepSequence_V6': testStepSequenceRevised,
   
   // STAGING: Templates Under Review
-  'STAGING_Hook1AQuestionBurst_V6_Upgraded': stagingHook1AUpgraded
+  'STAGING_Hook1AQuestionBurst_V6_Upgraded': stagingHook1AUpgraded,
+  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -314,6 +316,12 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Explain2AModule.getDuration ? Explain2AModule.getDuration(scene, fps) : 450;
       case 'TEST_Guide10StepSequence_V6':
         return Guide10Module.getDuration ? Guide10Module.getDuration(scene, fps) : 450;
+      
+      // STAGING: Templates Under Review
+      case 'STAGING_Hook1AQuestionBurst_V6_Upgraded':
+        return Hook1AModule.getDuration ? Hook1AModule.getDuration(scene, fps) : 450;
+      case 'STAGING_Reflect4AKeyTakeaways_V6_Enhanced':
+        return Reflect4AModule.getDuration ? Reflect4AModule.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats

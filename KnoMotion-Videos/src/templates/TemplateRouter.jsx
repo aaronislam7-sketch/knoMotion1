@@ -120,7 +120,8 @@ const V6_TEMPLATE_REGISTRY = {
   'TEST_Guide10StepSequence_V6': Guide10StepSequence,
   
   // STAGING: Templates Under Review (use existing components with upgraded scenes)
-  'STAGING_Hook1AQuestionBurst_V6_Upgraded': Hook1AQuestionBurst_V6
+  'STAGING_Hook1AQuestionBurst_V6_Upgraded': Hook1AQuestionBurst_V6,
+  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': Reflect4AKeyTakeaways_V6
 };
 
 /**
