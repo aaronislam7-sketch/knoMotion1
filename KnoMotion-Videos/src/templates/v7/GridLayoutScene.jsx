@@ -11,6 +11,7 @@ import {
 } from '../../sdk';
 // Note: calculateGridPositions is defined inline below since it's not exported from SDK
 import { AppMosaic } from '../../sdk/components/mid-level/AppMosaic';
+import { StackItems } from '../../sdk/components/mid-level/StackItems';
 
 // Simple animation helpers (inline to avoid import conflicts)
 const fadeIn = (frame, startFrame, duration) => {
@@ -213,6 +214,9 @@ const DEFAULT_CONFIG = {
       enabled: false,
       focusZoom: false,
       hoverEffect: false
+    },
+    stackItems: {
+      enabled: false  // Alternative to AppMosaic for grid layouts
     }
   }
 };
@@ -409,6 +413,18 @@ export const GridLayoutScene = ({ scene }) => {
       spotlight: { ...DEFAULT_CONFIG.effects.spotlight, ...scene.effects?.spotlight },
       noise: { ...DEFAULT_CONFIG.effects.noise, ...scene.effects?.noise },
       itemGlass: { ...DEFAULT_CONFIG.effects.itemGlass, ...scene.effects?.itemGlass }
+    },
+    mid_level_components: {
+      ...DEFAULT_CONFIG.mid_level_components,
+      ...scene.mid_level_components,
+      appMosaic: {
+        ...DEFAULT_CONFIG.mid_level_components.appMosaic,
+        ...scene.mid_level_components?.appMosaic
+      },
+      stackItems: {
+        ...DEFAULT_CONFIG.mid_level_components.stackItems,
+        ...scene.mid_level_components?.stackItems
+      }
     }
   }), [scene]);
   
@@ -516,43 +532,95 @@ export const GridLayoutScene = ({ scene }) => {
         </div>
       )}
       
-      {/* Grid Items - Simple default rendering, AppMosaic disabled for now */}
-      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
-        {items.map((item, index) => {
-          const row = Math.floor(index / columns);
-          const col = index % columns;
-          const position = gridPositions[index];
-          
-          console.log('[GridLayout] Rendering item', index, 'Position:', position, 'Item:', item.label);
-          
-          if (!position) {
-            console.warn('[GridLayout] No position for item', index);
-            return null;
-          }
-          
-          const itemStartFrame = calculateItemStartFrame(
-            index,
-            row,
-            col,
-            animations.items.stagger,
-            beatFrames.firstItem,
-            columns
-          );
-          
-          return renderGridItem(
-            item,
-            index,
-            position,
+      {/* Grid Items - Use mid-level components when enabled */}
+      {config.mid_level_components?.stackItems?.enabled ? (
+        // Use StackItems for grid layout (alternative to AppMosaic)
+        <StackItems
+          items={items.map(item => ({ text: item.label, description: item.description }))}
+          positions={gridPositions.map(pos => ({ x: pos.x, y: pos.y }))}
+          layout={{
+            direction: 'vertical',  // Grid items are positioned, direction doesn't matter
+            itemWidth: itemSize,
+            itemHeight: itemSize
+          }}
+          style={style_tokens}
+          animations={{
+            entrance: animations.items.entrance,
+            duration: animations.items.duration,
+            stagger: animations.items.stagger
+          }}
+          effects={{
+            itemGlass: effects.itemGlass,
+            showNumbers: false  // No numbers in grid layout
+          }}
+          startFrame={beatFrames.firstItem}
+        />
+      ) : config.mid_level_components?.appMosaic?.enabled ? (
+        // Use AppMosaic when enabled
+        <AppMosaic
+          items={items}
+          positions={gridPositions}
+          layout={{
+            columns,
+            gap: layout.gap,
             itemSize,
-            style_tokens,
-            frame,
-            itemStartFrame,
-            fps,
-            animations,
-            effects
-          );
-        })}
-      </div>
+            centerGrid: true
+          }}
+          style={style_tokens}
+          animations={{
+            entrance: animations.items.entrance,
+            duration: animations.items.duration,
+            stagger: animations.items.stagger
+          }}
+          effects={{
+            glass: effects.itemGlass.enabled,
+            glowOpacity: effects.itemGlass.glowOpacity,
+            borderOpacity: effects.itemGlass.borderOpacity,
+            focusZoom: config.mid_level_components.appMosaic.focusZoom,
+            focusIndex: null
+          }}
+          startFrame={beatFrames.firstItem}
+          viewport={{ width, height }}
+        />
+      ) : (
+        // Fallback: Simple default rendering
+        <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
+          {items.map((item, index) => {
+            const row = Math.floor(index / columns);
+            const col = index % columns;
+            const position = gridPositions[index];
+            
+            console.log('[GridLayout] Rendering item', index, 'Position:', position, 'Item:', item.label);
+            
+            if (!position) {
+              console.warn('[GridLayout] No position for item', index);
+              return null;
+            }
+            
+            const itemStartFrame = calculateItemStartFrame(
+              index,
+              row,
+              col,
+              animations.items.stagger,
+              beatFrames.firstItem,
+              columns
+            );
+            
+            return renderGridItem(
+              item,
+              index,
+              position,
+              itemSize,
+              style_tokens,
+              frame,
+              itemStartFrame,
+              fps,
+              animations,
+              effects
+            );
+          })}
+        </div>
+      )}
     </AbsoluteFill>
   );
 };

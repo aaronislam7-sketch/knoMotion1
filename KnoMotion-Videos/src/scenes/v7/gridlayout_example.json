@@ -135,6 +135,9 @@
       "enabled": true,
       "focusZoom": false,
       "hoverEffect": false
+    },
+    "stackItems": {
+      "enabled": false
     }
   }
 }
