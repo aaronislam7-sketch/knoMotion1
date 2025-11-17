@@ -741,9 +741,9 @@ KnoMotion-Videos/src/
 
 **After (Clean - Correct):**
 - Template ONLY calculates grid positions ✅
-- Template passes positions to AppMosaic ✅
-- AppMosaic handles ALL rendering & animations ✅
-- **Fully reusable** - AppMosaic works in ANY template ✅
+- Template is flexible - works with ANY mid-level ✅
+- Mid-level receives positions and renders content ✅
+- **True flexibility** - Grid can use AppMosaic, FlowDiagram, or any other mid-level ✅
 
 **Impact:**
 ```javascript
