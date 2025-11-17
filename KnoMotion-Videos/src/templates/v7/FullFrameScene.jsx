@@ -198,16 +198,20 @@ const renderMainContent = (content, style, frame, startFrame, fps, animations) =
       animStyle = fadeIn(frame, startFrame, entranceDuration);
   }
   
-  // Calculate emphasis animation if enabled
+  // Calculate emphasis animation if enabled - with safety checks
   let emphasisScale = 1;
   if (animConfig.emphasis?.enabled) {
     const emphasisStart = toFrames(animConfig.emphasis.start || 5.0, fps);
     const emphasisDuration = (animConfig.emphasis.duration || 1.0) * fps;
     
-    if (frame >= emphasisStart && frame < emphasisStart + emphasisDuration) {
+    // Safety check: ensure we have valid numbers
+    if (emphasisStart >= 0 && emphasisDuration > 0 && frame >= emphasisStart && frame < emphasisStart + emphasisDuration) {
       const progress = (frame - emphasisStart) / emphasisDuration;
-      const emphasis = getScaleEmphasis(progress, 1.1);
-      emphasisScale = emphasis.scale;
+      // Safety check: ensure progress is valid
+      if (!isNaN(progress) && isFinite(progress) && progress >= 0 && progress <= 1) {
+        const emphasis = getScaleEmphasis(progress, 1.1);
+        emphasisScale = emphasis?.scale || 1;
+      }
     }
   }
 

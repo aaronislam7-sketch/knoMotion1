@@ -397,9 +397,6 @@ export const GridLayoutScene = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
-  // Debug logging
-  console.log('[GridLayoutScene] Rendering frame:', frame, 'Items:', scene?.content?.items?.length);
-  
   // Merge with defaults
   const config = useMemo(() => ({
     ...DEFAULT_CONFIG,
@@ -434,9 +431,12 @@ export const GridLayoutScene = ({ scene }) => {
   const { content, layout, style_tokens, beats, animations, effects } = config;
   const colors = style_tokens.colors;
   const fonts = style_tokens.fonts;
+  const items = content.items || [];
+  
+  // Debug logging
+  console.log('[GridLayoutScene] Frame:', frame, 'Items:', items.length, 'AppMosaic:', config.mid_level_components?.appMosaic?.enabled);
   
   // Calculate grid layout
-  const items = content.items || [];
   const columns = Math.min(layout.columns, layout.maxItemsPerRow);
   const rows = Math.ceil(items.length / columns);
   

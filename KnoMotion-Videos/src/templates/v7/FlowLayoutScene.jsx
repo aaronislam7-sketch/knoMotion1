@@ -235,30 +235,20 @@ const calculateNodePositions = (nodes, layout, viewport) => {
   return positions;
 };
 
-// Helper: Render individual node
-const renderNode = (node, position, size, style, frame, startFrame, fps, animations, effects) => {
-  const { colors, fonts, spacing } = style;
+// Helper: Render individual node - SIMPLIFIED for better readability
+const renderNode = (node, position, size, style, frame, startFrame, fps, animations, effects, layout) => {
+  const { colors, fonts} = style;
   const animConfig = animations.nodes;
   const duration = (animConfig.duration || 0.6) * fps;
   
   let animStyle = {};
   
   switch (animConfig.entrance) {
-    case 'cardEntrance':
-      animStyle = getCardEntrance(frame, {
-        startFrame,
-        duration: animConfig.duration || 0.6,
-        direction: 'up',
-        distance: 40,
-        withGlow: true,
-        glowColor: `${colors.primary}40`
-      }, fps);
+    case 'scaleIn':
+      animStyle = scaleIn(frame, startFrame, duration, 0.8);
       break;
     case 'slideIn':
-      animStyle = slideIn(frame, startFrame, duration, 'up', 50);
-      break;
-    case 'scaleIn':
-      animStyle = scaleIn(frame, startFrame, duration, 0.6);
+      animStyle = slideIn(frame, startFrame, duration, 'up', 30);
       break;
     default:
       animStyle = fadeIn(frame, startFrame, duration);
@@ -269,104 +259,80 @@ const renderNode = (node, position, size, style, frame, startFrame, fps, animati
       key={node.id}
       style={{
         position: 'absolute',
-        left: position.x - size / 2,
-        top: position.y - size / 2,
-        width: size,
-        height: size,
+        left: position.x - size * 1.25,  // Wider container for text
+        top: position.y - size,
+        width: size * 2.5,
+        height: size * 2.5,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12,
         ...animStyle
       }}
     >
-      {effects.nodeGlass.enabled ? (
-        <GlassmorphicPane
-          innerRadius={size / 2}
-          glowOpacity={effects.nodeGlass.glowOpacity}
-          borderOpacity={effects.nodeGlass.borderOpacity}
-          backgroundColor={`${colors.primary}15`}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: `3px solid ${colors.primary}`,
-            borderRadius: '50%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: spacing.nodePadding,
-            gap: 8
-          }}
-        >
-          {node.icon && (
-            <div style={{ fontSize: 40, lineHeight: 1 }}>
-              {node.icon}
-            </div>
-          )}
-          <div
-            style={{
-              color: colors.text,
-              fontSize: Math.min(fonts.size_label, 26),
-              fontWeight: fonts.weight_label,
-              fontFamily: fonts.family,
-              textAlign: 'center',
-              lineHeight: 1.2,
-              maxWidth: '90%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical'
-            }}
-          >
-            {node.label}
-          </div>
-          {node.description && (
-            <div
-              style={{
-                color: colors.textSecondary,
-                fontSize: Math.min(fonts.size_description, 14),
-                fontWeight: fonts.weight_body,
-                fontFamily: fonts.family,
-                textAlign: 'center',
-                lineHeight: 1.2,
-                maxWidth: '90%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {node.description}
-            </div>
-          )}
-        </GlassmorphicPane>
-      ) : (
+      {/* Simple Node Shape - NO glassmorphic panes, NO emojis by default */}
+      <div
+        style={{
+          width: size,
+          height: size,
+          backgroundColor: colors.primary,
+          border: `4px solid ${colors.primary}`,
+          borderRadius: layout.nodeShape === 'square' ? '20px' : '50%',
+          boxShadow: `0 6px 30px ${colors.primary}50`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}
+      >
+        {/* Show first 2 chars of label */}
         <div
           style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: colors.primary,
-            borderRadius: '50%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: spacing.nodePadding,
-            gap: 8
+            color: '#FFFFFF',
+            fontSize: size * 0.4,
+            fontWeight: 900,
+            fontFamily: fonts.family,
+            textTransform: 'uppercase',
+            letterSpacing: '1px'
           }}
         >
-          {node.icon && (
-            <div style={{ fontSize: 40, lineHeight: 1 }}>
-              {node.icon}
-            </div>
-          )}
-          <div
-            style={{
-              color: colors.text,
-              fontSize: fonts.size_label,
-              fontWeight: fonts.weight_label,
-              fontFamily: fonts.family,
-              textAlign: 'center'
-            }}
-          >
-            {node.label}
-          </div>
+          {node.icon && typeof node.icon === 'string' && node.icon.length <= 2 
+            ? node.icon 
+            : node.label.substring(0, 2)}
+        </div>
+      </div>
+      
+      {/* Label (Title) - OUTSIDE the node, larger and readable */}
+      <div
+        style={{
+          color: colors.text,
+          fontSize: Math.min(fonts.size_label, 24),
+          fontWeight: fonts.weight_label,
+          fontFamily: fonts.family,
+          textAlign: 'center',
+          lineHeight: 1.3,
+          maxWidth: '100%',
+          wordBreak: 'break-word'
+        }}
+      >
+        {node.label}
+      </div>
+      
+      {/* Description (Body) - OUTSIDE the node, smaller */}
+      {node.description && (
+        <div
+          style={{
+            color: colors.textSecondary || `${colors.text}70`,
+            fontSize: Math.min(fonts.size_description, 16),
+            fontWeight: fonts.weight_body,
+            fontFamily: fonts.family,
+            textAlign: 'center',
+            lineHeight: 1.4,
+            maxWidth: '100%',
+            wordBreak: 'break-word'
+          }}
+        >
+          {node.description}
         </div>
       )}
     </div>
@@ -619,17 +585,18 @@ export const FlowLayoutScene = ({ scene }) => {
                 : 0;
               const nodeStartFrame = beatFrames.firstNode + staggerDelay;
               
-              return renderNode(
-                node,
-                position,
-                layout.nodeSize,
-                style_tokens,
-                frame,
-                nodeStartFrame,
-                fps,
-                animations,
-                effects
-              );
+            return renderNode(
+              node,
+              position,
+              layout.nodeSize,
+              style_tokens,
+              frame,
+              nodeStartFrame,
+              fps,
+              animations,
+              effects,
+              layout
+            );
             })}
           </div>
         </>

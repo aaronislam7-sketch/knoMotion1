@@ -169,11 +169,11 @@ const DEFAULT_CONFIG = {
       opacity: 0.03
     },
     itemGlass: {
-      enabled: true,
+      enabled: false,  // Disabled by default to reduce visual complexity
       glowOpacity: 0.15,
       borderOpacity: 0.4
     },
-    showNumbers: true       // Show step numbers
+    showNumbers: false  // Disabled by default to reduce visual complexity
   }
 };
 
@@ -246,137 +246,67 @@ const renderStackItem = (item, index, position, size, style, frame, startFrame, 
         top: position.y,
         width: size.width,
         height: size.height,
-        ...animStyle
+        ...animStyle,
+        // Simple clean background - NO glassmorphic pane by default
+        backgroundColor: effects.itemGlass.enabled ? `${colors.primary}12` : 'transparent',
+        border: effects.itemGlass.enabled ? `2px solid ${colors.primary}20` : 'none',
+        borderRadius: 12,
+        display: 'flex',
+        alignItems: 'center',
+        padding: spacing.itemPadding,
+        gap: 16
       }}
     >
-      {effects.itemGlass.enabled ? (
-        <GlassmorphicPane
-          innerRadius={16}
-          glowOpacity={effects.itemGlass.glowOpacity}
-          borderOpacity={effects.itemGlass.borderOpacity}
-          backgroundColor={`${colors.primary}12`}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: `2px solid ${colors.primary}30`,
-            borderRadius: 16,
-            display: 'flex',
-            alignItems: 'center',
-            padding: spacing.itemPadding,
-            gap: 20
-          }}
-        >
-          {/* Number or Icon */}
-          {effects.showNumbers && (
-            <div
-              style={{
-                minWidth: 60,
-                height: 60,
-                borderRadius: '50%',
-                backgroundColor: colors.primary,
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 28,
-                fontWeight: 800,
-                fontFamily: fonts.family,
-                flexShrink: 0
-              }}
-            >
-              {item.icon || itemNumber}
-            </div>
-          )}
-          
-          {/* Content */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div
-              style={{
-                color: colors.text,
-                fontSize: Math.min(fonts.size_text, 32),
-                fontWeight: fonts.weight_text,
-                fontFamily: fonts.family,
-                lineHeight: 1.3
-              }}
-            >
-              {item.text}
-            </div>
-            {item.description && (
-              <div
-                style={{
-                  color: colors.textSecondary,
-                  fontSize: Math.min(fonts.size_description, 18),
-                  fontWeight: fonts.weight_body,
-                  fontFamily: fonts.family,
-                  lineHeight: 1.4
-                }}
-              >
-                {item.description}
-              </div>
-            )}
-          </div>
-        </GlassmorphicPane>
-      ) : (
+      {/* Optional Number/Icon - only if showNumbers is enabled */}
+      {effects.showNumbers && (
         <div
           style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: colors.cardBg,
+            minWidth: 50,
+            height: 50,
+            borderRadius: '50%',
+            backgroundColor: `${colors.primary}25`,
             border: `2px solid ${colors.primary}`,
-            borderRadius: 16,
+            color: colors.text,
             display: 'flex',
             alignItems: 'center',
-            padding: spacing.itemPadding,
-            gap: 20
+            justifyContent: 'center',
+            fontSize: 24,
+            fontWeight: 700,
+            fontFamily: fonts.family,
+            flexShrink: 0
           }}
         >
-          {effects.showNumbers && (
-            <div
-              style={{
-                minWidth: 60,
-                height: 60,
-                borderRadius: '50%',
-                backgroundColor: colors.primary,
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 28,
-                fontWeight: 800,
-                fontFamily: fonts.family
-              }}
-            >
-              {item.icon || itemNumber}
-            </div>
-          )}
-          
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                color: colors.text,
-                fontSize: fonts.size_text,
-                fontWeight: fonts.weight_text,
-                fontFamily: fonts.family
-              }}
-            >
-              {item.text}
-            </div>
-            {item.description && (
-              <div
-                style={{
-                  color: colors.textSecondary,
-                  fontSize: fonts.size_description,
-                  fontWeight: fonts.weight_body,
-                  fontFamily: fonts.family,
-                  marginTop: 6
-                }}
-              >
-                {item.description}
-              </div>
-            )}
-          </div>
+          {item.icon || itemNumber}
         </div>
       )}
+      
+      {/* Content - Clean and simple */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div
+          style={{
+            color: colors.text,
+            fontSize: Math.min(fonts.size_text, 28),
+            fontWeight: fonts.weight_text,
+            fontFamily: fonts.family,
+            lineHeight: 1.4
+          }}
+        >
+          {item.text}
+        </div>
+        {item.description && (
+          <div
+            style={{
+              color: colors.textSecondary || `${colors.text}90`,
+              fontSize: Math.min(fonts.size_description, 16),
+              fontWeight: fonts.weight_body,
+              fontFamily: fonts.family,
+              lineHeight: 1.4
+            }}
+          >
+            {item.description}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

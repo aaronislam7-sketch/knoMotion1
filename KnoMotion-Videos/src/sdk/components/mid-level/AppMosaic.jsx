@@ -41,6 +41,9 @@ export const AppMosaic = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
+  // Debug logging
+  console.log('[AppMosaic] Frame:', frame, 'Items:', items.length, 'StartFrame:', startFrame);
+  
   // Default values
   const {
     columns = 3,
