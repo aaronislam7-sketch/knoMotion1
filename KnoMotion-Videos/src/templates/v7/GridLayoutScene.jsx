@@ -242,28 +242,10 @@ const renderGridItem = (item, index, position, size, style, frame, startFrame, f
   const animConfig = animations.items;
   const duration = (animConfig.duration || 0.6) * fps;
   
-  let animStyle = {};
+  // SIMPLIFIED: Use basic fadeIn for now (animations should be in mid-level)
+  let animStyle = fadeIn(frame, startFrame, duration);
   
-  switch (animConfig.entrance) {
-    case 'cardEntrance':
-      animStyle = getCardEntrance(frame, {
-        startFrame,
-        duration: animConfig.duration || 0.6,
-        direction: 'up',
-        distance: 40,
-        withGlow: true,
-        glowColor: `${item.color || colors.primary}40`
-      }, fps);
-      break;
-    case 'slideIn':
-      animStyle = slideIn(frame, startFrame, duration, 'up', 50);
-      break;
-    case 'scaleIn':
-      animStyle = scaleIn(frame, startFrame, duration, 0.7);
-      break;
-    default:
-      animStyle = fadeIn(frame, startFrame, duration);
-  }
+  console.log('[GridItem]', index, 'Frame:', frame, 'StartFrame:', startFrame, 'Opacity:', animStyle.opacity);
   
   const itemColor = item.color || colors.primary;
 
@@ -276,7 +258,9 @@ const renderGridItem = (item, index, position, size, style, frame, startFrame, f
         top: position.y - size / 2,
         width: size,
         height: size,
-        ...animStyle
+        ...animStyle,
+        // DEBUG: Force visible for testing
+        border: '2px solid red'  // Temporary debug border
       }}
     >
       {effects.itemGlass.enabled ? (

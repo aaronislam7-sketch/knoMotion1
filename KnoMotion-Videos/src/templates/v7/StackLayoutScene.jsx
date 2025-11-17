@@ -177,16 +177,22 @@ const DEFAULT_CONFIG = {
   }
 };
 
-// Helper: Calculate item position
+// Helper: Calculate item position using row-based math
 const calculateItemPosition = (index, totalItems, config, viewport) => {
   const { direction, spacing, alignment, itemWidth, itemHeight } = config;
   const { width, height } = viewport;
   
   if (direction === 'vertical') {
-    const totalHeight = (totalItems * itemHeight) + ((totalItems - 1) * spacing);
-    const startY = alignment === 'start' ? 250 :  // Increased from 200 to avoid title collision
-                   alignment === 'end' ? height - totalHeight - 200 :
-                   (height - totalHeight) / 2 + 40;  // Extra offset for center alignment
+    // Row-based calculation:
+    // Row 0 = Title row (protected, reserved space)
+    // Rows 1-7 = Stack items (max 7 items)
+    const maxItems = Math.min(totalItems, 7);  // Cap at 7 items
+    const titleRowHeight = 120;  // Reserved space for title (Row 0)
+    const availableHeight = height - titleRowHeight - 100;  // Remaining space minus bottom padding
+    const totalContentHeight = (maxItems * itemHeight) + ((maxItems - 1) * spacing);
+    
+    // Calculate start position for items (after title row)
+    const startY = titleRowHeight + ((availableHeight - totalContentHeight) / 2);
     
     return {
       x: (width - itemWidth) / 2,
@@ -257,28 +263,27 @@ const renderStackItem = (item, index, position, size, style, frame, startFrame, 
         gap: 16
       }}
     >
-      {/* Optional Number/Icon - only if showNumbers is enabled */}
-      {effects.showNumbers && (
-        <div
-          style={{
-            minWidth: 50,
-            height: 50,
-            borderRadius: '50%',
-            backgroundColor: `${colors.primary}25`,
-            border: `2px solid ${colors.primary}`,
-            color: colors.text,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 24,
-            fontWeight: 700,
-            fontFamily: fonts.family,
-            flexShrink: 0
-          }}
-        >
-          {item.icon || itemNumber}
-        </div>
-      )}
+      {/* Step number using Permanent Marker font */}
+      <div
+        style={{
+          minWidth: 70,
+          height: 70,
+          borderRadius: '50%',
+          backgroundColor: `${colors.primary}`,
+          border: `3px solid ${colors.primary}`,
+          color: '#FFFFFF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 38,
+          fontWeight: 400,
+          fontFamily: '"Permanent Marker", cursive',  // Permanent Marker font
+          flexShrink: 0,
+          boxShadow: `0 4px 12px ${colors.primary}40`
+        }}
+      >
+        {itemNumber}
+      </div>
       
       {/* Content - Clean and simple */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
