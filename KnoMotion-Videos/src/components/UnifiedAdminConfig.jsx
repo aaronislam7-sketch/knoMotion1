@@ -78,12 +78,14 @@ import * as GridLayoutSceneModule from '../templates/v7/GridLayoutScene';
 import * as StackLayoutSceneModule from '../templates/v7/StackLayoutScene';
 import * as FlowLayoutSceneModule from '../templates/v7/FlowLayoutScene';
 import * as SplitLayoutSceneModule from '../templates/v7/SplitLayoutScene';
+import * as HubSpokeSceneModule from '../templates/v7/HubSpokeScene';
 
 import fullframeExample from '../scenes/v7/fullframe_example.json';
 import gridlayoutExample from '../scenes/v7/gridlayout_example.json';
 import stacklayoutExample from '../scenes/v7/stacklayout_example.json';
 import flowlayoutExample from '../scenes/v7/flowlayout_example.json';
 import splitlayoutExample from '../scenes/v7/splitlayout_example.json';
+import hubspokeExample from '../scenes/v7/hubspoke_example.json';
 import fullframeMinimal from '../scenes/v7/fullframe_minimal.json';
 
 /**
@@ -134,7 +136,8 @@ const DEFAULT_SCENES = {
   'GridLayoutScene': gridlayoutExample,
   'StackLayoutScene': stacklayoutExample,
   'FlowLayoutScene': flowlayoutExample,
-  'SplitLayoutScene': splitlayoutExample
+  'SplitLayoutScene': splitlayoutExample,
+  'HubSpokeScene': hubspokeExample
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -355,6 +358,8 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return FlowLayoutSceneModule.getDuration ? FlowLayoutSceneModule.getDuration(scene, fps) : 450;
       case 'SplitLayoutScene':
         return SplitLayoutSceneModule.getDuration ? SplitLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'HubSpokeScene':
+        return HubSpokeSceneModule.getDuration ? HubSpokeSceneModule.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats

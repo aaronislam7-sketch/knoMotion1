@@ -446,6 +446,27 @@ const STAGING_CATALOG = [
       'Perfect for comparisons and dual-content'
     ]
   },
+  {
+    id: 'HubSpokeScene',
+    name: '🎨 V7: Hub Spoke Scene',
+    intentions: { primary: 'BREAKDOWN', secondary: ['CONNECT', 'EXPLAIN'] },
+    description: '✨ NEW V7: Central hub with radiating spokes arranged in a circle. Perfect for concept breakdowns, central idea with supporting points, and relationship mapping.',
+    duration: '14-18s',
+    icon: '🎯',
+    color: '#9C27B0',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Central hub element at screen center',
+      '2-8 surrounding spokes in circular arrangement',
+      'Configurable radius and spoke positioning',
+      'Optional connector lines from hub to spokes',
+      'Dynamic spoke positioning based on count',
+      'Staggered spoke reveal animations'
+    ]
+  },
   
   // V6 Staging Templates
   {
