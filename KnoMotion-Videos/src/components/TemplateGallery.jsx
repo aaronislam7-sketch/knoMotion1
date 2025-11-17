@@ -467,6 +467,27 @@ const STAGING_CATALOG = [
       'Staggered spoke reveal animations'
     ]
   },
+  {
+    id: 'ColumnLayoutScene',
+    name: '🎨 V7: Column Layout Scene',
+    intentions: { primary: 'COMPARE', secondary: ['BREAKDOWN', 'GUIDE'] },
+    description: '✨ NEW V7: 1-3 vertical columns with stacked items. Perfect for multi-column comparisons, category groupings, and side-by-side feature lists.',
+    duration: '12-15s',
+    icon: '📊',
+    color: '#00BCD4',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      '1-3 vertical columns with configurable widths',
+      'Items stacked vertically within each column',
+      'Optional column headers',
+      'Independent column animations',
+      'Configurable column gaps and item spacing',
+      'Perfect for comparisons and multi-column lists'
+    ]
+  },
   
   // V6 Staging Templates
   {

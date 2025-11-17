@@ -52,6 +52,7 @@ import { StackLayoutScene } from './v7/StackLayoutScene';
 import { FlowLayoutScene } from './v7/FlowLayoutScene';
 import { SplitLayoutScene } from './v7/SplitLayoutScene';
 import { HubSpokeScene } from './v7/HubSpokeScene';
+import { ColumnLayoutScene } from './v7/ColumnLayoutScene';
 
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
@@ -144,7 +145,8 @@ const V7_TEMPLATE_REGISTRY = {
   'StackLayoutScene': StackLayoutScene,
   'FlowLayoutScene': FlowLayoutScene,
   'SplitLayoutScene': SplitLayoutScene,
-  'HubSpokeScene': HubSpokeScene
+  'HubSpokeScene': HubSpokeScene,
+  'ColumnLayoutScene': ColumnLayoutScene
 };
 
 /**
