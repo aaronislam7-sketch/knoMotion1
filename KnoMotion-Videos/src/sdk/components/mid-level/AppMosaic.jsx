@@ -31,6 +31,7 @@ import { toFrames, GlassmorphicPane, getCardEntrance, getScaleEmphasis } from '.
 
 export const AppMosaic = ({
   items = [],
+  positions = [],  // Accept positions from template
   layout = {},
   style = {},
   animations = {},
@@ -40,9 +41,6 @@ export const AppMosaic = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  
-  // Debug logging
-  console.log('[AppMosaic] Frame:', frame, 'Items:', items.length, 'StartFrame:', startFrame);
   
   // Default values
   const {
@@ -82,21 +80,27 @@ export const AppMosaic = ({
     focusIndex = null
   } = effects;
   
-  // Calculate grid layout
-  const rows = Math.ceil(items.length / columns);
-  const gridWidth = (columns * itemSize) + ((columns - 1) * gap);
-  const gridHeight = (rows * itemSize) + ((rows - 1) * gap);
-  
-  const startX = centerGrid ? (viewport.width - gridWidth) / 2 : 100;
-  const startY = centerGrid ? (viewport.height - gridHeight) / 2 : 100;
+  // Use positions from template if provided, otherwise calculate
+  const useTemplatePositions = positions && positions.length === items.length;
   
   // Render individual item
   const renderItem = (item, index) => {
-    const row = Math.floor(index / columns);
-    const col = index % columns;
-    
-    const x = startX + (col * (itemSize + gap));
-    const y = startY + (row * (itemSize + gap));
+    // Use position from template or calculate
+    let x, y;
+    if (useTemplatePositions) {
+      x = positions[index].x - itemSize / 2;
+      y = positions[index].y - itemSize / 2;
+    } else {
+      const rows = Math.ceil(items.length / columns);
+      const gridWidth = (columns * itemSize) + ((columns - 1) * gap);
+      const gridHeight = (rows * itemSize) + ((rows - 1) * gap);
+      const startX = centerGrid ? (viewport.width - gridWidth) / 2 : 100;
+      const startY = centerGrid ? (viewport.height - gridHeight) / 2 : 100;
+      const row = Math.floor(index / columns);
+      const col = index % columns;
+      x = startX + (col * (itemSize + gap));
+      y = startY + (row * (itemSize + gap));
+    }
     
     // Calculate staggered animation
     const staggerDelay = stagger.enabled ? stagger.delay * fps * index : 0;
