@@ -1,6 +1,7 @@
 {
   "schema_version": "7.0",
   "scene_id": "stack-training-steps",
+  "template_id": "StackLayoutScene",
   "scene_template": "StackLayoutScene",
   
   "metadata": {

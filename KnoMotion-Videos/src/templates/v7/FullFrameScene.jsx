@@ -294,6 +294,9 @@ export const FullFrameScene = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
+  // Debug logging
+  console.log('[FullFrameScene] Rendering frame:', frame, 'Scene:', scene?.scene_id);
+  
   // Merge with defaults
   const config = useMemo(() => ({
     ...DEFAULT_CONFIG,
@@ -431,11 +434,11 @@ export const FullFrameScene = ({ scene }) => {
   );
 };
 
-// Export getDuration for template registry
-export const getDuration = (scene) => {
+// Export getDuration for template registry (returns FRAMES)
+export const getDuration = (scene, fps = 30) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
   const exitTime = config.beats?.exit || DEFAULT_CONFIG.beats.exit;
-  return exitTime + 1.0; // Add 1s buffer
+  return Math.ceil((exitTime + 1.0) * fps); // Convert seconds to frames
 };
 
 // Template metadata

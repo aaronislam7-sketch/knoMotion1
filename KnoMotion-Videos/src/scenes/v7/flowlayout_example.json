@@ -1,6 +1,7 @@
 {
   "schema_version": "7.0",
   "scene_id": "flow-data-pipeline",
+  "template_id": "FlowLayoutScene",
   "scene_template": "FlowLayoutScene",
   
   "metadata": {

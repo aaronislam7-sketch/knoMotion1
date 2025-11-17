@@ -397,6 +397,9 @@ export const GridLayoutScene = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
+  // Debug logging
+  console.log('[GridLayoutScene] Rendering frame:', frame, 'Items:', scene?.content?.items?.length);
+  
   // Merge with defaults
   const config = useMemo(() => ({
     ...DEFAULT_CONFIG,
@@ -595,11 +598,11 @@ export const GridLayoutScene = ({ scene }) => {
   );
 };
 
-// Export getDuration for template registry
-export const getDuration = (scene) => {
+// Export getDuration for template registry (returns FRAMES)
+export const getDuration = (scene, fps = 30) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
   const exitTime = config.beats?.exit || DEFAULT_CONFIG.beats.exit;
-  return exitTime + 1.0;
+  return Math.ceil((exitTime + 1.0) * fps); // Convert seconds to frames
 };
 
 // Template metadata

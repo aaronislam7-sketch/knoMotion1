@@ -82,6 +82,7 @@ import fullframeExample from '../scenes/v7/fullframe_example.json';
 import gridlayoutExample from '../scenes/v7/gridlayout_example.json';
 import stacklayoutExample from '../scenes/v7/stacklayout_example.json';
 import flowlayoutExample from '../scenes/v7/flowlayout_example.json';
+import fullframeMinimal from '../scenes/v7/fullframe_minimal.json';
 
 /**
  * Unified Admin Configuration Tool

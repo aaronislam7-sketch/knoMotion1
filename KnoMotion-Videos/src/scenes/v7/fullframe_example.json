@@ -1,6 +1,7 @@
 {
   "schema_version": "7.0",
   "scene_id": "fullframe-welcome",
+  "template_id": "FullFrameScene",
   "scene_template": "FullFrameScene",
   
   "metadata": {
