@@ -1,0 +1,102 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "fullframe-welcome",
+  "template_id": "FullFrameScene",
+  "scene_template": "FullFrameScene",
+  
+  "metadata": {
+    "name": "Welcome to Deep Learning",
+    "description": "Full-frame introduction scene with centered title card",
+    "primary_intention": "HOOK",
+    "tags": ["introduction", "single-concept"],
+    "duration_estimate": "12s"
+  },
+  
+  "content": {
+    "title": {
+      "text": "Welcome to Deep Learning"
+    },
+    "main": {
+      "type": "card",
+      "data": {
+        "text": "Explore how neural networks learn from data and make intelligent decisions"
+      }
+    }
+  },
+  
+  "layout": {
+    "mainSize": {
+      "width": "75%",
+      "height": "60%"
+    },
+    "alignment": "center",
+    "titleOffset": 100
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0F0F1E",
+      "primary": "#FF6B35",
+      "secondary": "#4ECDC4",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0"
+    },
+    "fonts": {
+      "size_title": 72,
+      "size_main": 36,
+      "size_body": 24,
+      "weight_title": 800,
+      "weight_body": 600,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80,
+      "gap": 40
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "main": 2.5,
+    "emphasis": 6.0,
+    "hold": 10.0,
+    "exit": 11.0
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "main": {
+      "entrance": "scaleIn",
+      "duration": 1.2,
+      "emphasis": {
+        "enabled": true,
+        "type": "pulse",
+        "start": 6.0,
+        "duration": 2.0
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": true,
+      "count": 20,
+      "color": "#4ECDC4",
+      "opacity": 0.35
+    },
+    "spotlight": {
+      "enabled": true,
+      "position": { "x": 50, "y": 50 },
+      "size": 900,
+      "opacity": 0.18
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    }
+  }
+}

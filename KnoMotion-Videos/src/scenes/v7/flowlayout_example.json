@@ -1,0 +1,146 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "flow-data-pipeline",
+  "template_id": "FlowLayoutScene",
+  "scene_template": "FlowLayoutScene",
+  
+  "metadata": {
+    "name": "ML Data Pipeline",
+    "description": "Flow diagram showing data processing pipeline",
+    "primary_intention": "EXPLAIN",
+    "tags": ["pipeline", "flow", "process"],
+    "duration_estimate": "16s"
+  },
+  
+  "content": {
+    "title": "Machine Learning Pipeline",
+    "nodes": [
+      {
+        "id": "data",
+        "label": "Raw Data",
+        "icon": "📊",
+        "description": "Input sources"
+      },
+      {
+        "id": "preprocess",
+        "label": "Preprocess",
+        "icon": "🔧",
+        "description": "Clean & transform"
+      },
+      {
+        "id": "train",
+        "label": "Train Model",
+        "icon": "🧠",
+        "description": "Learn patterns"
+      },
+      {
+        "id": "evaluate",
+        "label": "Evaluate",
+        "icon": "📈",
+        "description": "Test accuracy"
+      },
+      {
+        "id": "deploy",
+        "label": "Deploy",
+        "icon": "🚀",
+        "description": "Production use"
+      }
+    ],
+    "edges": [
+      { "from": "data", "to": "preprocess" },
+      { "from": "preprocess", "to": "train" },
+      { "from": "train", "to": "evaluate" },
+      { "from": "evaluate", "to": "deploy" }
+    ]
+  },
+  
+  "layout": {
+    "flowDirection": "left-to-right",
+    "nodeSize": 180,
+    "spacing": 220,
+    "startOffset": 200
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A1A",
+      "primary": "#FF6B35",
+      "secondary": "#4ECDC4",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0",
+      "connector": "#CBD5E0",
+      "activeConnector": "#FF6B35"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_label": 22,
+      "size_description": 14,
+      "weight_title": 800,
+      "weight_label": 700,
+      "weight_body": 400,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80,
+      "nodePadding": 20
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "firstNode": 2.5,
+    "nodeInterval": 0.5,
+    "edgesStart": 5.0,
+    "edgeInterval": 0.4,
+    "hold": 13.0,
+    "exit": 15.0
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "nodes": {
+      "entrance": "scaleIn",
+      "duration": 0.6,
+      "stagger": {
+        "enabled": true,
+        "delay": 0.5
+      }
+    },
+    "edges": {
+      "drawDuration": 0.6,
+      "stagger": {
+        "enabled": true,
+        "delay": 0.4
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    },
+    "nodeGlass": {
+      "enabled": true,
+      "glowOpacity": 0.2,
+      "borderOpacity": 0.5
+    }
+  },
+  
+  "mid_level_components": {
+    "flowDiagram": {
+      "enabled": false,
+      "autoLayout": true
+    }
+  }
+}

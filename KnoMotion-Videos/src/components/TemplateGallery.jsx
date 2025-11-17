@@ -340,6 +340,93 @@ const TEMPLATE_CATALOG = [
 // Templates under review - visible only in staging mode
 // Once approved, move to TEMPLATE_CATALOG above
 const STAGING_CATALOG = [
+  // V7.0 Scene-Shell Templates (Dec 2025) - NEW ARCHITECTURE
+  {
+    id: 'FullFrameScene',
+    name: '🎨 V7: Full Frame Scene',
+    intentions: { primary: 'INSPIRE', secondary: ['REVEAL', 'QUESTION'] },
+    description: '✨ NEW V7: Single full-screen canvas with centered content. Perfect for title cards, hero statements, and single concepts. Supports text, cards, and custom content types.',
+    duration: '10-15s',
+    icon: '🖼️',
+    color: '#FF6B35',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Full 1920x1080 canvas utilization',
+      'Centered content with optional title',
+      'Multiple content types (text, card, custom)',
+      'Configurable entrance animations',
+      'Works across aspect ratios (16:9, 9:16, 1:1)',
+      'Theme/style token system (no hardcoded colors)'
+    ]
+  },
+  {
+    id: 'GridLayoutScene',
+    name: '🎨 V7: Grid Layout Scene',
+    intentions: { primary: 'BREAKDOWN', secondary: ['COMPARE', 'GUIDE'] },
+    description: '✨ NEW V7: N×M grid with auto-positioning and staggered animations. Integrates with AppMosaic component. Perfect for feature showcases and tool comparisons.',
+    duration: '12-18s',
+    icon: '📱',
+    color: '#4ECDC4',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Auto-positions items in grid (no pixel coords)',
+      'Adaptive sizing for different item counts',
+      'Staggered animations (by index, row, or column)',
+      'Integrates with AppMosaic component',
+      'Glassmorphic card effects',
+      'Handles 3-12 items gracefully'
+    ]
+  },
+  {
+    id: 'StackLayoutScene',
+    name: '🎨 V7: Stack Layout Scene',
+    intentions: { primary: 'GUIDE', secondary: ['BREAKDOWN', 'REVEAL'] },
+    description: '✨ NEW V7: Vertical or horizontal linear stack with sequential reveals. Perfect for step-by-step guides, processes, and checklists.',
+    duration: '14-20s',
+    icon: '📋',
+    color: '#9B59B6',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Vertical or horizontal direction',
+      'Sequential/staggered reveal animations',
+      'Optional step numbering',
+      'Configurable spacing and alignment',
+      'Glassmorphic or solid card styles',
+      'Handles 1-6 items optimally'
+    ]
+  },
+  {
+    id: 'FlowLayoutScene',
+    name: '🎨 V7: Flow Layout Scene',
+    intentions: { primary: 'CONNECT', secondary: ['GUIDE', 'BREAKDOWN'] },
+    description: '✨ NEW V7: Connected nodes with directional flow and animated edges. Integrates with FlowDiagram. Perfect for pipelines and workflows.',
+    duration: '15-20s',
+    icon: '🔄',
+    color: '#00BCD4',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Left-to-right or top-to-bottom flow',
+      'Auto-positions nodes (no manual coords)',
+      'Animated edge drawing with arrowheads',
+      'Node highlighting (active/visited)',
+      'Integrates with FlowDiagram component',
+      'Handles 3-8 nodes cleanly'
+    ]
+  },
+  
+  // V6 Staging Templates
   {
     id: 'STAGING_Hook1AQuestionBurst_V6_Upgraded',
     name: '🧪 Question Burst V6 - Interactive Revelation',

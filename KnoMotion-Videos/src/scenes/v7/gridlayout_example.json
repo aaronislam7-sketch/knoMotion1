@@ -1,0 +1,140 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "grid-ml-frameworks",
+  "template_id": "GridLayoutScene",
+  "scene_template": "GridLayoutScene",
+  
+  "metadata": {
+    "name": "Machine Learning Frameworks",
+    "description": "Grid layout showcasing popular ML frameworks",
+    "primary_intention": "EXPLAIN",
+    "tags": ["frameworks", "tools", "comparison"],
+    "duration_estimate": "14s"
+  },
+  
+  "content": {
+    "title": "Popular ML Frameworks",
+    "items": [
+      {
+        "label": "TensorFlow",
+        "icon": "🔶",
+        "description": "End-to-end ML platform",
+        "color": "#FF6F00"
+      },
+      {
+        "label": "PyTorch",
+        "icon": "🔥",
+        "description": "Dynamic neural networks",
+        "color": "#EE4C2C"
+      },
+      {
+        "label": "Scikit-learn",
+        "icon": "🧠",
+        "description": "Classical ML algorithms",
+        "color": "#3499CD"
+      },
+      {
+        "label": "Keras",
+        "icon": "⚡",
+        "description": "High-level API",
+        "color": "#D00000"
+      },
+      {
+        "label": "XGBoost",
+        "icon": "🌲",
+        "description": "Gradient boosting",
+        "color": "#4ECDC4"
+      },
+      {
+        "label": "FastAI",
+        "icon": "🚀",
+        "description": "Simplified deep learning",
+        "color": "#00D4FF"
+      }
+    ]
+  },
+  
+  "layout": {
+    "columns": 3,
+    "gap": 50,
+    "itemSize": 260,
+    "adaptiveSize": true,
+    "maxItemsPerRow": 3,
+    "alignment": "center"
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A1A",
+      "primary": "#FF6B35",
+      "secondary": "#4ECDC4",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0",
+      "cardBg": "#2A2A2A"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_label": 26,
+      "size_description": 16,
+      "weight_title": 800,
+      "weight_label": 700,
+      "weight_body": 400,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80,
+      "gap": 50
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "firstItem": 2.2,
+    "itemInterval": 0.18,
+    "hold": 11.0,
+    "exit": 13.0
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "items": {
+      "entrance": "cardEntrance",
+      "duration": 0.7,
+      "stagger": {
+        "enabled": true,
+        "type": "index",
+        "delay": 0.18
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    },
+    "itemGlass": {
+      "enabled": true,
+      "glowOpacity": 0.18,
+      "borderOpacity": 0.45
+    }
+  },
+  
+  "mid_level_components": {
+    "appMosaic": {
+      "enabled": true,
+      "focusZoom": false,
+      "hoverEffect": false
+    }
+  }
+}
