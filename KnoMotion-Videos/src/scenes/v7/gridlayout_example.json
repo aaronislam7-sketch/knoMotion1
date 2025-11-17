@@ -132,7 +132,7 @@
   
   "mid_level_components": {
     "appMosaic": {
-      "enabled": true,
+      "enabled": false,
       "focusZoom": false,
       "hoverEffect": false
     }

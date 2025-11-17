@@ -184,9 +184,9 @@ const calculateItemPosition = (index, totalItems, config, viewport) => {
   
   if (direction === 'vertical') {
     const totalHeight = (totalItems * itemHeight) + ((totalItems - 1) * spacing);
-    const startY = alignment === 'start' ? 200 : 
+    const startY = alignment === 'start' ? 250 :  // Increased from 200 to avoid title collision
                    alignment === 'end' ? height - totalHeight - 200 :
-                   (height - totalHeight) / 2;
+                   (height - totalHeight) / 2 + 40;  // Extra offset for center alignment
     
     return {
       x: (width - itemWidth) / 2,

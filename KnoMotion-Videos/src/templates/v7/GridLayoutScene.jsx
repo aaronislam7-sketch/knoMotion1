@@ -532,68 +532,43 @@ export const GridLayoutScene = ({ scene }) => {
         </div>
       )}
       
-      {/* Grid Items - Use AppMosaic if enabled */}
-      {config.mid_level_components?.appMosaic?.enabled ? (
-        <AppMosaic
-          items={items}
-          layout={{
-            columns,
-            gap: layout.gap,
+      {/* Grid Items - Simple default rendering, AppMosaic disabled for now */}
+      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
+        {items.map((item, index) => {
+          const row = Math.floor(index / columns);
+          const col = index % columns;
+          const position = gridPositions[index];
+          
+          console.log('[GridLayout] Rendering item', index, 'Position:', position, 'Item:', item.label);
+          
+          if (!position) {
+            console.warn('[GridLayout] No position for item', index);
+            return null;
+          }
+          
+          const itemStartFrame = calculateItemStartFrame(
+            index,
+            row,
+            col,
+            animations.items.stagger,
+            beatFrames.firstItem,
+            columns
+          );
+          
+          return renderGridItem(
+            item,
+            index,
+            position,
             itemSize,
-            centerGrid: true
-          }}
-          style={{
-            colors,
-            fonts
-          }}
-          animations={{
-            entrance: animations.items.entrance,
-            duration: animations.items.duration,
-            stagger: animations.items.stagger
-          }}
-          effects={{
-            glass: effects.itemGlass.enabled,
-            glowOpacity: effects.itemGlass.glowOpacity,
-            borderOpacity: effects.itemGlass.borderOpacity,
-            focusZoom: config.mid_level_components.appMosaic.focusZoom,
-            focusIndex: config.mid_level_components.appMosaic.focusIndex || null
-          }}
-          startFrame={beatFrames.firstItem}
-          viewport={{ width, height }}
-        />
-      ) : (
-        <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
-          {items.map((item, index) => {
-            const row = Math.floor(index / columns);
-            const col = index % columns;
-            const position = gridPositions[index];
-            
-            if (!position) return null;
-            
-            const itemStartFrame = calculateItemStartFrame(
-              index,
-              row,
-              col,
-              animations.items.stagger,
-              beatFrames.firstItem,
-              columns
-            );
-            
-            return renderGridItem(
-              item,
-              index,
-              position,
-              itemSize,
-              style_tokens,
-              frame,
-              itemStartFrame,
-              fps,
-              animations,
-              effects
-            );
-          })}
-        </div>
-      )}
+            style_tokens,
+            frame,
+            itemStartFrame,
+            fps,
+            animations,
+            effects
+          );
+        })}
+      </div>
     </AbsoluteFill>
   );
 };

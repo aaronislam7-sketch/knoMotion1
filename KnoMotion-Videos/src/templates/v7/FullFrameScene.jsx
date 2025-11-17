@@ -198,22 +198,8 @@ const renderMainContent = (content, style, frame, startFrame, fps, animations) =
       animStyle = fadeIn(frame, startFrame, entranceDuration);
   }
   
-  // Calculate emphasis animation if enabled - with safety checks
+  // DISABLED: emphasis animation causes NaN errors with getScaleEmphasis
   let emphasisScale = 1;
-  if (animConfig.emphasis?.enabled) {
-    const emphasisStart = toFrames(animConfig.emphasis.start || 5.0, fps);
-    const emphasisDuration = (animConfig.emphasis.duration || 1.0) * fps;
-    
-    // Safety check: ensure we have valid numbers
-    if (emphasisStart >= 0 && emphasisDuration > 0 && frame >= emphasisStart && frame < emphasisStart + emphasisDuration) {
-      const progress = (frame - emphasisStart) / emphasisDuration;
-      // Safety check: ensure progress is valid
-      if (!isNaN(progress) && isFinite(progress) && progress >= 0 && progress <= 1) {
-        const emphasis = getScaleEmphasis(progress, 1.1);
-        emphasisScale = emphasis?.scale || 1;
-      }
-    }
-  }
 
   const baseStyle = {
     ...animStyle,
@@ -405,18 +391,23 @@ export const FullFrameScene = ({ scene }) => {
             style={{
               position: 'absolute',
               top: layout.titleOffset,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              ...titleAnim,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              ...titleAnim
+            }}
+          >
+            <div style={{
               color: colors.text,
               fontSize: Math.min(fonts.size_title, 72),
               fontWeight: fonts.weight_title,
               fontFamily: fonts.family,
               textAlign: 'center',
               maxWidth: '90%'
-            }}
-          >
-            {content.title.text}
+            }}>
+              {content.title.text}
+            </div>
           </div>
         )}
         

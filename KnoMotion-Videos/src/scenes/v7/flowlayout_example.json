@@ -139,7 +139,7 @@
   
   "mid_level_components": {
     "flowDiagram": {
-      "enabled": true,
+      "enabled": false,
       "autoLayout": true
     }
   }
