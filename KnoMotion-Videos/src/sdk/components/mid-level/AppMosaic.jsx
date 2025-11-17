@@ -81,13 +81,19 @@ export const AppMosaic = ({
   } = effects;
   
   // Use positions from template if provided, otherwise calculate
-  const useTemplatePositions = positions && positions.length === items.length;
+  const useTemplatePositions = positions && positions.length > 0 && positions.length === items.length;
+  
+  // Debug logging
+  if (useTemplatePositions && items.length > 0) {
+    console.log('[AppMosaic] Using template positions:', positions.length, 'items:', items.length, 'first position:', positions[0]);
+  }
   
   // Render individual item
   const renderItem = (item, index) => {
     // Use position from template or calculate
     let x, y;
     if (useTemplatePositions) {
+      // Positions from template are already center positions, so subtract half size for top-left
       x = positions[index].x - itemSize / 2;
       y = positions[index].y - itemSize / 2;
     } else {
@@ -281,9 +287,21 @@ export const AppMosaic = ({
     );
   };
 
+  // Debug: Log if no items
+  if (items.length === 0) {
+    console.warn('[AppMosaic] No items provided');
+    return null;
+  }
+  
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {items.map((item, index) => renderItem(item, index))}
+      {items.map((item, index) => {
+        const rendered = renderItem(item, index);
+        if (!rendered) {
+          console.warn('[AppMosaic] Failed to render item', index, item);
+        }
+        return rendered;
+      })}
     </div>
   );
 };

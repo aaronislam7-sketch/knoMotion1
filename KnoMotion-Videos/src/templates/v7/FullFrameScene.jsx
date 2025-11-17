@@ -191,10 +191,11 @@ const renderMainContent = (content, style, frame, startFrame, fps, animations, u
   
   // Use TextReveal for text content when enabled
   if (type === 'text' && useTextReveal) {
+    // Use center position (960, 540) to trigger relative positioning in TextReveal
     return (
       <TextReveal
         text={data.text || 'Content'}
-        position={{ x: viewport.width / 2, y: viewport.height / 2 }}
+        position={{ x: 960, y: 540 }}
         style={{
           colors,
           fonts: {

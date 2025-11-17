@@ -130,14 +130,28 @@ export const TextReveal = ({
   const finalFontWeight = fontWeight || fonts.weight_text;
   const finalColor = color || colors.text;
   
+  // If position is center (960, 540 default), use relative positioning instead
+  const isCentered = position.x === 960 && position.y === 540;
+  
+  // Combine transforms properly
+  let combinedTransform = '';
+  if (!isCentered) {
+    combinedTransform = `translateX(${transformX})`;
+    if (animStyle.transform) {
+      combinedTransform += ` ${animStyle.transform}`;
+    }
+  } else {
+    combinedTransform = animStyle.transform || 'none';
+  }
+  
   return (
     <div
       style={{
-        position: 'absolute',
-        left: position.x,
-        top: position.y,
-        transform: `translateX(${transformX})`,
-        ...animStyle,
+        position: isCentered ? 'relative' : 'absolute',
+        left: isCentered ? 'auto' : position.x,
+        top: isCentered ? 'auto' : position.y,
+        transform: combinedTransform,
+        opacity: animStyle.opacity !== undefined ? animStyle.opacity : 1,
         color: finalColor,
         fontSize: finalFontSize,
         fontWeight: finalFontWeight,
@@ -146,7 +160,8 @@ export const TextReveal = ({
         maxWidth: '90%',
         lineHeight: 1.4,
         whiteSpace: 'pre-wrap',
-        wordBreak: 'break-word'
+        wordBreak: 'break-word',
+        width: isCentered ? '100%' : 'auto'
       }}
     >
       {displayText}
