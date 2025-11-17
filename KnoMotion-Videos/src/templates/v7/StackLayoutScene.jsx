@@ -9,6 +9,7 @@ import {
   renderAmbientParticles,
   getCardEntrance
 } from '../../sdk';
+import { StackItems } from '../../sdk/components/mid-level/StackItems';
 
 // Simple animation helpers (inline to avoid import conflicts)
 const fadeIn = (frame, startFrame, duration) => {
@@ -174,6 +175,12 @@ const DEFAULT_CONFIG = {
       borderOpacity: 0.4
     },
     showNumbers: false  // Disabled by default to reduce visual complexity
+  },
+  
+  mid_level_components: {
+    stackItems: {
+      enabled: true  // Use StackItems mid-level by default
+    }
   }
 };
 
@@ -211,110 +218,7 @@ const calculateItemPosition = (index, totalItems, config, viewport) => {
   }
 };
 
-// Helper: Render individual stack item
-const renderStackItem = (item, index, position, size, style, frame, startFrame, fps, animations, effects, direction) => {
-  const { colors, fonts, spacing } = style;
-  const animConfig = animations.items;
-  const duration = (animConfig.duration || 0.6) * fps;
-  
-  let animStyle = {};
-  const slideDir = direction === 'vertical' ? 'up' : 'left';
-  
-  switch (animConfig.entrance) {
-    case 'cardEntrance':
-      animStyle = getCardEntrance(frame, {
-        startFrame,
-        duration: animConfig.duration || 0.6,
-        direction: slideDir,
-        distance: 50,
-        withGlow: true,
-        glowColor: `${colors.primary}40`
-      }, fps);
-      break;
-    case 'slideIn':
-      animStyle = slideIn(frame, startFrame, duration, slideDir, 60);
-      break;
-    case 'scaleIn':
-      animStyle = scaleIn(frame, startFrame, duration, 0.7);
-      break;
-    default:
-      animStyle = fadeIn(frame, startFrame, duration);
-  }
-  
-  const itemNumber = index + 1;
-
-  return (
-    <div
-      key={index}
-      style={{
-        position: 'absolute',
-        left: position.x,
-        top: position.y,
-        width: size.width,
-        height: size.height,
-        ...animStyle,
-        // Simple clean background - NO glassmorphic pane by default
-        backgroundColor: effects.itemGlass.enabled ? `${colors.primary}12` : 'transparent',
-        border: effects.itemGlass.enabled ? `2px solid ${colors.primary}20` : 'none',
-        borderRadius: 12,
-        display: 'flex',
-        alignItems: 'center',
-        padding: spacing.itemPadding,
-        gap: 16
-      }}
-    >
-      {/* Step number using Permanent Marker font */}
-      <div
-        style={{
-          minWidth: 70,
-          height: 70,
-          borderRadius: '50%',
-          backgroundColor: `${colors.primary}`,
-          border: `3px solid ${colors.primary}`,
-          color: '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 38,
-          fontWeight: 400,
-          fontFamily: '"Permanent Marker", cursive',  // Permanent Marker font
-          flexShrink: 0,
-          boxShadow: `0 4px 12px ${colors.primary}40`
-        }}
-      >
-        {itemNumber}
-      </div>
-      
-      {/* Content - Clean and simple */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div
-          style={{
-            color: colors.text,
-            fontSize: Math.min(fonts.size_text, 28),
-            fontWeight: fonts.weight_text,
-            fontFamily: fonts.family,
-            lineHeight: 1.4
-          }}
-        >
-          {item.text}
-        </div>
-        {item.description && (
-          <div
-            style={{
-              color: colors.textSecondary || `${colors.text}90`,
-              fontSize: Math.min(fonts.size_description, 16),
-              fontWeight: fonts.weight_body,
-              fontFamily: fonts.family,
-              lineHeight: 1.4
-            }}
-          >
-            {item.description}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+// Note: renderStackItem moved to StackItems mid-level component
 
 export const StackLayoutScene = ({ scene }) => {
   const frame = useCurrentFrame();
@@ -352,6 +256,14 @@ export const StackLayoutScene = ({ scene }) => {
       noise: { ...DEFAULT_CONFIG.effects.noise, ...scene.effects?.noise },
       itemGlass: { ...DEFAULT_CONFIG.effects.itemGlass, ...scene.effects?.itemGlass },
       showNumbers: scene.effects?.showNumbers ?? DEFAULT_CONFIG.effects.showNumbers
+    },
+    mid_level_components: {
+      ...DEFAULT_CONFIG.mid_level_components,
+      ...scene.mid_level_components,
+      stackItems: {
+        ...DEFAULT_CONFIG.mid_level_components.stackItems,
+        ...scene.mid_level_components?.stackItems
+      }
     }
   }), [scene]);
   
@@ -432,31 +344,63 @@ export const StackLayoutScene = ({ scene }) => {
         </div>
       )}
       
-      {/* Stack Items */}
-      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
-        {items.map((item, index) => {
-          const position = calculateItemPosition(index, items.length, layout, { width, height });
-          
-          const staggerDelay = animations.items.stagger.enabled 
-            ? animations.items.stagger.delay * fps * index 
-            : 0;
-          const itemStartFrame = beatFrames.firstItem + staggerDelay;
-          
-          return renderStackItem(
-            item,
-            index,
-            position,
-            { width: layout.itemWidth, height: layout.itemHeight },
-            style_tokens,
-            frame,
-            itemStartFrame,
-            fps,
-            animations,
-            effects,
-            layout.direction
-          );
-        })}
-      </div>
+      {/* Stack Items - Use StackItems mid-level component */}
+      {config.mid_level_components?.stackItems?.enabled !== false ? (
+        <StackItems
+          items={items}
+          positions={items.map((_, index) => calculateItemPosition(index, items.length, layout, { width, height }))}
+          layout={{
+            direction: layout.direction,
+            itemWidth: layout.itemWidth,
+            itemHeight: layout.itemHeight
+          }}
+          style={style_tokens}
+          animations={{
+            entrance: animations.items.entrance,
+            duration: animations.items.duration,
+            stagger: animations.items.stagger
+          }}
+          effects={{
+            itemGlass: effects.itemGlass,
+            showNumbers: effects.showNumbers
+          }}
+          startFrame={beatFrames.firstItem}
+        />
+      ) : (
+        // Fallback rendering (if mid-level disabled)
+        <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
+          {items.map((item, index) => {
+            const position = calculateItemPosition(index, items.length, layout, { width, height });
+            const staggerDelay = animations.items.stagger.enabled 
+              ? animations.items.stagger.delay * fps * index 
+              : 0;
+            const itemStartFrame = beatFrames.firstItem + staggerDelay;
+            const animStyle = fadeIn(frame, itemStartFrame, animations.items.duration * fps);
+            
+            return (
+              <div
+                key={index}
+                style={{
+                  position: 'absolute',
+                  left: position.x,
+                  top: position.y,
+                  width: layout.itemWidth,
+                  height: layout.itemHeight,
+                  ...animStyle,
+                  color: colors.text,
+                  fontSize: fonts.size_text,
+                  fontFamily: fonts.family,
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: style_tokens.spacing.itemPadding
+                }}
+              >
+                {item.text || item.label}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </AbsoluteFill>
   );
 };

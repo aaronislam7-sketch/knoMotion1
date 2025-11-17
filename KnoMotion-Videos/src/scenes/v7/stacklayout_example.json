@@ -118,5 +118,11 @@
       "borderOpacity": 0.4
     },
     "showNumbers": true
+  },
+  
+  "mid_level_components": {
+    "stackItems": {
+      "enabled": true
+    }
   }
 }

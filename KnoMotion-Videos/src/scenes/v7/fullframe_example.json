@@ -98,5 +98,11 @@
       "enabled": true,
       "opacity": 0.03
     }
+  },
+  
+  "mid_level_components": {
+    "textReveal": {
+      "enabled": false
+    }
   }
 }
