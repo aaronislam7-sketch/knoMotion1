@@ -26,8 +26,8 @@ import { toFrames } from '../../sdk';
  * {
  *   content: {
  *     title: "Optional Title",  // Optional
- *     left: { /* flexible content */ },  // or "top" for horizontal split
- *     right: { /* flexible content */ }  // or "bottom" for horizontal split
+ *     left: { ...flexible content... },  // or "top" for horizontal split
+ *     right: { ...flexible content... }  // or "bottom" for horizontal split
  *   },
  *   layout: {
  *     direction: "vertical",  // or "horizontal"
