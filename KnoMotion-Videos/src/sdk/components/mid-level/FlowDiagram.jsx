@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
-import { toFrames } from '../../core/time';
-import { GlassmorphicPane } from '../../effects/broadcastEffects';
-import { getCardEntrance } from '../../animations/microDelights';
+import { toFrames, GlassmorphicPane, getCardEntrance } from '../../index';
 
 /**
  * MID-LEVEL COMPONENT: FlowDiagram - V7.0

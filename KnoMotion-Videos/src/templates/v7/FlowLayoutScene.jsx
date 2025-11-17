@@ -1,16 +1,46 @@
 import React, { useMemo } from 'react';
-import { useCurrentFrame, useVideoConfig, AbsoluteFill } from 'remotion';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   toFrames,
-  fadeIn,
-  slideIn,
-  scaleIn,
-  drawPath
+  GlassmorphicPane,
+  SpotlightEffect,
+  NoiseTexture,
+  generateAmbientParticles,
+  renderAmbientParticles,
+  getCardEntrance
 } from '../../sdk';
-import { GlassmorphicPane, SpotlightEffect, NoiseTexture } from '../../sdk/broadcastEffects';
-import { generateAmbientParticles, renderAmbientParticles } from '../../sdk/particleSystem';
-import { getCardEntrance } from '../../sdk/microDelights';
 import { FlowDiagram } from '../../sdk/components/mid-level/FlowDiagram';
+
+// Simple animation helpers (inline to avoid import conflicts)
+const fadeIn = (frame, startFrame, duration) => {
+  const progress = interpolate(frame, [startFrame, startFrame + duration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  });
+  return { opacity: progress };
+};
+
+const slideIn = (frame, startFrame, duration, direction = 'up', distance = 50) => {
+  const progress = interpolate(frame, [startFrame, startFrame + duration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  });
+  const translations = {
+    left: `translateX(${(1 - progress) * distance}px)`,
+    right: `translateX(${(1 - progress) * -distance}px)`,
+    up: `translateY(${(1 - progress) * distance}px)`,
+    down: `translateY(${(1 - progress) * -distance}px)`
+  };
+  return { opacity: progress, transform: translations[direction] || translations.up };
+};
+
+const scaleIn = (frame, startFrame, duration, fromScale = 0.6) => {
+  const progress = interpolate(frame, [startFrame, startFrame + duration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  });
+  return { opacity: progress, transform: `scale(${fromScale + (1 - fromScale) * progress})` };
+};
 
 /**
  * SCENE TEMPLATE: FlowLayoutScene - V7.0

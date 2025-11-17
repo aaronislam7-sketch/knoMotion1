@@ -1,8 +1,6 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
-import { toFrames, staggerIn } from '../../core/time';
-import { GlassmorphicPane } from '../../effects/broadcastEffects';
-import { getCardEntrance, getScaleEmphasis } from '../../animations/microDelights';
+import { toFrames, GlassmorphicPane, getCardEntrance, getScaleEmphasis } from '../../index';
 
 /**
  * MID-LEVEL COMPONENT: AppMosaic - V7.0

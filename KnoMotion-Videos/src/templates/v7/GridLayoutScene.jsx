@@ -1,17 +1,80 @@
 import React, { useMemo } from 'react';
-import { useCurrentFrame, useVideoConfig, AbsoluteFill } from 'remotion';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
 import { 
   toFrames,
-  fadeIn,
-  slideIn,
-  scaleIn,
-  staggerIn
+  GlassmorphicPane,
+  SpotlightEffect,
+  NoiseTexture,
+  generateAmbientParticles,
+  renderAmbientParticles,
+  getCardEntrance
 } from '../../sdk';
-import { calculateGridPositions } from '../../sdk/layout/layoutEngine';
-import { GlassmorphicPane, SpotlightEffect, NoiseTexture } from '../../sdk/broadcastEffects';
-import { generateAmbientParticles, renderAmbientParticles } from '../../sdk/particleSystem';
-import { getCardEntrance } from '../../sdk/microDelights';
+// Note: calculateGridPositions is defined inline below since it's not exported from SDK
 import { AppMosaic } from '../../sdk/components/mid-level/AppMosaic';
+
+// Simple animation helpers (inline to avoid import conflicts)
+const fadeIn = (frame, startFrame, duration) => {
+  const progress = interpolate(frame, [startFrame, startFrame + duration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  });
+  return { opacity: progress };
+};
+
+const slideIn = (frame, startFrame, duration, direction = 'up', distance = 50) => {
+  const progress = interpolate(frame, [startFrame, startFrame + duration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  });
+  const translations = {
+    left: `translateX(${(1 - progress) * distance}px)`,
+    right: `translateX(${(1 - progress) * -distance}px)`,
+    up: `translateY(${(1 - progress) * distance}px)`,
+    down: `translateY(${(1 - progress) * -distance}px)`
+  };
+  return { opacity: progress, transform: translations[direction] || translations.up };
+};
+
+const scaleIn = (frame, startFrame, duration, fromScale = 0.7) => {
+  const progress = interpolate(frame, [startFrame, startFrame + duration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  });
+  return { opacity: progress, transform: `scale(${fromScale + (1 - fromScale) * progress})` };
+};
+
+// Helper: Calculate grid positions
+const calculateGridPositions = (items, config) => {
+  const {
+    basePosition = 'center',
+    columns,
+    columnSpacing,
+    rowSpacing,
+    centerGrid = true,
+    viewport
+  } = config;
+  
+  const rows = Math.ceil(items.length / columns);
+  const positions = [];
+  
+  const gridWidth = (columns - 1) * columnSpacing;
+  const gridHeight = (rows - 1) * rowSpacing;
+  
+  const startX = centerGrid ? (viewport.width - gridWidth) / 2 : 100;
+  const startY = centerGrid ? (viewport.height - gridHeight) / 2 : 100;
+  
+  items.forEach((item, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    
+    positions.push({
+      x: startX + (col * columnSpacing),
+      y: startY + (row * rowSpacing)
+    });
+  });
+  
+  return positions;
+};
 
 /**
  * SCENE TEMPLATE: GridLayoutScene - V7.0
