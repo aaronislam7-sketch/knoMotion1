@@ -45,6 +45,12 @@ import { Apply3BScenarioChoice as Apply3BScenarioChoice_V6 } from './v6/Apply3BS
 import { Reflect4AKeyTakeaways as Reflect4AKeyTakeaways_V6 } from './v6/Reflect4AKeyTakeaways_V6';
 import { Reflect4DForwardLink as Reflect4DForwardLink_V6 } from './v6/Reflect4DForwardLink_V6';
 
+// V7.0 Scene-Shell Templates (Dec 2025)
+import { FullFrameScene } from './v7/FullFrameScene';
+import { GridLayoutScene } from './v7/GridLayoutScene';
+import { StackLayoutScene } from './v7/StackLayoutScene';
+import { FlowLayoutScene } from './v7/FlowLayoutScene';
+
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
 
@@ -125,7 +131,20 @@ const V6_TEMPLATE_REGISTRY = {
 };
 
 /**
- * Get template component from template_id with v5.0/v5.1/v6.0 detection
+ * V7.0 Scene-Shell Templates Registry
+ * Abstract layout patterns with flexible content structures
+ * Migration from content-shell to scene-shell architecture
+ */
+const V7_TEMPLATE_REGISTRY = {
+  // Core Scene Templates (Dec 2025)
+  'FullFrameScene': FullFrameScene,
+  'GridLayoutScene': GridLayoutScene,
+  'StackLayoutScene': StackLayoutScene,
+  'FlowLayoutScene': FlowLayoutScene
+};
+
+/**
+ * Get template component from template_id with v5.0/v5.1/v6.0/v7.0 detection
  */
 const getTemplateComponent = (templateId, scene) => {
   if (!templateId) {
@@ -133,7 +152,13 @@ const getTemplateComponent = (templateId, scene) => {
     return Hook1AQuestionBurst;
   }
   
-  // Check v6 templates first (new intention-based system)
+  // Check v7 templates first (scene-shell architecture)
+  if (V7_TEMPLATE_REGISTRY[templateId]) {
+    console.info(`🎨 Using v7.0 scene-shell template for ${templateId}`);
+    return V7_TEMPLATE_REGISTRY[templateId];
+  }
+  
+  // Check v6 templates (new intention-based system)
   if (V6_TEMPLATE_REGISTRY[templateId]) {
     console.info(`🚀 Using v6.0 template for ${templateId}`);
     return V6_TEMPLATE_REGISTRY[templateId];
@@ -188,12 +213,13 @@ export const TemplateRouter = ({ scene, styles, presets, easingMap, transitions 
   
   const TemplateComponent = getTemplateComponent(templateId, scene);
   
-  // Check if this is a v5.x or v6.x template (has required exports)
+  // Check if this is a v5.x, v6.x, or v7.x template (has required exports)
   const isV5Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('5.');
   const isV6Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('6.');
+  const isV7Template = TemplateComponent.TEMPLATE_VERSION?.startsWith('7.');
   
-  if (isV5Template || isV6Template) {
-    // v5.x and v6.x templates require SceneIdContext wrapper
+  if (isV5Template || isV6Template || isV7Template) {
+    // v5.x, v6.x, and v7.x templates require SceneIdContext wrapper
     return (
       <SceneIdContext.Provider value={sceneId}>
         <TemplateComponent 
@@ -222,4 +248,4 @@ export const isV5Template = (templateId) => {
 /**
  * Export template registries for external use
  */
-export { TEMPLATE_REGISTRY, AGNOSTIC_TEMPLATE_REGISTRY, V6_TEMPLATE_REGISTRY };
+export { TEMPLATE_REGISTRY, AGNOSTIC_TEMPLATE_REGISTRY, V6_TEMPLATE_REGISTRY, V7_TEMPLATE_REGISTRY };

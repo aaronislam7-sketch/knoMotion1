@@ -1,0 +1,121 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "stack-training-steps",
+  "scene_template": "StackLayoutScene",
+  
+  "metadata": {
+    "name": "Neural Network Training Steps",
+    "description": "Vertical stack showing sequential training process",
+    "primary_intention": "GUIDE",
+    "tags": ["process", "steps", "sequence"],
+    "duration_estimate": "15s"
+  },
+  
+  "content": {
+    "title": "Training a Neural Network",
+    "items": [
+      {
+        "text": "Initialize Weights",
+        "icon": "1️⃣",
+        "description": "Set random initial values for all network parameters"
+      },
+      {
+        "text": "Forward Pass",
+        "icon": "2️⃣",
+        "description": "Compute predictions by passing data through the network"
+      },
+      {
+        "text": "Calculate Loss",
+        "icon": "3️⃣",
+        "description": "Measure the difference between predictions and true values"
+      },
+      {
+        "text": "Backward Pass",
+        "icon": "4️⃣",
+        "description": "Calculate gradients using backpropagation algorithm"
+      },
+      {
+        "text": "Update Weights",
+        "icon": "5️⃣",
+        "description": "Adjust parameters using gradient descent optimization"
+      }
+    ]
+  },
+  
+  "layout": {
+    "direction": "vertical",
+    "spacing": 70,
+    "alignment": "center",
+    "itemWidth": 750,
+    "itemHeight": 110,
+    "maxVisibleItems": 6
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A1A",
+      "primary": "#FF6B35",
+      "secondary": "#4ECDC4",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0",
+      "cardBg": "#2A2A2A",
+      "accent": "#FFD93D"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_text": 26,
+      "size_description": 17,
+      "weight_title": 800,
+      "weight_text": 700,
+      "weight_body": 400,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80,
+      "itemPadding": 24
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "firstItem": 2.5,
+    "itemInterval": 0.4,
+    "hold": 12.0,
+    "exit": 14.0
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "items": {
+      "entrance": "slideIn",
+      "duration": 0.65,
+      "stagger": {
+        "enabled": true,
+        "delay": 0.35
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    },
+    "itemGlass": {
+      "enabled": true,
+      "glowOpacity": 0.15,
+      "borderOpacity": 0.4
+    },
+    "showNumbers": true
+  }
+}
