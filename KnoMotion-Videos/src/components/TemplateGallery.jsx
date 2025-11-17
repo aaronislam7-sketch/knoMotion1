@@ -425,6 +425,27 @@ const STAGING_CATALOG = [
       'Handles 3-8 nodes cleanly'
     ]
   },
+  {
+    id: 'SplitLayoutScene',
+    name: '🎨 V7: Split Layout Scene',
+    intentions: { primary: 'COMPARE', secondary: ['EXPLAIN', 'SHOWCASE'] },
+    description: '✨ NEW V7: Two-panel split layout (vertical or horizontal) with configurable ratio. Perfect for before/after comparisons, side-by-side concepts, and dual-content scenarios.',
+    duration: '12-15s',
+    icon: '⚖️',
+    color: '#FF9800',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Vertical (left/right) or horizontal (top/bottom) split',
+      'Configurable split ratio (0.0 to 1.0)',
+      'Optional divider line at split point',
+      'Independent panel animations',
+      'Works with any mid-level component',
+      'Perfect for comparisons and dual-content'
+    ]
+  },
   
   // V6 Staging Templates
   {
