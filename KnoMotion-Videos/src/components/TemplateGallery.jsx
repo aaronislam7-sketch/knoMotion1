@@ -488,6 +488,48 @@ const STAGING_CATALOG = [
       'Perfect for comparisons and multi-column lists'
     ]
   },
+  {
+    id: 'OverlayLayoutScene',
+    name: '🎨 V7: Overlay Layout Scene',
+    intentions: { primary: 'GUIDE', secondary: ['EXPLAIN', 'SHOWCASE'] },
+    description: '✨ NEW V7: Base layer with overlay elements for annotations, callouts, and spotlight effects. Perfect for UI walkthroughs and annotated visuals.',
+    duration: '12-15s',
+    icon: '📌',
+    color: '#E91E63',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Base content layer (background)',
+      'Overlay elements positioned absolutely',
+      'Optional background dimming',
+      'Z-index management for layering',
+      'Perfect for annotations and callouts',
+      'Supports spotlight and label styles'
+    ]
+  },
+  {
+    id: 'CascadeLayoutScene',
+    name: '🎨 V7: Cascade Layout Scene',
+    intentions: { primary: 'REVEAL', secondary: ['SHOWCASE', 'GUIDE'] },
+    description: '✨ NEW V7: Staggered diagonal arrangement with overlapping elements and depth layering. Perfect for card stacks and progressive reveals.',
+    duration: '12-15s',
+    icon: '🎴',
+    color: '#FF5722',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Diagonal offset positioning',
+      'Overlapping elements with configurable overlap',
+      'Depth/z-index layering (front to back)',
+      'Staggered reveal animations',
+      'Perfect for card stacks and layered reveals',
+      'Supports up to 5 cascading items'
+    ]
+  },
   
   // V6 Staging Templates
   {

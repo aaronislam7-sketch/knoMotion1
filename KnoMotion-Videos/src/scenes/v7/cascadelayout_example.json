@@ -1,0 +1,114 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "cascade-feature-reveal",
+  "template_id": "CascadeLayoutScene",
+  "scene_template": "CascadeLayoutScene",
+  
+  "metadata": {
+    "name": "Cascading Feature Cards",
+    "description": "Staggered diagonal card arrangement with depth",
+    "primary_intention": "REVEAL",
+    "tags": ["cascade", "cards", "progressive-reveal"],
+    "duration_estimate": "13s"
+  },
+  
+  "content": {
+    "title": "Key Features",
+    "items": [
+      {
+        "text": "Feature 1",
+        "icon": "⚡",
+        "description": "Lightning fast performance"
+      },
+      {
+        "text": "Feature 2",
+        "icon": "🔒",
+        "description": "Enterprise-grade security"
+      },
+      {
+        "text": "Feature 3",
+        "icon": "📊",
+        "description": "Advanced analytics"
+      },
+      {
+        "text": "Feature 4",
+        "icon": "🌐",
+        "description": "Global scalability"
+      },
+      {
+        "text": "Feature 5",
+        "icon": "🤝",
+        "description": "Team collaboration"
+      }
+    ]
+  },
+  
+  "layout": {
+    "offsetX": 50,
+    "offsetY": 40,
+    "overlap": 0.25,
+    "itemWidth": 420,
+    "itemHeight": 280,
+    "startX": 300,
+    "startY": 250,
+    "maxItems": 5
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A1A",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0",
+      "cardBg": "#2A2A2A"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_item": 24,
+      "weight_title": 800,
+      "weight_item": 700,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "firstItem": 1.5,
+    "itemInterval": 0.4,
+    "hold": 10.0,
+    "exit": 12.0
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "items": {
+      "entrance": "scaleIn",
+      "duration": 0.6,
+      "stagger": {
+        "enabled": true,
+        "delay": 0.4
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    }
+  },
+  
+  "mid_level_components": {}
+}
