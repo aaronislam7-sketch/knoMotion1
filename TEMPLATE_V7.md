@@ -747,20 +747,29 @@ KnoMotion-Videos/src/
 
 **Impact:**
 ```javascript
-// Now possible: Use AppMosaic anywhere
-<FullFrameScene>
-  <AppMosaic items={[...]} />  // ✅ Same behavior
-</FullFrameScene>
+// GridLayoutScene can now use ANY mid-level:
+<GridLayoutScene mid_level="appMosaic" />     // ✅ App cards
+<GridLayoutScene mid_level="flowDiagram" />   // ✅ Flow nodes in grid
+<GridLayoutScene mid_level="dataViz" />       // ✅ Charts in grid
+<GridLayoutScene />                            // ✅ Simple grid (fallback)
 
-<StackLayoutScene>
-  <AppMosaic items={[...]} />  // ✅ Same behavior
-</StackLayoutScene>
+// AND AppMosaic can be used in ANY template:
+<FullFrameScene><AppMosaic /></FullFrameScene>
+<StackLayoutScene><AppMosaic /></StackLayoutScene>
 ```
 
+**What This Means:**
+
+**GridLayoutScene can now use:**
+- ✅ AppMosaic (when enabled in JSON)
+- ✅ FlowDiagram (when enabled in JSON) 
+- ✅ Any future mid-level component
+- ✅ Simple fallback rendering (when no mid-level specified)
+
 **Files Modified:**
-- `GridLayoutScene.jsx` - Removed 130 lines of rendering logic
-- `AppMosaic.jsx` - Now accepts positions from template
-- `gridlayout_example.json` - Re-enabled AppMosaic
+- `GridLayoutScene.jsx` - Now checks JSON for which mid-level to use
+- `AppMosaic.jsx` - Accepts positions from ANY template
+- `gridlayout_example.json` - Can enable/disable AppMosaic via JSON
 
 ---
 
