@@ -72,6 +72,17 @@ import testStepSequenceGrid from '../scenes/examples/guide_10_step_sequence_grid
 import stagingHook1AUpgraded from '../scenes/examples/hook_1a_upgraded_example.json';
 import stagingReflect4AEnhanced from '../scenes/v6/reflect_4a_deep_learning_enhanced.json';
 
+// V7.0 Scene-Shell Templates (Dec 2025)
+import * as FullFrameSceneModule from '../templates/v7/FullFrameScene';
+import * as GridLayoutSceneModule from '../templates/v7/GridLayoutScene';
+import * as StackLayoutSceneModule from '../templates/v7/StackLayoutScene';
+import * as FlowLayoutSceneModule from '../templates/v7/FlowLayoutScene';
+
+import fullframeExample from '../scenes/v7/fullframe_example.json';
+import gridlayoutExample from '../scenes/v7/gridlayout_example.json';
+import stacklayoutExample from '../scenes/v7/stacklayout_example.json';
+import flowlayoutExample from '../scenes/v7/flowlayout_example.json';
+
 /**
  * Unified Admin Configuration Tool
  * 
@@ -113,7 +124,13 @@ const DEFAULT_SCENES = {
   
   // STAGING: Templates Under Review
   'STAGING_Hook1AQuestionBurst_V6_Upgraded': stagingHook1AUpgraded,
-  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced
+  'STAGING_Reflect4AKeyTakeaways_V6_Enhanced': stagingReflect4AEnhanced,
+  
+  // V7.0 Scene-Shell Templates (Dec 2025)
+  'FullFrameScene': fullframeExample,
+  'GridLayoutScene': gridlayoutExample,
+  'StackLayoutScene': stacklayoutExample,
+  'FlowLayoutScene': flowlayoutExample
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -322,6 +339,16 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return Hook1AModule.getDuration ? Hook1AModule.getDuration(scene, fps) : 450;
       case 'STAGING_Reflect4AKeyTakeaways_V6_Enhanced':
         return Reflect4AModule.getDuration ? Reflect4AModule.getDuration(scene, fps) : 450;
+      
+      // V7.0 Scene-Shell Templates (Dec 2025)
+      case 'FullFrameScene':
+        return FullFrameSceneModule.getDuration ? FullFrameSceneModule.getDuration(scene, fps) : 450;
+      case 'GridLayoutScene':
+        return GridLayoutSceneModule.getDuration ? GridLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'StackLayoutScene':
+        return StackLayoutSceneModule.getDuration ? StackLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'FlowLayoutScene':
+        return FlowLayoutSceneModule.getDuration ? FlowLayoutSceneModule.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats
