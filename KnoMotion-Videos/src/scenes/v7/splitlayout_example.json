@@ -1,0 +1,115 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "split-before-after-comparison",
+  "template_id": "SplitLayoutScene",
+  "scene_template": "SplitLayoutScene",
+  
+  "metadata": {
+    "name": "Before & After Comparison",
+    "description": "Side-by-side comparison showing transformation or difference",
+    "primary_intention": "COMPARE",
+    "tags": ["comparison", "before-after", "side-by-side"],
+    "duration_estimate": "12s"
+  },
+  
+  "content": {
+    "title": "Traditional vs Modern Approach",
+    "left": {
+      "text": "Traditional Method",
+      "description": "Manual processes, time-consuming, error-prone",
+      "icon": "📋",
+      "features": [
+        "Manual data entry",
+        "Paper-based workflows",
+        "Limited scalability"
+      ]
+    },
+    "right": {
+      "text": "Modern Solution",
+      "description": "Automated, efficient, scalable",
+      "icon": "⚡",
+      "features": [
+        "Automated workflows",
+        "Digital-first approach",
+        "Unlimited scalability"
+      ]
+    }
+  },
+  
+  "layout": {
+    "direction": "vertical",
+    "ratio": 0.5,
+    "showDivider": true,
+    "dividerWidth": 2,
+    "padding": 60,
+    "gap": 20
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#1A1A1A",
+      "primary": "#FF6B35",
+      "secondary": "#4ECDC4",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0",
+      "divider": "#4ECDC4",
+      "leftAccent": "#E74C3C",
+      "rightAccent": "#2ECC71"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_label": 32,
+      "size_description": 20,
+      "size_body": 18,
+      "weight_title": 800,
+      "weight_label": 700,
+      "weight_body": 400,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 60,
+      "gap": 20
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "leftPanel": 1.5,
+    "rightPanel": 2.5,
+    "hold": 10.0,
+    "exit": 11.5
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "left": {
+      "entrance": "slideIn",
+      "direction": "left",
+      "duration": 0.7
+    },
+    "right": {
+      "entrance": "slideIn",
+      "direction": "right",
+      "duration": 0.7
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    }
+  },
+  
+  "mid_level_components": {}
+}
