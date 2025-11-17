@@ -68,9 +68,12 @@ const calculateGridPositions = (items, config) => {
     const col = index % columns;
     const row = Math.floor(index / columns);
     
+    // Return center positions (AppMosaic expects center positions)
+    // itemSize is passed in config, or calculate from columnSpacing
+    const itemSize = config.itemSize || (columnSpacing - (config.gap || 0));
     positions.push({
-      x: startX + (col * columnSpacing),
-      y: startY + (row * rowSpacing)
+      x: startX + (col * columnSpacing) + (itemSize / 2),
+      y: startY + (row * rowSpacing) + (itemSize / 2)
     });
   });
   
@@ -457,6 +460,7 @@ export const GridLayoutScene = ({ scene }) => {
       columns,
       columnSpacing: itemSize + layout.gap,
       rowSpacing: itemSize + layout.gap,
+      itemSize: itemSize,  // Pass itemSize explicitly
       centerGrid: true,
       viewport: { width, height }
     });
@@ -559,7 +563,7 @@ export const GridLayoutScene = ({ scene }) => {
         // Use AppMosaic when enabled
         <AppMosaic
           items={items}
-          positions={gridPositions}
+          positions={gridPositions.length === items.length ? gridPositions : []}
           layout={{
             columns,
             gap: layout.gap,

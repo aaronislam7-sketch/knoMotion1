@@ -10,6 +10,7 @@ import {
   getCardEntrance,
   getScaleEmphasis
 } from '../../sdk';
+import { TextReveal } from '../../sdk/components/mid-level/TextReveal';
 
 // Simple animation helpers (inline to avoid import conflicts)
 const fadeIn = (frame, startFrame, duration) => {
@@ -164,11 +165,17 @@ const DEFAULT_CONFIG = {
       enabled: true,
       opacity: 0.03
     }
+  },
+  
+  mid_level_components: {
+    textReveal: {
+      enabled: false  // Use TextReveal for text content when enabled
+    }
   }
 };
 
 // Helper: Render content based on type
-const renderMainContent = (content, style, frame, startFrame, fps, animations) => {
+const renderMainContent = (content, style, frame, startFrame, fps, animations, useTextReveal, viewport) => {
   if (!content || !content.main) {
     return null;
   }
@@ -181,6 +188,35 @@ const renderMainContent = (content, style, frame, startFrame, fps, animations) =
   const animConfig = animations.main || {};
   const entranceDuration = (animConfig.duration || 1.0) * fps;
   const entranceType = animConfig.entrance || 'fadeIn';
+  
+  // Use TextReveal for text content when enabled
+  if (type === 'text' && useTextReveal) {
+    return (
+      <TextReveal
+        text={data.text || 'Content'}
+        position={{ x: viewport.width / 2, y: viewport.height / 2 }}
+        style={{
+          colors,
+          fonts: {
+            ...fonts,
+            size_text: fonts.size_main
+          }
+        }}
+        animations={{
+          type: entranceType === 'fadeIn' ? 'fadeIn' : 
+                entranceType === 'slideIn' ? 'slideIn' : 
+                entranceType === 'scaleIn' ? 'scaleIn' : 
+                entranceType === 'typewriter' ? 'typewriter' : 'fadeIn',
+          duration: animConfig.duration || 1.0,
+          fontSize: Math.min(fonts.size_main, 72),
+          fontWeight: fonts.weight_body,
+          color: colors.text
+        }}
+        startFrame={startFrame}
+        alignment="center"
+      />
+    );
+  }
   
   let animStyle = {};
   
@@ -307,6 +343,14 @@ export const FullFrameScene = ({ scene }) => {
       particles: { ...DEFAULT_CONFIG.effects.particles, ...scene.effects?.particles },
       spotlight: { ...DEFAULT_CONFIG.effects.spotlight, ...scene.effects?.spotlight },
       noise: { ...DEFAULT_CONFIG.effects.noise, ...scene.effects?.noise }
+    },
+    mid_level_components: {
+      ...DEFAULT_CONFIG.mid_level_components,
+      ...scene.mid_level_components,
+      textReveal: {
+        ...DEFAULT_CONFIG.mid_level_components.textReveal,
+        ...scene.mid_level_components?.textReveal
+      }
     }
   }), [scene]);
   
@@ -422,7 +466,16 @@ export const FullFrameScene = ({ scene }) => {
             marginTop: content.title ? 60 : 0
           }}
         >
-          {renderMainContent(content, style_tokens, frame, beatFrames.main, fps, animations)}
+          {renderMainContent(
+            content, 
+            style_tokens, 
+            frame, 
+            beatFrames.main, 
+            fps, 
+            animations,
+            config.mid_level_components?.textReveal?.enabled,
+            { width, height }
+          )}
         </div>
       </div>
     </AbsoluteFill>
