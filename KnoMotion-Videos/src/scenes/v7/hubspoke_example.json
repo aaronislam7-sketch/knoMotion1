@@ -1,0 +1,131 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "hubspoke-deep-learning-breakdown",
+  "template_id": "HubSpokeScene",
+  "scene_template": "HubSpokeScene",
+  
+  "metadata": {
+    "name": "Deep Learning Concept Breakdown",
+    "description": "Central concept with supporting components arranged in circle",
+    "primary_intention": "BREAKDOWN",
+    "tags": ["concept-breakdown", "hub-spoke", "relationships"],
+    "duration_estimate": "14s"
+  },
+  
+  "content": {
+    "title": "Deep Learning Fundamentals",
+    "hub": {
+      "text": "Deep Learning",
+      "icon": "🧠",
+      "description": "Core concept"
+    },
+    "spokes": [
+      {
+        "text": "Neural Networks",
+        "icon": "🔗",
+        "description": "Interconnected layers"
+      },
+      {
+        "text": "Training Data",
+        "icon": "📊",
+        "description": "Large datasets"
+      },
+      {
+        "text": "Algorithms",
+        "icon": "⚙️",
+        "description": "Learning methods"
+      },
+      {
+        "text": "Applications",
+        "icon": "🚀",
+        "description": "Real-world uses"
+      },
+      {
+        "text": "Tools & Frameworks",
+        "icon": "🛠️",
+        "description": "Development platforms"
+      },
+      {
+        "text": "Challenges",
+        "icon": "⚠️",
+        "description": "Limitations & considerations"
+      }
+    ]
+  },
+  
+  "layout": {
+    "radius": 380,
+    "hubSize": 220,
+    "spokeSize": 160,
+    "showConnectors": true,
+    "startAngle": 0,
+    "maxSpokes": 8
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0F0F1E",
+      "hub": "#FF6B35",
+      "spoke": "#4ECDC4",
+      "connector": "#4ECDC4",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_hub": 32,
+      "size_spoke": 20,
+      "weight_title": 800,
+      "weight_hub": 700,
+      "weight_spoke": 600,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "hub": 1.5,
+    "firstSpoke": 2.5,
+    "spokeInterval": 0.4,
+    "hold": 11.0,
+    "exit": 13.0
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "hub": {
+      "entrance": "scaleIn",
+      "duration": 0.8
+    },
+    "spokes": {
+      "entrance": "fadeIn",
+      "duration": 0.6,
+      "stagger": {
+        "enabled": true,
+        "delay": 0.4
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    }
+  },
+  
+  "mid_level_components": {}
+}

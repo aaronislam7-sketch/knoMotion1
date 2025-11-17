@@ -77,11 +77,21 @@ import * as FullFrameSceneModule from '../templates/v7/FullFrameScene';
 import * as GridLayoutSceneModule from '../templates/v7/GridLayoutScene';
 import * as StackLayoutSceneModule from '../templates/v7/StackLayoutScene';
 import * as FlowLayoutSceneModule from '../templates/v7/FlowLayoutScene';
+import * as SplitLayoutSceneModule from '../templates/v7/SplitLayoutScene';
+import * as HubSpokeSceneModule from '../templates/v7/HubSpokeScene';
+import * as ColumnLayoutSceneModule from '../templates/v7/ColumnLayoutScene';
+import * as OverlayLayoutSceneModule from '../templates/v7/OverlayLayoutScene';
+import * as CascadeLayoutSceneModule from '../templates/v7/CascadeLayoutScene';
 
 import fullframeExample from '../scenes/v7/fullframe_example.json';
 import gridlayoutExample from '../scenes/v7/gridlayout_example.json';
 import stacklayoutExample from '../scenes/v7/stacklayout_example.json';
 import flowlayoutExample from '../scenes/v7/flowlayout_example.json';
+import splitlayoutExample from '../scenes/v7/splitlayout_example.json';
+import hubspokeExample from '../scenes/v7/hubspoke_example.json';
+import columnlayoutExample from '../scenes/v7/columnlayout_example.json';
+import overlaylayoutExample from '../scenes/v7/overlaylayout_example.json';
+import cascadelayoutExample from '../scenes/v7/cascadelayout_example.json';
 import fullframeMinimal from '../scenes/v7/fullframe_minimal.json';
 
 /**
@@ -131,7 +141,12 @@ const DEFAULT_SCENES = {
   'FullFrameScene': fullframeExample,
   'GridLayoutScene': gridlayoutExample,
   'StackLayoutScene': stacklayoutExample,
-  'FlowLayoutScene': flowlayoutExample
+  'FlowLayoutScene': flowlayoutExample,
+  'SplitLayoutScene': splitlayoutExample,
+  'HubSpokeScene': hubspokeExample,
+  'ColumnLayoutScene': columnlayoutExample,
+  'OverlayLayoutScene': overlaylayoutExample,
+  'CascadeLayoutScene': cascadelayoutExample
 };
 
 export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
@@ -350,6 +365,16 @@ export const UnifiedAdminConfig = ({ initialScene, onSceneUpdate }) => {
         return StackLayoutSceneModule.getDuration ? StackLayoutSceneModule.getDuration(scene, fps) : 450;
       case 'FlowLayoutScene':
         return FlowLayoutSceneModule.getDuration ? FlowLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'SplitLayoutScene':
+        return SplitLayoutSceneModule.getDuration ? SplitLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'HubSpokeScene':
+        return HubSpokeSceneModule.getDuration ? HubSpokeSceneModule.getDuration(scene, fps) : 450;
+      case 'ColumnLayoutScene':
+        return ColumnLayoutSceneModule.getDuration ? ColumnLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'OverlayLayoutScene':
+        return OverlayLayoutSceneModule.getDuration ? OverlayLayoutSceneModule.getDuration(scene, fps) : 450;
+      case 'CascadeLayoutScene':
+        return CascadeLayoutSceneModule.getDuration ? CascadeLayoutSceneModule.getDuration(scene, fps) : 450;
       
       default:
         // Fallback: try to calculate from beats

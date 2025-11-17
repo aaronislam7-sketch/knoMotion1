@@ -50,6 +50,11 @@ import { FullFrameScene } from './v7/FullFrameScene';
 import { GridLayoutScene } from './v7/GridLayoutScene';
 import { StackLayoutScene } from './v7/StackLayoutScene';
 import { FlowLayoutScene } from './v7/FlowLayoutScene';
+import { SplitLayoutScene } from './v7/SplitLayoutScene';
+import { HubSpokeScene } from './v7/HubSpokeScene';
+import { ColumnLayoutScene } from './v7/ColumnLayoutScene';
+import { OverlayLayoutScene } from './v7/OverlayLayoutScene';
+import { CascadeLayoutScene } from './v7/CascadeLayoutScene';
 
 // Schema detection for routing
 import { detectSchemaVersion } from '../sdk';
@@ -140,7 +145,12 @@ const V7_TEMPLATE_REGISTRY = {
   'FullFrameScene': FullFrameScene,
   'GridLayoutScene': GridLayoutScene,
   'StackLayoutScene': StackLayoutScene,
-  'FlowLayoutScene': FlowLayoutScene
+  'FlowLayoutScene': FlowLayoutScene,
+  'SplitLayoutScene': SplitLayoutScene,
+  'HubSpokeScene': HubSpokeScene,
+  'ColumnLayoutScene': ColumnLayoutScene,
+  'OverlayLayoutScene': OverlayLayoutScene,
+  'CascadeLayoutScene': CascadeLayoutScene
 };
 
 /**

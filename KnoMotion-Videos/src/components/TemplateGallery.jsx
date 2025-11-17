@@ -425,6 +425,111 @@ const STAGING_CATALOG = [
       'Handles 3-8 nodes cleanly'
     ]
   },
+  {
+    id: 'SplitLayoutScene',
+    name: '🎨 V7: Split Layout Scene',
+    intentions: { primary: 'COMPARE', secondary: ['EXPLAIN', 'SHOWCASE'] },
+    description: '✨ NEW V7: Two-panel split layout (vertical or horizontal) with configurable ratio. Perfect for before/after comparisons, side-by-side concepts, and dual-content scenarios.',
+    duration: '12-15s',
+    icon: '⚖️',
+    color: '#FF9800',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Vertical (left/right) or horizontal (top/bottom) split',
+      'Configurable split ratio (0.0 to 1.0)',
+      'Optional divider line at split point',
+      'Independent panel animations',
+      'Works with any mid-level component',
+      'Perfect for comparisons and dual-content'
+    ]
+  },
+  {
+    id: 'HubSpokeScene',
+    name: '🎨 V7: Hub Spoke Scene',
+    intentions: { primary: 'BREAKDOWN', secondary: ['CONNECT', 'EXPLAIN'] },
+    description: '✨ NEW V7: Central hub with radiating spokes arranged in a circle. Perfect for concept breakdowns, central idea with supporting points, and relationship mapping.',
+    duration: '14-18s',
+    icon: '🎯',
+    color: '#9C27B0',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Central hub element at screen center',
+      '2-8 surrounding spokes in circular arrangement',
+      'Configurable radius and spoke positioning',
+      'Optional connector lines from hub to spokes',
+      'Dynamic spoke positioning based on count',
+      'Staggered spoke reveal animations'
+    ]
+  },
+  {
+    id: 'ColumnLayoutScene',
+    name: '🎨 V7: Column Layout Scene',
+    intentions: { primary: 'COMPARE', secondary: ['BREAKDOWN', 'GUIDE'] },
+    description: '✨ NEW V7: 1-3 vertical columns with stacked items. Perfect for multi-column comparisons, category groupings, and side-by-side feature lists.',
+    duration: '12-15s',
+    icon: '📊',
+    color: '#00BCD4',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      '1-3 vertical columns with configurable widths',
+      'Items stacked vertically within each column',
+      'Optional column headers',
+      'Independent column animations',
+      'Configurable column gaps and item spacing',
+      'Perfect for comparisons and multi-column lists'
+    ]
+  },
+  {
+    id: 'OverlayLayoutScene',
+    name: '🎨 V7: Overlay Layout Scene',
+    intentions: { primary: 'GUIDE', secondary: ['EXPLAIN', 'SHOWCASE'] },
+    description: '✨ NEW V7: Base layer with overlay elements for annotations, callouts, and spotlight effects. Perfect for UI walkthroughs and annotated visuals.',
+    duration: '12-15s',
+    icon: '📌',
+    color: '#E91E63',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Base content layer (background)',
+      'Overlay elements positioned absolutely',
+      'Optional background dimming',
+      'Z-index management for layering',
+      'Perfect for annotations and callouts',
+      'Supports spotlight and label styles'
+    ]
+  },
+  {
+    id: 'CascadeLayoutScene',
+    name: '🎨 V7: Cascade Layout Scene',
+    intentions: { primary: 'REVEAL', secondary: ['SHOWCASE', 'GUIDE'] },
+    description: '✨ NEW V7: Staggered diagonal arrangement with overlapping elements and depth layering. Perfect for card stacks and progressive reveals.',
+    duration: '12-15s',
+    icon: '🎴',
+    color: '#FF5722',
+    version: 'v7.0-STAGING',
+    isNew: true,
+    isStaging: true,
+    hasConfig: false,
+    features: [
+      'Diagonal offset positioning',
+      'Overlapping elements with configurable overlap',
+      'Depth/z-index layering (front to back)',
+      'Staggered reveal animations',
+      'Perfect for card stacks and layered reveals',
+      'Supports up to 5 cascading items'
+    ]
+  },
   
   // V6 Staging Templates
   {

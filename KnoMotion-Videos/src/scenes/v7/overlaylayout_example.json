@@ -1,0 +1,123 @@
+{
+  "schema_version": "7.0",
+  "scene_id": "overlay-ui-walkthrough",
+  "template_id": "OverlayLayoutScene",
+  "scene_template": "OverlayLayoutScene",
+  
+  "metadata": {
+    "name": "UI Walkthrough with Annotations",
+    "description": "Base UI with overlay callouts and annotations",
+    "primary_intention": "GUIDE",
+    "tags": ["walkthrough", "annotations", "overlay"],
+    "duration_estimate": "12s"
+  },
+  
+  "content": {
+    "title": "Dashboard Overview",
+    "base": {
+      "text": "Main Dashboard Interface",
+      "description": "Base UI content showing the main interface"
+    },
+    "overlay": {
+      "items": [
+        {
+          "x": 300,
+          "y": 200,
+          "width": 250,
+          "height": 120,
+          "text": "Navigation Menu",
+          "description": "Access all sections"
+        },
+        {
+          "x": 800,
+          "y": 250,
+          "width": 280,
+          "height": 140,
+          "text": "Main Content Area",
+          "description": "Primary workspace"
+        },
+        {
+          "x": 1200,
+          "y": 180,
+          "width": 200,
+          "height": 100,
+          "text": "User Profile",
+          "description": "Account settings"
+        }
+      ]
+    }
+  },
+  
+  "layout": {
+    "overlayStyle": "callouts",
+    "dimBackground": true,
+    "dimOpacity": 0.6,
+    "zIndexBase": 0,
+    "zIndexDim": 1,
+    "zIndexOverlay": 2
+  },
+  
+  "style_tokens": {
+    "colors": {
+      "bg": "#0F0F1E",
+      "dim": "#000000",
+      "text": "#FFFFFF",
+      "textSecondary": "#B0B0B0",
+      "overlay": "#FF6B35"
+    },
+    "fonts": {
+      "size_title": 64,
+      "size_overlay": 20,
+      "weight_title": 800,
+      "weight_overlay": 600,
+      "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "padding": 80
+    }
+  },
+  
+  "beats": {
+    "entrance": 0.5,
+    "title": 1.0,
+    "base": 1.5,
+    "firstOverlay": 2.5,
+    "overlayInterval": 0.4,
+    "hold": 10.0,
+    "exit": 11.5
+  },
+  
+  "animations": {
+    "title": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "base": {
+      "entrance": "fadeIn",
+      "duration": 0.8
+    },
+    "overlay": {
+      "entrance": "scaleIn",
+      "duration": 0.5,
+      "stagger": {
+        "enabled": true,
+        "delay": 0.4
+      }
+    }
+  },
+  
+  "effects": {
+    "particles": {
+      "enabled": false
+    },
+    "spotlight": {
+      "enabled": false
+    },
+    "noise": {
+      "enabled": true,
+      "opacity": 0.03
+    }
+  },
+  
+  "mid_level_components": {}
+}
