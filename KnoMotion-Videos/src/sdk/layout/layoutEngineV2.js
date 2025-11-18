@@ -20,55 +20,50 @@ export const ARRANGEMENT_TYPES = {
   RADIAL: 'radial',
   CASCADE: 'cascade',
   CENTERED: 'centered',
-} as const;
-
-/**
- * Area helper type (left/top/width/height)
- * Used to reserve title/footers and pass content regions into layouts.
- *
- * Example:
- *  const areas = createLayoutAreas({ viewport, padding: 80, titleHeight: 140 });
- *  const gridSlots = calculateItemPositions(items, {
- *    arrangement: ARRANGEMENT_TYPES.GRID,
- *    area: areas.content,
- *    columns: 3,
- *    gap: 40,
- *  });
- */
-export type LayoutArea = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
 };
 
-type Viewport = { width: number; height: number };
+/**
+ * @typedef {Object} LayoutArea
+ * @property {number} left
+ * @property {number} top
+ * @property {number} width
+ * @property {number} height
+ */
+
+/**
+ * @typedef {Object} Viewport
+ * @property {number} width
+ * @property {number} height
+ */
 
 /**
  * Create standard canvas areas:
  * - full canvas
  * - title safe area (optional)
  * - content area (always excludes title/footer if provided)
+ *
+ * @param {Object} params
+ * @param {Viewport} params.viewport
+ * @param {number} [params.padding]
+ * @param {number} [params.titleHeight]
+ * @param {number} [params.footerHeight]
  */
 export const createLayoutAreas = ({
   viewport,
   padding = 80,
   titleHeight = 0,
   footerHeight = 0,
-}: {
-  viewport: Viewport;
-  padding?: number;
-  titleHeight?: number;
-  footerHeight?: number;
 }) => {
-  const canvas: LayoutArea = {
+  /** @type {LayoutArea} */
+  const canvas = {
     left: 0,
     top: 0,
     width: viewport.width,
     height: viewport.height,
   };
 
-  const title: LayoutArea | null =
+  /** @type {LayoutArea|null} */
+  const title =
     titleHeight > 0
       ? {
           left: padding,
@@ -81,14 +76,16 @@ export const createLayoutAreas = ({
   const contentTop = padding + (titleHeight || 0);
   const contentBottomPadding = padding + (footerHeight || 0);
 
-  const content: LayoutArea = {
+  /** @type {LayoutArea} */
+  const content = {
     left: padding,
     top: contentTop,
     width: viewport.width - padding * 2,
     height: viewport.height - contentTop - contentBottomPadding,
   };
 
-  const footer: LayoutArea | null =
+  /** @type {LayoutArea|null} */
+  const footer =
     footerHeight > 0
       ? {
           left: padding,
@@ -114,38 +111,11 @@ export const createLayoutAreas = ({
  *
  * NOTE:
  * - Most templates should pass an `area` (e.g. content area) rather than raw basePosition.
+ *
+ * @param {any[]} items
+ * @param {Object} [config]
  */
-export const calculateItemPositions = (
-  items: any[],
-  config: {
-    arrangement?: (typeof ARRANGEMENT_TYPES)[keyof typeof ARRANGEMENT_TYPES];
-    viewport?: Viewport;
-    // Either provide a layout area OR a basePosition token:
-    area?: LayoutArea;
-    basePosition?: any;
-    // Common config:
-    spacing?: number;
-    centerStack?: boolean;
-    // Grid-specific:
-    columns?: number;
-    gap?: number;
-    columnSpacing?: number;
-    rowSpacing?: number;
-    itemSize?: number;
-    itemWidth?: number;
-    itemHeight?: number;
-    centerGrid?: boolean;
-    // Circular / radial:
-    radius?: number;
-    startAngle?: number;
-    angles?: number[];
-    startRadius?: number;
-    radiusIncrement?: number;
-    // Cascade:
-    offsetX?: number;
-    offsetY?: number;
-  } = {},
-) => {
+export const calculateItemPositions = (items, config = {}) => {
   const {
     arrangement = ARRANGEMENT_TYPES.STACKED_VERTICAL,
   } = config;
@@ -191,18 +161,11 @@ export const calculateItemPositions = (
  * STACKED POSITIONS
  * - Vertical or horizontal stack
  * - Optionally centred inside an area
+ *
+ * @param {any[]} items
+ * @param {Object} config
  */
-const calculateStackedPositions = (
-  items: any[],
-  config: {
-    viewport?: Viewport;
-    area?: LayoutArea;
-    basePosition?: any;
-    spacing?: number;
-    centerStack?: boolean;
-    direction?: 'vertical' | 'horizontal';
-  },
-) => {
+const calculateStackedPositions = (items, config) => {
   const {
     viewport = { width: 1920, height: 1080 },
     area,
@@ -237,23 +200,11 @@ const calculateStackedPositions = (
  * - Accepts a `content area` so grids never trample title safe-areas
  * - Returns x, y, width, height per slot
  * - Handles min/max tile size and centring inside the area
+ *
+ * @param {any[]} items
+ * @param {Object} config
  */
-const calculateGridPositions = (
-  items: any[],
-  config: {
-    viewport?: Viewport;
-    area?: LayoutArea;
-    basePosition?: any;
-    columns?: number;
-    gap?: number;
-    columnSpacing?: number;
-    rowSpacing?: number;
-    itemSize?: number;
-    itemWidth?: number;
-    itemHeight?: number;
-    centerGrid?: boolean;
-  },
-) => {
+const calculateGridPositions = (items, config) => {
   const {
     viewport = { width: 1920, height: 1080 },
     area,
@@ -269,42 +220,35 @@ const calculateGridPositions = (
   } = config;
 
   const count = items.length;
-
   if (count === 0) return [];
 
   const rows = Math.ceil(count / columns);
 
-  // Decide the rectangle the grid must live within
-  const contentArea: LayoutArea = area || {
+  /** @type {LayoutArea} */
+  const contentArea = area || {
     left: 0,
     top: 0,
     width: viewport.width,
     height: viewport.height,
   };
 
-  // Gap between tiles
   const colGap = gap ?? columnSpacing ?? 40;
   const rowGap = gap ?? rowSpacing ?? 40;
 
-  // Max width/height each tile can have given the area + gaps
   const maxTileWidth = (contentArea.width - colGap * (columns - 1)) / columns;
   const maxTileHeight = (contentArea.height - rowGap * (rows - 1)) / rows;
 
-  // Requested size (if any)
   let tileW = itemWidth ?? itemSize ?? maxTileWidth;
   let tileH = itemHeight ?? itemSize ?? maxTileHeight;
 
-  // Clamp to available space
   tileW = Math.min(tileW, maxTileWidth);
   tileH = Math.min(tileH, maxTileHeight);
 
-  // Actual grid pixel footprint
   const gridWidth = columns * tileW + colGap * (columns - 1);
   const gridHeight = rows * tileH + rowGap * (rows - 1);
 
-  // Position grid within content area
-  let startX: number;
-  let startY: number;
+  let startX;
+  let startY;
 
   if (centerGrid) {
     const leftoverX = contentArea.width - gridWidth;
@@ -316,8 +260,7 @@ const calculateGridPositions = (
     startY = contentArea.top;
   }
 
-  const positions: { x: number; y: number; width: number; height: number; row: number; column: number }[] =
-    [];
+  const positions = [];
 
   items.forEach((_, index) => {
     const col = index % columns;
@@ -342,17 +285,11 @@ const calculateGridPositions = (
 /**
  * CIRCULAR POSITIONS
  * Arranges items in a circle around a centre point
+ *
+ * @param {any[]} items
+ * @param {Object} config
  */
-const calculateCircularPositions = (
-  items: any[],
-  config: {
-    viewport?: Viewport;
-    area?: LayoutArea;
-    basePosition?: any;
-    radius?: number;
-    startAngle?: number;
-  },
-) => {
+const calculateCircularPositions = (items, config) => {
   const {
     viewport = { width: 1920, height: 1080 },
     area,
@@ -368,7 +305,7 @@ const calculateCircularPositions = (
       }
     : resolvePosition(basePosition, { x: 0, y: 0 }, viewport);
 
-  const positions: { x: number; y: number }[] = [];
+  const positions = [];
   const angleStep = (Math.PI * 2) / items.length;
 
   items.forEach((_, index) => {
@@ -385,18 +322,11 @@ const calculateCircularPositions = (
 /**
  * RADIAL POSITIONS
  * Items radiate outward from centre with increasing radius
+ *
+ * @param {any[]} items
+ * @param {Object} config
  */
-const calculateRadialPositions = (
-  items: any[],
-  config: {
-    viewport?: Viewport;
-    area?: LayoutArea;
-    basePosition?: any;
-    angles?: number[];
-    startRadius?: number;
-    radiusIncrement?: number;
-  },
-) => {
+const calculateRadialPositions = (items, config) => {
   const {
     viewport = { width: 1920, height: 1080 },
     area,
@@ -413,7 +343,7 @@ const calculateRadialPositions = (
       }
     : resolvePosition(basePosition, { x: 0, y: 0 }, viewport);
 
-  const positions: { x: number; y: number }[] = [];
+  const positions = [];
 
   items.forEach((_, index) => {
     const angle = angles[index] || (index * Math.PI * 2) / items.length;
@@ -431,17 +361,11 @@ const calculateRadialPositions = (
 /**
  * CASCADE POSITIONS
  * Each item offset diagonally from a base point
+ *
+ * @param {any[]} items
+ * @param {Object} config
  */
-const calculateCascadePositions = (
-  items: any[],
-  config: {
-    viewport?: Viewport;
-    area?: LayoutArea;
-    basePosition?: any;
-    offsetX?: number;
-    offsetY?: number;
-  },
-) => {
+const calculateCascadePositions = (items, config) => {
   const {
     viewport = { width: 1920, height: 1080 },
     area,
@@ -466,11 +390,11 @@ const calculateCascadePositions = (
 /**
  * CENTERED POSITIONS
  * All items share same centre (for overlays / z-layers)
+ *
+ * @param {any[]} items
+ * @param {Object} config
  */
-const calculateCenteredPositions = (
-  items: any[],
-  config: { viewport?: Viewport; area?: LayoutArea; basePosition?: any },
-) => {
+const calculateCenteredPositions = (items, config) => {
   const {
     viewport = { width: 1920, height: 1080 },
     area,
@@ -489,10 +413,15 @@ const calculateCenteredPositions = (
 
 /**
  * Calculate dynamic spacing based on item count
+ *
+ * @param {number} itemCount
+ * @param {number} availableSpace
+ * @param {number} [minSpacing]
+ * @param {number} [maxSpacing]
  */
 export const calculateDynamicSpacing = (
-  itemCount: number,
-  availableSpace: number,
+  itemCount,
+  availableSpace,
   minSpacing = 40,
   maxSpacing = 120,
 ) => {
@@ -503,8 +432,10 @@ export const calculateDynamicSpacing = (
 
 /**
  * Calculate bounding box for a set of positions
+ *
+ * @param {{x:number,y:number}[]} positions
  */
-export const calculateBoundingBox = (positions: { x: number; y: number }[]) => {
+export const calculateBoundingBox = (positions) => {
   if (!positions.length) {
     return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
   }
@@ -529,8 +460,11 @@ export const calculateBoundingBox = (positions: { x: number; y: number }[]) => {
 
 /**
  * Scale positions to fit within bounds
+ *
+ * @param {{x:number,y:number}[]} positions
+ * @param {LayoutArea} bounds
  */
-export const scalePositionsToFit = (positions: { x: number; y: number }[], bounds: LayoutArea) => {
+export const scalePositionsToFit = (positions, bounds) => {
   const bbox = calculateBoundingBox(positions);
   if (bbox.width === 0 || bbox.height === 0) return positions;
 
@@ -547,9 +481,12 @@ export const scalePositionsToFit = (positions: { x: number; y: number }[], bound
 /**
  * Generic layout presets.
  * Kept light – scenes can still define their own configs on top.
+ *
+ * @param {string} pattern
+ * @param {Record<string, any>} [overrides]
  */
-export const getLayoutPattern = (pattern: string, overrides: Record<string, any> = {}) => {
-  const patterns: Record<string, any> = {
+export const getLayoutPattern = (pattern, overrides = {}) => {
+  const patterns = {
     'question-stacked': {
       arrangement: ARRANGEMENT_TYPES.STACKED_VERTICAL,
       spacing: 80,
@@ -584,9 +521,13 @@ export const getLayoutPattern = (pattern: string, overrides: Record<string, any>
 
 /**
  * Responsive font sizing helper
+ *
+ * @param {string} text
+ * @param {number} [baseSize]
+ * @param {number} [threshold]
  */
 export const calculateResponsiveFontSize = (
-  text: string,
+  text,
   baseSize = 92,
   threshold = 30,
 ) => {
@@ -601,10 +542,10 @@ export const calculateResponsiveFontSize = (
 
 /**
  * Simple overlap check when width/height are known
+ *
+ * @param {{x:number,y:number,width:number,height:number}[]} items
  */
-export const checkForOverlaps = (
-  items: { x: number; y: number; width: number; height: number }[],
-) => {
+export const checkForOverlaps = (items) => {
   for (let i = 0; i < items.length; i++) {
     for (let j = i + 1; j < items.length; j++) {
       const a = items[i];
@@ -625,9 +566,14 @@ export const checkForOverlaps = (
 
 /**
  * Stagger delays for list / grid animations
+ *
+ * @param {number} itemCount
+ * @param {number} [totalDuration]
+ * @param {number} [minDelay]
+ * @param {number} [maxDelay]
  */
 export const calculateStaggerDelays = (
-  itemCount: number,
+  itemCount,
   totalDuration = 2.0,
   minDelay = 0.1,
   maxDelay = 0.5,
