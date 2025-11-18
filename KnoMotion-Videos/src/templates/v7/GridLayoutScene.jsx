@@ -16,6 +16,7 @@ import { AppMosaic } from '../../sdk/components/mid-level/AppMosaic';
 import {
   ARRANGEMENT_TYPES,
   calculateItemPositions,
+  createLayoutAreas,
 } from '../../sdk/layout/layoutEngineV2';
 
 // Simple animation helpers (inline to avoid import conflicts)
@@ -356,42 +357,66 @@ export const GridLayoutScene = ({ scene }) => {
   const items = content.items || [];
  
   const viewport = { width, height };
+  // 🔵 Define canvas/title/content areas so the grid never collides with title or bottom edge
+  const areas = useMemo(() => {
+    const padding = style_tokens.spacing?.padding ?? 80;
+
+    // Reserve a strip for the title if one exists
+    const titleHeight = content.title ? 140 : 0;
+
+    // Reserve some breathing room at the bottom even if no explicit footer
+    const footerHeight = 80;
+
+    return createLayoutAreas({
+      viewport,
+      padding,
+      titleHeight,
+      footerHeight,
+    });
+  }, [
+    viewport.width,
+    viewport.height,
+    style_tokens.spacing?.padding,
+    content.title,
+  ]);
 
   // Grid config
-  const columns = Math.min(layout.columns, layout.maxItemsPerRow);
-  const rows = Math.ceil(items.length / Math.max(columns, 1));
+  const columns = Math.min(layout.columns, layout.maxItemsPerRow || layout.columns);
 
-  // Calculate responsive item size (you already had this – keep it)
-  const availableWidth = width - (style_tokens.spacing.padding * 2);
-  const availableHeight = height - (style_tokens.spacing.padding * 2) - (content.title ? 150 : 0);
- 
-  const maxItemWidth = (availableWidth - (layout.gap * (columns - 1))) / columns;
-  const maxItemHeight = (availableHeight - (layout.gap * (rows - 1))) / rows;
-  const itemSize = layout.adaptiveSize
-    ? Math.min(layout.itemSize, maxItemWidth, maxItemHeight)
-    : layout.itemSize;
-
-  // 🔵 NEW: ask layout engine for positions
   const gridSlots = useMemo(() => {
     if (!items.length) return [];
 
-    return calculateItemPositions(items, {
+    const gap = layout.gap ?? style_tokens.spacing?.gap ?? 40;
+
+    const rawSlots = calculateItemPositions(items, {
       arrangement: ARRANGEMENT_TYPES.GRID,
-      basePosition: 'center',
-      columns,
-      columnSpacing: itemSize + layout.gap,
-      rowSpacing: itemSize + layout.gap,
-      centerGrid: true,
       viewport,
-    }).map((pos, index) => ({
+      area: areas.content,          // 👈 key change: use content area, not full viewport
+      columns,
+      gap,
+      itemSize: layout.itemSize,    // desired size; engine clamps to fit area
+      centerGrid: true,
+    });
+
+    return rawSlots.map((pos, index) => ({
       x: pos.x,
       y: pos.y,
-      width: itemSize,
-      height: itemSize,
-      row: Math.floor(index / columns),
-      column: index % columns,
+      width: pos.width,
+      height: pos.height,
+      row: pos.row,
+      column: pos.column,
+      index,
     }));
-  }, [items.length, columns, itemSize, layout.gap, viewport.width, viewport.height]);
+  }, [
+    items.length,
+    columns,
+    layout.itemSize,
+    layout.gap,
+    style_tokens.spacing?.gap,
+    viewport.width,
+    viewport.height,
+    areas.content,
+  ]);
 
   // Particles
   const particles = useMemo(() => {
