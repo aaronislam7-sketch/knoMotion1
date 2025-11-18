@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { 
+import {
   toFrames,
   GlassmorphicPane,
   SpotlightEffect,
@@ -9,8 +9,14 @@ import {
   renderAmbientParticles,
   getCardEntrance
 } from '../../sdk';
-// Note: calculateGridPositions is defined inline below since it's not exported from SDK
+
 import { AppMosaic } from '../../sdk/components/mid-level/AppMosaic';
+
+// 🔵 NEW: import layout engine v2
+import {
+  ARRANGEMENT_TYPES,
+  calculateItemPositions,
+} from '../../sdk/layout/layoutEngineV2';
 
 // Simple animation helpers (inline to avoid import conflicts)
 const fadeIn = (frame, startFrame, duration) => {
@@ -43,74 +49,8 @@ const scaleIn = (frame, startFrame, duration, fromScale = 0.7) => {
   return { opacity: progress, transform: `scale(${fromScale + (1 - fromScale) * progress})` };
 };
 
-// Helper: Calculate grid positions
-const calculateGridPositions = (items, config) => {
-  const {
-    basePosition = 'center',
-    columns,
-    columnSpacing,
-    rowSpacing,
-    centerGrid = true,
-    viewport
-  } = config;
-  
-  const rows = Math.ceil(items.length / columns);
-  const positions = [];
-  
-  const gridWidth = (columns - 1) * columnSpacing;
-  const gridHeight = (rows - 1) * rowSpacing;
-  
-  const startX = centerGrid ? (viewport.width - gridWidth) / 2 : 100;
-  const startY = centerGrid ? (viewport.height - gridHeight) / 2 : 100;
-  
-  items.forEach((item, index) => {
-    const col = index % columns;
-    const row = Math.floor(index / columns);
-    
-    positions.push({
-      x: startX + (col * columnSpacing),
-      y: startY + (row * rowSpacing)
-    });
-  });
-  
-  return positions;
-};
-
 /**
  * SCENE TEMPLATE: GridLayoutScene - V7.0
- * 
- * PURPOSE: N×M grid arrangement with auto-positioning
- * DIFFERENTIATOR: Flexible grid with staggered animations
- * 
- * ACCEPTANCE CRITERIA:
- * ✅ Accepts layout.columns, layout.gap, content.items[]
- * ✅ Auto-positions items in grid (no pixel coords in JSON)
- * ✅ Grid adapts to item count (last row can be partially filled)
- * ✅ Respects theme/style tokens
- * ✅ Supports staggered entrance animations
- * ✅ Works in landscape and portrait (responsive)
- * ✅ Generic items (not assuming "apps")
- * ✅ Integrates with AppMosaic when requested
- * ✅ Fully wired to registry and driven by JSON
- * 
- * CONTENT STRUCTURE:
- * {
- *   content: {
- *     title: "Grid Title",  // Optional
- *     items: [
- *       { label: "Item 1", icon: "🎯", description: "...", color: "#FF6B35" },
- *       { label: "Item 2", icon: "💡", description: "..." }
- *     ]
- *   },
- *   layout: {
- *     columns: 3,
- *     gap: 40,
- *     itemSize: 240
- *   },
- *   animations: {
- *     stagger: { type: "row", delay: 0.15 }
- *   }
- * }
  */
 
 export const TEMPLATE_VERSION = '7.0';
@@ -125,16 +65,16 @@ const DEFAULT_CONFIG = {
       { label: 'Item 3', icon: '🚀', description: 'Third item' }
     ]
   },
-  
+ 
   layout: {
     columns: 3,
     gap: 40,
     itemSize: 240,
-    adaptiveSize: true,  // Auto-adjust for item count
+    adaptiveSize: true,
     maxItemsPerRow: 4,
     alignment: 'center'
   },
-  
+ 
   style_tokens: {
     colors: {
       bg: '#1A1A1A',
@@ -158,7 +98,7 @@ const DEFAULT_CONFIG = {
       gap: 40
     }
   },
-  
+ 
   beats: {
     entrance: 0.5,
     title: 1.0,
@@ -167,23 +107,23 @@ const DEFAULT_CONFIG = {
     hold: 8.0,
     exit: 10.0
   },
-  
+ 
   animations: {
     title: {
       entrance: 'fadeIn',
       duration: 0.8
     },
     items: {
-      entrance: 'cardEntrance',  // 'fadeIn', 'slideIn', 'scaleIn', 'cardEntrance'
+      entrance: 'cardEntrance',
       duration: 0.6,
       stagger: {
         enabled: true,
-        type: 'index',  // 'index', 'row', 'column'
+        type: 'index',
         delay: 0.15
       }
     }
   },
-  
+ 
   effects: {
     particles: {
       enabled: false,
@@ -207,7 +147,7 @@ const DEFAULT_CONFIG = {
       borderOpacity: 0.4
     }
   },
-  
+ 
   mid_level_components: {
     appMosaic: {
       enabled: false,
@@ -222,9 +162,9 @@ const calculateItemStartFrame = (index, row, col, staggerConfig, baseFrame, item
   if (!staggerConfig.enabled) {
     return baseFrame;
   }
-  
-  const delayFrames = staggerConfig.delay * 30; // Convert to frames (assuming 30fps)
-  
+ 
+  const delayFrames = staggerConfig.delay * 30; // TODO: use fps instead
+ 
   switch (staggerConfig.type) {
     case 'row':
       return baseFrame + (row * delayFrames);
@@ -237,16 +177,16 @@ const calculateItemStartFrame = (index, row, col, staggerConfig, baseFrame, item
 };
 
 // Helper: Render individual grid item
-const renderGridItem = (item, index, position, size, style, frame, startFrame, fps, animations, effects) => {
+const renderGridItem = (item, index, slot, style, frame, startFrame, fps, animations, effects) => {
   const { colors, fonts } = style;
   const animConfig = animations.items;
   const duration = (animConfig.duration || 0.6) * fps;
-  
-  // SIMPLIFIED: Use basic fadeIn for now (animations should be in mid-level)
+
+  const size = Math.min(slot.width, slot.height);
+ 
+  // For now keep simple fade; mid-level / SDK can own fancier stuff
   let animStyle = fadeIn(frame, startFrame, duration);
-  
-  console.log('[GridItem]', index, 'Frame:', frame, 'StartFrame:', startFrame, 'Opacity:', animStyle.opacity);
-  
+ 
   const itemColor = item.color || colors.primary;
 
   return (
@@ -254,13 +194,11 @@ const renderGridItem = (item, index, position, size, style, frame, startFrame, f
       key={index}
       style={{
         position: 'absolute',
-        left: position.x - size / 2,
-        top: position.y - size / 2,
+        left: slot.x - size / 2,
+        top: slot.y - size / 2,
         width: size,
         height: size,
         ...animStyle,
-        // DEBUG: Force visible for testing
-        border: '2px solid red'  // Temporary debug border
       }}
     >
       {effects.itemGlass.enabled ? (
@@ -380,7 +318,7 @@ const renderGridItem = (item, index, position, size, style, frame, startFrame, f
 export const GridLayoutScene = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  
+ 
   // Merge with defaults
   const config = useMemo(() => ({
     ...DEFAULT_CONFIG,
@@ -411,42 +349,51 @@ export const GridLayoutScene = ({ scene }) => {
       itemGlass: { ...DEFAULT_CONFIG.effects.itemGlass, ...scene.effects?.itemGlass }
     }
   }), [scene]);
-  
-  const { content, layout, style_tokens, beats, animations, effects } = config;
+ 
+  const { content, layout, style_tokens, beats, animations, effects, mid_level_components } = config;
   const colors = style_tokens.colors;
   const fonts = style_tokens.fonts;
   const items = content.items || [];
-  
-  // Debug logging
-  console.log('[GridLayoutScene] Frame:', frame, 'Items:', items.length, 'AppMosaic:', config.mid_level_components?.appMosaic?.enabled);
-  
-  // Calculate grid layout
+ 
+  const viewport = { width, height };
+
+  // Grid config
   const columns = Math.min(layout.columns, layout.maxItemsPerRow);
-  const rows = Math.ceil(items.length / columns);
-  
-  // Calculate responsive item size if needed
+  const rows = Math.ceil(items.length / Math.max(columns, 1));
+
+  // Calculate responsive item size (you already had this – keep it)
   const availableWidth = width - (style_tokens.spacing.padding * 2);
   const availableHeight = height - (style_tokens.spacing.padding * 2) - (content.title ? 150 : 0);
-  
+ 
   const maxItemWidth = (availableWidth - (layout.gap * (columns - 1))) / columns;
   const maxItemHeight = (availableHeight - (layout.gap * (rows - 1))) / rows;
-  const itemSize = layout.adaptiveSize 
+  const itemSize = layout.adaptiveSize
     ? Math.min(layout.itemSize, maxItemWidth, maxItemHeight)
     : layout.itemSize;
-  
-  // Calculate grid positions
-  const gridPositions = useMemo(() => {
-    return calculateGridPositions(items, {
+
+  // 🔵 NEW: ask layout engine for positions
+  const gridSlots = useMemo(() => {
+    if (!items.length) return [];
+
+    return calculateItemPositions(items, {
+      arrangement: ARRANGEMENT_TYPES.GRID,
       basePosition: 'center',
       columns,
       columnSpacing: itemSize + layout.gap,
       rowSpacing: itemSize + layout.gap,
       centerGrid: true,
-      viewport: { width, height }
-    });
-  }, [items.length, columns, itemSize, layout.gap, width, height]);
-  
-  // Generate particles once
+      viewport,
+    }).map((pos, index) => ({
+      x: pos.x,
+      y: pos.y,
+      width: itemSize,
+      height: itemSize,
+      row: Math.floor(index / columns),
+      column: index % columns,
+    }));
+  }, [items.length, columns, itemSize, layout.gap, viewport.width, viewport.height]);
+
+  // Particles
   const particles = useMemo(() => {
     if (!effects.particles.enabled) return [];
     return generateAmbientParticles({
@@ -456,20 +403,22 @@ export const GridLayoutScene = ({ scene }) => {
       bounds: { w: width, h: height }
     });
   }, [effects.particles.enabled, effects.particles.count, effects.particles.color, width, height]);
-  
-  // Calculate beat frames
+ 
+  // Beat frames
   const beatFrames = {
     entrance: toFrames(beats.entrance, fps),
     title: toFrames(beats.title, fps),
     firstItem: toFrames(beats.firstItem, fps)
   };
-  
+ 
   // Title animation
   const titleAnim = content.title ? (() => {
     const titleConfig = animations.title;
     const duration = (titleConfig.duration || 0.8) * fps;
     return fadeIn(frame, beatFrames.title, duration);
   })() : null;
+
+  const useAppMosaic = mid_level_components?.appMosaic?.enabled;
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
@@ -483,18 +432,17 @@ export const GridLayoutScene = ({ scene }) => {
           opacity={effects.spotlight.opacity}
         />
       )}
-      
+     
       {effects.noise.enabled && (
         <NoiseTexture opacity={effects.noise.opacity} />
       )}
-      
-      {/* Ambient Particles */}
+     
       {effects.particles.enabled && particles.length > 0 && (
         <svg style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none' }}>
           {renderAmbientParticles(particles, frame, fps, { opacity: effects.particles.opacity })}
         </svg>
       )}
-      
+     
       {/* Optional Title */}
       {content.title && (
         <div
@@ -515,43 +463,58 @@ export const GridLayoutScene = ({ scene }) => {
           {content.title}
         </div>
       )}
-      
-      {/* Grid Items - Simple default rendering, AppMosaic disabled for now */}
+     
+      {/* Grid Content */}
       <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
-        {items.map((item, index) => {
-          const row = Math.floor(index / columns);
-          const col = index % columns;
-          const position = gridPositions[index];
-          
-          console.log('[GridLayout] Rendering item', index, 'Position:', position, 'Item:', item.label);
-          
-          if (!position) {
-            console.warn('[GridLayout] No position for item', index);
-            return null;
-          }
-          
-          const itemStartFrame = calculateItemStartFrame(
-            index,
-            row,
-            col,
-            animations.items.stagger,
-            beatFrames.firstItem,
-            columns
-          );
-          
-          return renderGridItem(
-            item,
-            index,
-            position,
-            itemSize,
-            style_tokens,
-            frame,
-            itemStartFrame,
-            fps,
-            animations,
-            effects
-          );
-        })}
+        {useAppMosaic ? (
+          <AppMosaic
+            items={items}
+            positions={gridSlots.map((slot) => ({ x: slot.x, y: slot.y }))}
+            layout={{
+              columns,
+              gap: layout.gap,
+              itemSize,
+              centerGrid: true,
+            }}
+            style={style_tokens}
+            animations={animations.items}
+            effects={{
+              glass: effects.itemGlass.enabled,
+              glowOpacity: effects.itemGlass.glowOpacity,
+              borderOpacity: effects.itemGlass.borderOpacity,
+              focusZoom: mid_level_components.appMosaic.focusZoom,
+              focusIndex: mid_level_components.appMosaic.focusIndex ?? null,
+            }}
+            startFrame={beatFrames.firstItem}
+            viewport={viewport}
+          />
+        ) : (
+          items.map((item, index) => {
+            const slot = gridSlots[index];
+            if (!slot) return null;
+
+            const itemStartFrame = calculateItemStartFrame(
+              index,
+              slot.row,
+              slot.column,
+              animations.items.stagger,
+              beatFrames.firstItem,
+              columns
+            );
+           
+            return renderGridItem(
+              item,
+              index,
+              slot,
+              style_tokens,
+              frame,
+              itemStartFrame,
+              fps,
+              animations,
+              effects
+            );
+          })
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -561,10 +524,9 @@ export const GridLayoutScene = ({ scene }) => {
 export const getDuration = (scene, fps = 30) => {
   const config = { ...DEFAULT_CONFIG, ...scene };
   const exitTime = config.beats?.exit || DEFAULT_CONFIG.beats.exit;
-  return Math.ceil((exitTime + 1.0) * fps); // Convert seconds to frames
+  return Math.ceil((exitTime + 1.0) * fps);
 };
 
-// Template metadata
 export const TEMPLATE_METADATA = {
   id: TEMPLATE_ID,
   version: TEMPLATE_VERSION,
