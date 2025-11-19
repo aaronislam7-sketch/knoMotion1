@@ -163,59 +163,9 @@ export const GradientBackground: React.FC<{
   );
 };
 
-// ==================== NOISE TEXTURE ====================
-
-export const NoiseTexture: React.FC<{
-  opacity?: number;
-  scale?: number;
-}> = ({ opacity = 0.04, scale = 1 }) => {
-  return (
-    <AbsoluteFill
-      style={{
-        pointerEvents: 'none',
-        opacity,
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          backgroundSize: `${100 * scale}px ${100 * scale}px`,
-          mixBlendMode: 'overlay',
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
-
-// ==================== SPOTLIGHT EFFECT ====================
-
-export const SpotlightEffect: React.FC<{
-  x?: number;
-  y?: number;
-  size?: number;
-  color?: string;
-  opacity?: number;
-}> = ({ x = 50, y = 50, size = 800, color = '#ffffff', opacity = 0.1 }) => {
-  return (
-    <AbsoluteFill style={{ pointerEvents: 'none' }}>
-      <div
-        style={{
-          position: 'absolute',
-          left: `${x}%`,
-          top: `${y}%`,
-          width: size,
-          height: size,
-          transform: 'translate(-50%, -50%)',
-          background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-          opacity,
-          filter: 'blur(60px)',
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
+// ==================== NOISE TEXTURE & SPOTLIGHT EFFECT ====================
+// Re-exported from backgrounds.jsx for backward compatibility
+export { NoiseTexture, SpotlightEffect } from './backgrounds.jsx';
 
 // ==================== ANIMATED PARTICLES - OPTIMIZED ====================
 

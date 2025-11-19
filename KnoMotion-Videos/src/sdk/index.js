@@ -3,34 +3,42 @@
  * Centralized utilities, animations, and components for all templates
  * 
  * Organized structure:
- * - animations/  - All animation helpers
- * - effects/     - Visual effects (particles, glow, glassmorphic)
- * - lottie/      - Lottie integration
  * - layout/      - Layout engines and positioning
+ * - animations/  - All animation helpers (consolidated)
+ * - elements/    - Low-level visual primitives (NotebookCard)
+ * - effects/     - Visual effects (backgrounds, particles, etc.)
+ * - components/ - Reusable React components (mid-level, etc.)
+ * - lottie/      - Lottie integration
  * - validation/  - Schema validation and compatibility
  * - core/        - Core utilities (easing, time, motion, etc.)
- * - components/  - Reusable React components
  * - fonts/       - Font loading and management
  * - utils/       - Miscellaneous utilities
  */
 
-//ELEMENTS!//
-//export * as elements from './elements/NotebookCard';
+// ==================== LAYOUT ====================
+export * from './layout/layoutEngine';
+export * from './layout/positionSystem';
+export * from './layout/layout-resolver';
 
-// ==================== ANIMATIONS ====================
-export * from './animations/animations';
-export * from './animations/broadcastAnimations';
+// ==================== ANIMATIONS (Consolidated) ====================
+export * from './animations';
+// Micro-delights (for backward compatibility)
 export * from './animations/microDelights';
-export * from './animations/advancedEffects';
-export * from './animations/sceneTransformation';
-export * from './animations/continuousLife';
+
+// ==================== ELEMENTS ====================
+export { NotebookCard } from './elements/NotebookCard';
 
 // ==================== EFFECTS ====================
-export * from './effects/broadcastEffects';
-export * from './effects/handwritingEffects';
+// Background effects (consolidated)
+export * from './effects/backgrounds.jsx';
+// Particle system (for backward compatibility - also exports generateAmbientParticles, etc.)
 export * from './effects/particleSystem';
+// Other effects
+export * from './effects/handwritingEffects';
 export * from './effects/connectingLines';
 export * from './effects/flowLines';
+// Legacy broadcastEffects (for backward compatibility)
+export * from './effects/broadcastEffects';
 
 // ==================== LOTTIE ====================
 export * from './lottie/lottie-helpers';
@@ -38,10 +46,7 @@ export * from './lottie/lottieIntegration';
 export * from './lottie/lottieLibrary';
 export * from './lottie/lottiePresets';
 
-// ==================== LAYOUT ====================
-export * from './layout/layout-resolver';
-export * from './layout/layoutEngine';
-export * from './layout/positionSystem';
+// (Layout exports moved above)
 
 
 // ==================== VALIDATION ====================
@@ -59,6 +64,10 @@ export * from './core/typography';
 export { EZ, getEasing } from './core/easing';
 
 // ==================== COMPONENTS ====================
+// Mid-level components
+export { AppMosaic } from './components/mid-level/AppMosaic';
+export * from './components/mid-level/FlowDiagram';
+// Other components
 export * from './components/components';
 export * from './components/heroRegistry';
 export * from './components/questionRenderer';
@@ -79,18 +88,18 @@ export * from './utils/presets';
 
 // ==================== LEGACY COMPATIBILITY ====================
 // For backward compatibility with old imports
-import * as animations from './animations/animations';
+import * as animationsModule from './animations';
 import * as rough from './utils/rough-utils';
 import * as components from './components/components.jsx';
 import * as lottie from './lottie/lottie-helpers';
 
 export const SDK = {
-  animations,
+  animations: animationsModule,
   rough,
   components,
   lottie
 };
 
-export { animations, rough, components, lottie };
+export { animationsModule as animations, rough, components, lottie };
 
 export default SDK;
