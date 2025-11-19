@@ -457,6 +457,256 @@ export const getLiquidBlob = (frame, config = {}) => {
   return { path, points: pathPoints };
 };
 
+/**
+ * Kinetic typography - text that moves with physics
+ */
+export const getKineticText = (frame, config, fps) => {
+  const {
+    start = 0,
+    text = '',
+    splitBy = 'word',
+    effect = 'wave',
+    amplitude = 20,
+    frequency = 0.1,
+  } = config;
+  
+  const startFrame = Math.round(start * fps);
+  
+  if (frame < startFrame) {
+    return { segments: [], isActive: false };
+  }
+  
+  const localFrame = frame - startFrame;
+  const segments = splitBy === 'word' ? text.split(' ') : text.split('');
+  
+  const animatedSegments = segments.map((segment, index) => {
+    if (effect === 'wave') {
+      const phaseOffset = index * 0.5;
+      const y = Math.sin(localFrame * frequency + phaseOffset) * amplitude;
+      return {
+        text: segment,
+        translateX: 0,
+        translateY: y,
+        rotation: 0,
+        scale: 1,
+        opacity: 1,
+      };
+    }
+    
+    if (effect === 'scatter') {
+      const delay = index * 5;
+      const effectiveFrame = Math.max(0, localFrame - delay);
+      const duration = 40;
+      
+      if (effectiveFrame === 0) {
+        return { text: segment, translateX: 0, translateY: 0, rotation: 0, scale: 0, opacity: 0 };
+      }
+      
+      if (effectiveFrame > duration) {
+        return { text: segment, translateX: 0, translateY: 0, rotation: 0, scale: 1, opacity: 1 };
+      }
+      
+      const seed = index * 1000;
+      const angle = (Math.sin(seed) * Math.PI * 2);
+      const dist = 100;
+      const progress = effectiveFrame / duration;
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      
+      return {
+        text: segment,
+        translateX: Math.cos(angle) * dist * (1 - easedProgress),
+        translateY: Math.sin(angle) * dist * (1 - easedProgress),
+        rotation: 360 * (1 - easedProgress),
+        scale: easedProgress,
+        opacity: easedProgress,
+      };
+    }
+    
+    if (effect === 'orbit') {
+      const radius = 50;
+      const angularSpeed = 0.02;
+      const baseAngle = (index / segments.length) * Math.PI * 2;
+      const currentAngle = baseAngle + (localFrame * angularSpeed);
+      
+      return {
+        text: segment,
+        translateX: Math.cos(currentAngle) * radius,
+        translateY: Math.sin(currentAngle) * radius,
+        rotation: 0,
+        scale: 1,
+        opacity: 1,
+      };
+    }
+    
+    return { text: segment, translateX: 0, translateY: 0, rotation: 0, scale: 1, opacity: 1 };
+  });
+  
+  return { segments: animatedSegments, isActive: true };
+};
+
+/**
+ * Parallax depth layers
+ */
+export const getParallaxLayer = (frame, config = {}) => {
+  const {
+    depth = 1,
+    intensity = 1,
+    centerX = 960,
+    centerY = 540,
+  } = config;
+  
+  const cameraX = Math.sin(frame * 0.01) * 20 * intensity;
+  const cameraY = Math.cos(frame * 0.008) * 15 * intensity;
+  const parallaxX = cameraX * depth;
+  const parallaxY = cameraY * depth;
+  const scale = 1 + (depth * 0.05);
+  
+  return { translateX: parallaxX, translateY: parallaxY, scale };
+};
+
+/**
+ * Text reveal with mask animation
+ */
+export const getMaskReveal = (frame, config, fps) => {
+  const {
+    start = 0,
+    duration = 1.0,
+    direction = 'left',
+    textBounds,
+    ease = 'smooth',
+  } = config;
+  
+  const startFrame = Math.round(start * fps);
+  const endFrame = Math.round((start + duration) * fps);
+  
+  if (frame < startFrame) {
+    return { visible: false, clipPath: null };
+  }
+  
+  if (frame >= endFrame) {
+    return { visible: true, clipPath: null };
+  }
+  
+  const easeFn = EZ[ease] || EZ.smooth;
+  const progress = interpolate(
+    frame,
+    [startFrame, endFrame],
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: easeFn }
+  );
+  
+  const { x, y, width, height } = textBounds;
+  let clipPath = '';
+  
+  if (direction === 'left') {
+    const revealWidth = width * progress;
+    clipPath = `inset(0 ${width - revealWidth}px 0 0)`;
+  } else if (direction === 'right') {
+    const revealWidth = width * progress;
+    clipPath = `inset(0 0 0 ${width - revealWidth}px)`;
+  } else if (direction === 'top') {
+    const revealHeight = height * progress;
+    clipPath = `inset(${height - revealHeight}px 0 0 0)`;
+  } else if (direction === 'bottom') {
+    const revealHeight = height * progress;
+    clipPath = `inset(0 0 ${height - revealHeight}px 0)`;
+  } else if (direction === 'center') {
+    const revealWidth = width * progress;
+    const revealHeight = height * progress;
+    const leftInset = (width - revealWidth) / 2;
+    const topInset = (height - revealHeight) / 2;
+    clipPath = `inset(${topInset}px ${leftInset}px ${topInset}px ${leftInset}px)`;
+  }
+  
+  return { visible: true, clipPath, progress };
+};
+
+/**
+ * Ink splatter/splash effect
+ */
+export const getInkSplatter = (frame, config, fps) => {
+  const {
+    start = 0,
+    duration = 0.8,
+    centerX = 960,
+    centerY = 540,
+    maxRadius = 200,
+    points = 12,
+    seed = 0,
+  } = config;
+  
+  const startFrame = Math.round(start * fps);
+  const endFrame = Math.round((start + duration) * fps);
+  
+  if (frame < startFrame) {
+    return { visible: false, paths: [] };
+  }
+  
+  const progress = frame >= endFrame ? 1 : (frame - startFrame) / (endFrame - startFrame);
+  const paths = [];
+  
+  for (let i = 0; i < points; i++) {
+    const angle = (i / points) * Math.PI * 2 + seed;
+    const distance = maxRadius * progress;
+    const wobble = Math.sin(seed + i * 3) * 0.3 + 0.7;
+    const actualDistance = distance * wobble;
+    const x = centerX + Math.cos(angle) * actualDistance;
+    const y = centerY + Math.sin(angle) * actualDistance;
+    const blobSize = 10 + Math.sin(seed + i * 5) * 8;
+    
+    paths.push({ cx: x, cy: y, r: blobSize * progress });
+  }
+  
+  return {
+    visible: true,
+    progress,
+    centerX,
+    centerY,
+    centerRadius: maxRadius * progress * 0.6,
+    splatterPoints: paths,
+  };
+};
+
+/**
+ * Generate SVG filter for advanced effects
+ */
+export const createSVGFilter = (filterId, effect = 'glow', config = {}) => {
+  if (effect === 'glow') {
+    const { color = '#FF6B35', intensity = 5 } = config;
+    return `
+      <filter id="${filterId}">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="${intensity}" />
+        <feOffset dx="0" dy="0" result="offsetblur" />
+        <feFlood flood-color="${color}" />
+        <feComposite in2="offsetblur" operator="in" />
+        <feMerge>
+          <feMergeNode />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    `;
+  }
+  
+  if (effect === 'shadow') {
+    const { offsetX = 0, offsetY = 4, blur = 8, opacity = 0.3 } = config;
+    return `
+      <filter id="${filterId}">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="${blur}" />
+        <feOffset dx="${offsetX}" dy="${offsetY}" result="offsetblur" />
+        <feComponentTransfer>
+          <feFuncA type="linear" slope="${opacity}" />
+        </feComponentTransfer>
+        <feMerge>
+          <feMergeNode />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    `;
+  }
+  
+  return '';
+};
+
 // ==================== BROADCAST ANIMATIONS (from broadcastAnimations.ts, converted) ====================
 
 /**
@@ -617,89 +867,10 @@ export const rgbToHex = (r, g, b) => {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
-// ==================== MICRO DELIGHTS (key functions from microDelights.jsx) ====================
-
-/**
- * Get particle burst
- */
-export const getParticleBurst = (frame, config, fps) => {
-  const {
-    triggerFrame = 0,
-    particleCount = 12,
-    duration = 1.0,
-    color = '#FFD700',
-    size = 6,
-    spread = 100
-  } = config;
-  
-  const startFrame = toFrames(triggerFrame, fps);
-  const endFrame = toFrames(triggerFrame + duration, fps);
-  
-  if (frame < startFrame || frame > endFrame) {
-    return [];
-  }
-  
-  const progress = interpolate(
-    frame,
-    [startFrame, endFrame],
-    [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.power2Out }
-  );
-  
-  return Array.from({ length: particleCount }, (_, i) => {
-    const angle = (i / particleCount) * Math.PI * 2;
-    const distance = progress * spread;
-    const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance;
-    const opacity = interpolate(progress, [0, 0.3, 1], [0, 1, 0]);
-    const scale = interpolate(progress, [0, 0.2, 1], [1, 1.2, 0.5]);
-    
-    return {
-      x,
-      y,
-      opacity,
-      scale,
-      size,
-      color,
-      rotation: angle * (180 / Math.PI)
-    };
-  });
-};
-
-/**
- * Get spring bounce entrance
- */
-export const getSpringBounce = (frame, config, fps) => {
-  const {
-    startFrame = 0,
-    duration = 0.8,
-    scaleFrom = 0.3,
-    scaleTo = 1.0
-  } = config;
-  
-  const start = toFrames(startFrame, fps);
-  const end = toFrames(startFrame + duration, fps);
-  
-  if (frame < start) {
-    return { opacity: 0, scale: scaleFrom };
-  }
-  
-  if (frame >= end) {
-    return { opacity: 1, scale: scaleTo };
-  }
-  
-  const progress = interpolate(
-    frame,
-    [start, end],
-    [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EZ.backOut }
-  );
-  
-  return {
-    opacity: progress,
-    scale: scaleFrom + (scaleTo - scaleFrom) * progress
-  };
-};
+// ==================== MICRO DELIGHTS ====================
+// Note: Micro-delights functions (getParticleBurst, getCardEntrance, etc.) are exported
+// from animations/microDelights.jsx via the main SDK index.js
+// They are not duplicated here to avoid namespace conflicts
 
 // ==================== ADDITIONAL ADVANCED EFFECTS ====================
 
