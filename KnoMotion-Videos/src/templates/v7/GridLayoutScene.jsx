@@ -10,6 +10,7 @@ import {
 
 import { AppMosaic } from '../../sdk/components/mid-level/AppMosaic';
 import { NotebookCard } from '../../sdk/elements/NotebookCard';
+import { KNODE_THEME } from '/workspaces/knoMotion1/KnoMotion-Videos/src/sdk/theme/knodeTheme.ts';
 
 // NEW: layout engine
 import {
@@ -36,7 +37,7 @@ export const TEMPLATE_ID = 'GridLayoutScene';
 
 const DEFAULT_CONFIG = {
   content: {
-    title: null,
+    title: "HelloWorld",
     items: [
       { label: 'Item 1', icon: '🎯', description: 'First item' },
       { label: 'Item 2', icon: '💡', description: 'Second item' },
@@ -52,28 +53,27 @@ const DEFAULT_CONFIG = {
     maxItemsPerRow: 4,
   },
 
-  style_tokens: {
+style_tokens: {
     colors: {
-      bg: '#1A1A1A',
-      primary: '#FF6B35',
-      secondary: '#4ECDC4',
-      text: '#FFFFFF',
-      textSecondary: '#B0B0B0',
-      cardBg: '#2A2A2A',
+      bg: KNODE_THEME.colors.pageBg,
+      primary: KNODE_THEME.colors.primary,
+      secondary: KNODE_THEME.colors.secondary,
+      text: KNODE_THEME.colors.textMain,
+      textSecondary: KNODE_THEME.colors.textSoft,
+      cardBg: KNODE_THEME.colors.cardBg,
     },
     fonts: {
-      size_title: 64,
-      size_label: 28,
+      size_title: 56,
+      size_label: 24,
       size_description: 16,
-      weight_title: 800,
-      weight_label: 700,
+      weight_title: 700,
+      weight_label: 600,
       weight_body: 400,
-      family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+      family: KNODE_THEME.fonts.header, // notebook-y title by default
     },
     spacing: {
-      padding: 80,
-      gap: 40,
-      titleHeight: 120,
+      padding: KNODE_THEME.spacing.pagePadding,
+      gap: KNODE_THEME.spacing.gapMd,
     },
   },
 
@@ -290,6 +290,17 @@ export const GridLayoutScene = ({ scene }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+      {/* notebook “page edge” if you want */}
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      padding: 32,
+      boxSizing: 'border-box',
+      background:
+        'radial-gradient(circle at top left, #FFFDF8 0, #FFF6E8 55%, #F7E4C9 100%)',
+    }}
+  />
       {/* Background Effects */}
       {effects.spotlight.enabled && (
         <SpotlightEffect

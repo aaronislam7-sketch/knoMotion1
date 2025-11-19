@@ -14,6 +14,9 @@
  * - utils/       - Miscellaneous utilities
  */
 
+//ELEMENTS!//
+//export * as elements from './elements/NotebookCard';
+
 // ==================== ANIMATIONS ====================
 export * from './animations/animations';
 export * from './animations/broadcastAnimations';
@@ -39,6 +42,7 @@ export * from './lottie/lottiePresets';
 export * from './layout/layout-resolver';
 export * from './layout/layoutEngine';
 export * from './layout/positionSystem';
+
 
 // ==================== VALIDATION ====================
 export * from './validation/scene-validator';
