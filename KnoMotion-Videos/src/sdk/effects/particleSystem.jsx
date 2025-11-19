@@ -23,57 +23,12 @@ const seededRandom = (seed) => {
   return x - Math.floor(x);
 };
 
-/**
- * Generate deterministic particles for ambient floating effect
- * Perfect for backgrounds - adds life without distraction
- */
-export const generateAmbientParticles = (count, seed = 42, canvasWidth = 1920, canvasHeight = 1080) => {
-  const particles = [];
-  
-  for (let i = 0; i < count; i++) {
-    const particleSeed = seed + i * 1000;
-    
-    particles.push({
-      id: `ambient-${i}`,
-      x: seededRandom(particleSeed) * canvasWidth,
-      y: seededRandom(particleSeed + 1) * canvasHeight,
-      size: 2 + seededRandom(particleSeed + 2) * 4, // 2-6px
-      speed: 0.3 + seededRandom(particleSeed + 3) * 0.5, // 0.3-0.8
-      phase: seededRandom(particleSeed + 4) * Math.PI * 2, // Random phase offset
-      amplitude: 20 + seededRandom(particleSeed + 5) * 30, // 20-50px horizontal drift
-      opacity: 0.1 + seededRandom(particleSeed + 6) * 0.2, // 0.1-0.3
-    });
-  }
-  
-  return particles;
-};
-
-/**
- * Animate ambient particle (floating motion)
- */
-export const animateAmbientParticle = (particle, frame, fps, config = {}) => {
-  const {
-    verticalSpeed = 1.0, // Pixels per frame upward
-    loopHeight = 1200, // Reset after this distance
-  } = config;
-  
-  // Vertical movement (rises slowly)
-  const baseY = particle.y - (frame * verticalSpeed);
-  const wrappedY = ((baseY % loopHeight) + loopHeight) % loopHeight;
-  
-  // Horizontal drift (sine wave)
-  const driftX = Math.sin(frame * 0.02 * particle.speed + particle.phase) * particle.amplitude;
-  
-  // Subtle scale pulse
-  const scalePulse = 1 + Math.sin(frame * 0.03 * particle.speed + particle.phase) * 0.1;
-  
-  return {
-    x: particle.x + driftX,
-    y: wrappedY,
-    size: particle.size * scalePulse,
-    opacity: particle.opacity,
-  };
-};
+// Re-export ambient particle functions from backgrounds.jsx (consolidated)
+export { 
+  generateAmbientParticles,
+  animateAmbientParticle,
+  renderAmbientParticles
+} from './backgrounds.jsx';
 
 /**
  * Generate confetti burst particles (celebration moment)
@@ -199,29 +154,7 @@ export const animateSparkle = (particle, frame, startFrame) => {
   };
 };
 
-/**
- * Render ambient particles (SVG)
- */
-export const renderAmbientParticles = (particles, frame, fps, colors = ['#FF6B35', '#9B59B6', '#2E7FE4']) => {
-  return particles.map((particle) => {
-    const animated = animateAmbientParticle(particle, frame, fps);
-    const colorIndex = Math.floor(seededRandom(parseFloat(particle.id.split('-')[1]) * 777) * colors.length);
-    
-    return {
-      key: particle.id,
-      element: (
-        <circle
-          key={particle.id}
-          cx={animated.x}
-          cy={animated.y}
-          r={animated.size}
-          fill={colors[colorIndex]}
-          opacity={animated.opacity}
-        />
-      ),
-    };
-  });
-};
+// renderAmbientParticles is now exported from backgrounds.jsx (see re-export above)
 
 /**
  * Render confetti particles (SVG)

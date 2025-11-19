@@ -10,14 +10,14 @@ import {
 
 import { AppMosaic } from '../../sdk/components/mid-level/AppMosaic';
 import { NotebookCard } from '../../sdk/elements/NotebookCard';
-import { KNODE_THEME } from '/workspaces/knoMotion1/KnoMotion-Videos/src/sdk/theme/knodeTheme.ts';
+import { KNODE_THEME } from '../../sdk/theme/knodeTheme';
 
 // NEW: layout engine
 import {
   ARRANGEMENT_TYPES,
   calculateItemPositions,
   createLayoutAreas,
-} from '../../sdk/layout/layoutEngineV2';
+} from '../../sdk/layout/layoutEngine';
 
 // Simple animation helper for title
 const fadeIn = (frame, startFrame, duration) => {

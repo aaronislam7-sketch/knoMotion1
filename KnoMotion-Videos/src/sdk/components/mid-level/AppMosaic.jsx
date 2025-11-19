@@ -1,9 +1,10 @@
 // AppMosaic.jsx
 import React from 'react';
 import { useCurrentFrame, useVideoConfig } from 'remotion';
-import { fadeIn, slideIn, scaleIn, bounceIn, fadeSlide } from '/workspaces/knoMotion1/KnoMotion-Videos/src/sdk/animations/animations.js';
-import { NotebookCard } from '/workspaces/knoMotion1/KnoMotion-Videos/src/sdk/elements/NotebookCard.tsx';
-import { KNODE_THEME } from '/workspaces/knoMotion1/KnoMotion-Videos/src/sdk/theme/knodeTheme.ts';
+import { fadeIn, slideIn, scaleIn, bounceIn, fadeSlide } from '../../animations';
+import { NotebookCard } from '../../elements/NotebookCard';
+import { calculateItemPositions, ARRANGEMENT_TYPES } from '../../layout/layoutEngine';
+import { KNODE_THEME } from '../../theme/knodeTheme';
 
 export const AppMosaic = ({
   items = [],
@@ -48,22 +49,19 @@ export const AppMosaic = ({
 
   const useTemplatePositions = positions && positions.length === items.length;
 
-  const getFallbackPosition = (index) => {
-    const rows = Math.ceil(items.length / columns);
-    const gridWidth = columns * itemSize + (columns - 1) * gap;
-    const gridHeight = rows * itemSize + (rows - 1) * gap;
-
-    const startX = centerGrid ? (viewport.width - gridWidth) / 2 : 100;
-    const startY = centerGrid ? (viewport.height - gridHeight) / 2 : 100;
-
-    const row = Math.floor(index / columns);
-    const col = index % columns;
-
-    return {
-      x: startX + col * (itemSize + gap),
-      y: startY + row * (itemSize + gap),
-    };
-  };
+  // Calculate fallback positions using layout engine
+  const fallbackPositions = React.useMemo(() => {
+    if (useTemplatePositions) return positions;
+    
+    return calculateItemPositions(items, {
+      arrangement: ARRANGEMENT_TYPES.GRID,
+      columns,
+      gap,
+      itemSize,
+      centerGrid,
+      viewport,
+    });
+  }, [items, columns, gap, itemSize, centerGrid, viewport, useTemplatePositions, positions]);
 
   const getEntranceStyle = (index) => {
     const itemStartFrame = startFrame + index * staggerFrames;
@@ -84,9 +82,11 @@ export const AppMosaic = ({
   };
 
   const renderItem = (item, index) => {
-    const basePos = useTemplatePositions
-      ? { x: positions[index].x - itemSize / 2, y: positions[index].y - itemSize / 2 }
-      : getFallbackPosition(index);
+    const pos = fallbackPositions[index] || { x: viewport.width / 2, y: viewport.height / 2 };
+    const basePos = { 
+      x: pos.x - itemSize / 2, 
+      y: pos.y - itemSize / 2 
+    };
 
     const animStyle = getEntranceStyle(index);
 
