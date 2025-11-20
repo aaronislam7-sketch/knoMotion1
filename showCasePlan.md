@@ -106,27 +106,60 @@
 - [ ] **ACTION 1.5**: Audit all mid-scene components for inline element creation violations
 
 **From Ongoing Work**:
-- [ ] **ACTION 1.6**: components.jsx has 9 components, NONE use KNODE_THEME - all need refactoring
-- [ ] **ACTION 1.7**: Only 5 files in entire codebase use KNODE_THEME (NotebookCard, AppMosaic, GridLayoutScene, theme file itself, and 1 legacy)
-- [ ] **ACTION 1.8**: Only 1 element exists in /elements/ directory (NotebookCard.jsx) - need to build library
-- [ ] **ACTION 1.9**: V6 templates have 191 inline DIV/SPAN tags - likely creating elements inline (VIOLATION)
-- [ ] **ACTION 1.10**: Need to scan all V6 templates for inline element creation violations
+- [ ] **ACTION 1.6**: ~~components.jsx has 9 components, NONE use KNODE_THEME - all need refactoring~~ **DEPRIORITIZED** - Legacy components, not for showcase
+- [ ] **ACTION 1.7**: ~~Only 5 files in entire codebase use KNODE_THEME~~ **NOT CRITICAL** - Focus on new showcase components only
+- [ ] **ACTION 1.8**: Only 1 element exists in /elements/ directory (NotebookCard.jsx) - need to build library **CRITICAL FOR SHOWCASE**
+- [ ] **ACTION 1.9**: ~~V6 templates have 191 inline DIV/SPAN tags~~ **DEPRIORITIZED** - Templates will be sunset
+- [ ] **ACTION 1.10**: ~~Need to scan all V6 templates for inline element creation violations~~ **DEPRIORITIZED**
+- [ ] **ACTION 1.11**: Investigate DaisyUI + MaterialUI for element foundations (with Tailwind)
+- [ ] **ACTION 1.12**: Define "never import directly" wrapper pattern for external components
+- [ ] **ACTION 1.13**: Enhance KNODE_THEME with paper-y texture aesthetic
+- [ ] **ACTION 1.14**: Clarify paper-y aesthetic: element-level vs background-level texture
 
 ---
 
 ### Decision Log
 
 **Decision 1**: Consolidate showcase scenes
-- **Date**: [Date]
+- **Date**: 2025-11-20
 - **Decision**: Scenes 1+2 combined, 4-7 combined, layouts separate
 - **Rationale**: Smoother narrative flow, fewer composition switches
 - **Status**: ✅ Approved
 
 **Decision 2**: Element creation enforcement
-- **Date**: [Date]
+- **Date**: 2025-11-20
 - **Decision**: Strict rule - NO combo elements in mid-scenes/templates
 - **Rationale**: Prevent duplication, enforce reusability
 - **Status**: ✅ Approved
+
+**Decision 3**: Deprioritize old template refactoring
+- **Date**: 2025-11-20
+- **Decision**: Do NOT refactor V6/V7 templates for theme/element compliance
+- **Rationale**: Templates will be sunset, focus on showcase forward-looking work
+- **Status**: ✅ Approved
+- **Impact**: Removes ~20 templates from Phase 2 refactoring scope
+
+**Decision 4**: Element library quality over quantity
+- **Date**: 2025-11-20
+- **Decision**: Focus on 10-15 AMAZING elements vs 50 boring ones
+- **Rationale**: Showcase needs polish, not volume
+- **Requirements**: Clean, crisp styling with paper-y texture aesthetic
+- **Status**: ✅ Approved
+
+**Decision 5**: Leverage external component libraries (with wrapper pattern)
+- **Date**: 2025-11-20
+- **Decision**: Use Tailwind, DaisyUI, MaterialUI for element foundation
+- **Critical Rule**: NEVER import directly - always wrap, theme, export via SDK
+- **Rationale**: Accelerate development while maintaining control and theming
+- **Constraints**: Must be deterministic (no hover/event animations for Remotion)
+- **Status**: ✅ Approved
+
+**Decision 6**: Paper-y aesthetic as theme foundation
+- **Date**: 2025-11-20
+- **Decision**: Improve KNODE_THEME to emphasize grainy texture, notebook feel
+- **Rationale**: Aligns to product aesthetic - "working on piece of paper"
+- **Status**: ✅ Approved
+- **Question**: Awaiting clarification on element vs background texture approach
 
 (Add more decisions here as made)
 
@@ -164,6 +197,9 @@
 **Next Steps**:
 - Proceed to Phase 2: Critical Prerequisites
 - Focus on Lottie migration and Element library first
+- **REVISED SCOPE**: No old template refactoring - showcase only!
+- **QUALITY FOCUS**: 10-15 amazing elements > 50 mediocre ones
+- **LEVERAGE LIBS**: DaisyUI/MaterialUI via Tailwind (wrapper pattern)
 
 ---
 
