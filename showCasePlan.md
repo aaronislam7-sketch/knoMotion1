@@ -113,8 +113,8 @@
 - [ ] **ACTION 1.10**: ~~Need to scan all V6 templates for inline element creation violations~~ **DEPRIORITIZED**
 - [ ] **ACTION 1.11**: Investigate DaisyUI + MaterialUI for element foundations (with Tailwind)
 - [ ] **ACTION 1.12**: Define "never import directly" wrapper pattern for external components
-- [ ] **ACTION 1.13**: Enhance KNODE_THEME with paper-y texture aesthetic
-- [ ] **ACTION 1.14**: Clarify paper-y aesthetic: element-level vs background-level texture
+- [ ] **ACTION 1.13**: ~~Enhance KNODE_THEME with paper-y texture aesthetic~~ **DEFERRED** - Keep simple for now
+- [x] **ACTION 1.14**: ~~Clarify paper-y aesthetic~~ **RESOLVED** - Use existing theme as-is
 
 ---
 
@@ -156,10 +156,9 @@
 
 **Decision 6**: Paper-y aesthetic as theme foundation
 - **Date**: 2025-11-20
-- **Decision**: Improve KNODE_THEME to emphasize grainy texture, notebook feel
-- **Rationale**: Aligns to product aesthetic - "working on piece of paper"
-- **Status**: ✅ Approved
-- **Question**: Awaiting clarification on element vs background texture approach
+- **Decision**: Keep aesthetic simple - use existing KNODE_THEME as-is
+- **Rationale**: More important priorities (Lottie, Elements), aesthetic polish can come later
+- **Status**: ✅ Approved - DEFERRED to post-showcase
 
 (Add more decisions here as made)
 
@@ -482,9 +481,16 @@
 
 ### 2.1 Element Library Standardization
 
-**Status**: `🔴 CRITICAL`
+**Status**: `🔴 CRITICAL - TOP PRIORITY`
 
-**Objective**: Create standardized, theme-compliant atomic elements in `/sdk/elements/`.
+**Objective**: Create 10-15 AMAZING, polished elements leveraging DaisyUI/MaterialUI via Tailwind wrapper pattern.
+
+**Revised Approach**:
+- ✅ **Quality > Quantity**: 10-15 stellar elements, not 50 mediocre ones
+- ✅ **Leverage Libraries**: DaisyUI/MaterialUI for base components
+- ✅ **Wrapper Pattern**: NEVER import directly - always wrap, theme, export via SDK
+- ✅ **Deterministic Only**: No hover/event animations (Remotion constraint)
+- ✅ **Simple Aesthetic**: Use existing KNODE_THEME, no texture enhancements yet
 
 #### 2.1.1 Atomic Elements Needed
 
