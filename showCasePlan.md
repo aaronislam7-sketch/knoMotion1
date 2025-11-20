@@ -9,13 +9,124 @@
 
 ---
 
+## ⚠️ CRITICAL INSTRUCTIONS
+
+**FOR ALL AGENTS/DEVELOPERS WORKING ON THIS PROJECT:**
+
+1. **THIS FILE IS THE SINGLE SOURCE OF TRUTH**
+   - All progress tracking happens IN THIS FILE
+   - Do NOT create separate progress files, tracking docs, or status reports
+   - Update checkboxes `[ ]` → `[x]` as tasks complete
+   - Add notes inline under relevant tasks
+
+2. **ELEMENT CREATION RULES** (STRICTLY ENFORCED)
+   - ❌ **NEVER** create combo/composition elements inside mid-scene components
+   - ❌ **NEVER** create combo/composition elements inside templates
+   - ✅ **ALWAYS** create reusable elements in `/sdk/elements/`
+   - ✅ **ALWAYS** export via `/sdk/elements/index.js`
+   - If an element doesn't exist: CREATE IT ONCE in `/elements/`, then import everywhere
+
+3. **PROGRESS UPDATES**
+   - Check off tasks as `[x]` when complete
+   - Add `✅ COMPLETE` status to phase headers
+   - Add notes/learnings inline: `**Note**: discovered X during task Y`
+   - Log bugs in [Bug & Issue Log](#bug--issue-log) section
+
+4. **AUDIT FINDINGS**
+   - All audit discoveries go in [Audit Train](#audit-train) section
+   - Add actionable items to relevant phase task lists
+   - Link audit findings to tasks
+
+---
+
 ## 📋 Table of Contents
 
-1. [Current State Audit](#phase-1-current-state-audit)
-2. [Critical Prerequisites](#phase-2-critical-prerequisites)
-3. [Showcase Scene Design](#phase-3-showcase-scene-design)
-4. [Showcase Assembly](#phase-4-showcase-assembly)
-5. [Polish & QA](#phase-5-polish--qa)
+1. [Audit Train](#audit-train) ⭐ **START HERE**
+2. [Current State Audit](#phase-1-current-state-audit)
+3. [Critical Prerequisites](#phase-2-critical-prerequisites)
+4. [Showcase Scene Design](#phase-3-showcase-scene-design)
+5. [Showcase Assembly](#phase-4-showcase-assembly)
+6. [Polish & QA](#phase-5-polish--qa)
+7. [Bug & Issue Log](#bug--issue-log)
+
+---
+
+## 🔍 Audit Train
+
+**Purpose**: Central record of all audit findings, decisions, and action items.
+
+### Audit Status
+
+- **Started**: [Date to be filled]
+- **Completed**: [Date to be filled]
+- **Status**: 🟡 IN PROGRESS
+
+### Key Findings Summary
+
+#### 🔴 CRITICAL ISSUES
+1. **Lottie Integration** - Using wrong library (`@lottiefiles/react-lottie-player` instead of `@remotion/lottie`)
+   - **Impact**: Timeline sync issues, potential rendering problems
+   - **Action**: See Phase 2.2 - Lottie Migration
+   - **Priority**: P0 - Must fix before showcase
+
+2. **Element Library Disorganization** - Components scattered, not standardized
+   - **Impact**: Duplication, inconsistent theming, hard to maintain
+   - **Action**: See Phase 2.1 - Element Library Standardization
+   - **Priority**: P0 - Must fix before showcase
+
+#### ⚠️ NEEDS IMPROVEMENT
+3. **Continuous Life Animations** - Thin coverage
+   - **Impact**: Limited micro-animation variety
+   - **Action**: See Phase 2.3 - Animation Enhancements
+   - **Priority**: P1 - Important for showcase quality
+
+4. **Component Library Gap** - Potential to use existing libraries
+   - **Impact**: Reinventing the wheel, maintenance burden
+   - **Action**: See Phase 1.7 - Third-Party Component Investigation
+   - **Priority**: P1 - Could save significant development time
+
+#### ✅ WORKING WELL
+5. **Layout Engine** - Comprehensive and solid
+   - **Status**: Ready for showcase
+   - **Action**: None, use as-is
+
+6. **Theme System** - KNODE_THEME well-structured
+   - **Status**: Needs enforcement, but foundation is good
+   - **Action**: Ensure all new components use theme
+
+---
+
+### Audit Outputs & Action Items
+
+**From Initial Review**:
+- [ ] **ACTION 1.1**: Investigate `@remotion/tailwind` for UI components (see 1.7)
+- [ ] **ACTION 1.2**: Assess if we need additional combo elements beyond current list (see 2.1.2)
+- [ ] **ACTION 1.3**: Review all existing templates for element duplication patterns
+- [ ] **ACTION 1.4**: Create strict element creation guidelines document
+- [ ] **ACTION 1.5**: Audit all mid-scene components for inline element creation violations
+
+**From Ongoing Work**:
+- (Add new action items here as discovered)
+
+---
+
+### Decision Log
+
+**Decision 1**: Consolidate showcase scenes
+- **Date**: [Date]
+- **Decision**: Scenes 1+2 combined, 4-7 combined, layouts separate
+- **Rationale**: Smoother narrative flow, fewer composition switches
+- **Status**: ✅ Approved
+
+**Decision 2**: Element creation enforcement
+- **Date**: [Date]
+- **Decision**: Strict rule - NO combo elements in mid-scenes/templates
+- **Rationale**: Prevent duplication, enforce reusability
+- **Status**: ✅ Approved
+
+(Add more decisions here as made)
+
+---
 
 ---
 
@@ -163,12 +274,63 @@
 
 **Tasks**:
 - [ ] **1.6.1** Review existing mid-scenes for quality/completeness
-- [ ] **1.6.2** Identify which showcase scenes need mid-scene components
-- [ ] **1.6.3** Plan additional mid-scenes (see Phase 2.3)
+- [ ] **1.6.2** **CRITICAL**: Audit for inline element creation violations
+  - Check if AppMosaic creates combo elements inline
+  - Check if FlowDiagram creates combo elements inline
+  - Flag any violations for refactoring
+- [ ] **1.6.3** Identify which showcase scenes need mid-scene components
+- [ ] **1.6.4** Plan additional mid-scenes (deferred - see Phase 2.4)
 
 **Acceptance**:
 - Existing mid-scenes reviewed and working
+- No element creation violations
 - Plan for additional mid-scenes if needed
+
+---
+
+### 1.7 Third-Party Component Investigation
+
+**Status**: `🆕 NEW - NOT YET STARTED`
+
+**Objective**: Investigate if we should use existing component libraries instead of building everything from scratch.
+
+**Libraries to Investigate**:
+
+#### @remotion/tailwind
+- **Purpose**: Tailwind CSS integration for Remotion
+- **Potential Benefits**: 
+  - Pre-built utility classes
+  - Responsive design system
+  - Faster component styling
+- **Concerns**:
+  - May not fit Knode "notebook" aesthetic
+  - Could limit custom animations
+- **Action**: Research and prototype
+
+#### Other Remotion Ecosystem
+- **@remotion/animated** - Pre-built animated components?
+- **@remotion/shapes** - SVG shape primitives?
+- Community component libraries?
+
+**Tasks**:
+- [ ] **1.7.1** Research `@remotion/tailwind` capabilities
+- [ ] **1.7.2** Test if Tailwind classes work with current theme
+- [ ] **1.7.3** Prototype 2-3 elements using Tailwind vs custom CSS
+- [ ] **1.7.4** Compare development speed vs customization trade-off
+- [ ] **1.7.5** Research other Remotion component libraries
+- [ ] **1.7.6** Make decision: use external libs OR build custom
+- [ ] **1.7.7** Document decision in Audit Train
+
+**Decision Criteria**:
+- Does it save significant development time?
+- Does it maintain Knode aesthetic?
+- Does it support our animation needs?
+- Is it actively maintained?
+
+**Acceptance**:
+- Research complete
+- Decision made and documented
+- If using external libs: integration plan created
 
 ---
 
@@ -235,14 +397,45 @@
       CardWithIcon.jsx
       ...
     index.js (exports all)
+    README.md (element creation rules)
   ```
 
-- [ ] **2.1.3.2** Migrate existing components from `components.jsx` to `/elements/`
-- [ ] **2.1.3.3** Ensure all elements use KNODE_THEME
-- [ ] **2.1.3.4** Add animation support to all elements (entrance, continuous life)
-- [ ] **2.1.3.5** Create consistent API schema for all elements
-- [ ] **2.1.3.6** Export via `/sdk/elements/index.js`
-- [ ] **2.1.3.7** Update `/sdk/index.js` to export from elements
+- [ ] **2.1.3.2** Create `ELEMENT_RULES.md` in `/sdk/elements/`
+  - Document strict rules: NO inline creation in mid-scenes/templates
+  - Provide examples of correct vs incorrect usage
+  - Include API pattern guidelines
+  
+- [ ] **2.1.3.3** Migrate existing components from `components.jsx` to `/elements/`
+  - Review each component for reusability
+  - Refactor to use consistent API pattern
+  - Ensure theme compliance
+  
+- [ ] **2.1.3.4** Audit existing templates/mid-scenes for element violations
+  - Scan for inline combo element creation
+  - Extract and migrate to `/elements/`
+  - Update imports
+  
+- [ ] **2.1.3.5** Ensure all elements use KNODE_THEME
+  - No hardcoded colors/fonts
+  - Allow theme overrides via props
+  - Test theme switching
+  
+- [ ] **2.1.3.6** Add animation support to all elements (entrance, continuous life)
+  - Consistent animation prop API
+  - Support all animation types
+  - Test animation combinations
+  
+- [ ] **2.1.3.7** Create consistent API schema for all elements
+  - Document in ELEMENT_RULES.md
+  - Enforce via code review checklist
+  
+- [ ] **2.1.3.8** Export via `/sdk/elements/index.js`
+  - Organized exports (atoms, compositions)
+  - Named exports only (no default exports)
+  
+- [ ] **2.1.3.9** Update `/sdk/index.js` to export from elements
+  - Add elements to main SDK export
+  - Update SDK.md documentation
 
 **Element API Pattern**:
 ```javascript
@@ -260,9 +453,17 @@ export const Card = ({
 };
 ```
 
+**STRICT ENFORCEMENT**:
+- ❌ Creating combo elements inside mid-scene components → VIOLATION
+- ❌ Creating combo elements inside templates → VIOLATION
+- ✅ Creating reusable elements in `/elements/` → CORRECT
+- ✅ Importing elements from `/elements/` → CORRECT
+
 **Acceptance**:
 - All atomic elements created and theme-compliant
 - All composition elements created
+- No element creation violations in codebase
+- ELEMENT_RULES.md created
 - Exported via `/sdk/elements/index.js`
 - Used in at least one showcase scene
 
@@ -350,45 +551,67 @@ See [1.2 Lottie Integration Audit](#12-lottie-integration-audit) for tasks.
 
 **Duration**: 2-3 minutes (1800-2700 frames at 30fps)
 
-**Narrative Arc**:
+**Narrative Arc** (REVISED):
 
 ```
-ACT 1: HOOK (15-20s)
-├─ Scene 1: Opening Title
-│  └─ "Imagine endless opportunities to create beautiful videos in minutes"
+ACT 1: HOOK (20s) - Single Scene
+├─ Scene 1: Opening + Product Intro (COMBINED)
+│  ├─ Part A: "Imagine endless opportunities..." (typewriter)
+│  ├─ Transition: Particle burst + fade
+│  └─ Part B: "Enter KnoMotion" logo reveal
 │
-└─ Scene 2: Product Introduction  
-   └─ "Enter KnoMotion" + logo reveal with particles
-
 ACT 2: CAPABILITIES (90-120s)
-├─ Scene 3: Layouts
-│  └─ Demonstrate all 7 layout types with same content
-│     (Grid → Circular → Stack → Radial → Cascade)
+├─ Scene 2a: Layout - GRID
+│  └─ 6 cards in grid layout with content
 │
-├─ Scene 4: Elements & Animations
-│  └─ Showcase element library + entrance/exit animations
-│     (Cards, badges, icons, text with different animations)
+├─ Scene 2b: Layout - CIRCULAR  
+│  └─ Same 6 cards in circular layout
 │
-├─ Scene 5: Continuous Life
-│  └─ Show delightful micro-animations
-│     (Breathing, floating, pulsing, typewriter, particles)
+├─ Scene 2c: Layout - STACKED_VERTICAL
+│  └─ Same 6 cards in vertical stack
 │
-├─ Scene 6: Lottie Animations
-│  └─ 5 different Lottie examples
-│     (Simple: checkmark, Complex: walking stickman, Background: particles)
+├─ Scene 2d: Layout - RADIAL
+│  └─ Same 6 cards radiating from center
 │
-└─ Scene 7: Theme Consistency
-   └─ Same scene with different theme tokens
-      (Show color palette changes, font changes)
-
+├─ Scene 2e: Layout - CASCADE
+│  └─ Same 6 cards in diagonal cascade
+│
+├─ Scene 2f: Layout - CENTERED (optional)
+│  └─ Same 6 cards overlapping/layered
+│
+├─ Scene 3: Capabilities Showcase (COMBINED: Elements, Animations, Continuous Life, Lottie)
+│  ├─ Part A: Element library showcase (10s)
+│  │   └─ Entrance animations on various elements
+│  ├─ Transition: Smooth fade/morph (2s)
+│  ├─ Part B: Continuous life animations (10s)
+│  │   └─ Breathing, floating, pulsing, typewriter
+│  ├─ Transition: Smooth fade/morph (2s)
+│  └─ Part C: Lottie showcase (10s)
+│      └─ 5 Lottie examples (checkmark, confetti, lightbulb, stickman, particles)
+│
 ACT 3: POWER (20-30s)
-├─ Scene 8: Configurability
-│  └─ Split-screen: JSON config → rendered output
-│     (Pretend JSON is changing, output updates)
+├─ Scene 4: JSON Configurability
+│  └─ Split-screen: JSON editor → rendered output
+│     (Show property changes updating in real-time)
 │
-└─ Scene 9: Closing
+└─ Scene 5: Closing
    └─ "Built with KnoMotion" + CTA
 ```
+
+**Scene Count**: 
+- **Total**: 10 scenes (Scene 1 + 6 layout scenes + Scene 3 + Scene 4 + Scene 5)
+- **Render Approach**: Each layout gets own scene for simplicity
+
+**Rationale for Changes**:
+1. **Scene 1+2 combined** → Single opening scene with in-flight transitions
+2. **Scene 3 (layouts)** → Split into 6 separate scenes (one per layout type)
+   - Easier to build/maintain
+   - Clearer demonstration of each layout
+   - Simpler composition assembly
+3. **Scene 4-7 combined** → Single capabilities scene with in-flight transitions
+   - Elements → Continuous Life → Lottie flow naturally
+   - Maintains visual momentum
+4. **Scene 8-9** → Remain standalone (JSON + Closing)
 
 ### 3.2 Scene Specifications
 
@@ -638,18 +861,31 @@ ACT 3: POWER (20-30s)
 
 ### 3.3 Scene Task Summary
 
-**New Templates to Create** (9 total):
-1. ✅ Showcase_Opening.jsx
-2. ✅ Showcase_ProductIntro.jsx
-3. ✅ Showcase_Layouts.jsx
-4. ✅ Showcase_Elements.jsx
-5. ✅ Showcase_ContinuousLife.jsx
-6. ✅ Showcase_Lottie.jsx
-7. ✅ Showcase_JSONConfig.jsx
-8. ✅ Showcase_Closing.jsx
-9. ✅ (Optional) Showcase_Theme.jsx or reuse existing
+**New Templates to Create** (10 total):
+
+**ACT 1**:
+1. [ ] Showcase_OpeningCombo.jsx (Opening + Product Intro combined)
+
+**ACT 2 - Layouts** (6 separate scenes):
+2. [ ] Showcase_Layout_Grid.jsx
+3. [ ] Showcase_Layout_Circular.jsx
+4. [ ] Showcase_Layout_Stacked.jsx
+5. [ ] Showcase_Layout_Radial.jsx
+6. [ ] Showcase_Layout_Cascade.jsx
+7. [ ] Showcase_Layout_Centered.jsx (optional)
+
+**ACT 2 - Capabilities** (1 combined scene):
+8. [ ] Showcase_CapabilitiesCombo.jsx (Elements + Animations + Continuous Life + Lottie)
+
+**ACT 3**:
+9. [ ] Showcase_JSONConfig.jsx
+10. [ ] Showcase_Closing.jsx
 
 **Total Estimated Duration**: 2.5 minutes (4500 frames at 30fps)
+
+**Scene Reusability Note**:
+- Layout scenes 2-7 will share significant code (same content, different layout config)
+- Consider creating a shared `LayoutShowcaseBase.jsx` component
 
 ---
 
@@ -830,3 +1066,51 @@ export const ShowcaseComposition = () => {
 5. **Test continuously** - Verify each piece works before moving on
 
 **Ready to start?** Let me know if any adjustments are needed, then we'll begin Phase 1!
+
+---
+
+## 🐛 Bug & Issue Log
+
+**Purpose**: Track all bugs, defects, and issues encountered during development. Keep plan clean by logging problems here.
+
+**Format**:
+```
+### BUG-XXX: Short Description
+- **Discovered**: [Date] during [Task]
+- **Severity**: Critical | High | Medium | Low
+- **Description**: What went wrong
+- **Impact**: What breaks or is affected
+- **Workaround**: Temporary fix (if any)
+- **Resolution**: How it was fixed
+- **Status**: 🔴 Open | 🟡 In Progress | 🟢 Resolved
+```
+
+---
+
+### Example Bugs (Remove once real bugs are logged)
+
+### BUG-001: Lottie Timeline Sync Issues
+- **Discovered**: [Date] during Phase 1.2 Audit
+- **Severity**: Critical
+- **Description**: Using @lottiefiles/react-lottie-player instead of @remotion/lottie causes animations to not sync with video timeline
+- **Impact**: Lottie animations may start at wrong time or loop incorrectly
+- **Workaround**: None - requires migration
+- **Resolution**: See Phase 2.2 - Migrate to @remotion/lottie
+- **Status**: 🔴 Open
+
+### BUG-002: Theme Not Applied to Legacy Components
+- **Discovered**: [Date] during Phase 1.5 Audit
+- **Severity**: Medium
+- **Description**: Several components in components.jsx use hardcoded colors instead of KNODE_THEME
+- **Impact**: Components don't respect theme changes
+- **Workaround**: Pass style overrides manually
+- **Resolution**: Refactor components during Phase 2.1 migration
+- **Status**: 🔴 Open
+
+---
+
+### Real Bugs (Start logging here)
+
+(Add bugs as encountered during development)
+
+---
