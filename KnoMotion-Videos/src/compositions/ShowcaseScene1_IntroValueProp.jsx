@@ -27,32 +27,36 @@ export const ShowcaseScene1_IntroValueProp = () => {
   const containerStyles = {
     backgroundColor: theme.colors.pageBg,
     padding: 60,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
   };
 
   return (
     <AbsoluteFill style={containerStyles}>
       {/* SEQUENCE 1: Hero Entrance (0-150 frames = 0-5s) */}
       <Sequence from={0} durationInFrames={150}>
-        <HeroEntrance />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <HeroEntrance />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 2: Problem Statement (150-300 frames = 5-10s) */}
       <Sequence from={150} durationInFrames={150}>
-        <ProblemStatement />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ProblemStatement />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 3: Solution Intro (300-450 frames = 10-15s) */}
       <Sequence from={300} durationInFrames={150}>
-        <SolutionIntro />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <SolutionIntro />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 4: Value Props (450-1350 frames = 15-45s) */}
       <Sequence from={450} durationInFrames={900}>
-        <ValuePropsGrid />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ValuePropsGrid />
+        </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>
   );

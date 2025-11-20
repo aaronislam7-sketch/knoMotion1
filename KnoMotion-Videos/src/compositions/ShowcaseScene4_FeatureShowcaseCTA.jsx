@@ -40,22 +40,30 @@ export const ShowcaseScene4_FeatureShowcaseCTA = () => {
     <AbsoluteFill style={containerStyles}>
       {/* SEQUENCE 1: Element Gallery (0-450 frames = 0-15s) */}
       <Sequence from={0} durationInFrames={450}>
-        <ElementGallery />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ElementGallery />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 2: Animation Delights (450-900 frames = 15-30s) */}
       <Sequence from={450} durationInFrames={450}>
-        <AnimationDelights />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <AnimationDelights />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 3: Lottie + Theming (900-1350 frames = 30-45s) */}
       <Sequence from={900} durationInFrames={450}>
-        <LottieAndTheming />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <LottieAndTheming />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 4: Call-to-Action (1350-1800 frames = 45-60s) */}
       <Sequence from={1350} durationInFrames={450}>
-        <CallToAction />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CallToAction />
+        </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>
   );

@@ -29,17 +29,23 @@ export const ShowcaseScene2_ArchitectureDeepDive = () => {
     <AbsoluteFill style={containerStyles}>
       {/* SEQUENCE 1: Title (0-150 frames = 0-5s) */}
       <Sequence from={0} durationInFrames={150}>
-        <TitleSection />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 60 }}>
+          <TitleSection />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 2: Layer Cards (150-1500 frames = 5-50s) */}
       <Sequence from={150} durationInFrames={1350}>
-        <LayerCardsSequence />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <LayerCardsSequence />
+        </AbsoluteFill>
       </Sequence>
 
       {/* SEQUENCE 3: JSON Example (1500-1800 frames = 50-60s) */}
       <Sequence from={1500} durationInFrames={300}>
-        <JSONExample />
+        <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <JSONExample />
+        </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>
   );
