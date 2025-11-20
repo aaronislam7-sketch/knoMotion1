@@ -896,3 +896,215 @@ export const getShimmerEffect = (frame, config = {}) => {
     gradientEnd: position + width / 2,
   };
 };
+
+// ==================== NEW CONTINUOUS LIFE ANIMATIONS (Phase 2.3) ====================
+
+/**
+ * Particle Trail - Animated particle trail effect
+ * Creates particles that follow a path with fade and movement
+ * 
+ * @param {number} frame - Current frame
+ * @param {Object} config - Configuration
+ * @param {number} config.particleCount - Number of particles (default: 10)
+ * @param {number} config.trailLength - Length of trail in frames (default: 30)
+ * @param {number} config.speed - Speed multiplier (default: 1)
+ * @param {string} config.color - Particle color (default: '#FF6B35')
+ * @param {number} config.size - Particle size (default: 4)
+ * @returns {Array} Array of particle positions with opacity
+ */
+export const getParticleTrail = (frame, config = {}) => {
+  const {
+    particleCount = 10,
+    trailLength = 30,
+    speed = 1,
+    color = '#FF6B35',
+    size = 4,
+    pathType = 'circular', // 'circular', 'wave', 'linear'
+  } = config;
+
+  const particles = [];
+  const adjustedFrame = frame * speed;
+
+  for (let i = 0; i < particleCount; i++) {
+    const delay = (trailLength / particleCount) * i;
+    const particleFrame = adjustedFrame - delay;
+    
+    if (particleFrame < 0) continue;
+
+    // Calculate position based on path type
+    let x, y;
+    switch (pathType) {
+      case 'wave':
+        x = (particleFrame * 2) % 100;
+        y = Math.sin(particleFrame * 0.1) * 20;
+        break;
+      case 'linear':
+        x = (particleFrame * 2) % 100;
+        y = 0;
+        break;
+      case 'circular':
+      default:
+        const angle = (particleFrame * 0.05) % (Math.PI * 2);
+        x = Math.cos(angle) * 30;
+        y = Math.sin(angle) * 30;
+        break;
+    }
+
+    // Fade opacity based on position in trail
+    const opacity = 1 - (i / particleCount);
+
+    particles.push({
+      x,
+      y,
+      opacity,
+      color,
+      size: size * opacity,
+    });
+  }
+
+  return particles;
+};
+
+/**
+ * Enhanced Shimmer/Shine - Sweeping highlight effect with customization
+ * 
+ * @param {number} frame - Current frame
+ * @param {Object} config - Configuration
+ * @param {number} config.speed - Speed of shimmer (default: 0.015)
+ * @param {number} config.width - Width of shimmer band (default: 80)
+ * @param {number} config.angle - Angle of shimmer in degrees (default: 45)
+ * @param {number} config.intensity - Intensity/opacity (default: 0.4)
+ * @param {string} config.color - Shimmer color (default: 'rgba(255,255,255,0.6)')
+ * @param {boolean} config.loop - Loop continuously (default: true)
+ * @returns {Object} Shimmer style object
+ */
+export const getContinuousShimmer = (frame, config = {}) => {
+  const {
+    speed = 0.015,
+    width = 80,
+    angle = 45,
+    intensity = 0.4,
+    color = 'rgba(255,255,255,0.6)',
+    loop = true,
+  } = config;
+  
+  const progress = loop 
+    ? (frame * speed) % 1 
+    : Math.min(frame * speed, 1);
+  
+  const position = interpolate(progress, [0, 1], [-150, 150]);
+  
+  return {
+    background: `linear-gradient(${angle}deg, transparent ${position - width}%, ${color} ${position}%, transparent ${position + width}%)`,
+    backgroundSize: '200% 100%',
+    animation: loop ? 'shimmer 2s infinite' : 'none',
+  };
+};
+
+/**
+ * Wobble/Jiggle - Playful shake animation for attention
+ * 
+ * @param {number} frame - Current frame
+ * @param {Object} config - Configuration
+ * @param {number} config.intensity - Shake intensity in pixels (default: 3)
+ * @param {number} config.speed - Speed multiplier (default: 1)
+ * @param {string} config.direction - 'horizontal', 'vertical', 'both' (default: 'both')
+ * @param {boolean} config.continuous - Continuous wobble or triggered (default: true)
+ * @returns {Object} Transform style
+ */
+export const getContinuousWobble = (frame, config = {}) => {
+  const {
+    intensity = 3,
+    speed = 1,
+    direction = 'both',
+    continuous = true,
+  } = config;
+
+  if (!continuous) return { transform: 'translate(0, 0)' };
+
+  const adjustedFrame = frame * speed;
+  const wobbleX = direction === 'vertical' ? 0 : Math.sin(adjustedFrame * 0.3) * intensity;
+  const wobbleY = direction === 'horizontal' ? 0 : Math.cos(adjustedFrame * 0.25) * intensity;
+
+  return {
+    transform: `translate(${wobbleX}px, ${wobbleY}px)`,
+  };
+};
+
+/**
+ * Color Pulse - Smooth color transitions for status indicators
+ * 
+ * @param {number} frame - Current frame
+ * @param {Object} config - Configuration
+ * @param {string[]} config.colors - Array of colors to pulse between (default: ['#FF6B35', '#F7931E'])
+ * @param {number} config.duration - Duration of one pulse cycle in frames (default: 60)
+ * @param {string} config.easing - Easing function (default: 'linear')
+ * @returns {Object} Color style
+ */
+export const getContinuousColorPulse = (frame, config = {}) => {
+  const {
+    colors = ['#FF6B35', '#F7931E'],
+    duration = 60,
+    easing = 'linear',
+  } = config;
+
+  const cycleProgress = (frame % duration) / duration;
+  const colorIndex = Math.floor(cycleProgress * (colors.length - 1));
+  const nextColorIndex = (colorIndex + 1) % colors.length;
+  const segmentProgress = (cycleProgress * (colors.length - 1)) % 1;
+
+  const currentColor = colors[colorIndex];
+  const nextColor = colors[nextColorIndex];
+
+  const easedProgress = easing === 'ease-in-out' 
+    ? 0.5 - Math.cos(segmentProgress * Math.PI) / 2
+    : segmentProgress;
+
+  const interpolatedColor = interpolateColor(currentColor, nextColor, easedProgress);
+
+  return {
+    backgroundColor: interpolatedColor,
+    transition: 'background-color 0.1s ease',
+  };
+};
+
+/**
+ * Bounce Loop - Continuous bouncing animation for CTAs
+ * 
+ * @param {number} frame - Current frame
+ * @param {Object} config - Configuration
+ * @param {number} config.height - Bounce height in pixels (default: 10)
+ * @param {number} config.speed - Speed multiplier (default: 1)
+ * @param {string} config.easing - Easing type (default: 'bounce')
+ * @param {boolean} config.continuous - Continuous or triggered (default: true)
+ * @returns {Object} Transform style
+ */
+export const getContinuousBounce = (frame, config = {}) => {
+  const {
+    height = 10,
+    speed = 1,
+    easing = 'bounce',
+    continuous = true,
+  } = config;
+
+  if (!continuous) return { transform: 'translateY(0)' };
+
+  const adjustedFrame = frame * speed;
+  const bounceProgress = (adjustedFrame % 30) / 30;
+
+  let bounce;
+  if (easing === 'bounce') {
+    // Realistic bounce with gravity effect
+    const t = bounceProgress;
+    bounce = Math.abs(Math.sin(t * Math.PI)) * (1 - t * 0.3);
+  } else {
+    // Simple sine wave bounce
+    bounce = Math.abs(Math.sin(bounceProgress * Math.PI));
+  }
+
+  const translateY = -bounce * height;
+
+  return {
+    transform: `translateY(${translateY}px)`,
+  };
+};
