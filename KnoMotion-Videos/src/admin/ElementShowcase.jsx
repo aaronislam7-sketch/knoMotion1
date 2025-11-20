@@ -320,6 +320,296 @@ export const ElementShowcase = () => {
         </div>
       </div>
 
+      {/* Alert ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>Alert ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Informational message boxes with icons</p>
+        
+        <div style={styles.showcase}>
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Variants</div>
+            <div style={styles.demoContent}>
+              {['info', 'success', 'warning', 'error'].map(variant => {
+                const colors = {
+                  info: { bg: theme.colors.primary, text: theme.colors.cardBg },
+                  success: { bg: theme.colors.accentGreen, text: theme.colors.cardBg },
+                  warning: { bg: theme.colors.doodle, text: theme.colors.textMain },
+                  error: { bg: '#E74C3C', text: theme.colors.cardBg },
+                };
+                const icons = { info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌' };
+                return (
+                  <div key={variant} style={{
+                    display: 'flex',
+                    gap: 10,
+                    padding: theme.spacing.cardPadding,
+                    borderRadius: theme.radii.card,
+                    backgroundColor: colors[variant].bg,
+                    color: colors[variant].text,
+                    alignItems: 'flex-start',
+                  }}>
+                    <span style={{ fontSize: 20 }}>{icons[variant]}</span>
+                    <div>
+                      <div style={{ fontWeight: 700, marginBottom: 4 }}>{variant.charAt(0).toUpperCase() + variant.slice(1)}</div>
+                      <div style={{ fontSize: 14 }}>This is a {variant} alert message</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Styles</div>
+            <div style={styles.demoContent}>
+              {/* Outline */}
+              <div style={{
+                display: 'flex',
+                gap: 10,
+                padding: theme.spacing.cardPadding,
+                borderRadius: theme.radii.card,
+                backgroundColor: theme.colors.cardBg,
+                border: `2px solid ${theme.colors.primary}`,
+                color: theme.colors.primary,
+              }}>
+                <span style={{ fontSize: 20 }}>ℹ️</span>
+                <div style={{ fontSize: 14 }}>Outline style alert</div>
+              </div>
+              {/* Soft */}
+              <div style={{
+                display: 'flex',
+                gap: 10,
+                padding: theme.spacing.cardPadding,
+                borderRadius: theme.radii.card,
+                backgroundColor: `${theme.colors.primary}20`,
+                color: theme.colors.textMain,
+              }}>
+                <span style={{ fontSize: 20 }}>ℹ️</span>
+                <div style={{ fontSize: 14 }}>Soft style alert</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Avatar ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>Avatar ✨ NEW</h2>
+        <p style={styles.sectionDesc}>User profile images with status indicators</p>
+        
+        <div style={styles.showcase}>
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Sizes</div>
+            <div style={styles.demoContent}>
+              <div style={styles.variantRow}>
+                {[40, 60, 80, 100].map(size => (
+                  <div key={size} style={{
+                    width: size,
+                    height: size,
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.primary,
+                    color: theme.colors.cardBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: theme.fonts.header,
+                    fontWeight: 700,
+                    fontSize: size * 0.4,
+                  }}>
+                    KM
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Status & Ring</div>
+            <div style={styles.demoContent}>
+              <div style={styles.variantRow}>
+                {/* Online */}
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <div style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.primary,
+                    color: theme.colors.cardBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: 24,
+                    border: `3px solid ${theme.colors.primary}`,
+                    boxShadow: `0 0 0 3px ${theme.colors.cardBg}`,
+                  }}>KM</div>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    width: 15,
+                    height: 15,
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.accentGreen,
+                    border: `2px solid ${theme.colors.cardBg}`,
+                  }} />
+                </div>
+                {/* Away */}
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <div style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.primary,
+                    color: theme.colors.cardBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: 24,
+                  }}>AB</div>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    width: 15,
+                    height: 15,
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.doodle,
+                    border: `2px solid ${theme.colors.cardBg}`,
+                  }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Loading ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>Loading ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Animated loading indicators</p>
+        
+        <div style={styles.showcase}>
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Variants</div>
+            <div style={styles.demoContent}>
+              <div style={styles.variantRow}>
+                {/* Spinner */}
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  border: `5px solid ${theme.colors.primary}20`,
+                  borderTopColor: theme.colors.primary,
+                  borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite',
+                }} />
+                {/* Dots */}
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[0, 0.2, 0.4].map((delay, i) => (
+                    <div key={i} style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: theme.colors.primary,
+                      animation: `pulse 1.4s ease-in-out ${delay}s infinite`,
+                    }} />
+                  ))}
+                </div>
+                {/* Ring */}
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  border: `4px solid transparent`,
+                  borderTopColor: theme.colors.primary,
+                  borderBottomColor: theme.colors.primary,
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>Skeleton ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Loading state placeholders</p>
+        
+        <div style={styles.showcase}>
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Variants</div>
+            <div style={styles.demoContent}>
+              {/* Text lines */}
+              <div style={{ width: '100%', height: 16, borderRadius: 4, backgroundColor: `${theme.colors.textMain}10` }} />
+              <div style={{ width: '80%', height: 16, borderRadius: 4, backgroundColor: `${theme.colors.textMain}10` }} />
+              <div style={{ width: '90%', height: 16, borderRadius: 4, backgroundColor: `${theme.colors.textMain}10` }} />
+              {/* Circle */}
+              <div style={{ width: 60, height: 60, borderRadius: '50%', backgroundColor: `${theme.colors.textMain}10` }} />
+              {/* Rectangle */}
+              <div style={{ width: 200, height: 100, borderRadius: theme.radii.card, backgroundColor: `${theme.colors.textMain}10` }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Rating ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>Rating ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Star rating displays</p>
+        
+        <div style={styles.showcase}>
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Star Ratings</div>
+            <div style={styles.demoContent}>
+              {[5, 4, 3, 2, 1].map(rating => (
+                <div key={rating} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ fontSize: 24, display: 'flex', gap: 2 }}>
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <span key={star} style={{ color: star <= rating ? theme.colors.doodle : `${theme.colors.textMain}20` }}>★</span>
+                    ))}
+                  </div>
+                  <span style={{ fontSize: 14, color: theme.colors.textSecondary }}>({rating}/5)</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* RadialProgress ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>RadialProgress ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Circular progress indicators</p>
+        
+        <div style={styles.showcase}>
+          <div style={styles.demoBox}>
+            <div style={styles.demoTitle}>Progress Values</div>
+            <div style={styles.demoContent}>
+              <div style={styles.variantRow}>
+                {[25, 50, 75, 100].map(value => {
+                  const size = 100;
+                  const thickness = 4;
+                  const radius = (size - thickness * 2) / 2;
+                  const circumference = 2 * Math.PI * radius;
+                  const offset = circumference - (value / 100) * circumference;
+                  
+                  return (
+                    <div key={value} style={{ position: 'relative', width: size, height: size }}>
+                      <svg style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
+                        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={`${theme.colors.textMain}10`} strokeWidth={thickness} />
+                        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={theme.colors.primary} strokeWidth={thickness} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700 }}>{value}%</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Progress */}
       <div style={styles.section}>
         <h2 style={styles.sectionTitle}>Progress</h2>
@@ -602,6 +892,151 @@ export const ElementShowcase = () => {
           ))}
         </div>
       </div>
+
+      {/* FeatureCard ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>FeatureCard ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Icon + Title + Description + CTA button</p>
+        
+        <div style={styles.showcase}>
+          {[
+            { icon: '🚀', title: 'Lightning Fast', text: 'Create videos in minutes, not days', button: 'Get Started' },
+            { icon: '🎨', title: 'Beautiful Design', text: 'Professional-quality output every time', button: 'Learn More' },
+            { icon: '⚙️', title: 'Easy Config', text: 'JSON-driven flexibility and control', button: 'View Docs' },
+          ].map((item, i) => (
+            <div key={i} style={styles.card('default')}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.cardPadding, alignItems: 'center', textAlign: 'center' }}>
+                <span style={{ fontSize: 80 }}>{item.icon}</span>
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 700, fontFamily: theme.fonts.header, marginBottom: 10 }}>{item.title}</div>
+                  <div style={{ fontSize: 14, color: theme.colors.textSecondary, marginBottom: 15 }}>{item.text}</div>
+                  <div style={styles.button('primary', 'md')}>{item.button}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* TestimonialCard ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>TestimonialCard ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Avatar + Name + Quote + Rating</p>
+        
+        <div style={styles.showcase}>
+          {[
+            { name: 'Sarah Johnson', role: 'EdTech Director', quote: 'KnoMotion revolutionized how we create educational content. We went from weeks to hours!', rating: 5 },
+            { name: 'Michael Chen', role: 'Content Creator', quote: 'The JSON-first approach makes it incredibly easy to scale our video production.', rating: 5 },
+          ].map((item, i) => (
+            <div key={i} style={styles.card('glass')}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.cardPadding }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+                  <div style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    backgroundColor: theme.colors.primary,
+                    color: theme.colors.cardBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: 24,
+                    border: `3px solid ${theme.colors.primary}`,
+                    boxShadow: `0 0 0 3px ${theme.colors.cardBg}`,
+                  }}>{item.name[0]}</div>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 700, fontFamily: theme.fonts.header }}>{item.name}</div>
+                    <div style={{ fontSize: 14, color: theme.colors.textSecondary }}>{item.role}</div>
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 16,
+                  lineHeight: 1.6,
+                  fontStyle: 'italic',
+                  color: theme.colors.textMain,
+                  paddingLeft: 20,
+                  borderLeft: `3px solid ${theme.colors.primary}`,
+                }}>"{item.quote}"</div>
+                <div style={{ display: 'flex', justifyContent: 'center', fontSize: 20 }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <span key={star} style={{ color: theme.colors.doodle }}>★</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* PricingCard ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>PricingCard ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Price + Features + CTA</p>
+        
+        <div style={styles.showcase}>
+          {[
+            { title: 'Starter', price: '$29/mo', features: ['10 videos/month', 'HD rendering', 'Basic templates', 'Email support'] },
+            { title: 'Pro', price: '$99/mo', badge: 'Popular', features: ['Unlimited videos', '4K rendering', 'All templates', 'Priority support', 'Custom branding'], highlighted: true },
+            { title: 'Enterprise', price: 'Custom', features: ['Everything in Pro', 'Dedicated support', 'Custom integrations', 'SLA guarantee'] },
+          ].map((item, i) => {
+            const cardStyle = item.highlighted ? styles.card('glass') : styles.card('bordered');
+            return (
+              <div key={i} style={cardStyle}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: theme.spacing.cardPadding,
+                  textAlign: 'center',
+                  ...(item.highlighted && {
+                    border: `2px solid ${theme.colors.primary}`,
+                    borderRadius: theme.radii.card,
+                    padding: theme.spacing.cardPadding,
+                  }),
+                }}>
+                  {item.badge && <div style={{ ...styles.badge('primary', 'sm'), alignSelf: 'center' }}>{item.badge}</div>}
+                  <div style={{ fontSize: 24, fontWeight: 700, fontFamily: theme.fonts.header }}>{item.title}</div>
+                  <div style={{ fontSize: 48, fontWeight: 700, fontFamily: theme.fonts.marker, color: theme.colors.primary }}>{item.price}</div>
+                  <div style={{ height: 1, backgroundColor: `${theme.colors.textMain}20` }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {item.features.map((feature, j) => (
+                      <div key={j} style={{ fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <span style={{ color: theme.colors.accentGreen }}>✓</span>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                  <div style={styles.button('primary', 'lg')}>Get Started</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* HeroWithCTA ✨ NEW */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>HeroWithCTA ✨ NEW</h2>
+        <p style={styles.sectionDesc}>Hero section with call-to-action button</p>
+        
+        <div style={styles.showcase}>
+          <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 30 }}>
+            <span style={{ fontSize: 100 }}>🎬</span>
+            <div>
+              <div style={{ fontSize: 56, fontWeight: 700, fontFamily: theme.fonts.marker, color: theme.colors.primary, lineHeight: 1.2 }}>
+                Create Amazing Videos
+              </div>
+              <div style={{ height: 3, width: 200, backgroundColor: theme.colors.primary, margin: '15px auto' }} />
+              <div style={{ fontSize: 24, fontWeight: 400, fontFamily: theme.fonts.body, color: theme.colors.textSecondary, marginTop: 15 }}>
+                JSON-first video engine for EdTech professionals
+              </div>
+              <div style={{ marginTop: 25 }}>
+                <div style={styles.button('primary', 'lg')}>Start Creating</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 
@@ -626,7 +1061,7 @@ export const ElementShowcase = () => {
           }}
           onClick={() => setSelectedTab('atoms')}
         >
-          Atomic Elements (8)
+          Atomic Elements (14)
         </button>
         <button
           style={{
@@ -635,7 +1070,7 @@ export const ElementShowcase = () => {
           }}
           onClick={() => setSelectedTab('compositions')}
         >
-          Compositions (5)
+          Compositions (9)
         </button>
         <button
           style={{
@@ -659,11 +1094,17 @@ export const ElementShowcase = () => {
         borderTop: `2px solid ${theme.colors.textMain}10`,
         textAlign: 'center',
       }}>
+        <p style={{ fontSize: 24, fontWeight: 700, color: theme.colors.primary, marginBottom: 15 }}>
+          🎉 23 Elements Total!
+        </p>
+        <p style={{ fontSize: 16, color: theme.colors.textSecondary, marginBottom: 8 }}>
+          ✅ 14 Atomic Elements + 9 Composition Elements
+        </p>
         <p style={{ fontSize: 16, color: theme.colors.textSecondary, marginBottom: 8 }}>
           ✅ All elements follow KNODE_THEME and standardized prop schema
         </p>
         <p style={{ fontSize: 14, color: theme.colors.textSecondary }}>
-          Ready for showcase video production!
+          Ready for showcase video production! 🚀
         </p>
       </div>
 
