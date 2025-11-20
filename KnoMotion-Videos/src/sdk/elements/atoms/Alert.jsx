@@ -1,6 +1,5 @@
 import React from 'react';
 import { KNODE_THEME } from '../../theme/knodeTheme';
-import { applyAnimationStyle } from '../../animations';
 
 /**
  * Alert - Informational message boxes with icons and colors
@@ -113,14 +112,11 @@ export const Alert = ({
     lineHeight: 1.5,
   };
 
-  const animationStyles = animation ? applyAnimationStyle(animation) : {};
-
   return (
     <div
       role="alert"
       style={{
         ...getAlertStyles(),
-        ...animationStyles,
         ...style,
       }}
       {...props}

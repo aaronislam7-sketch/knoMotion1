@@ -1,6 +1,5 @@
 import React from 'react';
 import { KNODE_THEME } from '../../theme/knodeTheme';
-import { applyAnimationStyle } from '../../animations';
 
 /**
  * Rating - Star rating display (visual only, non-interactive)
@@ -72,13 +71,10 @@ export const Rating = ({
     return stars;
   };
 
-  const animationStyles = animation ? applyAnimationStyle(animation) : {};
-
   return (
     <div
       style={{
         ...containerStyles,
-        ...animationStyles,
         ...style,
       }}
       role="img"

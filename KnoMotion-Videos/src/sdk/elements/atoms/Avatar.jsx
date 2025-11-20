@@ -1,6 +1,5 @@
 import React from 'react';
 import { KNODE_THEME } from '../../theme/knodeTheme';
-import { applyAnimationStyle } from '../../animations';
 
 /**
  * Avatar - User profile image with status indicators
@@ -91,13 +90,10 @@ export const Avatar = ({
       }
     : null;
 
-  const animationStyles = animation ? applyAnimationStyle(animation) : {};
-
   return (
     <div
       style={{
         ...containerStyles,
-        ...animationStyles,
         ...style,
       }}
       {...props}

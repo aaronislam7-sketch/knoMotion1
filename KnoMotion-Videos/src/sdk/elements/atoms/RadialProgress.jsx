@@ -1,6 +1,5 @@
 import React from 'react';
 import { KNODE_THEME } from '../../theme/knodeTheme';
-import { applyAnimationStyle } from '../../animations';
 
 /**
  * RadialProgress - Circular progress indicator with percentage
@@ -82,13 +81,10 @@ export const RadialProgress = ({
     color: theme.colors.textSecondary,
   };
 
-  const animationStyles = animation ? applyAnimationStyle(animation) : {};
-
   return (
     <div
       style={{
         ...containerStyles,
-        ...animationStyles,
         ...style,
       }}
       role="progressbar"
