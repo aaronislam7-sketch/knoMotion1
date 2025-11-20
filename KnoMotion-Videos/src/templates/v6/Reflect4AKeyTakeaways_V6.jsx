@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion';
-import { Player } from '@lottiefiles/react-lottie-player';
+import { RemotionLottie as Player } from '../../sdk/lottie/lottieIntegration'; // Updated: using @remotion/lottie
 
 // SDK imports - Agnostic Template System v6
 import {
