@@ -19,7 +19,7 @@ export const ShowcaseScene3_LayoutShowcase = () => {
   const theme = KNODE_THEME;
 
   const containerStyles = {
-    backgroundColor: theme.colors.bg,
+    backgroundColor: theme.colors.pageBg,
     padding: 60,
   };
 

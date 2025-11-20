@@ -18,8 +18,11 @@ export const ShowcaseScene2_ArchitectureDeepDive = () => {
   const theme = KNODE_THEME;
 
   const containerStyles = {
-    backgroundColor: theme.colors.bg,
+    backgroundColor: theme.colors.pageBg,
     padding: 60,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   };
 
   return (
@@ -65,6 +68,8 @@ const TitleSection = () => {
       paddingBottom: 30,
       transform: `scale(${scale})`,
       opacity,
+      maxWidth: 1200,
+      width: '100%',
     }}>
       <div style={{
         fontSize: 56,
@@ -77,7 +82,7 @@ const TitleSection = () => {
       </div>
       <div style={{
         fontSize: 24,
-        color: theme.colors.textSecondary,
+        color: theme.colors.textSoft,
         fontFamily: theme.fonts.body,
       }}>
         How KnoMotion works under the hood
@@ -134,6 +139,8 @@ const LayerCardsSequence = () => {
     flexDirection: 'column',
     gap: 30,
     marginTop: 80,
+    maxWidth: 1200,
+    width: '100%',
   };
 
   return (
@@ -240,7 +247,7 @@ const LayerCardsSequence = () => {
                 </div>
                 <div style={{
                   fontSize: 16,
-                  color: theme.colors.textSecondary,
+                  color: theme.colors.textSoft,
                   lineHeight: 1.6,
                   fontFamily: theme.fonts.body,
                 }}>
@@ -327,7 +334,7 @@ const JSONExample = () => {
 
       <div style={{
         fontSize: 18,
-        color: theme.colors.textSecondary,
+        color: theme.colors.textSoft,
         textAlign: 'center',
         fontFamily: theme.fonts.body,
       }}>

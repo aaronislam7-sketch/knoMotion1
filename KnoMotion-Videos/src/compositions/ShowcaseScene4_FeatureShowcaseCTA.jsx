@@ -32,7 +32,7 @@ export const ShowcaseScene4_FeatureShowcaseCTA = () => {
   const theme = KNODE_THEME;
 
   const containerStyles = {
-    backgroundColor: theme.colors.bg,
+    backgroundColor: theme.colors.pageBg,
     padding: 60,
   };
 
@@ -245,7 +245,7 @@ const AnimationDelights = () => {
             justifyContent: 'center',
             fontSize: 56,
           }}>
-            <span style={{ color: theme.colors.cardBg }}>🎨</span>
+            🎨
           </div>
         </AnimationDemo>
 
@@ -462,7 +462,7 @@ const CallToAction = () => {
         <div style={{
           fontSize: 32,
           fontFamily: theme.fonts.body,
-          color: theme.colors.textSecondary,
+          color: theme.colors.textSoft,
         }}>
           Infinite possibilities, zero limits
         </div>
@@ -476,7 +476,7 @@ const CallToAction = () => {
         <div style={{
           padding: '20px 50px',
           backgroundColor: theme.colors.primary,
-          color: theme.colors.cardBg,
+          color: theme.colors.textMain,
           fontSize: 28,
           fontWeight: 700,
           fontFamily: theme.fonts.header,
@@ -491,7 +491,7 @@ const CallToAction = () => {
       {/* Subtitle */}
       <div style={{
         fontSize: 18,
-        color: theme.colors.textSecondary,
+        color: theme.colors.textSoft,
         fontFamily: theme.fonts.body,
         opacity: buttonOpacity,
       }}>

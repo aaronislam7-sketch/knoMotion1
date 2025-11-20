@@ -25,7 +25,7 @@ export const ShowcaseScene1_IntroValueProp = () => {
 
   // Container styles
   const containerStyles = {
-    backgroundColor: theme.colors.bg,
+    backgroundColor: theme.colors.pageBg,
     padding: 60,
     display: 'flex',
     flexDirection: 'column',
@@ -145,7 +145,7 @@ const HeroEntrance = () => {
         fontSize: 32, 
         fontWeight: 400, 
         fontFamily: theme.fonts.body, 
-        color: theme.colors.textSecondary,
+        color: theme.colors.textSoft,
         transform: `translateY(${subtitleY}px)`,
         opacity: subtitleOpacity,
       }}>
@@ -253,7 +253,7 @@ const SolutionIntro = () => {
           </div>
           <div style={{ 
             fontSize: 20, 
-            color: theme.colors.textSecondary,
+            color: theme.colors.textSoft,
             fontFamily: theme.fonts.body,
           }}>
             JSON-first video engine for EdTech
@@ -329,7 +329,7 @@ const ValuePropsGrid = () => {
               fontWeight: 600,
               fontFamily: theme.fonts.body,
               backgroundColor: theme.colors.primary,
-              color: theme.colors.cardBg,
+              color: theme.colors.textMain,
               zIndex: 10,
             }}>
               {prop.badge}
@@ -359,7 +359,7 @@ const ValuePropsGrid = () => {
               </div>
               <div style={{ 
                 fontSize: 16, 
-                color: theme.colors.textSecondary,
+                color: theme.colors.textSoft,
                 fontFamily: theme.fonts.body,
                 lineHeight: 1.5,
               }}>
