@@ -111,8 +111,10 @@
 - [ ] **ACTION 1.8**: Only 1 element exists in /elements/ directory (NotebookCard.jsx) - need to build library **CRITICAL FOR SHOWCASE**
 - [ ] **ACTION 1.9**: ~~V6 templates have 191 inline DIV/SPAN tags~~ **DEPRIORITIZED** - Templates will be sunset
 - [ ] **ACTION 1.10**: ~~Need to scan all V6 templates for inline element creation violations~~ **DEPRIORITIZED**
-- [ ] **ACTION 1.11**: Investigate DaisyUI + MaterialUI for element foundations (with Tailwind)
-- [ ] **ACTION 1.12**: Define "never import directly" wrapper pattern for external components
+- [x] **ACTION 1.11**: Investigate DaisyUI + MaterialUI for element foundations (with Tailwind)
+  - **Result**: DaisyUI ✅ (50KB, Tailwind-native) | MaterialUI ❌ (300KB, too heavy)
+- [x] **ACTION 1.12**: Define "never import directly" wrapper pattern for external components
+  - **Result**: Pattern documented in RESEARCH_SPIKE.md
 - [ ] **ACTION 1.13**: ~~Enhance KNODE_THEME with paper-y texture aesthetic~~ **DEFERRED** - Keep simple for now
 - [x] **ACTION 1.14**: ~~Clarify paper-y aesthetic~~ **RESOLVED** - Use existing theme as-is
 
@@ -148,11 +150,13 @@
 
 **Decision 5**: Leverage external component libraries (with wrapper pattern)
 - **Date**: 2025-11-20
-- **Decision**: Use Tailwind, DaisyUI, MaterialUI for element foundation
+- **Decision**: Use Tailwind + DaisyUI for element foundation (SKIP MaterialUI)
 - **Critical Rule**: NEVER import directly - always wrap, theme, export via SDK
 - **Rationale**: Accelerate development while maintaining control and theming
 - **Constraints**: Must be deterministic (no hover/event animations for Remotion)
 - **Status**: ✅ Approved
+- **Research**: See RESEARCH_SPIKE.md for full analysis
+- **Stack**: Tailwind + @remotion/tailwind + DaisyUI (~50KB) vs MaterialUI (~300KB rejected)
 
 **Decision 6**: Paper-y aesthetic as theme foundation
 - **Date**: 2025-11-20
@@ -481,16 +485,26 @@
 
 ### 2.1 Element Library Standardization
 
-**Status**: `🔴 CRITICAL - TOP PRIORITY`
+**Status**: `🔴 CRITICAL - TOP PRIORITY` → **🟢 READY TO BUILD**
 
-**Objective**: Create 10-15 AMAZING, polished elements leveraging DaisyUI/MaterialUI via Tailwind wrapper pattern.
+**Objective**: Create 13-15 AMAZING, polished elements leveraging DaisyUI via Tailwind wrapper pattern.
+
+**Research Complete**: See `/workspace/RESEARCH_SPIKE.md` for full analysis
+
+**Final Stack Decision**:
+- ✅ **Tailwind** (v3.4.18) - Utility classes
+- ✅ **@remotion/tailwind** (v4.0.373) - Already installed
+- ✅ **DaisyUI** (v5.5.5) - Component library (~50KB)
+- ❌ **MaterialUI** (v7.3.5) - REJECTED (too heavy at ~300KB)
 
 **Revised Approach**:
-- ✅ **Quality > Quantity**: 10-15 stellar elements, not 50 mediocre ones
-- ✅ **Leverage Libraries**: DaisyUI/MaterialUI for base components
+- ✅ **Quality > Quantity**: 13-15 stellar elements, not 50 mediocre ones
+- ✅ **Leverage DaisyUI**: Badge, Card, Button, Divider, Progress, Indicator, Timeline
 - ✅ **Wrapper Pattern**: NEVER import directly - always wrap, theme, export via SDK
 - ✅ **Deterministic Only**: No hover/event animations (Remotion constraint)
 - ✅ **Simple Aesthetic**: Use existing KNODE_THEME, no texture enhancements yet
+
+**Estimated Time**: 4-6 hours (1-2h DaisyUI setup + 3-4h building 13-15 elements)
 
 #### 2.1.1 Atomic Elements Needed
 
