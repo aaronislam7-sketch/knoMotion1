@@ -36,33 +36,30 @@ export const ElementLibraryTest = () => {
       }}
     >
       {/* Header */}
-      <Text variant="display" size="xl" weight="bold" color="primary">
-        Element Library Test (13 Elements)
-      </Text>
+      <Text text="Element Library Test (13 Elements)" variant="display" size="xl" weight="bold" color="primary" />
       
       <Divider orientation="horizontal" thickness={3} color="primary" />
 
       {/* Atomic Elements Section */}
       <div>
-        <Text variant="title" size="lg" weight="bold">
-          Atomic Elements (8)
-        </Text>
+        <Text text="Atomic Elements (8)" variant="title" size="lg" weight="bold" />
         
         {/* Row 1: Badge, Button, Icon */}
         <div style={{ display: 'flex', gap: 20, marginTop: 20, alignItems: 'center' }}>
-          <Badge variant="primary" size="md">Badge</Badge>
-          <Badge variant="success" size="sm">Success</Badge>
-          <Badge variant="warning" size="lg">Warning</Badge>
+          <Badge text="Badge" variant="primary" size="md" />
+          <Badge text="Success" variant="success" size="sm" />
+          <Badge text="Warning" variant="warning" size="lg" />
           
-          <Button variant="primary" size="md">Button</Button>
-          <Button variant="outline" size="sm">Outline</Button>
+          <Button text="Button" variant="primary" size="md" />
+          <Button text="Outline" variant="outline" size="sm" />
+          <Button text="With Icon" iconRef="🚀" variant="primary" size="md" />
           
-          <Icon size="md">🎨</Icon>
-          <Icon size="lg" color="primary">⚡</Icon>
+          <Icon iconRef="🎨" size="md" />
+          <Icon iconRef="⚡" size="lg" color="primary" />
           
           {/* Indicator test */}
           <div style={{ position: 'relative', width: 60, height: 60 }}>
-            <Icon size="xl">🔔</Icon>
+            <Icon iconRef="🔔" size="xl" />
             <Indicator variant="danger" pulse position="top-right" />
           </div>
         </div>
@@ -70,28 +67,28 @@ export const ElementLibraryTest = () => {
         {/* Row 2: Card */}
         <div style={{ display: 'flex', gap: 20, marginTop: 20 }}>
           <Card variant="default" size="sm" style={{ width: 200 }}>
-            <Text variant="body" size="sm">Default Card</Text>
+            <Text text="Default Card" variant="body" size="sm" />
           </Card>
           <Card variant="bordered" size="md" style={{ width: 200 }}>
-            <Text variant="body" size="sm">Bordered Card</Text>
+            <Text text="Bordered Card" variant="body" size="sm" />
           </Card>
           <Card variant="glass" size="lg" style={{ width: 200 }}>
-            <Text variant="body" size="sm">Glass Card</Text>
+            <Text text="Glass Card" variant="body" size="sm" />
           </Card>
         </div>
 
         {/* Row 3: Text variants */}
         <div style={{ marginTop: 20 }}>
-          <Text variant="display" size="md" weight="bold">Display Text</Text>
-          <Text variant="title" size="md">Title Text</Text>
-          <Text variant="body" size="sm" color="textSecondary">Body text (secondary)</Text>
+          <Text text="Display Text" variant="display" size="md" weight="bold" />
+          <Text text="Title Text" variant="title" size="md" />
+          <Text text="Body text (secondary)" variant="body" size="sm" color="textSecondary" />
         </div>
 
         {/* Row 4: Progress */}
         <div style={{ marginTop: 20, width: '100%', maxWidth: 500 }}>
-          <Progress value={75} variant="primary" size="md" />
-          <div style={{ marginTop: 10 }}>
-            <Progress value={50} variant="success" size="sm" />
+          <Progress value={75} label="Loading Progress (75%)" variant="primary" size="md" />
+          <div style={{ marginTop: 15 }}>
+            <Progress value={50} label="Success Rate" variant="success" size="sm" />
           </div>
         </div>
 
@@ -107,32 +104,29 @@ export const ElementLibraryTest = () => {
 
       {/* Composition Elements Section */}
       <div>
-        <Text variant="title" size="lg" weight="bold">
-          Composition Elements (5)
-        </Text>
+        <Text text="Composition Elements (5)" variant="title" size="lg" weight="bold" />
 
         {/* Row 1: CardWithBadge, CardWithIcon */}
         <div style={{ display: 'flex', gap: 20, marginTop: 20 }}>
           <CardWithBadge 
-            badge="New" 
+            badgeText="New" 
             badgeVariant="success"
             badgePosition="top-right"
             cardVariant="glass"
             style={{ width: 250 }}
           >
-            <Text variant="title" size="md" weight="bold">CardWithBadge</Text>
-            <Text variant="body" size="sm">Card + Badge combo</Text>
+            <Text text="CardWithBadge" variant="title" size="md" weight="bold" />
+            <Text text="Card + Badge combo" variant="body" size="sm" />
           </CardWithBadge>
 
           <CardWithIcon
-            icon="🚀"
+            iconRef="🚀"
             title="CardWithIcon"
+            text="Card + Icon + Text layout"
             layout="horizontal"
             cardVariant="bordered"
             style={{ width: 250 }}
-          >
-            <Text variant="body" size="sm">Card + Icon + Text layout</Text>
-          </CardWithIcon>
+          />
         </div>
 
         {/* Row 2: StepCard */}
@@ -140,10 +134,9 @@ export const ElementLibraryTest = () => {
           <StepCard 
             step={1}
             title="StepCard Component"
+            text="Step-by-step instruction card with number badge"
             cardVariant="bordered"
-          >
-            Step-by-step instruction card with number badge
-          </StepCard>
+          />
         </div>
 
         {/* Row 3: StatCard */}
@@ -151,7 +144,7 @@ export const ElementLibraryTest = () => {
           <StatCard 
             value="98%"
             label="Success Rate"
-            icon="⭐"
+            iconRef="⭐"
             trend="up"
             cardVariant="glass"
             style={{ width: 200 }}
@@ -159,7 +152,7 @@ export const ElementLibraryTest = () => {
           <StatCard 
             value="250K"
             label="Users"
-            icon="👥"
+            iconRef="👥"
             trend="up"
             style={{ width: 200 }}
           />
@@ -168,7 +161,7 @@ export const ElementLibraryTest = () => {
         {/* Row 4: HeroWithText */}
         <div style={{ marginTop: 20, maxWidth: 600 }}>
           <HeroWithText 
-            hero="🎓"
+            heroRef="🎓"
             title="HeroWithText Component"
             subtitle="Hero section with title and subtitle"
             layout="horizontal"
@@ -180,12 +173,19 @@ export const ElementLibraryTest = () => {
 
       {/* Footer */}
       <div style={{ textAlign: 'center', marginTop: 20 }}>
-        <Text variant="body" size="sm" color="textSecondary">
-          ✅ All 13 elements rendered successfully!
-        </Text>
-        <Text variant="body" size="xs" color="textSecondary" style={{ marginTop: 10 }}>
-          8 Atoms + 5 Compositions | KNODE_THEME Applied | Animation-Ready
-        </Text>
+        <Text 
+          text="✅ All 13 elements rendered successfully!" 
+          variant="body" 
+          size="sm" 
+          color="textSecondary" 
+        />
+        <Text 
+          text="8 Atoms + 5 Compositions | KNODE_THEME Applied | Animation-Ready | Standardized Props ✨" 
+          variant="body" 
+          size="xs" 
+          color="textSecondary" 
+          style={{ marginTop: 10 }} 
+        />
       </div>
     </AbsoluteFill>
   );

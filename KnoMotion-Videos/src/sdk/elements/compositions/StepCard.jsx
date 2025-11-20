@@ -9,8 +9,9 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * 
  * @param {object} props
  * @param {number} props.step - Step number
- * @param {string} props.title - Step title
- * @param {React.ReactNode} props.children - Step description/content
+ * @param {string} props.title - Step title (STANDARDIZED)
+ * @param {string} props.text - Step description (STANDARDIZED, alternative to children)
+ * @param {React.ReactNode} props.children - Step description/content (for complex markup)
  * @param {string} props.cardVariant - Card variant
  * @param {object} props.animation - Animation config
  * @param {object} props.style - Style overrides
@@ -18,6 +19,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
 export const StepCard = ({ 
   step,
   title,
+  text = null,
   children, 
   cardVariant = 'bordered',
   animation = null,
@@ -51,19 +53,16 @@ export const StepCard = ({
         
         {/* Content */}
         <div style={{ flex: 1 }}>
-          <Text variant="title" size="lg" weight="bold">
-            {title}
-          </Text>
-          {children && (
+          <Text text={title} variant="title" size="lg" weight="bold" />
+          {(text || children) && (
             <>
               <Divider 
                 orientation="horizontal" 
                 thickness={1} 
                 style={{ margin: `${theme.spacing.cardPadding * 0.5}px 0` }}
               />
-              <Text variant="body" size="md">
-                {children}
-              </Text>
+              {text && <Text text={text} variant="body" size="md" />}
+              {children && !text && children}
             </>
           )}
         </div>

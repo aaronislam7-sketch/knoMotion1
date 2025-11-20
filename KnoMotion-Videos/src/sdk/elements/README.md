@@ -44,7 +44,7 @@ Labels/tags for categorization
 ```tsx
 import { Badge } from '../../sdk/elements';
 
-<Badge variant="primary" size="md">New</Badge>
+<Badge text="New" variant="primary" size="md" />
 ```
 
 ---
@@ -61,7 +61,8 @@ Visual button elements (non-interactive, for display only)
 ```tsx
 import { Button } from '../../sdk/elements';
 
-<Button variant="primary" size="lg">Get Started</Button>
+<Button text="Get Started" variant="primary" size="lg" />
+<Button text="With Icon" iconRef="🚀" variant="primary" size="md" />
 ```
 
 ---
@@ -117,7 +118,7 @@ Icons/emojis with animation and spin support
 ```tsx
 import { Icon } from '../../sdk/elements';
 
-<Icon size="xl" spin>⚙️</Icon>
+<Icon iconRef="⚙️" size="xl" spin />
 ```
 
 ---
@@ -133,10 +134,10 @@ Notification dots/badges (absolute positioned)
 
 **Example**:
 ```tsx
-import { Indicator } from '../../sdk/elements';
+import { Indicator, Icon } from '../../sdk/elements';
 
 <div style={{ position: 'relative' }}>
-  <Icon>🔔</Icon>
+  <Icon iconRef="🔔" size="lg" />
   <Indicator variant="danger" pulse position="top-right" />
 </div>
 ```
@@ -160,6 +161,7 @@ import { Progress } from '../../sdk/elements';
 
 <Progress 
   value={75} 
+  label="Loading..."
   variant="primary" 
   animated 
   animateStartFrame={30}
@@ -184,13 +186,12 @@ Themed text with typewriter support
 import { Text } from '../../sdk/elements';
 
 <Text 
+  text="Hello World"
   variant="title" 
   size="xl" 
   weight="bold"
   animation={{ type: 'typewriter', startFrame: 0, duration: 2 }}
->
-  Hello World
-</Text>
+/>
 ```
 
 ---
@@ -212,7 +213,7 @@ Card + Badge combination
 import { CardWithBadge } from '../../sdk/elements';
 
 <CardWithBadge 
-  badge="New" 
+  badgeText="New" 
   badgeVariant="success"
   badgePosition="top-right"
   cardVariant="glass"
@@ -238,12 +239,11 @@ Card + Icon + Text layout
 import { CardWithIcon } from '../../sdk/elements';
 
 <CardWithIcon 
-  icon="🚀"
+  iconRef="🚀"
   title="Fast Setup"
+  text="Description here"
   layout="horizontal"
->
-  <p>Description here</p>
-</CardWithIcon>
+/>
 ```
 
 ---
@@ -263,7 +263,7 @@ Hero section with title/subtitle
 import { HeroWithText } from '../../sdk/elements';
 
 <HeroWithText 
-  hero="🎓"
+  heroRef="🎓"
   title="Learn Anything"
   subtitle="Powered by KnoMotion"
   layout="vertical"
@@ -291,7 +291,7 @@ import { StatCard } from '../../sdk/elements';
 <StatCard 
   value="98%"
   label="Satisfaction Rate"
-  icon="⭐"
+  iconRef="⭐"
   trend="up"
 />
 ```
@@ -314,10 +314,9 @@ import { StepCard } from '../../sdk/elements';
 <StepCard 
   step={1}
   title="Create Account"
+  text="Sign up in 30 seconds"
   cardVariant="bordered"
->
-  <p>Sign up in 30 seconds</p>
-</StepCard>
+/>
 ```
 
 ---
@@ -352,10 +351,10 @@ All elements support optional animation configs:
 // Import from SDK elements
 import { Badge, Card, Text } from '../../sdk/elements';
 
-// Use elements directly
+// Use elements with standardized props
 <Card variant="glass">
-  <Text variant="title">Hello</Text>
-  <Badge variant="primary">New</Badge>
+  <Text text="Hello" variant="title" />
+  <Badge text="New" variant="primary" />
 </Card>
 ```
 
@@ -365,9 +364,13 @@ import { Badge, Card, Text } from '../../sdk/elements';
 // NEVER import external libraries directly
 import { Badge } from 'daisyui';  // ❌ VIOLATION!
 
+// NEVER use inconsistent prop names
+<Badge>New</Badge>  // ❌ Use text prop
+<Icon>🚀</Icon>     // ❌ Use iconRef prop
+
 // NEVER create inline combo elements
 <div style={{ display: 'flex' }}>  // ❌ Create composition element instead
-  <Badge>Label</Badge>
+  <Badge text="Label" />
   <Card>Content</Card>
 </div>
 

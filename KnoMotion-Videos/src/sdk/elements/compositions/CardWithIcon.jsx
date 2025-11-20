@@ -8,17 +8,19 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * CardWithIcon - Composition element combining Card + Icon + Text
  * 
  * @param {object} props
- * @param {React.ReactNode} props.icon - Icon content (emoji, SVG)
- * @param {string} props.title - Title text
- * @param {React.ReactNode} props.children - Additional card content
+ * @param {string} props.iconRef - Icon reference (emoji, SVG) (STANDARDIZED)
+ * @param {string} props.title - Title text (STANDARDIZED)
+ * @param {string} props.text - Body text (STANDARDIZED, alternative to children)
+ * @param {React.ReactNode} props.children - Additional card content (for complex markup)
  * @param {string} props.layout - 'horizontal'|'vertical'
  * @param {string} props.cardVariant - Card variant
  * @param {object} props.animation - Animation config
  * @param {object} props.style - Style overrides
  */
 export const CardWithIcon = ({ 
-  icon,
+  iconRef,
   title,
+  text = null,
   children, 
   layout = 'horizontal',
   cardVariant = 'default',
@@ -41,11 +43,14 @@ export const CardWithIcon = ({
           textAlign: isVertical ? 'center' : 'left',
         }}
       >
-        <Icon size={isVertical ? 'xl' : 'lg'}>{icon}</Icon>
+        <Icon iconRef={iconRef} size={isVertical ? 'xl' : 'lg'} />
         <div style={{ flex: 1 }}>
-          <Text variant="title" size="lg" weight="bold">
-            {title}
-          </Text>
+          <Text text={title} variant="title" size="lg" weight="bold" />
+          {text && (
+            <div style={{ marginTop: theme.spacing.cardPadding * 0.5 }}>
+              <Text text={text} variant="body" size="md" />
+            </div>
+          )}
           {children && (
             <div style={{ marginTop: theme.spacing.cardPadding * 0.5 }}>
               {children}

@@ -10,15 +10,15 @@ import { fadeSlide, scaleIn } from '../../animations';
  * HeroWithText - Composition element for hero sections
  * 
  * @param {object} props
- * @param {React.ReactNode} props.hero - Hero content (emoji, icon, image)
- * @param {string} props.title - Main title
- * @param {string} props.subtitle - Subtitle/tagline
+ * @param {string} props.heroRef - Hero content reference (emoji, icon, image) (STANDARDIZED)
+ * @param {string} props.title - Main title (STANDARDIZED)
+ * @param {string} props.subtitle - Subtitle/tagline (STANDARDIZED)
  * @param {string} props.layout - 'horizontal'|'vertical'
  * @param {object} props.animation - Animation config for entrance
  * @param {object} props.style - Style overrides
  */
 export const HeroWithText = ({ 
-  hero,
+  heroRef,
   title,
   subtitle = null,
   layout = 'vertical',
@@ -66,20 +66,17 @@ export const HeroWithText = ({
       {...props}
     >
       {/* Hero */}
-      <Icon size="xl" animation={heroAnim}>
-        {hero}
-      </Icon>
+      <Icon iconRef={heroRef} size="xl" animation={heroAnim} />
       
       {/* Text Content */}
       <div style={{ flex: 1 }}>
         <Text 
+          text={title}
           variant="display" 
           size="xl" 
           weight="bold"
           animation={titleAnim}
-        >
-          {title}
-        </Text>
+        />
         
         {subtitle && (
           <>
@@ -93,14 +90,13 @@ export const HeroWithText = ({
               }}
             />
             <Text 
+              text={subtitle}
               variant="body" 
               size="lg" 
               color="textSecondary"
               animation={subtitleAnim}
               style={{ marginTop: theme.spacing.cardPadding * 0.5 }}
-            >
-              {subtitle}
-            </Text>
+            />
           </>
         )}
       </div>

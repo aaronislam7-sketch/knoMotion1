@@ -7,7 +7,7 @@ import { scaleIn, getContinuousRotation } from '../../animations';
  * Icon - Atomic element for icons/emojis
  * 
  * @param {object} props
- * @param {React.ReactNode} props.children - Icon content (emoji, SVG, etc.)
+ * @param {string} props.iconRef - Icon content (emoji, SVG, etc.) (STANDARDIZED)
  * @param {string} props.size - 'sm'|'md'|'lg'|'xl'
  * @param {string} props.color - Color from theme (optional)
  * @param {object} props.animation - Optional animation config
@@ -15,7 +15,7 @@ import { scaleIn, getContinuousRotation } from '../../animations';
  * @param {object} props.style - Style overrides
  */
 export const Icon = ({ 
-  children, 
+  iconRef, 
   size = 'md',
   color = null,
   animation = null,
@@ -77,7 +77,7 @@ export const Icon = ({
       }}
       {...props}
     >
-      {children}
+      {iconRef}
     </div>
   );
 };

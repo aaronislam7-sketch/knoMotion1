@@ -8,6 +8,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * 
  * @param {object} props
  * @param {number} props.value - Progress value (0-100)
+ * @param {string} props.label - Optional label text (STANDARDIZED)
  * @param {string} props.variant - 'default'|'primary'|'success'|'warning'
  * @param {string} props.size - 'sm'|'md'|'lg'
  * @param {boolean} props.animated - Whether to animate from 0 to value
@@ -17,6 +18,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  */
 export const Progress = ({ 
   value = 0,
+  label = null,
   variant = 'primary',
   size = 'md',
   animated = false,
@@ -58,7 +60,20 @@ export const Progress = ({
   };
   
   return (
-    <div 
+    <div style={{ width: '100%' }}>
+      {label && (
+        <div 
+          style={{ 
+            fontFamily: theme.fonts.body,
+            fontSize: 14,
+            color: theme.colors.textSecondary,
+            marginBottom: 6,
+          }}
+        >
+          {label}
+        </div>
+      )}
+      <div 
       className={`relative w-full ${sizeClasses[size]} rounded-full overflow-hidden ${className}`}
       style={{
         backgroundColor: `${variantColors[variant]}20`,
@@ -73,6 +88,7 @@ export const Progress = ({
           backgroundColor: variantColors[variant],
         }}
       />
+      </div>
     </div>
   );
 };

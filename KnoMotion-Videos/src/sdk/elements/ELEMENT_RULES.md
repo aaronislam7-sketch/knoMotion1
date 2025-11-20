@@ -99,9 +99,25 @@ export const Badge = ({ children }) => (
 
 ---
 
-## 🎨 Element API Pattern
+## 🎨 Element API Pattern (STANDARDIZED SCHEMA)
 
-All elements MUST follow this consistent API pattern:
+All elements MUST follow this **standardized prop naming convention**:
+
+### Content Props (STANDARDIZED)
+| Prop | Type | Usage |
+|------|------|-------|
+| `text` | `string` | Primary text content (single string) |
+| `title` | `string` | Title text (for elements with title + body) |
+| `subtitle` | `string` | Secondary text |
+| `label` | `string` | Label text |
+| `iconRef` | `string` | Icon/emoji reference |
+| `imageRef` | `string` | Image URL or file path |
+| `lottieRef` | `string` | Lottie animation URL or file path |
+| `children` | `ReactNode` | Complex/rich content (JSX, multiple elements) |
+
+**Rule**: Use `text` for simple strings, `children` for complex markup. All asset references use `*Ref` suffix.
+
+### Example Element with Standardized Props
 
 ```tsx
 import React from 'react';
@@ -111,14 +127,16 @@ import { KNODE_THEME } from '../theme/knodeTheme';
  * ElementName - Brief description
  * 
  * @param {object} props
- * @param {React.ReactNode} props.children - Content
+ * @param {string} props.text - Text content (STANDARDIZED)
+ * @param {string} props.iconRef - Icon reference (STANDARDIZED, optional)
  * @param {string} props.variant - Variant type
  * @param {string} props.size - Size
  * @param {object} props.animation - Optional animation config
  * @param {object} props.style - Style overrides
  */
 export const ElementName = ({ 
-  children, 
+  text,
+  iconRef = null,
   variant = 'default',
   size = 'md',
   animation = null,
@@ -148,21 +166,27 @@ export const ElementName = ({
       }}
       {...props}
     >
-      {children}
+      {iconRef && <span>{iconRef}</span>}
+      {text}
     </div>
   );
 };
 ```
 
-**Required Props**:
-- `children` - Content (if applicable)
+**Standardized Props**:
+- `text` / `title` / `subtitle` / `label` - Text content (REQUIRED for text elements)
+- `iconRef` / `imageRef` / `lottieRef` - Asset references (optional)
 - `variant` - Visual variant (default: 'default')
 - `size` - Size (default: 'md')
-
-**Optional Props**:
 - `animation` - Animation config object
 - `style` - Style overrides (use sparingly!)
-- `...props` - Additional HTML props
+- `children` - Complex content (for containers)
+
+**Benefits**:
+✅ JSON-friendly naming (easy serialization)  
+✅ Predictable API (`text` = string, `*Ref` = asset)  
+✅ Type-safe and discoverable  
+✅ Consistent across all 13 elements
 
 ---
 

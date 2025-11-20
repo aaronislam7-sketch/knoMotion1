@@ -8,14 +8,14 @@ import { fadeSlide } from '../../animations';
  * Wraps DaisyUI badge with KNODE_THEME styling
  * 
  * @param {object} props
- * @param {React.ReactNode} props.children - Badge text/content
+ * @param {string} props.text - Badge text content (STANDARDIZED)
  * @param {string} props.variant - 'default'|'primary'|'success'|'warning'|'danger'
  * @param {string} props.size - 'sm'|'md'|'lg'
  * @param {object} props.animation - Optional animation config { type, startFrame, duration }
  * @param {object} props.style - Style overrides
  */
 export const Badge = ({ 
-  children, 
+  text, 
   variant = 'default',
   size = 'md',
   animation = null,
@@ -80,7 +80,7 @@ export const Badge = ({
       }}
       {...props}
     >
-      {children}
+      {text}
     </div>
   );
 };

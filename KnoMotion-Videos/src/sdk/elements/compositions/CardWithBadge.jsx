@@ -7,7 +7,7 @@ import { Card } from '../atoms/Card';
  * 
  * @param {object} props
  * @param {React.ReactNode} props.children - Card content
- * @param {string} props.badge - Badge text
+ * @param {string} props.badgeText - Badge text (STANDARDIZED)
  * @param {string} props.badgeVariant - Badge variant
  * @param {string} props.badgePosition - 'top-right'|'top-left'|'bottom-right'|'bottom-left'
  * @param {string} props.cardVariant - Card variant
@@ -16,7 +16,7 @@ import { Card } from '../atoms/Card';
  */
 export const CardWithBadge = ({ 
   children, 
-  badge,
+  badgeText,
   badgeVariant = 'primary',
   badgePosition = 'top-right',
   cardVariant = 'default',
@@ -37,11 +37,9 @@ export const CardWithBadge = ({
       <Card variant={cardVariant} animation={animation}>
         {children}
       </Card>
-      {badge && (
+      {badgeText && (
         <div style={{ position: 'absolute', ...positions[badgePosition] }}>
-          <Badge variant={badgeVariant} size="sm">
-            {badge}
-          </Badge>
+          <Badge text={badgeText} variant={badgeVariant} size="sm" />
         </div>
       )}
     </div>

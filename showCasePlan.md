@@ -226,6 +226,22 @@ All audit findings are documented in the **Audit Train** below. Read before maki
 **Impact**: Use existing KNODE_THEME as-is, defer texture enhancements  
 **Status**: ✅ Accepted
 
+### Decision 7: Standardize Element Prop Schema
+**Date**: 2025-11-20  
+**Rationale**: User request for consistent, JSON-friendly prop naming across all elements  
+**Impact**: All elements now follow standardized naming:
+- Text content: `text`, `title`, `subtitle`, `label`
+- Visual assets: `iconRef`, `imageRef`, `lottieRef` (all use `*Ref` suffix)
+- Containers: `children` (for complex markup)
+**Benefits**:
+- ✅ JSON-friendly (easy serialization)
+- ✅ Predictable API (`text` = string, `*Ref` = asset)
+- ✅ Type-safe and discoverable
+- ✅ Consistent across all 13 elements
+**Status**: ✅ Accepted, ✅ Implemented
+
+**Documentation**: `/sdk/elements/PROP_SCHEMA.md`
+
 ---
 
 ## 📅 Phase Breakdown
@@ -308,6 +324,13 @@ All audit findings are documented in the **Audit Train** below. Read before maki
 - [x] `README.md` created
 
 **Status**: ✅ **COMPLETE** (2025-11-20)
+
+**Updates**:
+- ✅ Standardized prop schema implemented (Decision 7)
+- ✅ All elements updated to use: `text`, `iconRef`, `imageRef`, `lottieRef`
+- ✅ Documentation updated (`PROP_SCHEMA.md`, `ELEMENT_RULES.md`, `README.md`)
+- ✅ Test composition updated with new props
+- ✅ Build succeeds with no linter errors
 
 ---
 

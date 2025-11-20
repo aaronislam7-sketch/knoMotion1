@@ -7,7 +7,7 @@ import { fadeSlide, typewriter } from '../../animations';
  * Text - Atomic element for themed text
  * 
  * @param {object} props
- * @param {React.ReactNode} props.children - Text content
+ * @param {string} props.text - Text content (STANDARDIZED)
  * @param {string} props.variant - 'display'|'title'|'body'|'accent'|'utility'
  * @param {string} props.size - 'xs'|'sm'|'md'|'lg'|'xl'
  * @param {string} props.weight - 'normal'|'medium'|'bold'
@@ -16,7 +16,7 @@ import { fadeSlide, typewriter } from '../../animations';
  * @param {object} props.style - Style overrides
  */
 export const Text = ({ 
-  children, 
+  text, 
   variant = 'body',
   size = 'md',
   weight = 'normal',
@@ -32,7 +32,7 @@ export const Text = ({
   
   // Animation support
   let animStyle = {};
-  let content = children;
+  let content = text;
   
   if (animation) {
     const { type = 'fadeSlide', startFrame = 0, duration = 0.6, direction = 'up' } = animation;
@@ -40,8 +40,8 @@ export const Text = ({
     
     if (type === 'fadeSlide') {
       animStyle = fadeSlide(frame, startFrame, durationFrames, direction, 20);
-    } else if (type === 'typewriter' && typeof children === 'string') {
-      content = typewriter(frame, startFrame, durationFrames, children);
+    } else if (type === 'typewriter' && typeof text === 'string') {
+      content = typewriter(frame, startFrame, durationFrames, text);
       animStyle = { opacity: 1 };
     }
   }

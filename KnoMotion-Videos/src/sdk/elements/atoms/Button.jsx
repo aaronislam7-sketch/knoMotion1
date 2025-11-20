@@ -8,14 +8,16 @@ import { scaleIn } from '../../animations';
  * NOTE: Not interactive - for visual display only (Remotion constraint)
  * 
  * @param {object} props
- * @param {React.ReactNode} props.children - Button text/content
+ * @param {string} props.text - Button text content (STANDARDIZED)
+ * @param {string} props.iconRef - Optional icon/emoji (STANDARDIZED)
  * @param {string} props.variant - 'default'|'primary'|'success'|'outline'
  * @param {string} props.size - 'sm'|'md'|'lg'
  * @param {object} props.animation - Optional animation config
  * @param {object} props.style - Style overrides
  */
 export const Button = ({ 
-  children, 
+  text,
+  iconRef = null, 
   variant = 'primary',
   size = 'md',
   animation = null,
@@ -87,7 +89,8 @@ export const Button = ({
       }}
       {...props}
     >
-      {children}
+      {iconRef && <span style={{ marginRight: 8, fontSize: '1.2em' }}>{iconRef}</span>}
+      {text}
     </div>
   );
 };

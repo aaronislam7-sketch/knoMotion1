@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from '../atoms/Card';
+import { Icon } from '../atoms/Icon';
 import { Text } from '../atoms/Text';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 
@@ -8,8 +9,8 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * 
  * @param {object} props
  * @param {string|number} props.value - Stat value (number or string)
- * @param {string} props.label - Stat label/description
- * @param {React.ReactNode} props.icon - Optional icon
+ * @param {string} props.label - Stat label/description (STANDARDIZED)
+ * @param {string} props.iconRef - Optional icon reference (STANDARDIZED)
  * @param {string} props.trend - 'up'|'down'|'neutral' (optional trend indicator)
  * @param {string} props.cardVariant - Card variant
  * @param {object} props.animation - Animation config
@@ -18,7 +19,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
 export const StatCard = ({ 
   value,
   label,
-  icon = null,
+  iconRef = null,
   trend = null,
   cardVariant = 'glass',
   animation = null,
@@ -43,9 +44,9 @@ export const StatCard = ({
     <Card variant={cardVariant} animation={animation} style={style} {...props}>
       <div style={{ textAlign: 'center' }}>
         {/* Icon */}
-        {icon && (
-          <div style={{ marginBottom: theme.spacing.cardPadding * 0.5, fontSize: 40 }}>
-            {icon}
+        {iconRef && (
+          <div style={{ marginBottom: theme.spacing.cardPadding * 0.5 }}>
+            <Icon iconRef={iconRef} size="lg" />
           </div>
         )}
         
@@ -64,9 +65,7 @@ export const StatCard = ({
         </div>
         
         {/* Label */}
-        <Text variant="body" size="sm" color="textSecondary">
-          {label}
-        </Text>
+        <Text text={label} variant="body" size="sm" color="textSecondary" />
         
         {/* Trend Indicator */}
         {trend && (
