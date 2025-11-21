@@ -796,6 +796,69 @@ export const enforceMinimumSpacing = (elements, minSpacing = 20) => {
 };
 
 /**
+ * Convert position from center coordinates to top-left coordinates
+ * Layout engine returns center coordinates (x, y), but CSS positioning needs top-left
+ *
+ * @param {Object} position - Position with x, y (center) and optional width, height
+ * @returns {Object} Position with left, top (top-left) and width, height
+ */
+export const positionToTopLeft = (position) => {
+  const width = position.width || 0;
+  const height = position.height || 0;
+  return {
+    ...position,
+    left: position.x - width / 2,
+    top: position.y - height / 2,
+    // Keep original center coordinates for reference
+    centerX: position.x,
+    centerY: position.y,
+  };
+};
+
+/**
+ * Convert array of positions from center to top-left coordinates
+ *
+ * @param {Array} positions - Array of positions with x, y (center)
+ * @returns {Array} Array of positions with left, top (top-left)
+ */
+export const positionsToTopLeft = (positions) => {
+  return positions.map(positionToTopLeft);
+};
+
+/**
+ * Get CSS positioning style from position
+ * Returns ready-to-use CSS style object for absolute positioning
+ *
+ * @param {Object} position - Position (center or top-left format)
+ * @param {Object} [options] - Options
+ * @param {boolean} [options.useTopLeft=false] - If true, position is already top-left, else convert from center
+ * @returns {Object} CSS style object {position: 'absolute', left, top, width, height}
+ */
+export const positionToCSS = (position, options = {}) => {
+  const { useTopLeft = false } = options;
+  
+  let left, top;
+  if (useTopLeft) {
+    left = position.left ?? position.x ?? 0;
+    top = position.top ?? position.y ?? 0;
+  } else {
+    // Convert from center coordinates
+    const width = position.width || 0;
+    const height = position.height || 0;
+    left = position.x - width / 2;
+    top = position.y - height / 2;
+  }
+  
+  return {
+    position: 'absolute',
+    left: `${left}px`,
+    top: `${top}px`,
+    width: position.width ? `${position.width}px` : undefined,
+    height: position.height ? `${position.height}px` : undefined,
+  };
+};
+
+/**
  * Validate layout and return errors/warnings
  * Checks for bounds violations and collisions
  *

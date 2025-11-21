@@ -5,7 +5,7 @@ import {
   ARRANGEMENT_TYPES,
   calculateItemPositions,
   validateLayout,
-  findSafePosition,
+  positionToCSS,
 } from '../sdk/layout/layoutEngine';
 
 /**
@@ -124,7 +124,7 @@ export const ShowcaseScene5_LayoutEngineTest = () => {
           </div>
         </div>
 
-        {/* Grid Items - positions are absolute viewport coordinates */}
+        {/* Grid Items - using layout engine's positionToCSS utility */}
         {positionsToValidate.map((pos, index) => {
           const startFrame = index * 10;
           const scale = interpolate(frame, [startFrame, startFrame + 20], [0, 1], {
@@ -133,21 +133,14 @@ export const ShowcaseScene5_LayoutEngineTest = () => {
             easing: Easing.bezier(0.68, -0.55, 0.265, 1.55),
           });
 
-          // Grid returns center coordinates (absolute viewport), convert to top-left for positioning
-          const itemWidth = pos.width || 500;
-          const itemHeight = pos.height || 200;
-          const left = pos.x - itemWidth / 2;
-          const top = pos.y - itemHeight / 2;
+          // Use layout engine's positionToCSS to convert center coordinates to CSS-ready format
+          const cssPosition = positionToCSS(pos);
 
           return (
             <div
               key={index}
               style={{
-                position: 'absolute',
-                left: `${left}px`,
-                top: `${top}px`,
-                width: `${itemWidth}px`,
-                height: `${itemHeight}px`,
+                ...cssPosition,
                 backgroundColor: theme.colors.cardBg,
                 borderRadius: theme.radii.card,
                 boxShadow: theme.shadows.card,
