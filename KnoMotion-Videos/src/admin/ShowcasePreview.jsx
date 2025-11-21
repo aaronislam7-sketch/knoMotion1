@@ -8,6 +8,7 @@ import { ShowcaseScene4_FeatureShowcaseCTA } from '../compositions/ShowcaseScene
 import { ShowcaseScene5_LayoutEngineTest } from '../compositions/ShowcaseScene5_LayoutEngineTest';
 import { ShowcaseScene6_MidSceneHeroText } from '../compositions/ShowcaseScene6_MidSceneHeroText';
 import { ShowcaseScene7_MidSceneCardSequence } from '../compositions/ShowcaseScene7_MidSceneCardSequence';
+import { ShowcaseScene9_MidSceneIconGrid } from '../compositions/ShowcaseScene9_MidSceneIconGrid';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 
 /**
@@ -80,11 +81,19 @@ export const ShowcasePreview = () => {
     },
     scene7: {
       component: ShowcaseScene7_MidSceneCardSequence,
-      duration: 300, // 10 seconds
+      duration: 450, // 15 seconds
       width: 1920,
       height: 1080,
       fps: 30,
-      name: 'Scene 7: Mid-Scene CardSequence (10s)',
+      name: 'Scene 7: Mid-Scene Tests (TextReveal) (15s)',
+    },
+    scene9: {
+      component: ShowcaseScene9_MidSceneIconGrid,
+      duration: 450, // 15 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: 'Scene 9: Mid-Scene IconGrid (15s)',
     },
     animations: {
       component: ContinuousAnimationShowcase,

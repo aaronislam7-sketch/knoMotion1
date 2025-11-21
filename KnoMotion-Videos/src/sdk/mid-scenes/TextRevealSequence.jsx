@@ -201,6 +201,10 @@ export const TextRevealSequence = ({ config }) => {
             key={index}
             style={{
               ...linePosition,
+              width: pos.width || '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               ...style.lineContainer,
             }}
           >
@@ -209,6 +213,9 @@ export const TextRevealSequence = ({ config }) => {
                 opacity: animStyle.opacity,
                 transform: animStyle.transform,
                 clipPath: animStyle.clipPath || 'none',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
               }}
             >
               <Text
@@ -221,6 +228,7 @@ export const TextRevealSequence = ({ config }) => {
                   fontSize: baseFontSize,
                   lineHeight: `${lineHeight}px`,
                   textAlign: 'center',
+                  maxWidth: '90%',
                   ...emphasisStyle,
                   ...style.text,
                 }}
