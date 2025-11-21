@@ -3,7 +3,11 @@
 **Goal**: Achieve 100% JSON-driven video creation engine  
 **Current State**: 75% complete - Strong foundation, critical gaps remain  
 **Timeline**: 12-16 weeks (phased approach)  
-**Validation**: Use showcase zone (`/admin/ShowcasePreview.jsx`) for all testing
+**Validation**: Use showcase zone (`/admin/ShowcasePreview.jsx`) for all testing  
+**Testing Approach**: Create new showcase scene for each validation/test  
+**Documentation**: Audit docs live in root directory  
+**Code Review**: Grouped PRs (not per-task)  
+**Build Requirement**: Build must always pass - can sunset old templates to `/templates/legacy/` if needed
 
 ---
 
@@ -50,49 +54,77 @@
 ### 🔴 CRITICAL-1: Multiple Layout Systems
 **Impact**: Inconsistent behavior, maintenance burden, violates single source of truth  
 **Files Affected**: 
-- `/sdk/layout/layoutEngine.js` (most complete - **KEEP THIS**)
-- `/sdk/layout/layoutEngineV2.js` (unclear purpose - **AUDIT**)
-- `/sdk/layout/layout-resolver.js` (different approach - **AUDIT**)
+- `/sdk/layout/layoutEngine.js` (canonical - **KEEP THIS**)
+- `/sdk/layout/layoutEngineV2.js` (EXACT duplicate of layoutEngine.js - **REMOVE**)
+- `/sdk/layout/layout-resolver.js` (collision detection & safe positioning - **INTEGRATE INTO layoutEngine.js**)
+- `/sdk/layout/positionSystem.js` (legacy 9-point grid - **LOW PRIORITY**)
 
-**Evidence**: Templates import from different layout systems, causing inconsistent behavior
+**Evidence**: Duplicate systems exist, layout-resolver should be part of layoutEngine  
+**Note**: SceneRenderer should make minimal positioning calls - layout engine handles all positioning logic
 
 ---
 
 ### 🔴 CRITICAL-2: No Mid-Scene Library
-**Impact**: Can't reuse scene patterns, templates are 400-800 line monoliths  
+**Impact**: Can't reuse composed component patterns, no pre-built glue between elements/animations/effects  
 **Files Affected**:
-- All templates in `/templates/v6/` (17 templates)
-- All templates in `/templates/v7/` (9 templates)
+- New mid-scenes need to be created in `/sdk/mid-scenes/`
 
-**Evidence**: Each template reimplements hub-spoke, grid, stack patterns independently
+**What Mid-Scenes Are**:
+- **NOT layouts** - they are composed components that glue together:
+  - Atomic elements (Text, Button, Badge, etc.)
+  - Composition elements (HeroWithText, CardWithIcon, etc.)
+  - Animations (entrance, exit, continuous)
+  - Effects (particles, glow, etc.)
+- Each mid-scene is a pre-built, JSON-configurable component
+- Goal: LLM can generate JSON to use these mid-scenes
 
-**Patterns to Extract**:
-- Hub-spoke (from `Explain2AConceptBreakdown_V6.jsx`)
-- Grid (from `Compare12MatrixGrid_V6.jsx`)
-- Stack (from `Guide10StepSequence_V6.jsx`)
-- Cascade (from `Reveal9ProgressiveUnveil_V6.jsx`)
+**Example Mid-Scene**: `HeroTextEntranceExit`
+- Combines: Hero (image/lottie) + Text + Entrance animation + Exit animation
+- All configurable via JSON with beats for timing
+- Schema example:
+  ```json
+  {
+    "text": "Hello World",
+    "heroType": "image",
+    "heroRef": "/imagePath",
+    "animationEntrance": "fadeIn",
+    "animationExit": "fadeOut",
+    "beats": {
+      "entrance": 1.0,
+      "exit": 5.0
+    }
+  }
+  ```
+
+**Patterns to Create**:
+- HeroTextEntranceExit (hero + text + animations)
+- CardSequence (multiple cards with stagger animations)
+- IconGrid (grid of icons with entrance animations)
+- TextRevealSequence (text lines with reveal animations)
+- (More to be identified based on common patterns)
 
 ---
 
-### 🔴 CRITICAL-3: Templates Not JSON-Driven
-**Impact**: Architecture goal not achievable, hardcoded configs prevent full JSON control  
+### 🔴 CRITICAL-3: Legacy Templates (v6/v7)
+**Impact**: Old template approach - focus should be on new architecture, not refactoring old templates  
 **Files Affected**:
-- All templates with `DEFAULT_CONFIG` objects
-- Found in: `Explain2BAnalogy_V6.jsx`, `Explain2AConceptBreakdown_V6.jsx`, `Hook1AQuestionBurst_V6.jsx`, etc.
+- `/templates/v6/` (17 templates)
+- `/templates/v7/` (9 templates)
 
-**Evidence**: Templates merge `DEFAULT_CONFIG` with scene JSON, defaults should be in schema
+**Action**: **SUNSET** these templates safely to `/templates/legacy/` to ensure correct focus on new build  
+**Note**: Showcase compositions can remain as-is for visualization purposes (they demonstrate capabilities)
 
 ---
 
 ### 🔴 CRITICAL-4: Animation System Fragmentation
-**Impact**: Confusion about which animation function to use, inconsistent APIs  
+**Impact**: Multiple animation systems exist, but acceptable if no build issues  
 **Files Affected**:
 - `/sdk/animations/animations.js` (basic animations)
 - `/sdk/animations/microDelights.jsx` (sophisticated)
 - `/sdk/animations/broadcastAnimations.ts` (broadcast-quality)
 - `/sdk/animations/continuousLife.js` (continuous)
 
-**Evidence**: Templates import from different animation systems, no unified API
+**Action**: Keep fragmentation if no build issues. If issues arise, sunset old templates to legacy for focus.
 
 ---
 
@@ -108,30 +140,26 @@
 
 #### Task 1.1: Audit Layout Systems
 **Files to Review**:
-- `/sdk/layout/layoutEngine.js` (588 lines)
-- `/sdk/layout/layoutEngineV2.js` (unknown size)
-- `/sdk/layout/layout-resolver.js` (unknown size)
-- `/sdk/layout/positionSystem.js` (keep - 9-point grid)
+- `/sdk/layout/layoutEngine.js` (canonical - **KEEP**)
+- `/sdk/layout/layoutEngineV2.js` (EXACT duplicate - **REMOVE**)
+- `/sdk/layout/layout-resolver.js` (collision detection - **INTEGRATE INTO layoutEngine.js**)
+- `/sdk/layout/positionSystem.js` (legacy - **LOW PRIORITY**)
 
 **Steps**:
-1. [ ] Read all three layout files completely
-2. [ ] Document features in each:
-   - [ ] List all exported functions
-   - [ ] List all arrangement types supported
-   - [ ] List all configuration options
-   - [ ] Note any unique features
-3. [ ] Create comparison table:
-   - [ ] Feature matrix (what each system can do)
-   - [ ] Usage analysis (which templates use which)
-   - [ ] Code quality assessment
-4. [ ] Identify best features from each system
-5. [ ] Document findings in `/docs/audit/layout-system-audit.md`
+1. [ ] Verify `layoutEngineV2.js` is exact duplicate of `layoutEngine.js`
+2. [ ] Review `layout-resolver.js` functions:
+   - [ ] `findSafePosition()` - collision-aware positioning
+   - [ ] `autoResolveCollisions()` - automatic collision resolution
+   - [ ] Other utility functions
+3. [ ] Document what needs to be integrated from layout-resolver into layoutEngine
+4. [ ] Document findings in `/audit/layout-system-audit.md` (root directory)
 
-**Deliverable**: Audit document with recommendation for canonical system
+**Deliverable**: Audit document confirming duplicates and integration plan
 
 **Validation**: 
 - Review audit document
-- Confirm `layoutEngine.js` is most complete (expected)
+- Confirm layoutEngineV2 is duplicate (safe to remove)
+- Confirm layout-resolver functions to integrate
 
 ---
 
@@ -139,208 +167,228 @@
 **Target File**: `/sdk/layout/layoutEngine.js` (enhance existing)
 
 **Steps**:
-1. [ ] Review audit findings
-2. [ ] Enhance `layoutEngine.js` with best features from other systems:
-   - [ ] Add any missing arrangement types
-   - [ ] Add any missing utility functions
-   - [ ] Ensure all 7 arrangement types work: STACKED_VERTICAL, STACKED_HORIZONTAL, GRID, CIRCULAR, RADIAL, CASCADE, CENTERED
-3. [ ] Add mandatory collision detection:
-   - [ ] Import from `/sdk/validation/collision-detection.js`
-   - [ ] Add collision check to `calculateItemPositions()`
-   - [ ] Return warnings/errors for collisions
-4. [ ] Add automatic bounds checking:
-   - [ ] Check if items exceed canvas bounds
-   - [ ] Return warnings/errors for violations
+1. [ ] Review audit findings (Task 1.1)
+2. [ ] Integrate `layout-resolver.js` functions into `layoutEngine.js`:
+   - [ ] Add `findSafePosition()` function (collision-aware positioning)
+   - [ ] Add `autoResolveCollisions()` function (automatic resolution)
+   - [ ] Import collision detection utilities from `/sdk/validation/collision-detection.js`
+   - [ ] Ensure layout-resolver logic is called from within layoutEngine
+3. [ ] Enhance `calculateItemPositions()`:
+   - [ ] Add optional collision detection (use `findSafePosition` when enabled)
+   - [ ] Add automatic bounds checking
+   - [ ] Return `{ positions: [], warnings: [], errors: [] }` structure
+4. [ ] Ensure all 7 arrangement types work: STACKED_VERTICAL, STACKED_HORIZONTAL, GRID, CIRCULAR, RADIAL, CASCADE, CENTERED
 5. [ ] Create layout validation API:
    - [ ] `validateLayout(layout, canvas)` function
    - [ ] Returns `{ valid: boolean, errors: [], warnings: [] }`
 6. [ ] Update exports in `/sdk/layout/layoutEngine.js`
 7. [ ] Update SDK main index `/sdk/index.js` to export unified engine
+8. [ ] **Important**: Ensure SceneRenderer makes minimal positioning calls - layoutEngine handles all logic
 
-**Deliverable**: Enhanced unified layout engine with collision detection and bounds checking
+**Deliverable**: Enhanced unified layout engine with integrated collision detection and safe positioning
 
 **Validation**:
 - [ ] Test all 7 arrangement types work
 - [ ] Test collision detection catches overlaps
 - [ ] Test bounds checking catches violations
-- [ ] Review in showcase zone (create test scene)
+- [ ] Test safe positioning finds collision-free positions
+- [ ] Create new showcase scene: `ShowcaseScene5_LayoutEngineTest.jsx` for validation
 
 ---
 
-#### Task 1.3: Migrate All Templates to Unified Engine
-**Files to Update**: All templates using layout systems
+#### Task 1.3: Update Showcase & New Code to Use Unified Engine
+**Files to Update**: Showcase compositions and any new code
 
 **Steps**:
-1. [ ] Find all templates importing from layout systems:
-   - [ ] Search for `from '../sdk/layout'` imports
-   - [ ] Search for `from '../../sdk/layout'` imports
-   - [ ] List all affected files
-2. [ ] Update each template:
+1. [ ] Find showcase compositions using layout:
+   - [ ] Check `/compositions/ShowcaseScene3_LayoutShowcase.jsx`
+   - [ ] Check other showcase scenes if they use layout
+2. [ ] Update showcase compositions:
    - [ ] Change imports to use unified `layoutEngine.js`
    - [ ] Update function calls if API changed
-   - [ ] Test template still renders
-3. [ ] Update showcase compositions if they use layout:
-   - [ ] Check `/compositions/ShowcaseScene3_LayoutShowcase.jsx`
-   - [ ] Update if needed
-4. [ ] Test all templates in showcase zone:
-   - [ ] Load each template
+   - [ ] Test scenes still render
+3. [ ] Check for any other files importing from layout:
+   - [ ] Search codebase for layout imports
+   - [ ] Update if found (excluding legacy templates)
+4. [ ] Test in showcase zone:
+   - [ ] Load updated showcase scenes
    - [ ] Verify layouts render correctly
    - [ ] Check for console errors
 
-**Deliverable**: All templates using unified layout engine
+**Deliverable**: Showcase and new code using unified layout engine
 
 **Validation**:
-- [ ] All templates render without errors
+- [ ] Showcase scenes render without errors
 - [ ] Layouts look correct in showcase zone
 - [ ] No console warnings about layout
+- [ ] New showcase test scene (Task 1.2) works correctly
 
 ---
 
 #### Task 1.4: Remove Duplicate Layout Systems
-**Files to Remove/Deprecate**:
-- `/sdk/layout/layoutEngineV2.js` (remove or archive)
-- `/sdk/layout/layout-resolver.js` (remove or archive)
+**Files to Remove**:
+- `/sdk/layout/layoutEngineV2.js` (EXACT duplicate - **DELETE**)
+- `/sdk/layout/layout-resolver.js` (integrated into layoutEngine - **DELETE** after integration)
 
 **Steps**:
-1. [ ] Verify all templates migrated (Task 1.3 complete)
-2. [ ] Check for any other files importing from deprecated systems:
-   - [ ] Search codebase for imports
-   - [ ] Update any remaining imports
-3. [ ] Archive deprecated files:
-   - [ ] Move to `/sdk/layout/archive/` or delete
-   - [ ] Document why removed in commit message
-4. [ ] Update documentation:
-   - [ ] Update SDK.md if it references old systems
-   - [ ] Add migration notes if needed
+1. [ ] Verify layout-resolver functions integrated (Task 1.2 complete)
+2. [ ] Verify showcase updated (Task 1.3 complete)
+3. [ ] Check for any files importing from deprecated systems:
+   - [ ] Search codebase for `layoutEngineV2` imports
+   - [ ] Search codebase for `layout-resolver` imports
+   - [ ] Update any remaining imports (excluding legacy templates)
+4. [ ] Delete duplicate files:
+   - [ ] Delete `/sdk/layout/layoutEngineV2.js`
+   - [ ] Delete `/sdk/layout/layout-resolver.js`
+   - [ ] Document removal in commit message
+5. [ ] Verify build passes:
+   - [ ] Run build
+   - [ ] Fix any import errors
+   - [ ] Ensure no broken references
 
-**Deliverable**: Duplicate layout systems removed
+**Deliverable**: Duplicate layout systems removed, build passes
 
 **Validation**:
-- [ ] No files import from deprecated systems
+- [ ] No files import from deleted systems (except legacy)
 - [ ] Build succeeds
-- [ ] All tests pass (if tests exist)
+- [ ] Showcase scenes still work
+- [ ] New test scene (Task 1.2) works
 
 ---
 
 ### Week 2: Create Mid-Scene Library
 
-**Objective**: Extract reusable scene patterns from templates into `/sdk/mid-scenes/`
+**Objective**: Create composed components that glue elements, animations, and effects together - pre-built for LLM JSON generation
 
-#### Task 2.1: Extract HubSpokeScene
-**Source**: `/templates/v6/Explain2AConceptBreakdown_V6.jsx`  
-**Target**: `/sdk/mid-scenes/HubSpokeScene.jsx`
+#### Task 2.1: Create HeroTextEntranceExit Mid-Scene
+**Target**: `/sdk/mid-scenes/HeroTextEntranceExit.jsx`
+
+**What It Does**: Combines hero (image/lottie), text, entrance animation, and exit animation - all JSON-configurable
 
 **Steps**:
-1. [ ] Read `Explain2AConceptBreakdown_V6.jsx` completely
-2. [ ] Identify hub-spoke pattern logic:
-   - [ ] Center hub rendering
-   - [ ] Spoke positioning (circular layout)
-   - [ ] Connection lines between hub and spokes
-   - [ ] Animation sequences
-3. [ ] Extract to new file `/sdk/mid-scenes/HubSpokeScene.jsx`:
-   - [ ] Create component: `HubSpokeScene({ config, frame, fps })`
-   - [ ] Make all values come from `config` prop (no hardcoded defaults)
-   - [ ] Use unified layout engine for positioning
-   - [ ] Use unified animation system
-4. [ ] Create JSON schema for HubSpokeScene config:
-   - [ ] Document required fields
-   - [ ] Document optional fields
-   - [ ] Add to main scene schema if needed
-5. [ ] Update `Explain2AConceptBreakdown_V6.jsx`:
-   - [ ] Import `HubSpokeScene` from mid-scenes
-   - [ ] Replace hub-spoke logic with `<HubSpokeScene />` component
-   - [ ] Pass scene config as props
-6. [ ] Export from `/sdk/mid-scenes/index.js`
-7. [ ] Update SDK main index `/sdk/index.js`
+1. [ ] Create `/sdk/mid-scenes/HeroTextEntranceExit.jsx`:
+   - [ ] Component signature: `HeroTextEntranceExit({ config, frame, fps })`
+   - [ ] Accepts JSON config with: text, heroType, heroRef, animationEntrance, animationExit, beats
+   - [ ] Renders hero using `renderHero()` from SDK
+   - [ ] Renders text using `Text` element from SDK
+   - [ ] Applies entrance animation at `beats.entrance`
+   - [ ] Applies exit animation at `beats.exit`
+   - [ ] All values from config (no hardcoded defaults)
+2. [ ] Create JSON schema for this mid-scene:
+   - [ ] File: `/sdk/mid-scenes/schemas/HeroTextEntranceExit.schema.json`
+   - [ ] Schema structure:
+     ```json
+     {
+       "text": "string (required)",
+       "heroType": "image | lottie | svg (required)",
+       "heroRef": "string (required)",
+       "animationEntrance": "fadeIn | slideIn | scaleIn | ... (optional)",
+       "animationExit": "fadeOut | slideOut | scaleOut | ... (optional)",
+       "beats": {
+         "entrance": "number (seconds, required)",
+         "exit": "number (seconds, required)"
+       },
+       "position": "object (optional - uses layout engine)",
+       "style": "object (optional)"
+     }
+     ```
+3. [ ] Export from `/sdk/mid-scenes/index.js`
+4. [ ] Update SDK main index `/sdk/index.js`
+5. [ ] Create example JSON: `/scenes/examples/hero-text-entrance-exit.json`
 
-**Deliverable**: Reusable `HubSpokeScene` component
+**Deliverable**: `HeroTextEntranceExit` mid-scene component with schema
 
 **Validation**:
-- [ ] `Explain2AConceptBreakdown_V6.jsx` renders correctly using `HubSpokeScene`
-- [ ] Test in showcase zone with example JSON
-- [ ] Verify no visual regressions
-- [ ] Check JSON config controls all aspects
+- [ ] Create new showcase scene: `ShowcaseScene6_MidSceneHeroText.jsx`
+- [ ] Test with example JSON in showcase zone
+- [ ] Verify entrance animation works at correct beat
+- [ ] Verify exit animation works at correct beat
+- [ ] Verify hero renders (image and lottie variants)
+- [ ] Verify text renders
 
 ---
 
-#### Task 2.2: Extract GridScene
-**Source**: `/templates/v6/Compare12MatrixGrid_V6.jsx`  
-**Target**: `/sdk/mid-scenes/GridScene.jsx`
+#### Task 2.2: Create CardSequence Mid-Scene
+**Target**: `/sdk/mid-scenes/CardSequence.jsx`
+
+**What It Does**: Renders multiple cards in sequence with stagger animations - combines Card elements with entrance animations
 
 **Steps**:
-1. [ ] Read `Compare12MatrixGrid_V6.jsx` completely
-2. [ ] Identify grid pattern logic:
-   - [ ] Grid layout calculation
-   - [ ] Item positioning in grid
-   - [ ] Animation sequences
-3. [ ] Extract to `/sdk/mid-scenes/GridScene.jsx`:
-   - [ ] Create component: `GridScene({ config, frame, fps })`
-   - [ ] Use unified layout engine (GRID arrangement)
-   - [ ] Make all values configurable via JSON
-4. [ ] Create JSON schema for GridScene config
-5. [ ] Update `Compare12MatrixGrid_V6.jsx` to use `GridScene`
-6. [ ] Export from mid-scenes index
+1. [ ] Create `/sdk/mid-scenes/CardSequence.jsx`:
+   - [ ] Component signature: `CardSequence({ config, frame, fps })`
+   - [ ] Accepts array of cards with content
+   - [ ] Uses unified layout engine for positioning (STACKED_VERTICAL or GRID)
+   - [ ] Applies stagger entrance animations
+   - [ ] All configurable via JSON
+2. [ ] Create JSON schema: `/sdk/mid-scenes/schemas/CardSequence.schema.json`
+   - [ ] Schema includes: cards array, layout type, stagger delay, animations
+3. [ ] Export from mid-scenes index
+4. [ ] Create example JSON: `/scenes/examples/card-sequence.json`
 
-**Deliverable**: Reusable `GridScene` component
+**Deliverable**: `CardSequence` mid-scene component
 
 **Validation**:
-- [ ] `Compare12MatrixGrid_V6.jsx` renders correctly
-- [ ] Test in showcase zone
-- [ ] Verify grid layout is JSON-configurable
+- [ ] Create new showcase scene: `ShowcaseScene7_MidSceneCardSequence.jsx`
+- [ ] Test with example JSON in showcase zone
+- [ ] Verify cards render in correct layout
+- [ ] Verify stagger animations work
+- [ ] Verify all configurable via JSON
 
 ---
 
-#### Task 2.3: Extract StackScene
-**Source**: `/templates/v6/Guide10StepSequence_V6.jsx`  
-**Target**: `/sdk/mid-scenes/StackScene.jsx`
+#### Task 2.3: Create TextRevealSequence Mid-Scene
+**Target**: `/sdk/mid-scenes/TextRevealSequence.jsx`
+
+**What It Does**: Renders multiple text lines with reveal animations (typewriter, fade, slide) - combines Text elements with animations
 
 **Steps**:
-1. [ ] Read `Guide10StepSequence_V6.jsx` completely
-2. [ ] Identify stack pattern logic:
-   - [ ] Vertical/horizontal stacking
-   - [ ] Item spacing
-   - [ ] Animation sequences
-3. [ ] Extract to `/sdk/mid-scenes/StackScene.jsx`:
-   - [ ] Create component: `StackScene({ config, frame, fps })`
-   - [ ] Use unified layout engine (STACKED_VERTICAL/HORIZONTAL)
-   - [ ] Make all values configurable via JSON
-4. [ ] Create JSON schema for StackScene config
-5. [ ] Update `Guide10StepSequence_V6.jsx` to use `StackScene`
-6. [ ] Export from mid-scenes index
+1. [ ] Create `/sdk/mid-scenes/TextRevealSequence.jsx`:
+   - [ ] Component signature: `TextRevealSequence({ config, frame, fps })`
+   - [ ] Accepts array of text lines
+   - [ ] Applies reveal animations (typewriter, fade, slide) per line
+   - [ ] Supports stagger timing
+   - [ ] All configurable via JSON
+2. [ ] Create JSON schema: `/sdk/mid-scenes/schemas/TextRevealSequence.schema.json`
+   - [ ] Schema includes: lines array, reveal type, stagger delay, beats
+3. [ ] Export from mid-scenes index
+4. [ ] Create example JSON: `/scenes/examples/text-reveal-sequence.json`
 
-**Deliverable**: Reusable `StackScene` component
+**Deliverable**: `TextRevealSequence` mid-scene component
 
 **Validation**:
-- [ ] `Guide10StepSequence_V6.jsx` renders correctly
-- [ ] Test in showcase zone
-- [ ] Verify stack layout is JSON-configurable
+- [ ] Create new showcase scene: `ShowcaseScene8_MidSceneTextReveal.jsx`
+- [ ] Test with example JSON in showcase zone
+- [ ] Verify text lines reveal correctly
+- [ ] Verify stagger timing works
+- [ ] Verify all configurable via JSON
 
 ---
 
-#### Task 2.4: Extract CascadeScene
-**Source**: `/templates/v6/Reveal9ProgressiveUnveil_V6.jsx`  
-**Target**: `/sdk/mid-scenes/CascadeScene.jsx`
+#### Task 2.4: Create IconGrid Mid-Scene
+**Target**: `/sdk/mid-scenes/IconGrid.jsx`
+
+**What It Does**: Renders grid of icons with entrance animations - combines Icon elements with grid layout and animations
 
 **Steps**:
-1. [ ] Read `Reveal9ProgressiveUnveil_V6.jsx` completely
-2. [ ] Identify cascade pattern logic:
-   - [ ] Cascading item reveals
-   - [ ] Rotation offsets
-   - [ ] Animation sequences
-3. [ ] Extract to `/sdk/mid-scenes/CascadeScene.jsx`:
-   - [ ] Create component: `CascadeScene({ config, frame, fps })`
-   - [ ] Use unified layout engine (CASCADE arrangement)
-   - [ ] Make all values configurable via JSON
-4. [ ] Create JSON schema for CascadeScene config
-5. [ ] Update `Reveal9ProgressiveUnveil_V6.jsx` to use `CascadeScene`
-6. [ ] Export from mid-scenes index
+1. [ ] Create `/sdk/mid-scenes/IconGrid.jsx`:
+   - [ ] Component signature: `IconGrid({ config, frame, fps })`
+   - [ ] Accepts array of icons
+   - [ ] Uses unified layout engine (GRID arrangement)
+   - [ ] Applies entrance animations (stagger or cascade)
+   - [ ] All configurable via JSON
+2. [ ] Create JSON schema: `/sdk/mid-scenes/schemas/IconGrid.schema.json`
+   - [ ] Schema includes: icons array, grid columns, animation type, beats
+3. [ ] Export from mid-scenes index
+4. [ ] Create example JSON: `/scenes/examples/icon-grid.json`
 
-**Deliverable**: Reusable `CascadeScene` component
+**Deliverable**: `IconGrid` mid-scene component
 
 **Validation**:
-- [ ] `Reveal9ProgressiveUnveil_V6.jsx` renders correctly
-- [ ] Test in showcase zone
-- [ ] Verify cascade layout is JSON-configurable
+- [ ] Create new showcase scene: `ShowcaseScene9_MidSceneIconGrid.jsx`
+- [ ] Test with example JSON in showcase zone
+- [ ] Verify icons render in grid
+- [ ] Verify entrance animations work
+- [ ] Verify all configurable via JSON
 
 ---
 
@@ -349,17 +397,20 @@
 
 **Steps**:
 1. [ ] Create `/sdk/mid-scenes/index.js`:
-   - [ ] Export `HubSpokeScene`
-   - [ ] Export `GridScene`
-   - [ ] Export `StackScene`
-   - [ ] Export `CascadeScene`
+   - [ ] Export `HeroTextEntranceExit`
+   - [ ] Export `CardSequence`
+   - [ ] Export `TextRevealSequence`
+   - [ ] Export `IconGrid`
 2. [ ] Update `/sdk/index.js` to export mid-scenes
 3. [ ] Create `/sdk/mid-scenes/README.md`:
+   - [ ] Document what mid-scenes are (composed components, not layouts)
    - [ ] Document each mid-scene component
-   - [ ] Show usage examples
-   - [ ] Document JSON config structure
+   - [ ] Show usage examples with JSON
+   - [ ] Link to schema files
    - [ ] Link to example JSON files
-4. [ ] Update main SDK.md documentation
+   - [ ] Explain goal: pre-built for LLM JSON generation
+4. [ ] Create consolidated schema file: `/sdk/mid-scenes/schemas/index.ts` (exports all schemas)
+5. [ ] Update main SDK.md documentation
 
 **Deliverable**: Mid-scene library documented and exported
 
@@ -367,14 +418,15 @@
 - [ ] All mid-scenes importable from SDK
 - [ ] Documentation is clear
 - [ ] Examples work
+- [ ] Schemas are accessible
 
 ---
 
-### Week 3: Unify Animation System
+### Week 3: Animation System (Keep Fragmentation)
 
-**Objective**: Single unified animation API for all templates
+**Objective**: Document animation systems, ensure no build issues. Keep fragmentation if working.
 
-#### Task 3.1: Audit Animation Systems
+#### Task 3.1: Audit Animation Systems (Documentation Only)
 **Files to Review**:
 - `/sdk/animations/animations.js`
 - `/sdk/animations/microDelights.jsx`
@@ -398,300 +450,216 @@
 5. [ ] Identify gaps (missing common animations)
 6. [ ] Document findings in `/docs/audit/animation-system-audit.md`
 
-**Deliverable**: Complete audit of all animation functions
+**Deliverable**: Complete documentation of all animation functions
 
 **Validation**:
 - [ ] All animation functions documented
 - [ ] Categories are clear
-- [ ] Duplicates identified
+- [ ] Documentation is in `/audit/animation-system-audit.md`
 
 ---
 
-#### Task 3.2: Create AnimationEngine
-**Target**: `/sdk/animations/AnimationEngine.js`
-
+#### Task 3.2: Verify Build Stability (Skip if No Issues)
 **Steps**:
-1. [ ] Create `AnimationEngine` class:
-   - [ ] Structure: `class AnimationEngine { }`
-   - [ ] Methods organized by category
-2. [ ] Implement unified API:
-   - [ ] Standard signature: `getAnimation(frame, config, fps)`
-   - [ ] Config structure: `{ type, startFrame, duration, ...options }`
-   - [ ] Return structure: `{ opacity, transform, ...styleProps }`
-3. [ ] Migrate entrance animations:
-   - [ ] `fadeIn(frame, config, fps)`
-   - [ ] `slideIn(frame, config, fps)`
-   - [ ] `scaleIn(frame, config, fps)`
-   - [ ] `springEntrance(frame, config, fps)`
-   - [ ] etc.
-4. [ ] Migrate exit animations:
-   - [ ] `fadeOut(frame, config, fps)`
-   - [ ] `slideOut(frame, config, fps)`
-   - [ ] etc.
-5. [ ] Migrate continuous animations:
-   - [ ] `breathing(frame, config)`
-   - [ ] `floating(frame, config)`
-   - [ ] `rotation(frame, config)`
-   - [ ] etc.
-6. [ ] Migrate micro-delights:
-   - [ ] `cardEntrance(frame, config, fps)`
-   - [ ] `iconPop(frame, config, fps)`
-   - [ ] `particleBurst(frame, config, fps)`
-   - [ ] etc.
-7. [ ] Create animation presets:
-   - [ ] `getPreset(presetName)` - returns config for common animations
-   - [ ] Presets: "hero-entrance", "card-pop", "fade-in", etc.
-8. [ ] Export from `/sdk/animations/index.js`
+1. [ ] Run build to check for animation system conflicts
+2. [ ] Test showcase scenes that use animations
+3. [ ] If build issues found:
+   - [ ] Document issues
+   - [ ] Consider sunsetting problematic templates to legacy
+4. [ ] If no build issues:
+   - [ ] Keep fragmentation as-is
+   - [ ] Document that multiple systems are acceptable
 
-**Deliverable**: Unified `AnimationEngine` with single API
+**Deliverable**: Build stability verified, fragmentation acceptable if no issues
 
 **Validation**:
-- [ ] All animation categories work
-- [ ] API is consistent
-- [ ] Presets work
+- [ ] Build passes
+- [ ] Showcase scenes work
+- [ ] No animation-related errors
+
+---
+
+### Week 4: Sunset Legacy Templates & Complete Mid-Scene Schemas
+
+**Objective**: Safely move old templates to legacy, complete mid-scene JSON schemas
+
+#### Task 4.1: Sunset v6/v7 Templates to Legacy
+**Source**: `/templates/v6/` and `/templates/v7/`  
+**Target**: `/templates/legacy/`
+
+**Steps**:
+1. [ ] Create `/templates/legacy/` directory structure:
+   - [ ] `/templates/legacy/v6/`
+   - [ ] `/templates/legacy/v7/`
+2. [ ] Move all v6 templates:
+   - [ ] Move 17 templates from `/templates/v6/` to `/templates/legacy/v6/`
+   - [ ] Update any imports if needed
+3. [ ] Move all v7 templates:
+   - [ ] Move 9 templates from `/templates/v7/` to `/templates/legacy/v7/`
+   - [ ] Update any imports if needed
+4. [ ] Update TemplateRouter:
+   - [ ] Remove v6/v7 from active registries
+   - [ ] Add to legacy registry (optional - for backward compat)
+   - [ ] Or remove entirely if not needed
+5. [ ] Verify build passes:
+   - [ ] Run build
+   - [ ] Fix any broken imports
+   - [ ] Ensure showcase still works
+6. [ ] Create `/templates/legacy/README.md`:
+   - [ ] Document why moved to legacy
+   - [ ] Note: Focus on new architecture
+   - [ ] Link to new approach
+
+**Deliverable**: Legacy templates safely moved, build passes
+
+**Validation**:
+- [ ] Build passes
+- [ ] No broken imports
+- [ ] Showcase still works
+- [ ] Legacy templates in correct location
+
+---
+
+#### Task 4.2: Complete Mid-Scene JSON Schemas
+**Target**: All mid-scene schema files
+
+**Steps**:
+1. [ ] Review all mid-scene schemas created in Week 2:
+   - [ ] `HeroTextEntranceExit.schema.json`
+   - [ ] `CardSequence.schema.json`
+   - [ ] `TextRevealSequence.schema.json`
+   - [ ] `IconGrid.schema.json`
+2. [ ] Ensure schemas are complete:
+   - [ ] All required fields documented
+   - [ ] All optional fields documented
+   - [ ] Default values specified
+   - [ ] Validation rules clear
+3. [ ] Create TypeScript/Zod schemas if needed:
+   - [ ] For runtime validation
+   - [ ] For type safety
+4. [ ] Create consolidated schema index:
+   - [ ] `/sdk/mid-scenes/schemas/index.ts`
+   - [ ] Exports all schemas
+   - [ ] Provides validation functions
+5. [ ] Update documentation:
+   - [ ] Link schemas in mid-scenes README
+   - [ ] Show example JSON for each
+
+**Deliverable**: Complete mid-scene schemas with validation
+
+**Validation**:
+- [ ] All schemas are complete
+- [ ] Validation works
+- [ ] Examples validate correctly
+- [ ] Documentation is clear
+
+---
+
+#### Task 4.3: Create Scene Schema for Mid-Scenes
+**Target**: `/sdk/validation/scene.schema.ts` (extend for mid-scenes)
+
+**Steps**:
+1. [ ] Review current scene schema
+2. [ ] Add mid-scene support:
+   - [ ] Add `midScenes` array field
+   - [ ] Each mid-scene has `type` and `config`
+   - [ ] Type discriminates which schema to use
+3. [ ] Ensure schema covers:
+   - [ ] All mid-scene types
+   - [ ] All config options
+   - [ ] Timing/beats for mid-scenes
+4. [ ] Test schema validation:
+   - [ ] Valid mid-scene JSON passes
+   - [ ] Invalid JSON fails with helpful errors
+
+**Deliverable**: Scene schema supports mid-scenes
+
+**Validation**:
+- [ ] Schema validates mid-scene JSON
+- [ ] Error messages are helpful
+- [ ] Examples work
+
+---
+
+## Phase 2: JSON-Driven System (Weeks 5-8)
+
+**Goal**: Build JSON editor, create SceneRenderer, prove architecture with mid-scenes
+
+---
+
+### Week 5: Create SceneRenderer
+
+**Objective**: Template-agnostic renderer that uses mid-scenes from JSON
+
+#### Task 5.1: Create SceneRenderer Component
+**Target**: `/components/SceneRenderer.jsx`
+
+**Steps**:
+1. [ ] Create `SceneRenderer` component:
+   - [ ] Accepts JSON scene as prop
+   - [ ] Reads scene structure from JSON
+   - [ ] Renders mid-scenes based on JSON config
+   - [ ] Uses unified layout engine (minimal positioning calls)
+   - [ ] No template-specific code
+2. [ ] Support mid-scene rendering:
+   - [ ] Read `midScenes` array from JSON
+   - [ ] For each mid-scene, render appropriate component
+   - [ ] Pass config from JSON to mid-scene
+3. [ ] Handle timing/beats:
+   - [ ] Read beats from JSON
+   - [ ] Apply timing to mid-scenes
+   - [ ] Handle scene transitions
+4. [ ] Add error handling:
+   - [ ] Invalid mid-scene type
+   - [ ] Missing required fields
+   - [ ] Validation errors
+5. [ ] Export from components
+
+**Deliverable**: Template-agnostic SceneRenderer using mid-scenes
+
+**Validation**:
+- [ ] Create new showcase scene: `ShowcaseScene10_SceneRendererTest.jsx`
+- [ ] Test with JSON containing multiple mid-scenes
+- [ ] Verify all mid-scenes render correctly
+- [ ] Verify timing works
+- [ ] Verify no template-specific code
+
+---
+
+#### Task 5.2: Create Example JSON Scenes Using Mid-Scenes
+**Target**: `/scenes/examples/` (new examples)
+
+**Steps**:
+1. [ ] Create example: `hero-text-scene.json`:
+   - [ ] Uses `HeroTextEntranceExit` mid-scene
+   - [ ] Shows all config options
+2. [ ] Create example: `card-sequence-scene.json`:
+   - [ ] Uses `CardSequence` mid-scene
+   - [ ] Shows stagger animations
+3. [ ] Create example: `text-reveal-scene.json`:
+   - [ ] Uses `TextRevealSequence` mid-scene
+   - [ ] Shows typewriter effect
+4. [ ] Create example: `icon-grid-scene.json`:
+   - [ ] Uses `IconGrid` mid-scene
+   - [ ] Shows grid layout
+5. [ ] Create example: `multi-midscene-scene.json`:
+   - [ ] Uses multiple mid-scenes in sequence
+   - [ ] Shows scene composition
+
+**Deliverable**: Example JSON scenes using mid-scenes
+
+**Validation**:
+- [ ] All examples validate against schema
+- [ ] All examples render in SceneRenderer
 - [ ] Test in showcase zone
 
 ---
 
-#### Task 3.3: Update Templates to Use AnimationEngine
-**Files to Update**: All templates using animations
-
-**Steps**:
-1. [ ] Find all templates importing animations:
-   - [ ] Search for `from '../sdk/animations'` imports
-   - [ ] Search for `from '../../sdk/animations'` imports
-   - [ ] List all affected files
-2. [ ] Update each template:
-   - [ ] Change imports to use `AnimationEngine`
-   - [ ] Update function calls to new API
-   - [ ] Update config structures if needed
-3. [ ] Update showcase compositions if they use animations
-4. [ ] Test all templates in showcase zone
-
-**Deliverable**: All templates using unified AnimationEngine
-
-**Validation**:
-- [ ] All templates render without errors
-- [ ] Animations work correctly
-- [ ] No console warnings
-
----
-
-#### Task 3.4: Deprecate Old Animation Systems
-**Files to Deprecate**:
-- Keep for backward compatibility initially
-- Add deprecation warnings
-- Document migration path
-
-**Steps**:
-1. [ ] Add deprecation warnings to old animation files:
-   - [ ] `console.warn('Use AnimationEngine instead')`
-   - [ ] Point to new API
-2. [ ] Create migration guide:
-   - [ ] Document old → new API mapping
-   - [ ] Show examples
-3. [ ] Update documentation
-
-**Deliverable**: Old systems deprecated with clear migration path
-
-**Validation**:
-- [ ] Deprecation warnings show in console
-- [ ] Migration guide is clear
-
----
-
-### Week 4: Complete JSON Schema
-
-**Objective**: All template features configurable via JSON, no DEFAULT_CONFIG in templates
-
-#### Task 4.1: Audit Template Features
-**Files to Review**: All templates with DEFAULT_CONFIG
-
-**Steps**:
-1. [ ] Find all DEFAULT_CONFIG objects:
-   - [ ] Search codebase for `DEFAULT_CONFIG`
-   - [ ] List all files with defaults
-2. [ ] For each template, document:
-   - [ ] All fields in DEFAULT_CONFIG
-   - [ ] Current JSON schema coverage
-   - [ ] Missing JSON fields
-3. [ ] Create feature coverage matrix:
-   - [ ] Template name
-   - [ ] Feature
-   - [ ] In DEFAULT_CONFIG? (Y/N)
-   - [ ] In JSON schema? (Y/N)
-   - [ ] Action needed
-4. [ ] Document findings in `/docs/audit/json-schema-gaps.md`
-
-**Deliverable**: Complete list of hardcoded configs and JSON gaps
-
-**Validation**:
-- [ ] All DEFAULT_CONFIG objects found
-- [ ] All gaps documented
-
----
-
-#### Task 4.2: Extend JSON Schema
-**Target**: `/sdk/validation/scene.schema.ts`
-
-**Steps**:
-1. [ ] Review feature coverage matrix (Task 4.1)
-2. [ ] For each missing field, add to Zod schema:
-   - [ ] Add field definition
-   - [ ] Add default value (in schema, not template)
-   - [ ] Add validation rules
-   - [ ] Add JSDoc comments
-3. [ ] Ensure schema covers:
-   - [ ] All layout options
-   - [ ] All animation configs
-   - [ ] All effect configs
-   - [ ] All style tokens
-   - [ ] All timing/beats
-4. [ ] Test schema validation:
-   - [ ] Valid JSON passes
-   - [ ] Invalid JSON fails with helpful errors
-   - [ ] Missing fields use schema defaults
-
-**Deliverable**: Complete JSON schema covering all template features
-
-**Validation**:
-- [ ] Schema validates all example JSON files
-- [ ] Defaults work correctly
-- [ ] Error messages are helpful
-
----
-
-#### Task 4.3: Remove DEFAULT_CONFIG from Templates
-**Files to Update**: All templates with DEFAULT_CONFIG
-
-**Steps**:
-1. [ ] For each template with DEFAULT_CONFIG:
-   - [ ] Remove `DEFAULT_CONFIG` object
-   - [ ] Update template to read from `scene` prop only
-   - [ ] Use schema defaults if field missing
-   - [ ] Test template still renders
-2. [ ] Update template logic:
-   - [ ] Remove `{ ...DEFAULT_CONFIG, ...scene }` merging
-   - [ ] Use `scene.field ?? schemaDefault`
-   - [ ] Or rely on schema defaults
-3. [ ] Test all templates in showcase zone:
-   - [ ] Load with minimal JSON (only required fields)
-   - [ ] Verify defaults from schema work
-   - [ ] Verify full JSON still works
-
-**Deliverable**: No DEFAULT_CONFIG objects in templates
-
-**Validation**:
-- [ ] All templates render with minimal JSON
-- [ ] Defaults come from schema
-- [ ] No hardcoded configs remain
-
----
-
-#### Task 4.4: Update Example JSON Files
-**Files to Update**: All example scenes in `/scenes/`
-
-**Steps**:
-1. [ ] Review all example JSON files
-2. [ ] Ensure examples are complete:
-   - [ ] Include all common fields
-   - [ ] Show best practices
-   - [ ] Document optional fields
-3. [ ] Create minimal examples:
-   - [ ] Show minimum required fields
-   - [ ] Show defaults in action
-4. [ ] Update documentation:
-   - [ ] Reference examples in schema docs
-   - [ ] Link examples from templates
-
-**Deliverable**: Complete, accurate example JSON files
-
-**Validation**:
-- [ ] All examples validate against schema
-- [ ] Examples render correctly
-- [ ] Examples are well-documented
-
----
-
-## Phase 2: JSON-Driven Templates (Weeks 5-8)
-
-**Goal**: Make templates 100% JSON-configurable, build JSON editor, prove architecture
-
----
-
-### Weeks 5-6: Migrate v6 → v7
-
-**Objective**: Convert all v6 templates to v7 scene-shell architecture
-
-#### Task 5.1: Convert Explain2A to v7
-**Source**: `/templates/v6/Explain2AConceptBreakdown_V6.jsx`  
-**Target**: Update to use v7 scene-shell pattern
-
-**Steps**:
-1. [ ] Review v7 template structure (e.g., `FullFrameScene.jsx`)
-2. [ ] Refactor `Explain2AConceptBreakdown_V6.jsx`:
-   - [ ] Use scene-shell architecture
-   - [ ] Use `HubSpokeScene` mid-scene component
-   - [ ] Remove all hardcoded logic
-   - [ ] Read all config from JSON
-3. [ ] Update example JSON:
-   - [ ] Ensure all features configurable
-   - [ ] Test with showcase zone
-4. [ ] Verify rendering:
-   - [ ] Test in showcase zone
-   - [ ] Compare with original (no visual regressions)
-
-**Deliverable**: Explain2A using v7 architecture, 100% JSON-driven
-
-**Validation**:
-- [ ] Template renders correctly
-- [ ] All features JSON-configurable
-- [ ] No hardcoded values
-
----
-
-#### Task 5.2: Convert Hook1A to v7
-**Source**: `/templates/v6/Hook1AQuestionBurst_V6.jsx`  
-**Target**: v7 scene-shell architecture
-
-**Steps**: (Same pattern as Task 5.1)
-1. [ ] Refactor to v7 architecture
-2. [ ] Use mid-scene components where applicable
-3. [ ] Remove hardcoded logic
-4. [ ] Update JSON example
-5. [ ] Test in showcase zone
-
-**Deliverable**: Hook1A using v7 architecture, 100% JSON-driven
-
----
-
-#### Task 5.3: Convert Remaining v6 Templates
-**Templates to Convert**: All 17 v6 templates
-
-**Steps**:
-1. [ ] List all v6 templates
-2. [ ] Convert each template:
-   - [ ] Use v7 scene-shell architecture
-   - [ ] Use mid-scene components
-   - [ ] Remove hardcoded logic
-   - [ ] Update JSON examples
-3. [ ] Test each template in showcase zone
-4. [ ] Update template router if needed
-
-**Deliverable**: All v6 templates using v7 architecture
-
-**Validation**:
-- [ ] All templates render correctly
-- [ ] All are JSON-driven
-- [ ] No regressions
-
----
-
-### Week 7: JSON Editor
+### Week 6: JSON Editor
 
 **Objective**: Build JSON editor with autocomplete and validation
 
-#### Task 7.1: Create JSON Editor Component
+#### Task 6.1: Create JSON Editor Component
 **Target**: `/components/JSONEditor.jsx`
 
 **Steps**:
@@ -721,7 +689,7 @@
 
 ---
 
-#### Task 7.2: Integrate JSON Editor with Admin UI
+#### Task 6.2: Integrate JSON Editor with Admin UI
 **Target**: `/admin/UnifiedAdminConfig.jsx`
 
 **Steps**:
@@ -740,66 +708,62 @@
 
 ---
 
-### Week 8: Template-Agnostic Renderer
+### Week 7: Integrate SceneRenderer & Update Main Composition
 
-**Objective**: Prove architecture - render any scene from JSON only
+**Objective**: Use SceneRenderer in main app, prove end-to-end JSON workflow
 
-#### Task 8.1: Create SceneRenderer Component
-**Target**: `/components/SceneRenderer.jsx`
-
-**Steps**:
-1. [ ] Create `SceneRenderer` component:
-   - [ ] Accepts JSON scene as prop
-   - [ ] Reads `template_id` from JSON
-   - [ ] Routes to appropriate template
-   - [ ] No template-specific code
-2. [ ] Ensure all templates work:
-   - [ ] Test with all v6 templates
-   - [ ] Test with all v7 templates
-   - [ ] Test with showcase scenes
-3. [ ] Add error handling:
-   - [ ] Invalid template_id
-   - [ ] Missing required fields
-   - [ ] Validation errors
-
-**Deliverable**: Template-agnostic SceneRenderer
-
-**Validation**:
-- [ ] Can render any template from JSON
-- [ ] No hardcoded template logic
-- [ ] Error handling works
-
----
-
-#### Task 8.2: Update Main Composition
+#### Task 7.1: Update Main Composition
 **Target**: `/MainComposition.jsx` or main entry point
 
 **Steps**:
-1. [ ] Update to use `SceneRenderer`
-2. [ ] Remove template-specific routing
+1. [ ] Update main composition to use `SceneRenderer`
+2. [ ] Remove template-specific routing (TemplateRouter)
 3. [ ] Load scene from JSON file
-4. [ ] Test end-to-end
+4. [ ] Support loading from URL or file
+5. [ ] Test end-to-end
 
 **Deliverable**: Main composition uses SceneRenderer
 
 **Validation**:
-- [ ] Can load any scene from JSON
+- [ ] Can load scene from JSON
 - [ ] Renders correctly
 - [ ] No template-specific code
+- [ ] Test in showcase zone
 
 ---
 
-## Phase 3: Polish & Scale (Weeks 9-12)
+#### Task 7.2: Create Full Example Scene
+**Target**: Complete example using multiple mid-scenes
 
-**Goal**: Standardize effects, enforce guardrails, convert showcase to JSON, optimize
+**Steps**:
+1. [ ] Create comprehensive example JSON:
+   - [ ] Uses all 4 mid-scenes
+   - [ ] Shows timing/beats
+   - [ ] Shows transitions
+2. [ ] Test in SceneRenderer
+3. [ ] Document as reference example
+4. [ ] Add to showcase
+
+**Deliverable**: Complete example scene
+
+**Validation**:
+- [ ] Example renders correctly
+- [ ] All mid-scenes work together
+- [ ] Timing is correct
 
 ---
 
-### Week 9: Effects Standardization
+## Phase 3: Polish & Scale (Weeks 8-12)
+
+**Goal**: Standardize effects, enforce guardrails, optimize, complete documentation
+
+---
+
+### Week 8: Effects Standardization (Optional)
 
 **Objective**: Organize effects into unified registry
 
-#### Task 9.1: Create EffectsRegistry
+#### Task 8.1: Create EffectsRegistry
 **Target**: `/sdk/effects/EffectsRegistry.js`
 
 **Steps**:
@@ -818,11 +782,11 @@
 
 ---
 
-### Week 10: Layout Guardrails
+### Week 9: Layout Guardrails
 
 **Objective**: Enforce collision detection and bounds checking
 
-#### Task 10.1: Enforce Collision Detection
+#### Task 9.1: Enforce Collision Detection
 **Target**: `/sdk/layout/layoutEngine.js`
 
 **Steps**:
@@ -835,46 +799,74 @@
 
 ---
 
-### Week 11: JSON Showcase
+### Week 10: Additional Mid-Scenes (Based on Needs)
 
 **Objective**: Convert showcase to JSON-driven scenes
 
-#### Task 11.1: Convert Showcase Scenes to JSON
-**Target**: Convert all showcase compositions to JSON
-
+#### Task 10.1: Identify Additional Mid-Scene Needs
 **Steps**:
-1. [ ] Create JSON for each showcase scene
-2. [ ] Update showcase compositions to use JSON
-3. [ ] Test all scenes render correctly
-4. [ ] Update showcase documentation
+1. [ ] Review common video patterns
+2. [ ] Identify missing mid-scene patterns
+3. [ ] Prioritize based on usage
+4. [ ] Create additional mid-scenes as needed
 
-**Deliverable**: Showcase is JSON-driven
+**Deliverable**: Additional mid-scenes based on needs
 
 ---
 
-### Week 12: Performance & Testing
+### Week 11: Performance & Optimization
 
 **Objective**: Optimize performance, add tests, complete documentation
 
-#### Task 12.1: Performance Optimization
+#### Task 11.1: Performance Optimization
 **Steps**:
 1. [ ] Profile rendering performance
 2. [ ] Optimize particle systems
 3. [ ] Lazy load heavy effects
 4. [ ] Optimize layout calculations
+5. [ ] Optimize mid-scene rendering
 
 **Deliverable**: Optimized performance
 
 ---
 
-#### Task 12.2: Integration Tests
+#### Task 11.2: Integration Tests
 **Steps**:
-1. [ ] Test all templates render
+1. [ ] Test all mid-scenes render
 2. [ ] Test JSON validation
 3. [ ] Test layout guardrails
-4. [ ] Test mid-scene components
+4. [ ] Test SceneRenderer
+5. [ ] Test example scenes
 
 **Deliverable**: Integration test suite
+
+---
+
+### Week 12: Documentation & Final Polish
+
+**Objective**: Complete documentation, final review
+
+#### Task 12.1: Complete Documentation
+**Steps**:
+1. [ ] Update main README with new architecture
+2. [ ] Document mid-scene system
+3. [ ] Document SceneRenderer
+4. [ ] Create JSON reference guide
+5. [ ] Create migration guide (if needed)
+
+**Deliverable**: Complete documentation
+
+---
+
+#### Task 12.2: Final Review & Cleanup
+**Steps**:
+1. [ ] Review all code
+2. [ ] Remove unused files
+3. [ ] Update all documentation
+4. [ ] Final testing in showcase
+5. [ ] Prepare for LLM JSON generation
+
+**Deliverable**: Production-ready system
 
 ---
 
@@ -925,46 +917,48 @@ Use this format to track progress for each task:
 
 ---
 
-## Questions & Clarifications
+## Clarifications Received
 
-**Before starting Phase 1, please clarify:**
+✅ **Time Estimates**: No need for time estimates  
+✅ **Testing Strategy**: Test outputs in Showcase zone  
+✅ **Documentation**: Audit docs live in root directory (`/audit/`)  
+✅ **Showcase Zone**: Add new scene each time for validation  
+✅ **Code Review**: Grouped PRs (not per-task)  
+✅ **Backward Compatibility**: Build must always pass - can sunset old templates to `/templates/legacy/`  
+✅ **Priority**: Use suggested approach, no adjustments needed
 
-1. **Time Estimates**: Should I include time estimates for each task? (e.g., "Task 1.1: 4 hours")
+### Key Clarifications:
 
-2. **Testing Strategy**: 
-   - Should we create automated tests for each phase?
-   - What's the preferred testing framework?
-   - Should tests be part of each task?
+1. **Layout Engine**:
+   - `layoutEngineV2.js` is EXACT duplicate of `layoutEngine.js` - can drop one
+   - `positionSystem.js` is legacy, less important now
+   - `layout-resolver.js` should exist inside layoutEngine OR be called from there
+   - SceneRenderer should make minimal positioning calls
 
-3. **Documentation**:
-   - Where should audit documents go? (`/docs/audit/`?)
-   - Should we create migration guides for each change?
-   - Format preference for documentation?
+2. **Mid-Scene Library**:
+   - **NOT layouts** - they are glue between elements, animations, effects
+   - Example: `HeroTextEntranceExit` - combines hero + text + entrance/exit animations
+   - All configurable via JSON with beats
+   - Goal: Pre-built for LLM JSON generation
 
-4. **Showcase Zone Usage**:
-   - Should we create a dedicated "Architecture Test" scene in showcase?
-   - Or use existing showcase scenes for validation?
-   - Should we add a "Test Mode" to showcase preview?
+3. **Templates**:
+   - Don't refactor v6/v7 templates
+   - Sunset them safely to `/templates/legacy/`
+   - Focus on new architecture
+   - Showcase can stay as-is for visualization
 
-5. **Code Review Process**:
-   - Should each task be a separate PR?
-   - Or group related tasks?
-   - Who reviews?
-
-6. **Backward Compatibility**:
-   - How important is backward compatibility during migration?
-   - Should old systems work alongside new ones temporarily?
-   - Migration timeline for breaking changes?
-
-7. **Priority Adjustments**:
-   - Are all critical issues equal priority?
-   - Should we adjust order based on dependencies?
-   - Any constraints (deadlines, resources)?
-
-**Please review this plan and provide clarifications before we begin Phase 1.**
+4. **Animation System**:
+   - Keep fragmentation if no build issues
+   - Sunset old templates if needed for focus
 
 ---
 
-**Plan Version**: 1.0  
+**Plan Status**: ✅ Ready to Execute  
+**Next Step**: Begin Phase 1, Week 1, Task 1.1
+
+---
+
+**Plan Version**: 2.0  
 **Created**: 2025-01-20  
-**Status**: ⬜ Awaiting Review
+**Updated**: 2025-01-20 (with clarifications)  
+**Status**: ✅ Ready to Execute
