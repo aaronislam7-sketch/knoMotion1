@@ -1,0 +1,20 @@
+{
+  "text": "Welcome to KnoMotion",
+  "heroType": "image",
+  "heroRef": "/lotties/arrowFlow.json",
+  "animationEntrance": "fadeSlide",
+  "animationExit": "fadeOut",
+  "beats": {
+    "entrance": 1.0,
+    "exit": 5.0
+  },
+  "style": {
+    "container": {
+      "maxWidth": 900
+    },
+    "heroContainer": {
+      "width": 400,
+      "height": 400
+    }
+  }
+}

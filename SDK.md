@@ -374,106 +374,362 @@ import { getLottiePreset } from '../sdk/lottiePresets';
 
 ## 📐 Layout
 
-### Module: `layoutEngine.js`
+### Module: `layoutEngine.js` (Unified Layout Engine)
 
-**Layout calculation utilities:**
+**The unified layout engine provides a single, consistent API for all positioning needs.**
+
+#### Core API: `calculateItemPositions()`
+
+**Single function for all 7 arrangement types:**
 
 ```javascript
 import {
-  calculateCircularLayout,
-  calculateGridLayout,
-  calculateVerticalStack
-} from '../sdk/layoutEngine';
+  ARRANGEMENT_TYPES,
+  calculateItemPositions,
+  positionToCSS,
+  validateLayout,
+  createLayoutAreas
+} from '../sdk/layout/layoutEngine';
 
-// Circular (hub-and-spoke) layout
-const positions = calculateCircularLayout({
-  count: 6,              // Number of items
-  radius: 420,           // Distance from center
-  centerX: 960,
-  centerY: 540,
-  startAngle: 0,         // Start position (degrees)
-  angleOffset: 60        // Degrees between items
+// Unified API - works for all arrangement types
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.GRID,  // See all types below
+  viewport: { width: 1920, height: 1080 },
+  area: { left: 100, top: 200, width: 1720, height: 680 }, // Optional content area
+  // ... arrangement-specific options
+});
+```
+
+**Returns:** Array of position objects with center coordinates:
+```javascript
+[
+  { x: 960, y: 540, width: 500, height: 200, row: 0, column: 0 },
+  { x: 1460, y: 540, width: 500, height: 200, row: 0, column: 1 },
+  // ...
+]
+```
+
+**Note:** Positions use **center coordinates** (x, y). Use `positionToCSS()` to convert to CSS-ready format.
+
+---
+
+#### All 7 Arrangement Types
+
+##### 1. GRID - Grid layout with columns
+
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.GRID,
+  columns: 3,
+  gap: 50,                    // Gap between items (or use columnSpacing/rowSpacing)
+  itemWidth: 500,
+  itemHeight: 200,
+  centerGrid: true,           // Center grid in area
+  viewport: { width: 1920, height: 1080 },
+  area: { left: 100, top: 200, width: 1720, height: 680 } // Optional
+});
+// Returns: [{ x, y, width, height, row, column }, ...]
+```
+
+##### 2. STACKED_VERTICAL - Vertical stack
+
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.STACKED_VERTICAL,
+  spacing: 80,                // Vertical spacing between items
+  basePosition: 'center',     // 'center', 'top', 'bottom'
+  viewport: { width: 1920, height: 1080 }
+});
+// Returns: [{ x, y }, ...]
+```
+
+##### 3. STACKED_HORIZONTAL - Horizontal stack
+
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.STACKED_HORIZONTAL,
+  spacing: 100,               // Horizontal spacing
+  basePosition: 'center',
+  viewport: { width: 1920, height: 1080 }
+});
+// Returns: [{ x, y }, ...]
+```
+
+##### 4. CIRCULAR - Circular (hub-and-spoke) layout
+
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.CIRCULAR,
+  radius: 300,                // Distance from center
+  startAngle: 0,              // Starting angle (degrees)
+  viewport: { width: 1920, height: 1080 }
 });
 // Returns: [{ x, y, angle }, ...]
+```
 
-// Grid layout
-const grid = calculateGridLayout({
-  count: 9,
-  columns: 3,
-  itemWidth: 240,
-  itemHeight: 240,
-  gap: 40,
-  containerWidth: 1920,
-  containerHeight: 1080
-});
-// Returns: [{ x, y, row, col }, ...]
+##### 5. RADIAL - Radial (spiral) layout
 
-// Vertical stack
-const stack = calculateVerticalStack({
-  count: 5,
-  itemHeight: 120,
-  gap: 30,
-  startY: 200
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.RADIAL,
+  startRadius: 100,           // Starting radius
+  radiusIncrement: 150,       // Radius increase per item
+  angleIncrement: 45,         // Angle increase per item (degrees)
+  viewport: { width: 1920, height: 1080 }
 });
-// Returns: [{ y }, ...]
+// Returns: [{ x, y, radius, angle }, ...]
+```
+
+##### 6. CASCADE - Cascading diagonal layout
+
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.CASCADE,
+  offsetX: 50,                // Horizontal offset per item
+  offsetY: 50,                // Vertical offset per item
+  basePosition: 'center',
+  viewport: { width: 1920, height: 1080 }
+});
+// Returns: [{ x, y }, ...]
+```
+
+##### 7. CENTERED - All items at same center
+
+```javascript
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.CENTERED,
+  viewport: { width: 1920, height: 1080 }
+});
+// Returns: [{ x, y }, ...] (all same coordinates)
 ```
 
 ---
 
-### Module: `positionSystem.js`
+#### Position Utilities
 
-**9-point grid positioning system:**
+**Convert center coordinates to CSS-ready format:**
 
 ```javascript
-import { resolvePosition, getPositionCoordinates } from '../sdk/positionSystem';
+import { positionToCSS, positionToTopLeft, positionsToTopLeft } from '../sdk/layout/layoutEngine';
 
-// Resolve position token to coordinates
+// Convert single position to CSS style object
+const position = { x: 960, y: 540, width: 500, height: 200 };
+const cssStyle = positionToCSS(position);
+// Returns: { position: 'absolute', left: '710px', top: '440px', width: '500px', height: '200px' }
+
+// Use in JSX
+<div style={positionToCSS(position)}>
+  {/* Content */}
+</div>
+
+// Convert to top-left coordinates (keeps original center coords)
+const topLeft = positionToTopLeft(position);
+// Returns: { left: 710, top: 440, centerX: 960, centerY: 540, width: 500, height: 200 }
+
+// Convert array of positions
+const topLeftPositions = positionsToTopLeft(positions);
+```
+
+**Why center coordinates?**
+- Easier to center items
+- Simpler collision detection
+- Consistent API across all arrangement types
+- Convert to CSS when needed with `positionToCSS()`
+
+---
+
+#### Collision Detection & Validation
+
+**Enable collision detection in layout calculation:**
+
+```javascript
+const result = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.GRID,
+  columns: 3,
+  itemWidth: 500,
+  itemHeight: 200,
+  enableCollisionDetection: true,  // Enable collision detection
+  minSpacing: 20,                   // Minimum spacing between items
+  viewport: { width: 1920, height: 1080 }
+});
+
+// Returns: { positions: [...], valid: boolean, warnings: [], errors: [] }
+```
+
+**Validate layout manually:**
+
+```javascript
+import { validateLayout } from '../sdk/layout/layoutEngine';
+
+const validation = validateLayout(positions, viewport, {
+  checkBounds: true,        // Check if items exceed viewport
+  checkCollisions: true     // Check for overlapping items
+});
+
+if (!validation.valid) {
+  console.error('Layout errors:', validation.errors);
+  console.warn('Layout warnings:', validation.warnings);
+}
+
+// Returns: { valid: boolean, errors: [], warnings: [] }
+```
+
+**Validation errors include:**
+- Bounds violations (items outside viewport)
+- Collisions (overlapping items)
+- Spacing violations (items too close)
+
+---
+
+#### Layout Areas
+
+**Create title-safe and content areas:**
+
+```javascript
+import { createLayoutAreas } from '../sdk/layout/layoutEngine';
+
+const areas = createLayoutAreas({
+  viewport: { width: 1920, height: 1080 },
+  padding: 60,              // Page padding
+  titleHeight: 150,          // Space for title
+  footerHeight: 100          // Space for footer
+});
+
+// Returns:
+// {
+//   title: { left, top, width, height },
+//   content: { left, top, width, height },
+//   footer: { left, top, width, height },
+//   full: { left, top, width, height }
+// }
+
+// Use content area for layout
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.GRID,
+  area: areas.content,      // Constrain to content area
+  columns: 3
+});
+```
+
+---
+
+#### Safe Positioning Utilities
+
+**Find safe positions avoiding collisions:**
+
+```javascript
+import { findSafePosition, calculateSafeLayout } from '../sdk/layout/layoutEngine';
+
+// Find safe position for single element
+const safePos = findSafePosition(
+  { width: 200, height: 200 },
+  existingElements,
+  {
+    viewport: { width: 1920, height: 1080 },
+    preferredX: 960,
+    preferredY: 540,
+    minSpacing: 20
+  }
+);
+// Returns: { x, y } - safe position avoiding collisions
+
+// Calculate safe layout for multiple elements
+const safeLayout = calculateSafeLayout(elements, {
+  viewport: { width: 1920, height: 1080 },
+  minSpacing: 20,
+  strategy: 'spread'  // 'spread', 'compact', 'grid'
+});
+// Returns: Array of adjusted positions
+```
+
+---
+
+#### Complete Example
+
+```javascript
+import { useMemo } from 'react';
+import { AbsoluteFill } from 'remotion';
+import {
+  ARRANGEMENT_TYPES,
+  calculateItemPositions,
+  positionToCSS,
+  validateLayout,
+  createLayoutAreas
+} from '../sdk/layout/layoutEngine';
+
+export const GridScene = ({ items }) => {
+  const viewport = { width: 1920, height: 1080 };
+  
+  // Create layout areas
+  const areas = useMemo(() => createLayoutAreas({
+    viewport,
+    padding: 60,
+    titleHeight: 150
+  }), []);
+  
+  // Calculate positions
+  const result = useMemo(() => calculateItemPositions(items, {
+    arrangement: ARRANGEMENT_TYPES.GRID,
+    area: areas.content,
+    columns: 3,
+    gap: 50,
+    itemWidth: 500,
+    itemHeight: 200,
+    centerGrid: true,
+    enableCollisionDetection: true,
+    minSpacing: 20,
+    viewport
+  }), [items, areas.content]);
+  
+  const positions = result.positions || result;
+  
+  // Validate layout
+  const validation = useMemo(() => validateLayout(positions, viewport), [positions]);
+  
+  return (
+    <AbsoluteFill>
+      {positions.map((pos, index) => (
+        <div
+          key={index}
+          style={{
+            ...positionToCSS(pos),  // Convert to CSS-ready format
+            backgroundColor: '#FFF',
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {items[index].label}
+        </div>
+      ))}
+      
+      {!validation.valid && (
+        <div>Layout errors: {validation.errors.length}</div>
+      )}
+    </AbsoluteFill>
+  );
+};
+```
+
+---
+
+#### Legacy Modules (Low Priority)
+
+**`positionSystem.js`** - Legacy 9-point grid system (still used internally, low priority)
+
+```javascript
+import { resolvePosition } from '../sdk/layout/positionSystem';
+
 const { x, y } = resolvePosition('centerRight', {
   width: 1920,
   height: 1080,
   offset: { x: 100, y: 0 }
 });
-
-// Available positions:
-// topLeft, topCenter, topRight
-// centerLeft, center, centerRight
-// bottomLeft, bottomCenter, bottomRight
+// Available: topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight
 ```
 
----
-
-### Module: `collision-detection.js`
-
-**Layout validation and collision detection:**
-
-```javascript
-import {
-  detectCollisions,
-  checkBoundsViolations,
-  validateLayout
-} from '../sdk/collision-detection';
-
-// Detect collisions between elements
-const collisions = detectCollisions([
-  { x: 100, y: 100, width: 200, height: 200, id: 'element1' },
-  { x: 150, y: 150, width: 200, height: 200, id: 'element2' }
-]);
-// Returns: [{ element1: {...}, element2: {...}, overlap: 50 }]
-
-// Check if elements exceed canvas bounds
-const violations = checkBoundsViolations([
-  { x: 1800, y: 100, width: 200, height: 100 }  // Exceeds right edge
-], { width: 1920, height: 1080 });
-// Returns: [{ element: {...}, violation: 'right', amount: 80 }]
-
-// Validate entire layout
-const validation = validateLayout({
-  elements: [...],
-  canvas: { width: 1920, height: 1080 },
-  margins: { top: 80, right: 100, bottom: 60, left: 100 }
-});
-// Returns: { valid: boolean, errors: [], warnings: [] }
-```
+**Note:** The unified `layoutEngine.js` is the canonical layout system. All new code should use `calculateItemPositions()`.
 
 ---
 
@@ -1227,7 +1483,7 @@ The SDK provides **everything you need** to build professional video templates:
 - 🎬 **20+ animation functions** (8 new continuous life animations!)
 - 🧩 **23 UI elements** (14 atoms + 9 compositions)
 - ✨ **15+ visual effects**
-- 📐 **7 layout engines** (GRID, RADIAL, CASCADE, STACK, etc.)
+- 📐 **Unified layout engine** (7 arrangement types: GRID, RADIAL, CASCADE, STACK, CIRCULAR, CENTERED)
 - ✅ **Full validation suite**
 - 🛠️ **30+ utilities**
 - 🎨 **Complete theme system** (KNODE_THEME)
@@ -1242,7 +1498,7 @@ The SDK provides **everything you need** to build professional video templates:
 | Elements | 23 | ✅ Production Ready |
 | Animations | 20+ | ✅ Production Ready |
 | Continuous Animations | 8 | ✅ NEW! |
-| Layout Engines | 7 | ✅ Production Ready |
+| Layout Engine | 7 arrangement types | ✅ Unified & Production Ready |
 | Visual Effects | 15+ | ✅ Production Ready |
 | Utilities | 30+ | ✅ Production Ready |
 

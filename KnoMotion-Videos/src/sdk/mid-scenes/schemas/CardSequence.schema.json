@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CardSequence Schema",
+  "description": "Schema for CardSequence mid-scene component",
+  "type": "object",
+  "required": ["cards", "beats"],
+  "properties": {
+    "cards": {
+      "type": "array",
+      "description": "Array of card configurations",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Card title"
+          },
+          "content": {
+            "type": "string",
+            "description": "Card content text"
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["default", "bordered", "glass"],
+            "default": "default",
+            "description": "Card variant style"
+          },
+          "size": {
+            "type": "string",
+            "enum": ["sm", "md", "lg"],
+            "default": "md",
+            "description": "Card size"
+          },
+          "style": {
+            "type": "object",
+            "description": "Card style overrides"
+          },
+          "titleStyle": {
+            "type": "object",
+            "description": "Title style overrides"
+          },
+          "contentStyle": {
+            "type": "object",
+            "description": "Content style overrides"
+          },
+          "children": {
+            "description": "Custom React children (not in JSON, for programmatic use)"
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "string",
+      "enum": ["stacked", "grid"],
+      "default": "stacked",
+      "description": "Layout arrangement type"
+    },
+    "columns": {
+      "type": "number",
+      "default": 3,
+      "minimum": 1,
+      "maximum": 6,
+      "description": "Number of columns for grid layout"
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["fadeIn", "slideIn", "scaleIn", "fadeSlide"],
+      "default": "fadeSlide",
+      "description": "Entrance animation type"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.15,
+      "minimum": 0,
+      "description": "Delay between cards in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.6,
+      "minimum": 0.1,
+      "description": "Animation duration in seconds"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start beat in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Optional position override (uses layout engine)",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "card": { "type": "object" }
+      }
+    }
+  }
+}

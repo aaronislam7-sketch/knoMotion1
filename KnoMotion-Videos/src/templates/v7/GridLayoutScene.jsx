@@ -17,6 +17,7 @@ import {
   ARRANGEMENT_TYPES,
   calculateItemPositions,
   createLayoutAreas,
+  positionToCSS,
 } from '../../sdk/layout/layoutEngine';
 
 // Simple animation helper for title
@@ -153,15 +154,14 @@ const renderGridItem = (item, index, slot, style_tokens, frame, startFrame, fps,
   const duration = (animations.items.duration || 0.6) * fps;
   const animStyle = fadeIn(frame, startFrame, duration);
 
+  // Use layout engine's positionToCSS to convert center coordinates to CSS-ready format
+  const cssPosition = positionToCSS(slot);
+
   return (
     <div
       key={index}
       style={{
-        position: 'absolute',
-        left: slot.x - slot.width / 2,
-        top: slot.y - slot.height / 2,
-        width: slot.width,
-        height: slot.height,
+        ...cssPosition,
         opacity: animStyle.opacity,
       }}
     >
@@ -238,7 +238,7 @@ export const GridLayoutScene = ({ scene }) => {
     [viewport.width, viewport.height, style_tokens.spacing, content.title],
   );
 
-  // Use layoutEngineV2 to get grid slots
+  // Use unified layoutEngine to get grid slots
   const gridSlots = useMemo(() => {
     if (!items.length) return [];
 

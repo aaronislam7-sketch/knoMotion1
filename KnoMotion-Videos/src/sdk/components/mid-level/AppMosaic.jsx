@@ -3,7 +3,7 @@ import React from 'react';
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { fadeIn, slideIn, scaleIn, bounceIn, fadeSlide } from '../../animations';
 import { NotebookCard } from '../../elements/NotebookCard';
-import { calculateItemPositions, ARRANGEMENT_TYPES } from '../../layout/layoutEngine';
+import { calculateItemPositions, ARRANGEMENT_TYPES, positionToCSS } from '../../layout/layoutEngine';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 
 export const AppMosaic = ({
@@ -82,11 +82,9 @@ export const AppMosaic = ({
   };
 
   const renderItem = (item, index) => {
-    const pos = fallbackPositions[index] || { x: viewport.width / 2, y: viewport.height / 2 };
-    const basePos = { 
-      x: pos.x - itemSize / 2, 
-      y: pos.y - itemSize / 2 
-    };
+    const pos = fallbackPositions[index] || { x: viewport.width / 2, y: viewport.height / 2, width: itemSize, height: itemSize };
+    // Use layout engine's positionToCSS to convert center coordinates to CSS-ready format
+    const cssPosition = positionToCSS({ ...pos, width: itemSize, height: itemSize });
 
     const animStyle = getEntranceStyle(index);
 
@@ -104,11 +102,7 @@ export const AppMosaic = ({
       <div
         key={index}
         style={{
-          position: 'absolute',
-          left: basePos.x,
-          top: basePos.y,
-          width: itemSize,
-          height: itemSize,
+          ...cssPosition,
           opacity: animStyle.opacity ?? 1,
           transform,
           transition: focusZoom ? 'transform 0.3s ease' : 'none',
