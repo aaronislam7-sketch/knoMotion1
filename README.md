@@ -18,25 +18,33 @@ npm run dev
 
 ## 📖 What Is This?
 
-KnoMotion is a **configurable video template system** for creating educational content at scale. Each template:
+KnoMotion is a **JSON-first video engine** for creating educational content at scale. It provides:
 
 - ✅ **100% configurable** via JSON (no code changes needed)
+- ✅ **23 production-ready UI elements** (atoms + compositions)
+- ✅ **8 continuous life animations** (breathing, floating, rotation, etc.)
+- ✅ **4-layer architecture** (SDK, Layout, Mid-Scene, JSON)
 - ✅ **Broadcast quality** visuals (not PowerPoint)
 - ✅ **Learning intention-aligned** (Hook, Explain, Apply, Reflect, etc.)
 - ✅ **Domain agnostic** (works for any subject matter)
 
-**Built with:** React, Remotion, Vite
+**Built with:** React, Remotion, Vite, DaisyUI, Tailwind CSS
+
+**See it in action**: 🎬 [KnoMotion Showcase](./SHOWCASE.md) - 3.5-minute demo video
 
 ---
 
 ## 📚 Documentation
 
-### For Content Creators
+### Essential Guides
+- **[SHOWCASE.md](./SHOWCASE.md)** ⭐ - Complete showcase demo and guide (3.5-minute video)
+- **[showCasePlan.md](./showCasePlan.md)** - Project plan and progress tracker
+- **[SDK.md](./SDK.md)** - SDK framework reference (23 elements, 8 animations, layouts)
 - **[CONFIGURATION.md](./CONFIGURATION.md)** - How to configure templates using JSON
 - **[TEMPLATES.md](./TEMPLATES.md)** - Template catalog and usage guide
 
 ### For Developers
-- **[SDK.md](./SDK.md)** - SDK framework reference and API docs
+- **[SDK.md](./SDK.md)** - Complete SDK API documentation
 - **[TEMPLATES.md](./TEMPLATES.md)** - How to create new templates
 - **[docs/methodology/TEMPLATE_POLISH.md](./docs/methodology/TEMPLATE_POLISH.md)** - Polish standards
 
@@ -227,18 +235,24 @@ See **[SDK.md](./SDK.md)** → "Contributing" section
 ## 📊 System Stats
 
 - **Templates:** 17 V6 templates (active)
-- **SDK Modules:** ~20 organized modules
+- **SDK Elements:** 23 production-ready components (14 atoms, 9 compositions)
+- **Animations:** 20+ animation functions (8 continuous life animations)
+- **Layout Engines:** 7 types (GRID, RADIAL, CASCADE, STACK, etc.)
+- **SDK Modules:** 20+ organized modules
 - **Learning Intentions:** 8 core intentions
 - **Scene Examples:** 25+ example configurations
-- **Documentation:** 4 core docs + methodology
+- **Documentation:** 6 core docs + methodology
+- **Showcase:** 3.5-minute demo video showcasing all capabilities
 
 ---
 
 ## 🔗 Quick Links
 
+- **🎬 Showcase Demo:** [SHOWCASE.md](./SHOWCASE.md) ⭐ NEW!
+- **📋 Project Plan:** [showCasePlan.md](./showCasePlan.md)
+- **SDK Reference:** [SDK.md](./SDK.md) (23 elements, 8 animations)
 - **Template Catalog:** [TEMPLATES.md](./TEMPLATES.md)
 - **Configuration Guide:** [CONFIGURATION.md](./CONFIGURATION.md)
-- **SDK Reference:** [SDK.md](./SDK.md)
 - **Polish Standards:** [docs/methodology/TEMPLATE_POLISH.md](./docs/methodology/TEMPLATE_POLISH.md)
 - **Archive:** [docs/archive/](./docs/archive/)
 
