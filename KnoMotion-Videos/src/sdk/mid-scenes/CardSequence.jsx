@@ -132,42 +132,47 @@ export const CardSequence = ({ config }) => {
             key={index}
             style={{
               ...cardPosition,
-              opacity: animStyle.opacity,
-              transform: animStyle.transform,
               ...style.card,
             }}
           >
-            <Card
-              variant={card.variant || 'default'}
-              size={card.size || 'md'}
+            <div
               style={{
-                width: layout === 'grid' ? (pos.width || 400) : '100%',
-                maxWidth: layout === 'grid' ? (pos.width || 400) : 600,
-                ...card.style,
+                opacity: animStyle.opacity,
+                transform: animStyle.transform,
               }}
             >
-              {card.title && (
-                <Text
-                  text={card.title}
-                  variant="title"
-                  size="lg"
-                  weight="bold"
-                  color="primary"
-                  style={{ marginBottom: 12, ...card.titleStyle }}
-                />
-              )}
-              {card.content && (
-                <Text
-                  text={card.content}
-                  variant="body"
-                  size="md"
-                  weight="normal"
-                  color="textMain"
-                  style={card.contentStyle}
-                />
-              )}
-              {card.children && card.children}
-            </Card>
+              <Card
+                variant={card.variant || 'default'}
+                size={card.size || 'md'}
+                style={{
+                  width: layout === 'grid' ? (pos.width || 400) : '100%',
+                  maxWidth: layout === 'grid' ? (pos.width || 400) : 600,
+                  ...card.style,
+                }}
+              >
+                {card.title && (
+                  <Text
+                    text={card.title}
+                    variant="title"
+                    size="lg"
+                    weight="bold"
+                    color="primary"
+                    style={{ marginBottom: 12, ...card.titleStyle }}
+                  />
+                )}
+                {card.content && (
+                  <Text
+                    text={card.content}
+                    variant="body"
+                    size="md"
+                    weight="normal"
+                    color="textMain"
+                    style={card.contentStyle}
+                  />
+                )}
+                {card.children && card.children}
+              </Card>
+            </div>
           </div>
         );
       })}

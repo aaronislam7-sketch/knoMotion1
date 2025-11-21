@@ -160,42 +160,47 @@ export const IconGrid = ({ config }) => {
             key={index}
             style={{
               ...iconPosition,
-              opacity: animStyle.opacity,
-              transform: animStyle.transform,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
               ...style.iconContainer,
             }}
           >
-            {/* Icon */}
-            <Icon
-              iconRef={icon.iconRef}
-              size={iconSize}
-              color={icon.color || 'primary'}
+            <div
               style={{
-                marginBottom: showLabels ? 8 : 0,
-                ...icon.style,
+                opacity: animStyle.opacity,
+                transform: animStyle.transform,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
-            />
-            
-            {/* Optional Label */}
-            {showLabels && icon.label && (
-              <Text
-                text={icon.label}
-                variant="body"
-                size="sm"
-                weight="normal"
-                color="textSoft"
+            >
+              {/* Icon */}
+              <Icon
+                iconRef={icon.iconRef}
+                size={iconSize}
+                color={icon.color || 'primary'}
                 style={{
-                  fontSize: 14,
-                  textAlign: 'center',
-                  maxWidth: itemSize,
-                  ...style.label,
+                  marginBottom: showLabels ? 8 : 0,
+                  ...icon.style,
                 }}
               />
-            )}
+              
+              {/* Optional Label */}
+              {showLabels && icon.label && (
+                <Text
+                  text={icon.label}
+                  variant="body"
+                  size="sm"
+                  weight="normal"
+                  color="textSoft"
+                  style={{
+                    fontSize: 14,
+                    textAlign: 'center',
+                    maxWidth: itemSize,
+                    ...style.label,
+                  }}
+                />
+              )}
+            </div>
           </div>
         );
       })}

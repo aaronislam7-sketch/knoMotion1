@@ -201,26 +201,31 @@ export const TextRevealSequence = ({ config }) => {
             key={index}
             style={{
               ...linePosition,
-              opacity: animStyle.opacity,
-              transform: animStyle.transform,
-              clipPath: animStyle.clipPath || 'none',
               ...style.lineContainer,
             }}
           >
-            <Text
-              text={displayText}
-              variant="body"
-              size="xl"
-              weight={emphasisStyle.fontWeight}
-              color="textMain"
+            <div
               style={{
-                fontSize: baseFontSize,
-                lineHeight: `${lineHeight}px`,
-                textAlign: 'center',
-                ...emphasisStyle,
-                ...style.text,
+                opacity: animStyle.opacity,
+                transform: animStyle.transform,
+                clipPath: animStyle.clipPath || 'none',
               }}
-            />
+            >
+              <Text
+                text={displayText}
+                variant="body"
+                size="xl"
+                weight={emphasisStyle.fontWeight}
+                color="textMain"
+                style={{
+                  fontSize: baseFontSize,
+                  lineHeight: `${lineHeight}px`,
+                  textAlign: 'center',
+                  ...emphasisStyle,
+                  ...style.text,
+                }}
+              />
+            </div>
           </div>
         );
       })}
