@@ -10,3 +10,4 @@
 
 export { HeroTextEntranceExit } from './HeroTextEntranceExit';
 export { CardSequence } from './CardSequence';
+export { TextRevealSequence } from './TextRevealSequence';

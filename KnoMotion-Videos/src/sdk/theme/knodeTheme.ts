@@ -36,6 +36,11 @@ export const KNODE_THEME = {
     gapSm: 12,
     gapMd: 24,
     gapLg: 40,
+    // Line spacing tokens for consistent text rendering
+    lineSpacingTight: 1.2,    // Dense text blocks
+    lineSpacingNormal: 1.5,   // Standard readability
+    lineSpacingRelaxed: 1.8,  // Spacious, friendly
+    lineSpacingLoose: 2.0,    // Maximum breathing room
   },
 
   radii: {

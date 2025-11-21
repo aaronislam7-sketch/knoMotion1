@@ -1,0 +1,58 @@
+{
+  "title": "Text Reveal Sequence Example",
+  "description": "Example configuration for TextRevealSequence mid-scene",
+  "config": {
+    "lines": [
+      {
+        "text": "Welcome to KnoMotion",
+        "emphasis": "high"
+      },
+      {
+        "text": "Create amazing videos with ease",
+        "emphasis": "normal"
+      },
+      {
+        "text": "Built with SDK and JSON configuration",
+        "emphasis": "low"
+      }
+    ],
+    "revealType": "fade",
+    "direction": "up",
+    "staggerDelay": 0.3,
+    "animationDuration": 0.8,
+    "lineSpacing": "normal",
+    "beats": {
+      "start": 1.0
+    }
+  },
+  "variations": {
+    "typewriter": {
+      "revealType": "typewriter",
+      "staggerDelay": 0.5,
+      "animationDuration": 1.5
+    },
+    "slideUp": {
+      "revealType": "slide",
+      "direction": "up",
+      "staggerDelay": 0.2
+    },
+    "slideLeft": {
+      "revealType": "slide",
+      "direction": "left",
+      "staggerDelay": 0.25
+    },
+    "maskReveal": {
+      "revealType": "mask",
+      "direction": "left",
+      "staggerDelay": 0.3
+    },
+    "tightSpacing": {
+      "lineSpacing": "tight",
+      "staggerDelay": 0.15
+    },
+    "relaxedSpacing": {
+      "lineSpacing": "relaxed",
+      "staggerDelay": 0.4
+    }
+  }
+}
