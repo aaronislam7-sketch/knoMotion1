@@ -8,13 +8,14 @@
 
 1. [Overview](#overview)
 2. [Core Modules](#core-modules)
-3. [Animations](#animations)
-4. [Effects](#effects)
-5. [Layout](#layout)
-6. [Validation](#validation)
-7. [Utilities](#utilities)
-8. [Usage Examples](#usage-examples)
-9. [Contributing](#contributing)
+3. [Mid-Scenes](#mid-scenes)
+4. [Animations](#animations)
+5. [Effects](#effects)
+6. [Layout](#layout)
+7. [Validation](#validation)
+8. [Utilities](#utilities)
+9. [Usage Examples](#usage-examples)
+10. [Contributing](#contributing)
 
 ---
 
@@ -22,6 +23,7 @@
 
 The KnoMotion SDK is a **modular collection of utilities** for building video templates. It provides:
 
+- ✅ **Mid-Scenes** - Pre-built JSON-configurable components for LLMs
 - ✅ **Animation helpers** - Pre-built animation functions
 - ✅ **Visual effects** - Particles, glow, glassmorphic, etc.
 - ✅ **Layout engines** - Positioning, spacing, collision detection
@@ -51,6 +53,259 @@ import { renderHero } from '../sdk/heroRegistry';
 import * as animations from '../sdk/animations';
 import * as lottie from '../sdk/lottie-helpers';
 ```
+
+---
+
+## 🎯 Mid-Scenes
+
+**Location:** `/workspace/KnoMotion-Videos/src/sdk/mid-scenes/`
+
+### What Are Mid-Scenes?
+
+Mid-scenes are **composed components** that combine SDK elements, animations, effects, and layout logic into reusable, JSON-configurable patterns. They are designed for **LLM JSON generation**—enabling AI to create complete video scenes without writing code.
+
+**NOT Layouts**: Mid-scenes are **NOT** layout systems. They are pre-built components that **use** layout systems.
+
+### Current Mid-Scenes (4)
+
+#### 1. HeroTextEntranceExit
+
+**Purpose**: Hero visual + text with entrance/exit animations.
+
+```javascript
+import { HeroTextEntranceExit } from '../sdk/mid-scenes';
+
+const config = {
+  text: "Learn with KnoMotion",
+  heroType: "lottie",
+  heroRef: "/lotties/rocket.json",
+  animationEntrance: "fadeSlide",
+  animationExit: "fadeOut",
+  beats: { entrance: 1.0, exit: 5.0 }
+};
+
+<HeroTextEntranceExit config={config} />
+```
+
+**Schema**: `mid-scenes/schemas/HeroTextEntranceExit.schema.json`
+
+#### 2. CardSequence
+
+**Purpose**: Multiple cards with stagger animations (stacked or grid).
+
+```javascript
+import { CardSequence } from '../sdk/mid-scenes';
+
+const config = {
+  cards: [
+    { title: "Step 1", content: "Understand concept", variant: "default" },
+    { title: "Step 2", content: "Practice skill", variant: "bordered" }
+  ],
+  layout: "stacked",
+  animation: "fadeSlide",
+  staggerDelay: 0.2,
+  beats: { start: 1.0 }
+};
+
+<CardSequence config={config} />
+```
+
+**Schema**: `mid-scenes/schemas/CardSequence.schema.json`
+
+#### 3. TextRevealSequence
+
+**Purpose**: Multiple text lines with reveal animations and emphasis.
+
+```javascript
+import { TextRevealSequence } from '../sdk/mid-scenes';
+
+const config = {
+  lines: [
+    { text: "Learning is a journey", emphasis: "high" },
+    { text: "Every step matters", emphasis: "normal" }
+  ],
+  revealType: "typewriter",
+  direction: "up",
+  staggerDelay: 0.3,
+  lineSpacing: "relaxed",
+  beats: { start: 1.0 }
+};
+
+<TextRevealSequence config={config} />
+```
+
+**Features**:
+- Reveal types: typewriter, fade, slide, mask
+- Direction support: up, down, left, right
+- Emphasis levels: normal, high (bold + highlight), low (muted)
+- Line spacing: tight, normal, relaxed, loose (from theme)
+
+**Schema**: `mid-scenes/schemas/TextRevealSequence.schema.json`
+
+#### 4. IconGrid
+
+**Purpose**: Grid of icons with entrance animations.
+
+```javascript
+import { IconGrid } from '../sdk/mid-scenes';
+
+const config = {
+  icons: [
+    { iconRef: "🎯", label: "Focus", color: "primary" },
+    { iconRef: "🚀", label: "Launch", color: "accentBlue" },
+    { iconRef: "💡", label: "Ideas", color: "doodle" }
+  ],
+  columns: 3,
+  animation: "cascade",
+  iconSize: "lg",
+  showLabels: true,
+  beats: { start: 1.0 }
+};
+
+<IconGrid config={config} />
+```
+
+**Features**:
+- Animations: fadeIn, slideIn, scaleIn, bounceIn, **cascade** (diagonal wave)
+- Icon sizes: sm, md, lg, xl
+- Per-icon color control
+- Optional labels
+
+**Schema**: `mid-scenes/schemas/IconGrid.schema.json`
+
+---
+
+### Mid-Scene Architecture
+
+All mid-scenes follow this pattern:
+
+```javascript
+export const MidSceneComponent = ({ config }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  
+  // 1. Extract config
+  const { items, animation, beats, style } = config;
+  
+  // 2. Calculate positions using layout engine
+  const positions = calculateItemPositions(items, {
+    arrangement: ARRANGEMENT_TYPES.STACKED_VERTICAL,
+    viewport: { width, height },
+    spacing: 80,
+  });
+  
+  // 3. Render with wrapper pattern (position + animation separation)
+  return (
+    <AbsoluteFill>
+      {positions.map((pos, index) => {
+        const animStyle = getAnimationStyle(...);
+        const itemPosition = positionToCSS(pos);
+        
+        return (
+          <div key={index} style={itemPosition}>  {/* Outer: Position only */}
+            <div style={animStyle}>              {/* Inner: Animation only */}
+              <Content />
+            </div>
+          </div>
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+```
+
+### Key Principles
+
+1. **100% SDK Integration** - Use only SDK functions, never custom animations
+2. **Wrapper Pattern** - Separate positioning and animation into nested divs
+3. **Theme Consistency** - Use `KNODE_THEME` tokens exclusively
+4. **Layout Engine** - Use `calculateItemPositions()` for all positioning
+5. **JSON Configurable** - Everything configurable via JSON with defaults
+6. **Schema Validation** - Every mid-scene has JSON schema file
+
+---
+
+### Critical Issue: Two `positionToCSS` Functions
+
+**Problem**: There are **two different** `positionToCSS` functions that handle positioning differently:
+
+| Function | Location | Use When | Input |
+|----------|----------|----------|-------|
+| `positionToCSS` | `layout/positionSystem.js` | STACKED layouts | `{x, y}` only |
+| `positionToCSS` | `layout/layoutEngine.js` | GRID layouts | `{x, y, width, height}` |
+
+**Why This Matters**:
+
+```javascript
+// STACKED layouts return center coordinates WITHOUT width/height
+const positions = calculateItemPositions(items, {
+  arrangement: ARRANGEMENT_TYPES.STACKED_VERTICAL,
+  spacing: 80
+});
+// Returns: [{ x: 960, y: 400 }, { x: 960, y: 500 }]
+
+// ❌ WRONG: Using layoutEngine.positionToCSS
+import { positionToCSS } from '../layout/layoutEngine';
+const css = positionToCSS(positions[0]);
+// Calculates: left = 960 - 0 = 960px (CENTER used as LEFT → offset to right!)
+
+// ✅ CORRECT: Using positionSystem.positionToCSS
+import { positionToCSS } from '../layout/positionSystem';
+const css = positionToCSS(positions[0], 'center');
+// Returns: { left: '960px', top: '400px', transform: 'translate(-50%, -50%)' }
+// CSS transform centers the element correctly!
+```
+
+**Solution Pattern**:
+
+```javascript
+// Import both with aliases
+import { positionToCSS as positionToCSSLayoutEngine } from '../layout/layoutEngine';
+import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
+
+// Check if positions have width/height
+const hasWidthHeight = 'width' in positions[0] && 'height' in positions[0];
+
+// Use correct function
+const itemPosition = hasWidthHeight
+  ? positionToCSSLayoutEngine(pos)           // GRID layout
+  : positionToCSSWithTransform(pos, 'center'); // STACKED layout
+```
+
+**Best Practice**: Always check what your layout returns before choosing `positionToCSS`.
+
+---
+
+### Wrapper Pattern (Required)
+
+Always separate positioning and animation transforms:
+
+```javascript
+// ❌ WRONG: Both on same div (transforms conflict)
+<div style={{
+  left: '100px',
+  transform: 'translateY(20px)'  // Conflicts with position transforms!
+}}>
+  <Text text="Hello" />
+</div>
+
+// ✅ CORRECT: Nested divs
+<div style={{ left: '100px' }}>  {/* Outer: Position only */}
+  <div style={{ transform: 'translateY(20px)' }}>  {/* Inner: Animation only */}
+    <Text text="Hello" />
+  </div>
+</div>
+```
+
+---
+
+### Full Documentation
+
+See [`mid-scenes/README.md`](./src/sdk/mid-scenes/README.md) for:
+- Detailed usage guide
+- 15 future mid-scene ideas (learning video focused)
+- Common issues & solutions
+- Contributing guidelines
 
 ---
 
