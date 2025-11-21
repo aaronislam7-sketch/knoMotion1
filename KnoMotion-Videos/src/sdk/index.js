@@ -18,7 +18,8 @@
 // ==================== LAYOUT ====================
 export * from './layout/layoutEngine';
 export * from './layout/positionSystem';
-export * from './layout/layout-resolver';
+// Note: layout-resolver functions have been integrated into layoutEngine.js
+// Legacy template-specific functions still available via direct import if needed
 
 // ==================== ANIMATIONS (Consolidated) ====================
 export * from './animations';

@@ -289,7 +289,7 @@ import { NotebookCard } from '../../sdk';
 **Layout:**
 ```javascript
 // Old
-import { calculateItemPositions } from '../../sdk/layout/layoutEngineV2';
+import { calculateItemPositions } from '../../sdk/layout/layoutEngine';
 
 // New (layoutEngine.js is now the consolidated version)
 import { calculateItemPositions } from '../../sdk/layout/layoutEngine';

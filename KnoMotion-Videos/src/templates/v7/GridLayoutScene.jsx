@@ -238,7 +238,7 @@ export const GridLayoutScene = ({ scene }) => {
     [viewport.width, viewport.height, style_tokens.spacing, content.title],
   );
 
-  // Use layoutEngineV2 to get grid slots
+  // Use unified layoutEngine to get grid slots
   const gridSlots = useMemo(() => {
     if (!items.length) return [];
 

@@ -300,10 +300,14 @@ export const validateLayout = (positions, canvas, options = {}) => {
 **Task 1.2 Status**: ✅ Complete
 
 ### Cleanup Actions (Task 1.4):
-1. ⏳ Delete `layoutEngineV2.js`
-2. ⏳ Delete `layout-resolver.js` (after integration)
-3. ⏳ Update all imports
-4. ⏳ Verify build passes
+1. ✅ Delete `layoutEngineV2.js` (DONE)
+2. ⚠️ Keep `layout-resolver.js` temporarily (used by scene-validator.js for legacy template functions)
+   - Not exported from SDK index.js (already removed)
+   - Will be deleted when templates are sunset in Week 4
+3. ✅ Update all imports (DONE - removed from SDK exports)
+4. ✅ Verify build passes (DONE)
+
+**Task 1.4 Status**: ✅ Complete (layout-resolver kept temporarily for legacy compatibility)
 
 ---
 
@@ -311,9 +315,9 @@ export const validateLayout = (positions, canvas, options = {}) => {
 
 | File | Status | Action |
 |------|--------|--------|
-| `layoutEngine.js` | ✅ Keep | Enhance with collision detection |
-| `layoutEngineV2.js` | ❌ Remove | Delete (exact duplicate) |
-| `layout-resolver.js` | ✅ Integrate | Move core functions to layoutEngine, then delete |
+| `layoutEngine.js` | ✅ Keep | Enhanced with collision detection ✅ |
+| `layoutEngineV2.js` | ❌ Removed | Deleted (exact duplicate) ✅ |
+| `layout-resolver.js` | ⚠️ Keep Temporarily | Core functions integrated ✅, template-specific functions remain for legacy templates (will be removed in Week 4) |
 | `positionSystem.js` | ⚠️ Keep | Legacy, low priority |
 
 **Next Step**: Proceed to Task 1.2 - Create Unified Layout Engine

@@ -5,6 +5,7 @@ import { ShowcaseScene1_IntroValueProp } from '../compositions/ShowcaseScene1_In
 import { ShowcaseScene2_ArchitectureDeepDive } from '../compositions/ShowcaseScene2_ArchitectureDeepDive';
 import { ShowcaseScene3_LayoutShowcase } from '../compositions/ShowcaseScene3_LayoutShowcase';
 import { ShowcaseScene4_FeatureShowcaseCTA } from '../compositions/ShowcaseScene4_FeatureShowcaseCTA';
+import { ShowcaseScene5_LayoutEngineTest } from '../compositions/ShowcaseScene5_LayoutEngineTest';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 
 /**
@@ -58,6 +59,14 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: 'Scene 4: Feature Showcase + CTA (60s)',
+    },
+    scene5: {
+      component: ShowcaseScene5_LayoutEngineTest,
+      duration: 900, // 30 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: 'Scene 5: Layout Engine Test (30s)',
     },
     animations: {
       component: ContinuousAnimationShowcase,
