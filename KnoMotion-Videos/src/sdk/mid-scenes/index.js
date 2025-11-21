@@ -9,3 +9,4 @@
  */
 
 export { HeroTextEntranceExit } from './HeroTextEntranceExit';
+export { CardSequence } from './CardSequence';

@@ -1,0 +1,30 @@
+{
+  "cards": [
+    {
+      "title": "Step 1: Import JSON",
+      "content": "Load your scene configuration from a JSON file",
+      "variant": "default",
+      "size": "md"
+    },
+    {
+      "title": "Step 2: Configure Layout",
+      "content": "Choose between stacked or grid layouts",
+      "variant": "bordered",
+      "size": "md"
+    },
+    {
+      "title": "Step 3: Add Animations",
+      "content": "Apply entrance animations with stagger timing",
+      "variant": "glass",
+      "size": "md"
+    }
+  ],
+  "layout": "stacked",
+  "columns": 3,
+  "animation": "fadeSlide",
+  "staggerDelay": 0.2,
+  "animationDuration": 0.6,
+  "beats": {
+    "start": 1.0
+  }
+}
