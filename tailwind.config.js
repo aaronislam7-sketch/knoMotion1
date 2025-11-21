@@ -93,5 +93,14 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('daisyui'),
+  ],
+  daisyui: {
+    themes: false,  // Disable default themes, use custom KNODE_THEME
+    base: false,    // Disable base styles, keep control
+    styled: true,   // Use styled components
+    utils: true,    // Include utility classes
+    logs: false,    // Disable DaisyUI logs
+  },
 };

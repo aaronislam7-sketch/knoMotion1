@@ -1,12 +1,16 @@
 /**
- * Lottie Animation Presets for Templates
+ * Lottie Animation Presets for Templates (UPDATED for @remotion/lottie)
  * 
  * Template-specific Lottie configuration presets.
  * All configurable via JSON - templates can override any property.
  * 
+ * MIGRATION NOTES:
+ * - Now uses lottieRef instead of animation (standardized schema)
+ * - Uses playbackRate instead of speed
+ * - All animations reference local files from /public/lotties/
+ * 
  * Uses:
  * - lottieIntegration.tsx (RemotionLottie, AnimatedLottie, LottieIcon, LottieOverlay)
- * - lottieLibrary.js (inline animation data)
  */
 
 // ==================== PRESET CONFIGURATIONS ====================
@@ -17,10 +21,9 @@
 export const QUIZ_PRESETS = {
   // Correct answer celebration
   correctAnswer: {
-    animation: 'celebration',
+    lottieRef: 'celebration', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.2,
+    playbackRate: 1.2, // Updated from speed
     style: {
       position: 'absolute',
       width: 300,
@@ -37,22 +40,20 @@ export const QUIZ_PRESETS = {
   
   // Checkmark for correct answer
   checkmark: {
-    animation: 'checkmark',
+    lottieRef: 'checkmark', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.0,
+    playbackRate: 1.0, // Updated from speed
     style: {
       width: 60,
       height: 60
     }
   },
   
-  // Thinking indicator
-  thinking: {
-    animation: 'thinking',
+  // Loading indicator (replaces thinking)
+  loading: {
+    lottieRef: 'loading', // STANDARDIZED
     loop: true,
-    autoplay: true,
-    speed: 0.8,
+    playbackRate: 0.8, // Updated from speed
     style: {
       width: 100,
       height: 100,
@@ -65,12 +66,11 @@ export const QUIZ_PRESETS = {
  * Concept & Explanation Lottie Presets
  */
 export const CONCEPT_PRESETS = {
-  // Lightbulb for insights
+  // Stars for insights
   insight: {
-    animation: 'lightbulb',
+    lottieRef: 'stars', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.0,
+    playbackRate: 1.0, // Updated from speed
     style: {
       width: 120,
       height: 120
@@ -79,12 +79,11 @@ export const CONCEPT_PRESETS = {
     entranceDuration: 20
   },
   
-  // Sparkle for emphasis
+  // Burst for emphasis
   sparkle: {
-    animation: 'sparkle',
+    lottieRef: 'burst', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.0,
+    playbackRate: 1.0, // Updated from speed
     style: {
       width: 80,
       height: 80,
@@ -95,10 +94,9 @@ export const CONCEPT_PRESETS = {
   
   // Central hub glow/pulse
   centralGlow: {
-    animation: 'sparkle',
+    lottieRef: 'stars', // STANDARDIZED
     loop: true,
-    autoplay: true,
-    speed: 0.5,
+    playbackRate: 0.5, // Updated from speed
     style: {
       width: 200,
       height: 200,
@@ -116,37 +114,34 @@ export const CONCEPT_PRESETS = {
 export const PROGRESS_PRESETS = {
   // Step completion checkmark
   stepComplete: {
-    animation: 'checkmark',
+    lottieRef: 'success', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.0,
+    playbackRate: 1.0, // Updated from speed
     style: {
       width: 50,
       height: 50
     }
   },
   
-  // Arrow for connections
-  arrow: {
-    animation: 'arrow',
-    loop: true,
-    autoplay: true,
-    speed: 1.0,
-    style: {
-      width: 60,
-      height: 60
-    }
-  },
-  
   // Loading/progress indicator
   loading: {
-    animation: 'loading',
+    lottieRef: 'loading', // STANDARDIZED
     loop: true,
-    autoplay: true,
-    speed: 1.0,
+    playbackRate: 1.0, // Updated from speed
     style: {
       width: 40,
       height: 40
+    }
+  },
+  
+  // Spinner for long processes
+  spinner: {
+    lottieRef: 'spinner', // STANDARDIZED
+    loop: true,
+    playbackRate: 1.2, // Updated from speed
+    style: {
+      width: 60,
+      height: 60
     }
   }
 };
@@ -157,10 +152,9 @@ export const PROGRESS_PRESETS = {
 export const SPOTLIGHT_PRESETS = {
   // Stage transition sparkle
   stageTransition: {
-    animation: 'sparkle',
+    lottieRef: 'burst', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.5,
+    playbackRate: 1.5, // Updated from speed
     style: {
       width: 150,
       height: 150,
@@ -175,10 +169,9 @@ export const SPOTLIGHT_PRESETS = {
   
   // Reveal burst
   revealBurst: {
-    animation: 'celebration',
+    lottieRef: 'celebration', // STANDARDIZED
     loop: false,
-    autoplay: true,
-    speed: 1.0,
+    playbackRate: 1.0, // Updated from speed
     style: {
       width: 200,
       height: 200,
@@ -195,10 +188,9 @@ export const SPOTLIGHT_PRESETS = {
 export const AMBIENT_PRESETS = {
   // Subtle background particles
   backgroundParticles: {
-    animation: 'sparkle',
+    lottieRef: 'particles', // STANDARDIZED
     loop: true,
-    autoplay: true,
-    speed: 0.3,
+    playbackRate: 0.3, // Updated from speed
     style: {
       position: 'absolute',
       width: '40%',
@@ -211,10 +203,9 @@ export const AMBIENT_PRESETS = {
   
   // Corner accent
   cornerAccent: {
-    animation: 'sparkle',
+    lottieRef: 'stars', // STANDARDIZED
     loop: true,
-    autoplay: true,
-    speed: 0.5,
+    playbackRate: 0.5, // Updated from speed
     style: {
       position: 'absolute',
       width: 150,
@@ -248,10 +239,9 @@ export const getLottiePreset = (presetName, overrides = {}) => {
   if (!preset) {
     console.warn(`Lottie preset "${presetName}" not found, using default`);
     return {
-      animation: 'sparkle',
+      lottieRef: 'burst', // STANDARDIZED (updated from animation)
       loop: false,
-      autoplay: true,
-      speed: 1.0,
+      playbackRate: 1.0, // Updated from speed
       style: { width: 100, height: 100 },
       ...overrides
     };
@@ -290,10 +280,9 @@ export const getLottieFromConfig = (config) => {
   
   // Otherwise, config is the full configuration
   return {
-    animation: config.animation || 'sparkle',
+    lottieRef: config.lottieRef || config.animation || 'burst', // STANDARDIZED (backward compatible)
     loop: config.loop !== undefined ? config.loop : false,
-    autoplay: config.autoplay !== undefined ? config.autoplay : true,
-    speed: config.speed || 1.0,
+    playbackRate: config.playbackRate || config.speed || 1.0, // Updated (backward compatible)
     style: config.style || { width: 100, height: 100 },
     entranceDelay: config.entranceDelay,
     entranceDuration: config.entranceDuration

@@ -26,6 +26,9 @@ export * from './animations';
 export * from './animations/microDelights';
 
 // ==================== ELEMENTS ====================
+// Export all themed elements (13 total: 8 atoms, 5 compositions)
+export * from './elements';
+// Legacy element (keep for backward compatibility)
 export { NotebookCard } from './elements/NotebookCard';
 
 // ==================== EFFECTS ====================

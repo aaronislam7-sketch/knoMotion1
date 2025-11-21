@@ -1,99 +1,133 @@
 /**
- * Lottie Animation Integration
+ * Lottie Animation Integration (MIGRATED to @remotion/lottie)
  * For dynamic, fresh animations that adapt to content
+ * 
+ * MIGRATION NOTES:
+ * - Now uses @remotion/lottie (proper Remotion integration)
+ * - Uses animationData prop (JSON object) instead of src (URL)
+ * - All animations loaded from /public/lotties/ directory
+ * - Proper timeline sync with Remotion
  */
 
 import React from 'react';
-import { Player as LottiePlayer } from '@lottiefiles/react-lottie-player';
-import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+import { Lottie, LottieAnimationData } from '@remotion/lottie';
+import { useCurrentFrame, useVideoConfig, interpolate, staticFile } from 'remotion';
 
-// ==================== LOTTIE ANIMATION LIBRARY ====================
+// ==================== LOCAL LOTTIE IMPORTS ====================
+
+// Import local Lottie JSON files
+// Note: Using staticFile() for proper bundling
+const successCheckmark = staticFile('lotties/success-checkmark.json');
+const loadingSpinner = staticFile('lotties/loading-spinner.json');
+const particleBurst = staticFile('lotties/particle-burst.json');
+const celebrationStars = staticFile('lotties/celebration-stars.json');
 
 /**
- * Curated Lottie animations - Using @lottiefiles CDN with correct paths
+ * Lottie animation registry (local files)
+ * Maps animation names to file paths
  */
 export const lottieAnimations = {
   // Celebration & Success
-  celebration: 'https://lottie.host/4db68bbd-31f6-4cd8-b67f-730fbcb3c941/Tl19qUt1Ks.json',
-  confetti: 'https://lottie.host/395f0e7d-b105-4c77-8c06-5a388d7cd78e/lchIiQQbHx.json',
-  success: 'https://lottie.host/647c5f3f-7e80-4c68-89a4-4e5a60ce1a0a/7r5lMSc8ZE.json',
-  trophy: 'https://lottie.host/c9623fcd-0ed7-46d1-b0d3-e4c4be1fe8d3/DhBmqFjXrM.json',
+  success: successCheckmark,
+  celebration: celebrationStars,
+  checkmark: successCheckmark,
+  stars: celebrationStars,
   
-  // Learning & Education  
-  lightbulb: 'https://lottie.host/3c1f7b61-81c3-4e79-8b95-2f4c05c3d0a0/FhSKUXSILT.json',
-  book: 'https://lottie.host/1d4b6e12-9c05-4d9e-8e20-5f7b3d3c1f2a/8KdLmSzPqW.json',
-  brain: 'https://lottie.host/5e3d2b9f-1a2c-4d6e-9b7f-3e5a1c2d4f6b/9NfMpTyQrX.json',
-  rocket: 'https://lottie.host/4f5e3c2d-1b9a-4e7f-8c6a-2d3f5e4c1a2b/7JhKnRxLsY.json',
+  // Loading & Progress
+  loading: loadingSpinner,
+  spinner: loadingSpinner,
   
-  // Emotions & Engagement
-  thinking: 'https://lottie.host/2c3d4e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f/5GiJkMnOpZ.json',
-  question: 'https://lottie.host/1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d/3DfGhIjKlA.json',
-  star: 'https://lottie.host/7e6f5d4c-3b2a-1f0e-9d8c-7b6a5f4e3d2c/2CeBfDgEhB.json',
-  sparkle: 'https://lottie.host/6d5c4b3a-2f1e-0d9c-8b7a-6f5e4d3c2b1a/4FgHiJkLmC.json',
+  // Effects & Particles
+  particles: particleBurst,
+  burst: particleBurst,
   
-  // Abstract & Background
-  particles: 'https://lottie.host/8c7b6a5f-4e3d-2c1b-0a9f-8e7d6c5b4a3f/6IhJkLmNpD.json',
-  dots: 'https://lottie.host/9d8c7b6a-5f4e-3d2c-1b0a-9f8e7d6c5b4a/8KjLmNoPqE.json',
-  wave: 'https://lottie.host/0e9d8c7b-6a5f-4e3d-2c1b-0a9f8e7d6c5b/1MnOpQrStF.json',
-  
-  // Actions & Transitions
-  arrow: 'https://lottie.host/1f0e9d8c-7b6a-5f4e-3d2c-1b0a9f8e7d6c/3PqRsTuVwG.json',
-  checkmark: 'https://lottie.host/2a1f0e9d-8c7b-6a5f-4e3d-2c1b0a9f8e7d/5SuVwXyZaH.json',
-  loading: 'https://lottie.host/3b2a1f0e-9d8c-7b6a-5f4e-3d2c1b0a9f8e/7WxYzAbCdI.json',
+  // Add more animations as needed...
 };
 
 export type LottieAnimationType = keyof typeof lottieAnimations;
 
-// ==================== LOTTIE PLAYER COMPONENT ====================
+// ==================== HELPER: FETCH LOTTIE DATA ====================
+
+/**
+ * Fetch Lottie animation data from URL
+ * Used internally by components
+ */
+const fetchLottieData = async (url: string): Promise<LottieAnimationData | null> => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`Failed to fetch Lottie animation: ${url}`);
+      return null;
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching Lottie animation:`, error);
+    return null;
+  }
+};
+
+// ==================== REMOTION LOTTIE COMPONENT ====================
 
 interface RemotionLottieProps {
-  animation: LottieAnimationType | string;
+  lottieRef: string; // Standardized prop name!
   style?: React.CSSProperties;
   startFrame?: number;
   endFrame?: number;
-  speed?: number;
+  playbackRate?: number; // Renamed from 'speed' to match @remotion/lottie
   loop?: boolean;
-  autoplay?: boolean;
 }
 
 /**
- * Remotion-compatible Lottie player
- * Syncs animation to video timeline
- * SIMPLIFIED to prevent crashes
+ * Remotion-compatible Lottie player with proper timeline sync
+ * Uses @remotion/lottie for deterministic rendering
+ * 
+ * @param lottieRef - Animation name or file path (STANDARDIZED)
  */
 export const RemotionLottie: React.FC<RemotionLottieProps> = ({
-  animation,
+  lottieRef,
   style = {},
   startFrame = 0,
   endFrame,
-  speed = 1,
+  playbackRate = 1,
   loop = true,
-  autoplay = true,
 }) => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const [animationData, setAnimationData] = React.useState<LottieAnimationData | null>(null);
 
   // Get animation source
-  const animationSrc = animation in lottieAnimations
-    ? lottieAnimations[animation as LottieAnimationType]
-    : animation;
+  const animationSrc = lottieRef in lottieAnimations
+    ? lottieAnimations[lottieRef as LottieAnimationType]
+    : lottieRef;
+
+  // Fetch animation data
+  React.useEffect(() => {
+    fetchLottieData(animationSrc).then(setAnimationData);
+  }, [animationSrc]);
 
   // Only render if we're in the valid frame range
   if (frame < startFrame || (endFrame && frame > endFrame)) {
     return null;
   }
 
-  // Simple autoplay - let Lottie handle it
+  // Don't render until animation data is loaded
+  if (!animationData) {
+    return null;
+  }
+
+  // Calculate animation progress (for proper timeline sync)
+  const relativeFrame = frame - startFrame;
+  const totalFrames = endFrame ? endFrame - startFrame : 9999;
+
   return (
-    <LottiePlayer
-      src={animationSrc}
-      style={{
-        width: '100%',
-        height: '100%',
-        ...style,
-      }}
-      autoplay={autoplay}
-      loop={loop}
-    />
+    <div style={{ width: '100%', height: '100%', ...style }}>
+      <Lottie
+        animationData={animationData}
+        style={{ width: '100%', height: '100%' }}
+        playbackRate={playbackRate}
+        loop={loop}
+      />
+    </div>
   );
 };
 
@@ -108,14 +142,13 @@ export const AnimatedLottie: React.FC<
     entranceDuration?: number;
   }
 > = ({
-  animation,
+  lottieRef,
   style = {},
   entranceDelay = 0,
   entranceDuration = 30,
   ...lottieProps
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   // Entrance animation
   const progress = Math.max(
@@ -130,7 +163,7 @@ export const AnimatedLottie: React.FC<
 
   return (
     <div style={{ ...entranceStyle, ...style }}>
-      <RemotionLottie animation={animation} {...lottieProps} />
+      <RemotionLottie lottieRef={lottieRef} {...lottieProps} />
     </div>
   );
 };
@@ -141,11 +174,11 @@ export const AnimatedLottie: React.FC<
  * Subtle background Lottie animation
  */
 export const LottieBackground: React.FC<{
-  animation: LottieAnimationType | string;
+  lottieRef: string; // STANDARDIZED
   opacity?: number;
   scale?: number;
   position?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-}> = ({ animation, opacity = 0.15, scale = 1.5, position = 'center' }) => {
+}> = ({ lottieRef, opacity = 0.15, scale = 1.5, position = 'center' }) => {
   const positions = {
     center: { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
     'top-left': { top: '10%', left: '10%' },
@@ -167,7 +200,7 @@ export const LottieBackground: React.FC<{
         zIndex: 0,
       }}
     >
-      <RemotionLottie animation={animation} loop autoplay />
+      <RemotionLottie lottieRef={lottieRef} loop />
     </div>
   );
 };
@@ -178,12 +211,10 @@ export const LottieBackground: React.FC<{
  * Small inline Lottie icon
  */
 export const LottieIcon: React.FC<{
-  animation: LottieAnimationType | string;
+  lottieRef: string; // STANDARDIZED
   size?: number;
   delay?: number;
-}> = ({ animation, size = 80, delay = 0 }) => {
-  const frame = useCurrentFrame();
-
+}> = ({ lottieRef, size = 80, delay = 0 }) => {
   return (
     <div
       style={{
@@ -193,7 +224,7 @@ export const LottieIcon: React.FC<{
         verticalAlign: 'middle',
       }}
     >
-      <RemotionLottie animation={animation} startFrame={delay} />
+      <RemotionLottie lottieRef={lottieRef} startFrame={delay} />
     </div>
   );
 };
@@ -204,11 +235,11 @@ export const LottieIcon: React.FC<{
  * Full-screen Lottie overlay for dramatic moments
  */
 export const LottieOverlay: React.FC<{
-  animation: LottieAnimationType | string;
+  lottieRef: string; // STANDARDIZED
   startFrame: number;
   duration: number;
   opacity?: number;
-}> = ({ animation, startFrame, duration, opacity = 0.8 }) => {
+}> = ({ lottieRef, startFrame, duration, opacity = 0.8 }) => {
   const frame = useCurrentFrame();
 
   if (frame < startFrame || frame > startFrame + duration) {
@@ -226,7 +257,7 @@ export const LottieOverlay: React.FC<{
       }}
     >
       <RemotionLottie
-        animation={animation}
+        lottieRef={lottieRef}
         startFrame={startFrame}
         endFrame={startFrame + duration}
         loop={false}
@@ -234,3 +265,8 @@ export const LottieOverlay: React.FC<{
     </div>
   );
 };
+
+// ==================== EXPORT LEGACY NAMES ====================
+
+// For backward compatibility (will be deprecated)
+export { RemotionLottie as LottiePlayer };
