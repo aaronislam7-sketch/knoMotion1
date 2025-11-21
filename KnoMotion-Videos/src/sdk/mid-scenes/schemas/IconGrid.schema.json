@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IconGrid Schema",
+  "description": "Schema for IconGrid mid-scene component",
+  "type": "object",
+  "required": ["icons", "beats"],
+  "properties": {
+    "icons": {
+      "type": "array",
+      "description": "Array of icon configurations",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["iconRef"],
+        "properties": {
+          "iconRef": {
+            "type": "string",
+            "description": "Icon content (emoji, SVG, etc.)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional label below icon"
+          },
+          "color": {
+            "type": "string",
+            "description": "Icon color from theme or hex value"
+          },
+          "style": {
+            "type": "object",
+            "description": "Icon style overrides"
+          }
+        }
+      }
+    },
+    "columns": {
+      "type": "number",
+      "default": 4,
+      "minimum": 1,
+      "maximum": 8,
+      "description": "Number of columns in grid"
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["fadeIn", "slideIn", "scaleIn", "bounceIn", "cascade"],
+      "default": "scaleIn",
+      "description": "Entrance animation type"
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["up", "down", "left", "right"],
+      "default": "up",
+      "description": "Direction for slide animations"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.1,
+      "minimum": 0,
+      "description": "Delay between icons in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.5,
+      "minimum": 0.1,
+      "description": "Animation duration per icon in seconds"
+    },
+    "iconSize": {
+      "type": "string",
+      "enum": ["sm", "md", "lg", "xl"],
+      "default": "lg",
+      "description": "Icon size"
+    },
+    "gap": {
+      "type": "number",
+      "default": 40,
+      "minimum": 0,
+      "description": "Gap between icons in pixels"
+    },
+    "showLabels": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show labels below icons"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start beat in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Optional position override (uses layout engine)",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "iconContainer": { "type": "object" },
+        "label": { "type": "object" }
+      }
+    }
+  }
+}

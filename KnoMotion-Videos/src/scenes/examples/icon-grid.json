@@ -1,0 +1,93 @@
+{
+  "title": "Icon Grid Example",
+  "description": "Example configuration for IconGrid mid-scene",
+  "config": {
+    "icons": [
+      {
+        "iconRef": "🎯",
+        "label": "Focus",
+        "color": "primary"
+      },
+      {
+        "iconRef": "🚀",
+        "label": "Launch",
+        "color": "accentBlue"
+      },
+      {
+        "iconRef": "💡",
+        "label": "Ideas",
+        "color": "doodle"
+      },
+      {
+        "iconRef": "⚡",
+        "label": "Speed",
+        "color": "accentGreen"
+      },
+      {
+        "iconRef": "🎨",
+        "label": "Design",
+        "color": "secondary"
+      },
+      {
+        "iconRef": "📊",
+        "label": "Analytics",
+        "color": "accentBlue"
+      },
+      {
+        "iconRef": "🔒",
+        "label": "Security",
+        "color": "primary"
+      },
+      {
+        "iconRef": "✨",
+        "label": "Magic",
+        "color": "doodle"
+      }
+    ],
+    "columns": 4,
+    "animation": "scaleIn",
+    "direction": "up",
+    "staggerDelay": 0.1,
+    "animationDuration": 0.5,
+    "iconSize": "lg",
+    "gap": 50,
+    "showLabels": true,
+    "beats": {
+      "start": 1.0
+    }
+  },
+  "variations": {
+    "bounceAnimation": {
+      "animation": "bounceIn",
+      "staggerDelay": 0.08,
+      "animationDuration": 0.6
+    },
+    "cascadeEffect": {
+      "animation": "cascade",
+      "staggerDelay": 0.05,
+      "columns": 3
+    },
+    "slideAnimation": {
+      "animation": "slideIn",
+      "direction": "left",
+      "staggerDelay": 0.12
+    },
+    "smallIcons": {
+      "iconSize": "md",
+      "columns": 5,
+      "gap": 30,
+      "showLabels": false
+    },
+    "largeIcons": {
+      "iconSize": "xl",
+      "columns": 3,
+      "gap": 60,
+      "showLabels": true
+    },
+    "noLabels": {
+      "showLabels": false,
+      "iconSize": "lg",
+      "gap": 40
+    }
+  }
+}

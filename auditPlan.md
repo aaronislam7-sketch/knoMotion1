@@ -336,59 +336,83 @@
 
 ---
 
-#### Task 2.3: Create TextRevealSequence Mid-Scene
+#### Task 2.3: Create TextRevealSequence Mid-Scene ✅ COMPLETE
+**Status**: ✅ Complete  
+**Completed**: 2025-11-21  
 **Target**: `/sdk/mid-scenes/TextRevealSequence.jsx`
 
-**What It Does**: Renders multiple text lines with reveal animations (typewriter, fade, slide) - combines Text elements with animations
+**What It Does**: Renders multiple text lines with reveal animations (typewriter, fade, slide, mask) - combines Text elements with animations
 
 **Steps**:
-1. [ ] Create `/sdk/mid-scenes/TextRevealSequence.jsx`:
-   - [ ] Component signature: `TextRevealSequence({ config, frame, fps })`
-   - [ ] Accepts array of text lines
-   - [ ] Applies reveal animations (typewriter, fade, slide) per line
-   - [ ] Supports stagger timing
-   - [ ] All configurable via JSON
-2. [ ] Create JSON schema: `/sdk/mid-scenes/schemas/TextRevealSequence.schema.json`
-   - [ ] Schema includes: lines array, reveal type, stagger delay, beats
-3. [ ] Export from mid-scenes index
-4. [ ] Create example JSON: `/scenes/examples/text-reveal-sequence.json`
+1. [✅] Create `/sdk/mid-scenes/TextRevealSequence.jsx`:
+   - [✅] Component signature: `TextRevealSequence({ config })`
+   - [✅] Accepts array of text lines with emphasis support
+   - [✅] Applies reveal animations (typewriter, fade, slide, mask) per line
+   - [✅] Supports direction for slide/mask reveals (up, down, left, right)
+   - [✅] Supports stagger timing
+   - [✅] Uses theme line spacing tokens (tight, normal, relaxed, loose)
+   - [✅] Emphasis as visual effect (weight, color, highlighting)
+   - [✅] All configurable via JSON
+2. [✅] Create JSON schema: `/sdk/mid-scenes/schemas/TextRevealSequence.schema.json`
+   - [✅] Schema includes: lines array, reveal type, direction, stagger delay, line spacing, beats
+3. [✅] Export from mid-scenes index
+4. [✅] Create example JSON: `/scenes/examples/text-reveal-sequence.json`
+5. [✅] Add line spacing tokens to theme: `/sdk/theme/knodeTheme.ts`
+   - [✅] Added lineSpacingTight, lineSpacingNormal, lineSpacingRelaxed, lineSpacingLoose
 
-**Deliverable**: `TextRevealSequence` mid-scene component
+**Deliverable**: `TextRevealSequence` mid-scene component with full feature set
 
 **Validation**:
-- [ ] Create new showcase scene: `ShowcaseScene8_MidSceneTextReveal.jsx`
-- [ ] Test with example JSON in showcase zone
-- [ ] Verify text lines reveal correctly
-- [ ] Verify stagger timing works
-- [ ] Verify all configurable via JSON
+- [✅] Updated ShowcaseScene7 to include TextRevealSequence tests (renamed to "Mid-Scene Tests")
+- [✅] Test with 3 different reveal types: typewriter, fade, slide
+- [✅] Verify text lines reveal correctly
+- [✅] Verify stagger timing works
+- [✅] Verify direction support works
+- [✅] Verify emphasis styles work (high/normal/low)
+- [✅] Verify all configurable via JSON
+- [✅] Build passes with no errors
+- [✅] No linter errors
 
 ---
 
-#### Task 2.4: Create IconGrid Mid-Scene
+#### Task 2.4: Create IconGrid Mid-Scene ✅ COMPLETE
+**Status**: ✅ Complete  
+**Completed**: 2025-11-21  
 **Target**: `/sdk/mid-scenes/IconGrid.jsx`
 
 **What It Does**: Renders grid of icons with entrance animations - combines Icon elements with grid layout and animations
 
 **Steps**:
-1. [ ] Create `/sdk/mid-scenes/IconGrid.jsx`:
-   - [ ] Component signature: `IconGrid({ config, frame, fps })`
-   - [ ] Accepts array of icons
-   - [ ] Uses unified layout engine (GRID arrangement)
-   - [ ] Applies entrance animations (stagger or cascade)
-   - [ ] All configurable via JSON
-2. [ ] Create JSON schema: `/sdk/mid-scenes/schemas/IconGrid.schema.json`
-   - [ ] Schema includes: icons array, grid columns, animation type, beats
-3. [ ] Export from mid-scenes index
-4. [ ] Create example JSON: `/scenes/examples/icon-grid.json`
+1. [✅] Create `/sdk/mid-scenes/IconGrid.jsx`:
+   - [✅] Component signature: `IconGrid({ config })`
+   - [✅] Accepts array of icons with iconRef, label, color
+   - [✅] Uses unified layout engine (GRID arrangement)
+   - [✅] Applies entrance animations: fadeIn, slideIn, scaleIn, bounceIn, cascade
+   - [✅] Supports direction for slide animations (up, down, left, right)
+   - [✅] Supports stagger and cascade effects
+   - [✅] Supports icon sizes (sm, md, lg, xl)
+   - [✅] Supports optional labels below icons
+   - [✅] All configurable via JSON
+2. [✅] Create JSON schema: `/sdk/mid-scenes/schemas/IconGrid.schema.json`
+   - [✅] Schema includes: icons array, grid columns, animation type, direction, stagger delay, icon size, gap, show labels, beats
+3. [✅] Export from mid-scenes index
+4. [✅] Create example JSON: `/scenes/examples/icon-grid.json`
+   - [✅] Base config with 8 icons
+   - [✅] 6 variations: bounce, cascade, slide, small icons, large icons, no labels
 
-**Deliverable**: `IconGrid` mid-scene component
+**Deliverable**: `IconGrid` mid-scene component with full feature set
 
 **Validation**:
-- [ ] Create new showcase scene: `ShowcaseScene9_MidSceneIconGrid.jsx`
-- [ ] Test with example JSON in showcase zone
-- [ ] Verify icons render in grid
-- [ ] Verify entrance animations work
-- [ ] Verify all configurable via JSON
+- [✅] Create new showcase scene: `ShowcaseScene9_MidSceneIconGrid.jsx`
+- [✅] Test with 3 different configs: scaleIn, bounceIn, cascade
+- [✅] Verify icons render in grid layout
+- [✅] Verify entrance animations work
+- [✅] Verify stagger timing works
+- [✅] Verify cascade effect works
+- [✅] Verify labels show/hide correctly
+- [✅] Verify all configurable via JSON
+- [✅] Build passes with no errors
+- [✅] No linter errors
 
 ---
 
