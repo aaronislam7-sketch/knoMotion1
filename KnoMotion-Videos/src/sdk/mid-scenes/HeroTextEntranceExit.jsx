@@ -148,10 +148,10 @@ export const HeroTextEntranceExit = ({ config }) => {
   );
 
   // Position handling - use layout engine if position provided, otherwise center
-  const containerStyle = position
+  // Use wrapper approach for proper centering with animations
+  const wrapperStyle = position
     ? {
         ...positionToCSS(position),
-        ...style.container,
       }
     : {
         position: 'absolute',
@@ -160,23 +160,28 @@ export const HeroTextEntranceExit = ({ config }) => {
         transform: 'translate(-50%, -50%)',
         width: '80%',
         maxWidth: 800,
-        ...style.container,
       };
+
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 40,
+    width: '100%',
+    ...style.container,
+  };
 
   return (
     <AbsoluteFill>
-      <div
-        style={{
-          ...containerStyle,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 40,
-          opacity: combinedStyle.opacity,
-          transform: combinedStyle.transform,
-        }}
-      >
+      <div style={wrapperStyle}>
+        <div
+          style={{
+            ...containerStyle,
+            opacity: combinedStyle.opacity,
+            transform: combinedStyle.transform || 'none',
+          }}
+        >
         {/* Hero */}
         <div
           style={{
@@ -212,6 +217,7 @@ export const HeroTextEntranceExit = ({ config }) => {
             ...style.text,
           }}
         />
+        </div>
       </div>
     </AbsoluteFill>
   );
