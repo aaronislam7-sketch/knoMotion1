@@ -14,7 +14,8 @@ import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill } from 'remotion';
 import { Card } from '../elements/atoms/Card';
 import { Text } from '../elements/atoms/Text';
-import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../layout/layoutEngine';
+import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS as positionToCSSLayoutEngine } from '../layout/layoutEngine';
+import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
 import { fadeIn, slideIn, scaleIn, fadeSlide } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
@@ -124,8 +125,11 @@ export const CardSequence = ({ config }) => {
           'up'
         );
 
-        // Get card position - use layout engine position or default
-        const cardPosition = positionToCSS(pos);
+        // Get card position - use correct function based on layout type
+        // GRID has width/height, STACKED only has x/y
+        const cardPosition = layout === 'grid' 
+          ? positionToCSSLayoutEngine(pos)
+          : positionToCSSWithTransform(pos, 'center');
 
         return (
           <div
