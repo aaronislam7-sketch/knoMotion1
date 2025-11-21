@@ -35,27 +35,40 @@ export const ShowcaseScene5_LayoutEngineTest = () => {
     label: `Item ${i + 1}`,
   }));
 
-  // Test GRID layout with collision detection
+  // Define content area (accounting for title and padding)
+  // Center the grid in the available space with proper margins
+  const contentArea = {
+    left: 100,  // Left margin
+    top: 250,   // Start below title
+    width: 1720, // Full width minus margins (1920 - 200)
+    height: 750,  // Height for grid
+  };
+
+  // Test GRID layout
+  // Use area to constrain grid within visible bounds
   const gridPositions = calculateItemPositions(testItems, {
     arrangement: ARRANGEMENT_TYPES.GRID,
     columns: 3,
-    gap: 40,
+    gap: 50,
     viewport,
-    enableCollisionDetection: true,
+    area: contentArea,
+    itemWidth: 500,
+    itemHeight: 200,
+    centerGrid: true,
+    enableCollisionDetection: false, // Disable for now to test basic grid first
     minSpacing: 20,
   });
 
-  // Test CIRCULAR layout
-  const circularPositions = calculateItemPositions(testItems, {
-    arrangement: ARRANGEMENT_TYPES.CIRCULAR,
-    radius: 250,
-    viewport,
-  });
-
-  // Test validation
+  // Test validation on the actual positions
+  const positionsToValidate = gridPositions.positions || gridPositions;
+  // Validate against viewport (positions are absolute viewport coordinates)
   const validation = validateLayout(
-    gridPositions.positions || gridPositions,
-    viewport
+    positionsToValidate,
+    viewport,
+    {
+      checkBounds: true,
+      checkCollisions: true,
+    }
   );
 
   const fadeIn = interpolate(frame, [0, 30], [0, 1], {
@@ -91,102 +104,107 @@ export const ShowcaseScene5_LayoutEngineTest = () => {
         </div>
       </div>
 
-      {/* Grid Layout Test (with collision detection) */}
-      <div style={{
-        position: 'absolute',
-        top: 150,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: fadeIn,
-      }}>
+      {/* Grid Layout Test */}
+      <AbsoluteFill style={{ opacity: fadeIn }}>
         <div style={{
-          fontSize: 28,
-          fontWeight: 600,
-          fontFamily: theme.fonts.header,
-          color: theme.colors.textMain,
-          marginBottom: 30,
+          position: 'absolute',
+          top: 200,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
         }}>
-          GRID Layout (with Collision Detection)
+          <div style={{
+            fontSize: 28,
+            fontWeight: 600,
+            fontFamily: theme.fonts.header,
+            color: theme.colors.textMain,
+            marginBottom: 40,
+          }}>
+            GRID Layout Test
+          </div>
         </div>
 
-        <div style={{
-          position: 'relative',
-          width: 1200,
-          height: 600,
-        }}>
-          {(gridPositions.positions || gridPositions).map((pos, index) => {
-            const startFrame = index * 10;
-            const scale = interpolate(frame, [startFrame, startFrame + 20], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.bezier(0.68, -0.55, 0.265, 1.55),
-            });
+        {/* Grid Items - positions are absolute viewport coordinates */}
+        {positionsToValidate.map((pos, index) => {
+          const startFrame = index * 10;
+          const scale = interpolate(frame, [startFrame, startFrame + 20], [0, 1], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+            easing: Easing.bezier(0.68, -0.55, 0.265, 1.55),
+          });
 
-            return (
-              <div
-                key={index}
-                style={{
-                  position: 'absolute',
-                  left: pos.x - (pos.width || 100) / 2,
-                  top: pos.y - (pos.height || 100) / 2,
-                  width: pos.width || 200,
-                  height: pos.height || 150,
-                  backgroundColor: theme.colors.cardBg,
-                  borderRadius: theme.radii.card,
-                  boxShadow: theme.shadows.card,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 24,
-                  fontWeight: 600,
-                  fontFamily: theme.fonts.body,
-                  color: theme.colors.textMain,
-                  transform: `scale(${scale})`,
-                  border: `2px solid ${theme.colors.primary}`,
-                }}
-              >
-                {testItems[index].label}
-              </div>
-            );
-          })}
-        </div>
+          // Grid returns center coordinates (absolute viewport), convert to top-left for positioning
+          const itemWidth = pos.width || 500;
+          const itemHeight = pos.height || 200;
+          const left = pos.x - itemWidth / 2;
+          const top = pos.y - itemHeight / 2;
+
+          return (
+            <div
+              key={index}
+              style={{
+                position: 'absolute',
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${itemWidth}px`,
+                height: `${itemHeight}px`,
+                backgroundColor: theme.colors.cardBg,
+                borderRadius: theme.radii.card,
+                boxShadow: theme.shadows.card,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 32,
+                fontWeight: 700,
+                fontFamily: theme.fonts.header,
+                color: theme.colors.primary,
+                transform: `scale(${scale})`,
+                border: `3px solid ${theme.colors.primary}`,
+              }}
+            >
+              {testItems[index].label}
+            </div>
+          );
+        })}
 
         {/* Validation Status */}
-        {gridPositions.valid !== undefined && (
+        <div style={{
+          position: 'absolute',
+          bottom: 40,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: 20,
+          backgroundColor: validation.valid ? theme.colors.accentGreen + '20' : '#E74C3C20',
+          borderRadius: theme.radii.card,
+          border: `2px solid ${validation.valid ? theme.colors.accentGreen : '#E74C3C'}`,
+          minWidth: 400,
+          textAlign: 'center',
+        }}>
           <div style={{
-            marginTop: 40,
-            padding: 20,
-            backgroundColor: gridPositions.valid ? theme.colors.accentGreen + '20' : '#E74C3C20',
-            borderRadius: theme.radii.card,
-            border: `2px solid ${gridPositions.valid ? theme.colors.accentGreen : '#E74C3C'}`,
+            fontSize: 18,
+            fontWeight: 600,
+            fontFamily: theme.fonts.body,
+            color: validation.valid ? theme.colors.accentGreen : '#E74C3C',
+            marginBottom: 10,
           }}>
-            <div style={{
-              fontSize: 18,
-              fontWeight: 600,
-              fontFamily: theme.fonts.body,
-              color: gridPositions.valid ? theme.colors.accentGreen : '#E74C3C',
-              marginBottom: 10,
-            }}>
-              {gridPositions.valid ? '✅ Layout Valid' : '❌ Layout Invalid'}
-            </div>
-            {gridPositions.warnings && gridPositions.warnings.length > 0 && (
-              <div style={{ fontSize: 14, color: theme.colors.textSoft }}>
-                Warnings: {gridPositions.warnings.length}
-              </div>
-            )}
-            {gridPositions.errors && gridPositions.errors.length > 0 && (
-              <div style={{ fontSize: 14, color: '#E74C3C' }}>
-                Errors: {gridPositions.errors.length}
-              </div>
-            )}
+            {validation.valid ? '✅ Layout Valid' : `❌ Layout Invalid - Errors: ${validation.errors.length}`}
           </div>
-        )}
-      </div>
+          {validation.warnings && validation.warnings.length > 0 && (
+            <div style={{ fontSize: 14, color: theme.colors.doodle, marginTop: 5 }}>
+              Warnings: {validation.warnings.length}
+            </div>
+          )}
+          {validation.errors && validation.errors.length > 0 && (
+            <div style={{ fontSize: 12, color: '#E74C3C', marginTop: 10, textAlign: 'left' }}>
+              {validation.errors.slice(0, 3).map((err, i) => (
+                <div key={i} style={{ marginTop: 5 }}>
+                  • {err.message}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
