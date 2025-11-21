@@ -6,6 +6,7 @@ import { ShowcaseScene2_ArchitectureDeepDive } from '../compositions/ShowcaseSce
 import { ShowcaseScene3_LayoutShowcase } from '../compositions/ShowcaseScene3_LayoutShowcase';
 import { ShowcaseScene4_FeatureShowcaseCTA } from '../compositions/ShowcaseScene4_FeatureShowcaseCTA';
 import { ShowcaseScene5_LayoutEngineTest } from '../compositions/ShowcaseScene5_LayoutEngineTest';
+import { ShowcaseScene6_MidSceneHeroText } from '../compositions/ShowcaseScene6_MidSceneHeroText';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 
 /**
@@ -67,6 +68,14 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: 'Scene 5: Layout Engine Test (30s)',
+    },
+    scene6: {
+      component: ShowcaseScene6_MidSceneHeroText,
+      duration: 300, // 10 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: 'Scene 6: Mid-Scene HeroTextEntranceExit (10s)',
     },
     animations: {
       component: ContinuousAnimationShowcase,

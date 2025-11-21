@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HeroTextEntranceExit Schema",
+  "description": "Schema for HeroTextEntranceExit mid-scene component",
+  "type": "object",
+  "required": ["text", "heroType", "heroRef", "beats"],
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Text content to display"
+    },
+    "heroType": {
+      "type": "string",
+      "enum": ["image", "lottie", "svg"],
+      "description": "Type of hero visual"
+    },
+    "heroRef": {
+      "type": "string",
+      "description": "Path or reference to hero asset"
+    },
+    "animationEntrance": {
+      "type": "string",
+      "enum": ["fadeIn", "slideIn", "scaleIn", "fadeSlide"],
+      "default": "fadeIn",
+      "description": "Entrance animation type"
+    },
+    "animationExit": {
+      "type": "string",
+      "enum": ["fadeOut", "slideOut", "scaleOut"],
+      "default": "fadeOut",
+      "description": "Exit animation type"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["entrance", "exit"],
+      "properties": {
+        "entrance": {
+          "type": "number",
+          "description": "Entrance beat in seconds"
+        },
+        "exit": {
+          "type": "number",
+          "description": "Exit beat in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Optional position override (uses layout engine)",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "container": { "type": "object" },
+        "heroContainer": { "type": "object" },
+        "hero": { "type": "object" },
+        "text": { "type": "object" }
+      }
+    }
+  }
+}

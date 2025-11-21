@@ -67,6 +67,10 @@ export * from './core/transitions';
 export * from './core/typography';
 export { EZ, getEasing } from './core/easing';
 
+// ==================== MID-SCENES ====================
+// Composed components that glue elements, animations, and effects together
+export * from './mid-scenes';
+
 // ==================== COMPONENTS ====================
 // Mid-level components
 export { AppMosaic } from './components/mid-level/AppMosaic';

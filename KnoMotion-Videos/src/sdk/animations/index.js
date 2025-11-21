@@ -116,6 +116,64 @@ export const scaleIn = (frame, startFrame, duration = 30, fromScale = 0.3) => {
 };
 
 /**
+ * Fade out animation
+ */
+export const fadeOut = (frame, startFrame, duration = 30) => {
+  const progress = interpolate(
+    frame,
+    [startFrame, startFrame + duration],
+    [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+  
+  return {
+    opacity: progress,
+    transform: `scale(${1 - (1 - progress) * 0.05})`
+  };
+};
+
+/**
+ * Slide out to direction
+ */
+export const slideOut = (frame, startFrame, duration = 30, direction = 'left', distance = 50) => {
+  const progress = interpolate(
+    frame,
+    [startFrame, startFrame + duration],
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+  
+  const translations = {
+    left: `translateX(${progress * distance}px)`,
+    right: `translateX(${progress * -distance}px)`,
+    up: `translateY(${progress * distance}px)`,
+    down: `translateY(${progress * -distance}px)`
+  };
+  
+  return {
+    opacity: 1 - progress,
+    transform: translations[direction] || translations.left
+  };
+};
+
+/**
+ * Scale out animation
+ */
+export const scaleOut = (frame, startFrame, duration = 30, toScale = 0.3) => {
+  const progress = interpolate(
+    frame,
+    [startFrame, startFrame + duration],
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+  
+  return {
+    opacity: 1 - progress,
+    transform: `scale(${1 - (1 - toScale) * progress})`
+  };
+};
+
+/**
  * Spring-based animation
  */
 export const springAnimation = (frame, fps, startFrame, config = 'smooth') => {
