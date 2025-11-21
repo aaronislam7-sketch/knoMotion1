@@ -13,7 +13,8 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill } from 'remotion';
 import { Text } from '../elements/atoms/Text';
-import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../layout/layoutEngine';
+import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
+import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
 import { fadeIn, slideIn, typewriter, getMaskReveal } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
@@ -191,7 +192,8 @@ export const TextRevealSequence = ({ config }) => {
         );
 
         const emphasisStyle = getEmphasisStyle(line.emphasis);
-        const linePosition = positionToCSS(pos);
+        // Use positionSystem's positionToCSS which uses transforms for center coords
+        const linePosition = positionToCSSWithTransform(pos, 'center');
 
         // Handle typewriter vs. other animations
         const displayText = animStyle.isTypewriter ? animStyle.visibleText : line.text;
@@ -201,21 +203,14 @@ export const TextRevealSequence = ({ config }) => {
             key={index}
             style={{
               ...linePosition,
-              width: pos.width || '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
               ...style.lineContainer,
             }}
           >
             <div
               style={{
                 opacity: animStyle.opacity,
-                transform: animStyle.transform,
+                transform: `${linePosition.transform} ${animStyle.transform || ''}`.trim(),
                 clipPath: animStyle.clipPath || 'none',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center',
               }}
             >
               <Text
@@ -228,7 +223,6 @@ export const TextRevealSequence = ({ config }) => {
                   fontSize: baseFontSize,
                   lineHeight: `${lineHeight}px`,
                   textAlign: 'center',
-                  maxWidth: '90%',
                   ...emphasisStyle,
                   ...style.text,
                 }}
