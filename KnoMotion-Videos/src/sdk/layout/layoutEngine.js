@@ -8,6 +8,10 @@
  */
 
 import { resolvePosition, getCenteredStackBase, getStackedPosition } from './positionSystem';
+import {
+  detectCollisions,
+  autoResolveCollisions,
+} from '../validation/collision-detection';
 
 /**
  * Layout arrangement types
@@ -111,50 +115,108 @@ export const createLayoutAreas = ({
  *
  * NOTE:
  * - Most templates should pass an `area` (e.g. content area) rather than raw basePosition.
+ * - Can optionally enable collision detection to ensure elements don't overlap.
  *
  * @param {any[]} items
  * @param {Object} [config]
+ * @param {string} [config.arrangement] - Arrangement type
+ * @param {boolean} [config.enableCollisionDetection=false] - Enable collision detection
+ * @param {number} [config.minSpacing=20] - Minimum spacing when collision detection enabled
+ * @param {Object} [config.viewport] - Viewport dimensions for bounds checking
+ * @returns {Array|Object} Positions array, or object with positions/warnings/errors if collision detection enabled
  */
 export const calculateItemPositions = (items, config = {}) => {
   const {
     arrangement = ARRANGEMENT_TYPES.STACKED_VERTICAL,
+    enableCollisionDetection = false,
+    minSpacing = 20,
+    viewport = { width: 1920, height: 1080 },
+    ...restConfig
   } = config;
 
+  let positions;
+
+  // Calculate positions using arrangement type
   switch (arrangement) {
     case ARRANGEMENT_TYPES.STACKED_VERTICAL:
-      return calculateStackedPositions(items, {
-        ...config,
+      positions = calculateStackedPositions(items, {
+        ...restConfig,
         direction: 'vertical',
+        viewport,
       });
+      break;
 
     case ARRANGEMENT_TYPES.STACKED_HORIZONTAL:
-      return calculateStackedPositions(items, {
-        ...config,
+      positions = calculateStackedPositions(items, {
+        ...restConfig,
         direction: 'horizontal',
+        viewport,
       });
+      break;
 
     case ARRANGEMENT_TYPES.GRID:
-      return calculateGridPositions(items, config);
+      positions = calculateGridPositions(items, { ...restConfig, viewport });
+      break;
 
     case ARRANGEMENT_TYPES.CIRCULAR:
-      return calculateCircularPositions(items, config);
+      positions = calculateCircularPositions(items, { ...restConfig, viewport });
+      break;
 
     case ARRANGEMENT_TYPES.RADIAL:
-      return calculateRadialPositions(items, config);
+      positions = calculateRadialPositions(items, { ...restConfig, viewport });
+      break;
 
     case ARRANGEMENT_TYPES.CASCADE:
-      return calculateCascadePositions(items, config);
+      positions = calculateCascadePositions(items, { ...restConfig, viewport });
+      break;
 
     case ARRANGEMENT_TYPES.CENTERED:
-      return calculateCenteredPositions(items, config);
+      positions = calculateCenteredPositions(items, { ...restConfig, viewport });
+      break;
 
     default:
       console.warn(`Unknown arrangement type: ${arrangement}`);
-      return calculateStackedPositions(items, {
-        ...config,
+      positions = calculateStackedPositions(items, {
+        ...restConfig,
         direction: 'vertical',
+        viewport,
       });
   }
+
+  // Apply collision detection if enabled
+  if (enableCollisionDetection) {
+    // Ensure positions have width/height for collision detection
+    // If not provided, use defaults based on arrangement
+    const positionsWithDimensions = positions.map((pos, index) => {
+      if (pos.width && pos.height) {
+        return { ...pos, id: pos.id || `item-${index}` };
+      }
+      // Default dimensions if not provided
+      return {
+        ...pos,
+        id: pos.id || `item-${index}`,
+        width: pos.width || 200,
+        height: pos.height || 100,
+      };
+    });
+
+    // Enforce minimum spacing
+    const adjusted = enforceMinimumSpacing(positionsWithDimensions, minSpacing);
+
+    // Validate layout
+    const validation = validateLayout(adjusted, viewport);
+
+    // Return with validation results
+    return {
+      positions: adjusted,
+      warnings: validation.warnings,
+      errors: validation.errors,
+      valid: validation.valid,
+    };
+  }
+
+  // Return positions array (backward compatible)
+  return positions;
 };
 
 /**
@@ -584,4 +646,256 @@ export const calculateStaggerDelays = (
   const delay = Math.max(minDelay, Math.min(maxDelay, idealDelay));
 
   return Array.from({ length: itemCount }, (_, i) => i * delay);
+};
+
+/**
+ * ========================================
+ * COLLISION DETECTION & SAFE POSITIONING
+ * ========================================
+ * Integrated from layout-resolver.js
+ */
+
+/**
+ * Find safe position that avoids collisions with existing elements
+ * Uses expanding circle search to find collision-free position
+ *
+ * @param {Object} element - Element with x, y, width, height, id
+ * @param {Array} existingElements - Array of existing elements to avoid
+ * @param {Object} [options] - Configuration
+ * @param {Object} [options.preferredPosition] - Preferred position {x, y}
+ * @param {number} [options.searchRadius=200] - Maximum search radius
+ * @param {number} [options.stepSize=20] - Step size for search
+ * @param {Object} [options.constraints] - Bounds constraints {minX, maxX, minY, maxY}
+ * @returns {Object} Safe position {x, y}
+ */
+export const findSafePosition = (element, existingElements, options = {}) => {
+  const {
+    preferredPosition = { x: element.x, y: element.y },
+    searchRadius = 200,
+    stepSize = 20,
+    constraints = {},
+  } = options;
+
+  // Create bounding box for the element at preferred position
+  let testBox = {
+    ...element,
+    x: preferredPosition.x,
+    y: preferredPosition.y,
+  };
+
+  // Check if preferred position is collision-free
+  const collisions = detectCollisions([testBox, ...existingElements]);
+  if (collisions.length === 0) {
+    return preferredPosition;
+  }
+
+  // Search in expanding circles for a safe position
+  const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+
+  for (let radius = stepSize; radius <= searchRadius; radius += stepSize) {
+    for (let angle of angles) {
+      const radian = (angle * Math.PI) / 180;
+      const testX = preferredPosition.x + Math.cos(radian) * radius;
+      const testY = preferredPosition.y + Math.sin(radian) * radius;
+
+      // Check constraints
+      if (constraints.minX && testX < constraints.minX) continue;
+      if (constraints.maxX && testX > constraints.maxX) continue;
+      if (constraints.minY && testY < constraints.minY) continue;
+      if (constraints.maxY && testY > constraints.maxY) continue;
+
+      testBox = { ...element, x: testX, y: testY };
+      const testCollisions = detectCollisions([testBox, ...existingElements]);
+
+      if (testCollisions.length === 0) {
+        return { x: testX, y: testY };
+      }
+    }
+  }
+
+  // If no safe position found, return preferred position with warning
+  console.warn(`⚠️ Could not find collision-free position for ${element.id || 'element'}`);
+  return preferredPosition;
+};
+
+/**
+ * Calculate safe layout for multiple elements with mutual avoidance
+ * Uses iterative collision resolution
+ *
+ * @param {Array} elements - Array of elements with x, y, width, height, id
+ * @param {Object} [options] - Configuration
+ * @param {Object} [options.canvas] - Canvas dimensions {width, height}
+ * @param {number} [options.minSpacing=20] - Minimum spacing between elements
+ * @param {number} [options.maxIterations=5] - Maximum resolution iterations
+ * @returns {Object} Result with success, elements, iterations, message
+ */
+export const calculateSafeLayout = (elements, options = {}) => {
+  const {
+    canvas = { width: 1920, height: 1080 },
+    minSpacing = 20,
+    maxIterations = 5,
+  } = options;
+
+  // Start with initial positions
+  let currentElements = elements.map((el) => ({
+    ...el,
+    flexible: el.flexible !== false, // Default to flexible
+  }));
+
+  // Iteratively resolve collisions
+  const result = autoResolveCollisions(currentElements, {
+    maxIterations,
+    onProgress: ({ iteration, collisionsRemaining, message }) => {
+      if (collisionsRemaining > 0) {
+        console.log(`Layout iteration ${iteration}: ${message}`);
+      }
+    },
+  });
+
+  return {
+    success: result.success,
+    elements: result.boxes,
+    iterations: result.iterations,
+    message: result.message,
+  };
+};
+
+/**
+ * Enforce minimum spacing between elements
+ * Adjusts element positions to ensure minimum spacing
+ *
+ * @param {Array} elements - Array of elements with x, y, width, height, id
+ * @param {number} [minSpacing=20] - Minimum spacing in pixels
+ * @returns {Array} Adjusted elements with new positions
+ */
+export const enforceMinimumSpacing = (elements, minSpacing = 20) => {
+  const adjusted = [];
+
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i];
+    const others = adjusted; // Only check against already placed elements
+
+    const safePos = findSafePosition(
+      element,
+      others,
+      {
+        preferredPosition: { x: element.x, y: element.y },
+        searchRadius: 300,
+        stepSize: minSpacing,
+      }
+    );
+
+    adjusted.push({
+      ...element,
+      x: safePos.x,
+      y: safePos.y,
+    });
+  }
+
+  return adjusted;
+};
+
+/**
+ * Validate layout and return errors/warnings
+ * Checks for bounds violations and collisions
+ *
+ * @param {Array} positions - Calculated positions (with optional width/height)
+ * @param {Object} canvas - Canvas dimensions {width, height}
+ * @param {Object} [options] - Validation options
+ * @param {boolean} [options.checkCollisions=true] - Check for collisions
+ * @param {boolean} [options.checkBounds=true] - Check for bounds violations
+ * @returns {Object} {valid: boolean, errors: [], warnings: []}
+ */
+export const validateLayout = (positions, canvas, options = {}) => {
+  const {
+    checkCollisions = true,
+    checkBounds = true,
+  } = options;
+
+  const errors = [];
+  const warnings = [];
+
+  // Check bounds violations
+  if (checkBounds) {
+    positions.forEach((pos, index) => {
+      const hasWidth = pos.width !== undefined;
+      const hasHeight = pos.height !== undefined;
+
+      // Check if position (or element bounds) exceeds canvas
+      if (hasWidth) {
+        const left = pos.x - pos.width / 2;
+        const right = pos.x + pos.width / 2;
+        if (left < 0) {
+          errors.push({
+            element: index,
+            type: 'bounds-violation',
+            side: 'left',
+            amount: Math.abs(left),
+            message: `Element ${index} exceeds canvas left edge by ${Math.abs(left).toFixed(0)}px`,
+          });
+        }
+        if (right > canvas.width) {
+          errors.push({
+            element: index,
+            type: 'bounds-violation',
+            side: 'right',
+            amount: right - canvas.width,
+            message: `Element ${index} exceeds canvas right edge by ${(right - canvas.width).toFixed(0)}px`,
+          });
+        }
+      } else if (pos.x < 0 || pos.x > canvas.width) {
+        errors.push({
+          element: index,
+          type: 'bounds-violation',
+          message: `Element ${index} position (${pos.x}) is outside canvas width (0-${canvas.width})`,
+        });
+      }
+
+      if (hasHeight) {
+        const top = pos.y - pos.height / 2;
+        const bottom = pos.y + pos.height / 2;
+        if (top < 0) {
+          errors.push({
+            element: index,
+            type: 'bounds-violation',
+            side: 'top',
+            amount: Math.abs(top),
+            message: `Element ${index} exceeds canvas top edge by ${Math.abs(top).toFixed(0)}px`,
+          });
+        }
+        if (bottom > canvas.height) {
+          errors.push({
+            element: index,
+            type: 'bounds-violation',
+            side: 'bottom',
+            amount: bottom - canvas.height,
+            message: `Element ${index} exceeds canvas bottom edge by ${(bottom - canvas.height).toFixed(0)}px`,
+          });
+        }
+      } else if (pos.y < 0 || pos.y > canvas.height) {
+        errors.push({
+          element: index,
+          type: 'bounds-violation',
+          message: `Element ${index} position (${pos.y}) is outside canvas height (0-${canvas.height})`,
+        });
+      }
+    });
+  }
+
+  // Check collisions (if width/height provided)
+  if (checkCollisions && positions.every((p) => p.width && p.height)) {
+    const hasOverlaps = checkForOverlaps(positions);
+    if (hasOverlaps) {
+      warnings.push({
+        type: 'collision',
+        message: 'Elements overlap - consider enabling collision detection in calculateItemPositions()',
+      });
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  };
 };
