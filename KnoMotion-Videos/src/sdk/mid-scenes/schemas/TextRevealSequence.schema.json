@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TextRevealSequence Schema",
+  "description": "Schema for TextRevealSequence mid-scene component",
+  "type": "object",
+  "required": ["lines", "beats"],
+  "properties": {
+    "lines": {
+      "type": "array",
+      "description": "Array of text line configurations",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Line text content"
+          },
+          "emphasis": {
+            "type": "string",
+            "enum": ["normal", "high", "low"],
+            "default": "normal",
+            "description": "Emphasis level (affects weight, color, highlighting)"
+          }
+        }
+      }
+    },
+    "revealType": {
+      "type": "string",
+      "enum": ["typewriter", "fade", "slide", "mask"],
+      "default": "fade",
+      "description": "Type of reveal animation"
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["up", "down", "left", "right"],
+      "default": "up",
+      "description": "Direction for slide and mask reveals"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.2,
+      "minimum": 0,
+      "description": "Delay between lines in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.8,
+      "minimum": 0.1,
+      "description": "Animation duration per line in seconds"
+    },
+    "lineSpacing": {
+      "type": "string",
+      "enum": ["tight", "normal", "relaxed", "loose"],
+      "default": "normal",
+      "description": "Line spacing type (uses theme tokens)"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start beat in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Optional position override (uses layout engine)",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "lineContainer": { "type": "object" },
+        "text": { "type": "object" }
+      }
+    }
+  }
+}
