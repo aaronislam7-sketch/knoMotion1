@@ -9,6 +9,7 @@ import { ShowcaseScene5_LayoutEngineTest } from '../compositions/ShowcaseScene5_
 import { ShowcaseScene6_MidSceneHeroText } from '../compositions/ShowcaseScene6_MidSceneHeroText';
 import { ShowcaseScene7_MidSceneCardSequence } from '../compositions/ShowcaseScene7_MidSceneCardSequence';
 import { ShowcaseScene9_MidSceneIconGrid } from '../compositions/ShowcaseScene9_MidSceneIconGrid';
+import { ShowcaseScene10_SceneLayout } from '../compositions/ShowcaseScene10_SceneLayout';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 
 /**
@@ -94,6 +95,14 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: 'Scene 9: Mid-Scene IconGrid (15s)',
+    },
+    scene10: {
+      component: ShowcaseScene10_SceneLayout,
+      duration: 450, // 15 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: 'Scene 10: Macro Scene Layout (15s)',
     },
     animations: {
       component: ContinuousAnimationShowcase,
