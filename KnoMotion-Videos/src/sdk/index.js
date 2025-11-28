@@ -21,6 +21,10 @@ export * from './layout/positionSystem';
 // Note: layout-resolver functions have been integrated into layoutEngine.js
 // Legacy template-specific functions still available via direct import if needed
 
+// ==================== SCENE LAYOUT (MACRO) ====================
+// Macro scene layout: viewport → named slots (independent of layoutEngine)
+export * from './scene-layout';
+
 // ==================== ANIMATIONS (Consolidated) ====================
 export * from './animations';
 // Micro-delights (for backward compatibility)
