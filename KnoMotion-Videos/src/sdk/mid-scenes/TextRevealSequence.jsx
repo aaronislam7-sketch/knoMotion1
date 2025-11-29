@@ -198,36 +198,40 @@ export const TextRevealSequence = ({ config }) => {
         // Handle typewriter vs. other animations
         const displayText = animStyle.isTypewriter ? animStyle.visibleText : line.text;
 
+        // Combine centering transform with animation transform properly
+        // The linePosition.transform handles centering (-50%, -50%)
+        // The animStyle.transform handles animation (e.g., translateY for slide)
+        const combinedTransform = animStyle.transform && animStyle.transform !== 'none'
+          ? `${linePosition.transform} ${animStyle.transform}`
+          : linePosition.transform;
+
         return (
           <div
             key={index}
             style={{
               ...linePosition,
+              // Override transform to include animation
+              transform: combinedTransform,
+              opacity: animStyle.opacity,
+              clipPath: animStyle.clipPath || 'none',
               ...style.lineContainer,
             }}
           >
-            <div
+            <Text
+              text={displayText}
+              variant="body"
+              size="xl"
+              weight={emphasisStyle.fontWeight}
+              color="textMain"
               style={{
-                opacity: animStyle.opacity,
-                transform: `${linePosition.transform} ${animStyle.transform || ''}`.trim(),
-                clipPath: animStyle.clipPath || 'none',
+                fontSize: baseFontSize,
+                lineHeight: `${lineHeight}px`,
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                ...emphasisStyle,
+                ...style.text,
               }}
-            >
-              <Text
-                text={displayText}
-                variant="body"
-                size="xl"
-                weight={emphasisStyle.fontWeight}
-                color="textMain"
-                style={{
-                  fontSize: baseFontSize,
-                  lineHeight: `${lineHeight}px`,
-                  textAlign: 'center',
-                  ...emphasisStyle,
-                  ...style.text,
-                }}
-              />
-            </div>
+            />
           </div>
         );
       })}
