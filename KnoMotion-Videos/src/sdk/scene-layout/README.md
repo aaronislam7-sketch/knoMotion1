@@ -134,7 +134,7 @@ R×C grid of cells.
 ## Global Behavior
 
 All layouts:
-- Reserve a **header/title strip** at the top (default 70px)
+- Reserve a **header/title strip** at the top (default 100px)
 - Compute **contentArea** below header, respecting padding
 - Return at least `slots.header`
 
@@ -142,7 +142,7 @@ All layouts:
 
 | Option | Default |
 |--------|---------|
-| `titleHeight` | 70 |
+| `titleHeight` | 100 |
 | `padding` | 0 |
 | `rows` (fallback) | 3 |
 | `columns` (fallback) | 2 |

@@ -24,17 +24,17 @@ layout: {
   type: "full",
   options: {
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100  // Default is 100px
   }
 }
 ```
 
 ### Expected Slots
-- `header` - Title strip at top (80px height)
+- `header` - Title strip at top (100px height)
 - `full` - Entire content area below header
 
 ### Validation Checklist
-- [ ] Header slot renders at top with correct height (80px)
+- [ ] Header slot renders at top with correct height (100px)
 - [ ] Full slot fills remaining viewport below header
 - [ ] Padding is applied on all sides (40px)
 - [ ] "Hello World!" text renders centered in `full` slot
@@ -53,7 +53,7 @@ layout: {
   options: {
     rows: 3,
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -66,7 +66,7 @@ layout: {
     rows: 3,
     rowRatios: [1, 2, 1],  // Middle row twice as tall
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -99,7 +99,7 @@ layout: {
   options: {
     columns: 2,
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -112,7 +112,7 @@ layout: {
     columns: 3,
     ratios: [1, 2, 1],  // Middle column twice as wide
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -148,7 +148,7 @@ layout: {
     columns: 2,
     rowHeightRatio: 0.35,  // Row takes 35% of content area
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -162,7 +162,7 @@ layout: {
     columnRatios: [1, 2, 1],
     rowHeightRatio: 0.4,
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -206,7 +206,7 @@ layout: {
     rows: 2,
     columns: 2,
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -219,7 +219,7 @@ layout: {
     rows: 2,
     columns: 3,
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```
@@ -282,7 +282,7 @@ layout: {
   options: {
     rows: -5,  // Should default to 3
     padding: 40,
-    titleHeight: 80
+    titleHeight: 100
   }
 }
 ```

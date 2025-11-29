@@ -75,7 +75,7 @@
 // ============================================================================
 
 /** Default header/title strip height in pixels */
-const DEFAULT_TITLE_HEIGHT = 70;
+const DEFAULT_TITLE_HEIGHT = 100;
 
 /** Default padding around content area */
 const DEFAULT_PADDING = 0;
@@ -538,7 +538,7 @@ export const SCENE_LAYOUT_TYPES = Object.freeze([
  * @type {Object}
  */
 export const SCENE_LAYOUT_DEFAULTS = Object.freeze({
-  titleHeight: DEFAULT_TITLE_HEIGHT,
+  titleHeight: DEFAULT_TITLE_HEIGHT, // 100px
   padding: DEFAULT_PADDING,
   rows: DEFAULT_ROWS,
   columns: DEFAULT_COLUMNS,

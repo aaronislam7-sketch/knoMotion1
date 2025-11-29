@@ -54,7 +54,7 @@ const sceneConfig = {
       columns: 2,
       ratios: [1, 1],
       padding: 40,
-      titleHeight: 80
+      titleHeight: 100  // Default is 100px
     }
   },
 
@@ -250,6 +250,9 @@ const sceneConfig = {
  * Positions the content using the slot's LayoutArea (left, top, width, height)
  * and passes the area dimensions to the mid-scene for internal layout.
  * 
+ * Header slots use bottom alignment (with padding for descenders).
+ * Other slots use center alignment.
+ * 
  * @param {Object} props
  * @param {Object} props.slot - LayoutArea { left, top, width, height }
  * @param {Object} props.midSceneConfig - Mid-scene configuration from JSON
@@ -260,6 +263,12 @@ const SlotRenderer = ({ slot, midSceneConfig, slotName, showDebug = false }) => 
   if (!slot || !midSceneConfig) return null;
 
   const { midScene, props } = midSceneConfig;
+
+  // Determine if this is a header slot - use bottom alignment
+  const isHeader = slotName === 'header';
+  
+  // Padding from bottom for descenders (letters like p, g, y, q)
+  const descenderPadding = 10;
 
   // Enhance config with slot area for mid-scene to use
   const enhancedConfig = {
@@ -293,7 +302,7 @@ const SlotRenderer = ({ slot, midSceneConfig, slotName, showDebug = false }) => 
         top: slot.top,
         width: slot.width,
         height: slot.height,
-        overflow: 'hidden',
+        overflow: 'visible', // Allow slight overflow for text
         // Debug visualization
         ...(showDebug && {
           border: '2px dashed rgba(255, 107, 53, 0.5)',
@@ -324,12 +333,18 @@ const SlotRenderer = ({ slot, midSceneConfig, slotName, showDebug = false }) => 
       {/* Mid-scene content - positioned relative to slot */}
       <div
         style={{
-          position: 'relative',
+          position: 'absolute',
+          left: 0,
+          right: 0,
           width: '100%',
           height: '100%',
           display: 'flex',
-          alignItems: 'center',
+          // Header: align to bottom with descender padding
+          // Other slots: center both axes
+          alignItems: isHeader ? 'flex-end' : 'center',
           justifyContent: 'center',
+          paddingBottom: isHeader ? descenderPadding : 0,
+          boxSizing: 'border-box',
         }}
       >
         {renderMidScene()}
