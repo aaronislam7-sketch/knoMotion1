@@ -200,6 +200,161 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 
 ---
 
+### 5. ChecklistReveal
+**Purpose**: Renders checklist with bullet/tick items and staggered pop animations.
+
+**Use Cases**:
+- To-do lists
+- Feature checklists
+- Step completion tracking
+- Requirements lists
+- Progress indicators
+
+**Features**:
+- 6 animation types: pop, slide, fade, scale, spring, bounceIn
+- **Static icon presets**: check, bullet, dot, arrow, star, diamond, plus, minus
+- **Lottie icon presets**: lottieCheck, lottieTick, lottieSuccess, lottieStar
+- Auto-fit text to available width
+- Per-item checked/unchecked state
+- Custom colors per item
+- Layout-aware sizing
+
+**JSON Example**:
+```json
+{
+  "items": [
+    { "text": "Complete the tutorial", "checked": true },
+    { "text": "Practice with examples", "checked": true },
+    { "text": "Build your first project", "checked": false }
+  ],
+  "revealType": "pop",
+  "icon": "lottieTick",
+  "iconColor": "accentGreen",
+  "staggerDelay": 0.25,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/ChecklistReveal.schema.json`](./schemas/ChecklistReveal.schema.json)
+
+---
+
+### 6. BubbleCalloutSequence
+**Purpose**: Freeform floating callouts for annotations, thoughts, and tips.
+
+**Use Cases**:
+- Thought bubbles
+- Tip/hint callouts
+- Annotated explanations
+- Scattered annotations
+
+**Features**:
+- 3 bubble shapes: speech (with tail), rounded, notebook (dashed Knode style)
+- 3 freeform patterns: scattered (golden angle), zigzag, diagonal
+- 5 animations: pop, float, slide, scale, fade
+- Uses SDK **CalloutBubble** composition
+- Per-callout icons and colors
+
+**JSON Example**:
+```json
+{
+  "callouts": [
+    { "text": "Start with a clear goal", "icon": "🎯" },
+    { "text": "Break into small steps", "icon": "📝" },
+    { "text": "Celebrate progress!", "icon": "🎉" }
+  ],
+  "shape": "notebook",
+  "pattern": "scattered",
+  "animation": "float",
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/BubbleCalloutSequence.schema.json`](./schemas/BubbleCalloutSequence.schema.json)
+
+---
+
+### 7. SideBySideCompare
+**Purpose**: Left vs right comparison blocks for before/after, pros/cons, or A vs B scenarios.
+
+**Use Cases**:
+- Before/after comparisons
+- Pros and cons
+- Option A vs Option B
+- Concept contrasts
+
+**Features**:
+- Uses SDK **Card**, **Text**, **Icon**, **Badge** elements
+- 5 animations: slide, fade, scale, bounce, reveal
+- 4 divider styles: none, line, dashed, vs (with circular badge)
+- Title, subtitle, icon, and item lists per side
+- Custom colors per side
+- Content alignment: center or inner (facing divider)
+
+**JSON Example**:
+```json
+{
+  "left": {
+    "title": "Before",
+    "icon": "😕",
+    "items": ["Confusing syntax", "Hard to debug", "Slow"],
+    "color": "secondary"
+  },
+  "right": {
+    "title": "After",
+    "icon": "🎉",
+    "items": ["Clean code", "Easy debugging", "Fast"],
+    "color": "accentGreen"
+  },
+  "animation": "slide",
+  "dividerType": "vs",
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/SideBySideCompare.schema.json`](./schemas/SideBySideCompare.schema.json)
+
+---
+
+### 8. GridCardReveal
+**Purpose**: Mini-cards in a grid with image/icon and label, mask or slide reveals.
+
+**Use Cases**:
+- Feature grids
+- Team member displays
+- Product showcases
+- Category displays
+- Icon galleries
+
+**Features**:
+- 7 animations: fade, slide, scale, bounce, flip, mask, cascade
+- 5 card variants: default, bordered, glass, flat, elevated
+- Auto-calculated grid columns
+- Image support with rounded option
+- Labels with positioning control
+- Per-card customization
+
+**JSON Example**:
+```json
+{
+  "cards": [
+    { "icon": "🎯", "label": "Focus" },
+    { "icon": "📚", "label": "Learn" },
+    { "icon": "💪", "label": "Practice" },
+    { "icon": "🏆", "label": "Master" }
+  ],
+  "columns": 2,
+  "animation": "cascade",
+  "cardVariant": "default",
+  "showLabels": true,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/GridCardReveal.schema.json`](./schemas/GridCardReveal.schema.json)
+
+---
+
 ## Usage Guide
 
 ### Basic Integration
@@ -503,15 +658,23 @@ npm run dev
 mid-scenes/
 ├── README.md                          # This file
 ├── index.js                           # Exports all mid-scenes
-├── HeroTextEntranceExit.jsx          # Mid-scene component
-├── CardSequence.jsx                   # Mid-scene component
-├── TextRevealSequence.jsx            # Mid-scene component
-├── IconGrid.jsx                       # Mid-scene component
+├── HeroTextEntranceExit.jsx          # Hero + text with entrance/exit
+├── CardSequence.jsx                   # Cards in sequence/grid
+├── TextRevealSequence.jsx            # Text lines with reveals
+├── IconGrid.jsx                       # Icon grid with animations
+├── ChecklistReveal.jsx               # Checklist with pop animations
+├── BubbleCalloutSequence.jsx         # Speech bubble callouts
+├── SideBySideCompare.jsx             # Left vs right comparison
+├── GridCardReveal.jsx                # Mini-cards in grid layout
 └── schemas/
     ├── HeroTextEntranceExit.schema.json
     ├── CardSequence.schema.json
     ├── TextRevealSequence.schema.json
-    └── IconGrid.schema.json
+    ├── IconGrid.schema.json
+    ├── ChecklistReveal.schema.json
+    ├── BubbleCalloutSequence.schema.json
+    ├── SideBySideCompare.schema.json
+    └── GridCardReveal.schema.json
 ```
 
 ### Dependencies
@@ -538,6 +701,30 @@ mid-scenes/
 
 ---
 
-**Last Updated**: November 21, 2025  
-**Status**: 4 mid-scenes complete, 15+ planned  
-**Week 2 Progress**: 80% complete
+**Last Updated**: December 1, 2025  
+**Status**: 8 mid-scenes complete (4 original + 4 new)  
+**SDK Elements Created**: CalloutBubble
+
+### Recent Refactoring (v2.2)
+
+Based on feedback, the following simplifications and SDK improvements were made:
+
+**Design Principles Applied:**
+- **Use SDK elements** - No inline code; all styling via compositions
+- **Simplify variations** - Fewer options = easier for LLMs to configure
+- **Focused use-cases** - Each mid-scene has a clear, specific purpose
+
+1. **BubbleCalloutSequence** (Simplified)
+   - Reduced to 3 patterns: scattered, zigzag, diagonal (freeform only)
+   - Reduced to 3 shapes: speech, rounded, notebook
+   - **NEW**: Uses SDK `CalloutBubble` composition
+   - Removed structured layouts (use other mid-scenes for structured content)
+
+2. **SideBySideCompare** (Simplified)
+   - Simplified to 4 divider types: none, line, dashed, vs
+   - Uses SDK Card, Text, Icon, Badge elements
+   - Made VS badge larger and more prominent
+
+3. **ChecklistReveal** (Lottie Support)
+   - Added Lottie icon presets: lottieCheck, lottieTick, lottieSuccess, lottieStar
+   - Uses SDK RemotionLottie for animated icons

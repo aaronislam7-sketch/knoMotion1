@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BubbleCalloutSequence",
+  "description": "Freeform floating speech-bubble callouts. Use for annotations, thoughts, tips in scattered layouts.",
+  "type": "object",
+  "required": ["callouts", "beats"],
+  "properties": {
+    "callouts": {
+      "type": "array",
+      "description": "Array of callout items",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Simple text callout"
+          },
+          {
+            "type": "object",
+            "required": ["text"],
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "Callout text content"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Optional emoji or icon"
+              },
+              "color": {
+                "type": "string",
+                "description": "Custom bubble background color"
+              },
+              "shape": {
+                "type": "string",
+                "enum": ["speech", "rounded", "notebook"],
+                "description": "Bubble shape override"
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    },
+    "shape": {
+      "type": "string",
+      "enum": ["speech", "rounded", "notebook"],
+      "default": "speech",
+      "description": "Default bubble shape. 'speech': with tail. 'rounded': pill-like. 'notebook': dashed Knode style."
+    },
+    "pattern": {
+      "type": "string",
+      "enum": ["scattered", "zigzag", "diagonal"],
+      "default": "scattered",
+      "description": "Freeform layout pattern. 'scattered': golden angle distribution. 'zigzag': alternating L/R. 'diagonal': top-left to bottom-right."
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["pop", "float", "slide", "scale", "fade"],
+      "default": "float",
+      "description": "Animation type for bubble entrance"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.3,
+      "minimum": 0,
+      "description": "Delay between callouts in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.6,
+      "minimum": 0.1,
+      "description": "Animation duration per callout in seconds"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides (passed to CalloutBubble)",
+      "properties": {
+        "bubbleWrapper": { "type": "object" },
+        "wrapper": { "type": "object" },
+        "card": { "type": "object" },
+        "content": { "type": "object" },
+        "icon": { "type": "object" },
+        "text": { "type": "object" },
+        "tail": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "callouts": [
+        { "text": "Start with a clear goal", "icon": "🎯" },
+        { "text": "Break into small steps", "icon": "📝" },
+        { "text": "Celebrate progress!", "icon": "🎉" }
+      ],
+      "shape": "speech",
+      "pattern": "diagonal",
+      "animation": "float",
+      "staggerDelay": 0.4,
+      "beats": { "start": 1.0 }
+    },
+    {
+      "callouts": [
+        { "text": "Tip: Always test your code" },
+        { "text": "Remember: Keep it simple" },
+        { "text": "Note: Document everything" }
+      ],
+      "shape": "notebook",
+      "pattern": "scattered",
+      "animation": "pop",
+      "beats": { "start": 0.5 }
+    },
+    {
+      "callouts": [
+        "What if we tried this?",
+        "That's a great idea!",
+        "Let's make it happen!"
+      ],
+      "shape": "rounded",
+      "pattern": "zigzag",
+      "animation": "slide",
+      "beats": { "start": 1.0 }
+    }
+  ],
+  "useCase": {
+    "description": "Freeform callouts for annotations, thoughts, and tips",
+    "when": "Use when you need scattered, non-structured callouts that float around the scene",
+    "notFor": "Structured lists, step-by-step content, or grid layouts - use ChecklistReveal, TimelineStrip, or GridCardReveal instead"
+  },
+  "sizingBehavior": {
+    "description": "BubbleCalloutSequence adapts to slot dimensions",
+    "width": "Bubbles are sized up to 45% of slot width or 320px max",
+    "height": "Bubbles are distributed within slot using the selected pattern",
+    "positioning": "Uses SDK CalloutBubble composition for consistent styling"
+  }
+}

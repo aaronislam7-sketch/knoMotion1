@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ChecklistReveal",
+  "description": "A checklist with bullet/tick items that reveal with staggered pop animations",
+  "type": "object",
+  "required": ["items", "beats"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "Array of checklist items",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Simple text item"
+          },
+          {
+            "type": "object",
+            "required": ["text"],
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "Item text content"
+              },
+              "checked": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether the item is checked"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Custom icon for this item (preset name or emoji)"
+              },
+              "color": {
+                "type": "string",
+                "description": "Custom color for this item's icon"
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    },
+    "revealType": {
+      "type": "string",
+      "enum": ["pop", "slide", "fade", "scale", "spring", "bounceIn", "slideIn", "scaleIn", "fadeIn"],
+      "default": "pop",
+      "description": "Animation type for revealing items"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.2,
+      "minimum": 0,
+      "description": "Delay between items in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.5,
+      "minimum": 0.1,
+      "description": "Animation duration per item in seconds"
+    },
+    "icon": {
+      "type": "string",
+      "default": "check",
+      "description": "Default icon for all items. Static presets: check, bullet, dot, arrow, star, diamond, circle, square, plus, minus. Lottie presets: lottieCheck, lottieTick, lottieSuccess, lottieStar. Or use custom emoji."
+    },
+    "iconColor": {
+      "type": "string",
+      "default": "accentGreen",
+      "description": "Default icon color. Theme keys: primary, secondary, accentGreen, accentBlue, doodle. Or hex/rgb."
+    },
+    "iconSize": {
+      "type": "number",
+      "default": 1.2,
+      "minimum": 0.5,
+      "maximum": 3,
+      "description": "Icon size multiplier"
+    },
+    "autoFitText": {
+      "type": "boolean",
+      "default": true,
+      "description": "Auto-fit text to available width"
+    },
+    "alignment": {
+      "type": "string",
+      "enum": ["left", "center"],
+      "default": "left",
+      "description": "Text alignment"
+    },
+    "spacing": {
+      "type": "number",
+      "description": "Vertical spacing between items in pixels (auto-calculated if not provided)"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "itemContainer": { "type": "object" },
+        "iconContainer": { "type": "object" },
+        "icon": { "type": "object" },
+        "textContainer": { "type": "object" },
+        "text": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "items": [
+        { "text": "Complete the tutorial", "checked": true },
+        { "text": "Practice with examples", "checked": true },
+        { "text": "Build your first project", "checked": false },
+        { "text": "Share with the community", "checked": false }
+      ],
+      "revealType": "pop",
+      "staggerDelay": 0.25,
+      "icon": "check",
+      "iconColor": "accentGreen",
+      "beats": { "start": 1.0 }
+    },
+    {
+      "items": [
+        "Step 1: Understand the problem",
+        "Step 2: Break it into parts",
+        "Step 3: Solve each part",
+        "Step 4: Combine solutions"
+      ],
+      "revealType": "spring",
+      "icon": "arrow",
+      "iconColor": "primary",
+      "staggerDelay": 0.3,
+      "beats": { "start": 0.5 }
+    }
+  ],
+  "sizingBehavior": {
+    "description": "ChecklistReveal adapts to slot dimensions automatically",
+    "width": "Uses full slot width with padding",
+    "height": "Items are vertically centered and spaced to fit slot height",
+    "fontScaling": "Font size scales based on item count and slot height",
+    "textFit": "Long text auto-shrinks to fit available width when autoFitText is true"
+  }
+}

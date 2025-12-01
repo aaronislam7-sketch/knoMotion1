@@ -1,0 +1,466 @@
+/**
+ * SideBySideCompare - Mid-Scene Component
+ * 
+ * Renders left vs right comparison blocks with optional divider.
+ * Uses SDK Card and Text elements for consistent styling.
+ * 
+ * @module mid-scenes/SideBySideCompare
+ * @category SDK
+ * @subcategory Mid-Scenes
+ */
+
+import React from 'react';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, spring } from 'remotion';
+import { Card } from '../elements/atoms/Card';
+import { Text } from '../elements/atoms/Text';
+import { Icon } from '../elements/atoms/Icon';
+import { Badge } from '../elements/atoms/Badge';
+import { Divider } from '../elements/atoms/Divider';
+import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
+import { toFrames } from '../core/time';
+import { KNODE_THEME } from '../theme/knodeTheme';
+
+/**
+ * Get animation style for comparison sides
+ */
+const getSideAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, side = 'left') => {
+  const direction = side === 'left' ? 'right' : 'left';
+  
+  switch (animationType) {
+    case 'slide':
+      return slideIn(frame, startFrame, durationFrames, direction, 80);
+    
+    case 'scale':
+      return scaleIn(frame, startFrame, durationFrames, 0.7);
+    
+    case 'bounce':
+      return bounceIn(frame, startFrame, durationFrames);
+    
+    case 'reveal': {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 15, mass: 1, stiffness: 100 },
+      });
+      return {
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * (side === 'left' ? -60 : 60)}px)`,
+      };
+    }
+    
+    case 'fade':
+    default:
+      return fadeIn(frame, startFrame, durationFrames);
+  }
+};
+
+/**
+ * Get divider animation style
+ */
+const getDividerAnimationStyle = (frame, startFrame, durationFrames, fps) => {
+  const progress = spring({
+    frame: Math.max(0, frame - startFrame),
+    fps,
+    config: { damping: 12, mass: 1, stiffness: 120 },
+  });
+  
+  return {
+    opacity: progress,
+    transform: `scaleY(${progress})`,
+  };
+};
+
+/**
+ * Comparison Side Component using SDK elements
+ */
+const ComparisonSide = ({
+  config,
+  side,
+  animStyle,
+  baseFontSize,
+  slotHeight,
+  style = {},
+}) => {
+  const theme = KNODE_THEME;
+  const { title, subtitle, icon, items = [], color, backgroundColor } = config;
+  
+  // Resolve colors
+  const accentColor = color 
+    ? (theme.colors[color] || color)
+    : theme.colors.primary;
+  
+  const bgColor = backgroundColor
+    ? (theme.colors[backgroundColor] || backgroundColor)
+    : 'transparent';
+
+  const alignment = config.alignment || 'center';
+  const textAlign = alignment === 'inner' 
+    ? (side === 'left' ? 'right' : 'left')
+    : 'center';
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: alignment === 'inner' 
+          ? (side === 'left' ? 'flex-end' : 'flex-start')
+          : 'center',
+        padding: baseFontSize * 1.5,
+        opacity: animStyle.opacity,
+        backgroundColor: bgColor,
+        ...style.sideWrapper,
+      }}
+    >
+      <div
+        style={{
+          transform: animStyle.transform,
+          maxWidth: '90%',
+          ...style.sideContent,
+        }}
+      >
+        {/* Icon */}
+        {icon && (
+          <div style={{ marginBottom: baseFontSize * 0.8, textAlign }}>
+            <Icon
+              iconRef={icon}
+              size="xl"
+              style={{
+                fontSize: baseFontSize * 2.5,
+                ...style.icon,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Title */}
+        {title && (
+          <Text
+            text={title}
+            variant="title"
+            size="xl"
+            weight="bold"
+            style={{
+              fontSize: baseFontSize * 1.8,
+              marginBottom: baseFontSize * 0.4,
+              textAlign,
+              color: accentColor,
+              ...style.title,
+            }}
+          />
+        )}
+
+        {/* Subtitle */}
+        {subtitle && (
+          <Text
+            text={subtitle}
+            variant="body"
+            size="md"
+            color="textSoft"
+            style={{
+              fontSize: baseFontSize * 0.9,
+              marginBottom: baseFontSize * 0.8,
+              textAlign,
+              ...style.subtitle,
+            }}
+          />
+        )}
+
+        {/* Items list */}
+        {items.length > 0 && (
+          <div
+            style={{
+              marginTop: baseFontSize * 0.5,
+              ...style.itemsList,
+            }}
+          >
+            {items.map((item, index) => {
+              const itemText = typeof item === 'string' ? item : item.text;
+              const itemIcon = typeof item === 'object' ? item.icon : null;
+              
+              return (
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: baseFontSize * 0.5,
+                    marginBottom: baseFontSize * 0.4,
+                    justifyContent: alignment === 'inner'
+                      ? (side === 'left' ? 'flex-end' : 'flex-start')
+                      : 'center',
+                    ...style.item,
+                  }}
+                >
+                  {itemIcon && side === 'left' && alignment === 'inner' && (
+                    <Text
+                      text={itemText}
+                      variant="body"
+                      size="md"
+                      style={{ fontSize: baseFontSize, ...style.itemText }}
+                    />
+                  )}
+                  {itemIcon && (
+                    <span style={{ fontSize: baseFontSize * 1.1, color: accentColor }}>
+                      {itemIcon}
+                    </span>
+                  )}
+                  {(!itemIcon || side === 'right' || alignment !== 'inner') && (
+                    <Text
+                      text={itemText}
+                      variant="body"
+                      size="md"
+                      style={{ fontSize: baseFontSize, ...style.itemText }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Divider Component
+ */
+const VsDivider = ({
+  type,
+  label,
+  color,
+  animStyle,
+  slotHeight,
+  baseFontSize,
+  style = {},
+}) => {
+  if (type === 'none') return null;
+
+  const dividerSize = Math.min(baseFontSize * 4, slotHeight * 0.15);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: baseFontSize * 0.5,
+        opacity: animStyle.opacity,
+        ...style.dividerWrapper,
+      }}
+    >
+      {/* Top line */}
+      {(type === 'line' || type === 'dashed' || type === 'vs') && (
+        <div
+          style={{
+            width: 3,
+            height: slotHeight * 0.25,
+            backgroundColor: type === 'dashed' ? 'transparent' : `${color}40`,
+            backgroundImage: type === 'dashed' 
+              ? `repeating-linear-gradient(to bottom, ${color} 0, ${color} 8px, transparent 8px, transparent 16px)`
+              : 'none',
+            transform: animStyle.transform,
+            transformOrigin: 'top center',
+            ...style.dividerLine,
+          }}
+        />
+      )}
+      
+      {/* VS Badge */}
+      {type === 'vs' && (
+        <div
+          style={{
+            width: dividerSize,
+            height: dividerSize,
+            borderRadius: '50%',
+            backgroundColor: color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 6px 20px ${color}50`,
+            transform: `scale(${animStyle.opacity})`,
+            ...style.vsBadge,
+          }}
+        >
+          <Text
+            text={label || 'VS'}
+            variant="body"
+            weight={700}
+            style={{
+              fontSize: dividerSize * 0.35,
+              color: '#fff',
+              letterSpacing: 2,
+              ...style.vsText,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Bottom line */}
+      {(type === 'line' || type === 'dashed' || type === 'vs') && (
+        <div
+          style={{
+            width: 3,
+            height: slotHeight * 0.25,
+            backgroundColor: type === 'dashed' ? 'transparent' : `${color}40`,
+            backgroundImage: type === 'dashed' 
+              ? `repeating-linear-gradient(to bottom, ${color} 0, ${color} 8px, transparent 8px, transparent 16px)`
+              : 'none',
+            transform: animStyle.transform,
+            transformOrigin: 'bottom center',
+            ...style.dividerLine,
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+/**
+ * SideBySideCompare Component
+ * 
+ * @param {Object} props
+ * @param {Object} props.config - JSON configuration
+ * @param {Object} props.config.left - Left side configuration (required)
+ * @param {string} props.config.left.title - Left side title
+ * @param {string} [props.config.left.subtitle] - Left side subtitle
+ * @param {string} [props.config.left.icon] - Left side icon/emoji
+ * @param {Array} [props.config.left.items] - List of items/bullets
+ * @param {string} [props.config.left.color] - Accent color
+ * @param {string} [props.config.left.backgroundColor] - Background color
+ * @param {Object} props.config.right - Right side configuration (required)
+ * @param {string} [props.config.animation='slide'] - Animation: 'slide' | 'fade' | 'scale' | 'bounce' | 'reveal'
+ * @param {number} [props.config.staggerDelay=0.3] - Delay between sides in seconds
+ * @param {number} [props.config.animationDuration=0.6] - Animation duration in seconds
+ * @param {string} [props.config.dividerType='vs'] - Divider type: 'none' | 'line' | 'dashed' | 'vs'
+ * @param {string} [props.config.dividerLabel='VS'] - Label for VS badge
+ * @param {string} [props.config.dividerColor='primary'] - Divider color
+ * @param {string} [props.config.alignment='center'] - Content alignment: 'center' | 'inner'
+ * @param {Object} props.config.beats - Beat timings
+ * @param {number} props.config.beats.start - Start time in seconds (required)
+ * @param {Object} [props.config.position] - Slot position from layout resolver
+ * @param {Object} [props.config.style] - Optional style overrides
+ */
+export const SideBySideCompare = ({ config }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  
+  const {
+    left = {},
+    right = {},
+    animation = 'slide',
+    staggerDelay = 0.3,
+    animationDuration = 0.6,
+    dividerType = 'vs',
+    dividerLabel = 'VS',
+    dividerColor = 'primary',
+    alignment = 'center',
+    beats = {},
+    position,
+    style = {},
+  } = config;
+
+  // Validate required fields
+  if (!left.title && !right.title) {
+    console.warn('SideBySideCompare: No content provided');
+    return null;
+  }
+
+  const { start = 1.0 } = beats;
+  const startFrame = toFrames(start, fps);
+  const staggerFrames = toFrames(staggerDelay, fps);
+  const durationFrames = toFrames(animationDuration, fps);
+  
+  // Calculate slot dimensions
+  const slot = {
+    width: position?.width || width,
+    height: position?.height || height,
+    left: position?.left || 0,
+    top: position?.top || 0,
+  };
+
+  // Resolve divider color
+  const resolvedDividerColor = KNODE_THEME.colors[dividerColor] || dividerColor;
+
+  // Calculate animation timings
+  const leftStartFrame = startFrame;
+  const dividerStartFrame = startFrame + staggerFrames * 0.5;
+  const rightStartFrame = startFrame + staggerFrames;
+
+  // Get animation styles
+  const leftAnimStyle = getSideAnimationStyle(animation, frame, leftStartFrame, durationFrames, fps, 'left');
+  const rightAnimStyle = getSideAnimationStyle(animation, frame, rightStartFrame, durationFrames, fps, 'right');
+  const dividerAnimStyle = getDividerAnimationStyle(frame, dividerStartFrame, durationFrames, fps);
+
+  // Calculate font size based on slot
+  const baseFontSize = Math.min(28, Math.max(16, slot.height / 20));
+
+  return (
+    <AbsoluteFill>
+      <div
+        style={{
+          position: 'absolute',
+          left: slot.left,
+          top: slot.top,
+          width: slot.width,
+          height: slot.height,
+          display: 'flex',
+          flexDirection: 'row',
+          ...style.container,
+        }}
+      >
+        {/* Left side */}
+        <ComparisonSide
+          config={{ ...left, alignment }}
+          side="left"
+          animStyle={leftAnimStyle}
+          baseFontSize={baseFontSize}
+          slotHeight={slot.height}
+          style={style}
+        />
+
+        {/* Right side */}
+        <ComparisonSide
+          config={{ ...right, alignment }}
+          side="right"
+          animStyle={rightAnimStyle}
+          baseFontSize={baseFontSize}
+          slotHeight={slot.height}
+          style={style}
+        />
+      </div>
+
+      {/* Divider (positioned absolutely over the container) */}
+      <div
+        style={{
+          position: 'absolute',
+          left: slot.left,
+          top: slot.top,
+          width: slot.width,
+          height: slot.height,
+          pointerEvents: 'none',
+        }}
+      >
+        <VsDivider
+          type={dividerType}
+          label={dividerLabel}
+          color={resolvedDividerColor}
+          animStyle={dividerAnimStyle}
+          slotHeight={slot.height}
+          baseFontSize={baseFontSize}
+          style={style}
+        />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+export default SideBySideCompare;

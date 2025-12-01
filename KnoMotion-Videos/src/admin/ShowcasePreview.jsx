@@ -11,6 +11,7 @@ import { ShowcaseScene7_MidSceneCardSequence } from '../compositions/ShowcaseSce
 import { ShowcaseScene9_MidSceneIconGrid } from '../compositions/ShowcaseScene9_MidSceneIconGrid';
 import { ShowcaseScene10_SceneLayout } from '../compositions/ShowcaseScene10_SceneLayout';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
+import { CanonShowerVideo } from '../compositions/CanonShowerVideo';
 
 /**
  * Showcase Preview Tool
@@ -111,6 +112,14 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: 'Continuous Animation Showcase (30s)',
+    },
+    canonShower: {
+      component: CanonShowerVideo,
+      duration: 3600, // 120 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: '🚿 Canon: Shower Video (2 min)',
     },
   };
 

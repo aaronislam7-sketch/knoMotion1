@@ -1,0 +1,219 @@
+/**
+ * BubbleCalloutSequence - Mid-Scene Component
+ * 
+ * Renders floating speech-bubble callouts in a freeform/scattered layout.
+ * Uses SDK CalloutBubble composition for consistent styling.
+ * Focused use-case: Thought bubbles, annotations, tips in a non-structured layout.
+ * 
+ * @module mid-scenes/BubbleCalloutSequence
+ * @category SDK
+ * @subcategory Mid-Scenes
+ */
+
+import React, { useMemo } from 'react';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, spring } from 'remotion';
+import { CalloutBubble } from '../elements/compositions/CalloutBubble';
+import { fadeIn, slideIn, scaleIn, bounceIn, staggerIn } from '../animations/index';
+import { toFrames } from '../core/time';
+import { KNODE_THEME } from '../theme/knodeTheme';
+
+/**
+ * Calculate bubble positions based on pattern (simplified to freeform patterns only)
+ */
+const calculateBubblePositions = (callouts, pattern, slot) => {
+  const { width, height } = slot;
+  const count = callouts.length;
+  const padding = Math.min(width, height) * 0.1;
+  const usableWidth = width - padding * 2;
+  const usableHeight = height - padding * 2;
+  
+  switch (pattern) {
+    case 'diagonal':
+      // Top-left to bottom-right diagonal
+      return callouts.map((_, index) => ({
+        x: padding + (usableWidth / (count + 1)) * (index + 1),
+        y: padding + (usableHeight / (count + 1)) * (index + 1),
+      }));
+    
+    case 'zigzag':
+      // Alternating left-right positions
+      return callouts.map((_, index) => {
+        const isEven = index % 2 === 0;
+        return {
+          x: isEven ? padding + usableWidth * 0.25 : padding + usableWidth * 0.75,
+          y: padding + (usableHeight / (count + 1)) * (index + 1),
+        };
+      });
+    
+    case 'scattered':
+    default: {
+      // Deterministic scatter using golden angle for good distribution
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const maxRadius = Math.min(usableWidth, usableHeight) * 0.35;
+      
+      return callouts.map((_, index) => {
+        // Golden angle distribution for natural-looking scatter
+        const angle = index * 137.5 * (Math.PI / 180);
+        const radiusFactor = 0.4 + ((index % 3) * 0.2);
+        const radius = maxRadius * radiusFactor;
+        
+        return {
+          x: centerX + Math.cos(angle) * radius,
+          y: centerY + Math.sin(angle) * radius,
+        };
+      });
+    }
+  }
+};
+
+/**
+ * Get animation style for bubble entrance
+ */
+const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, index = 0) => {
+  switch (animationType) {
+    case 'pop':
+      return bounceIn(frame, startFrame, durationFrames);
+    
+    case 'float': {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 15, mass: 1, stiffness: 100 },
+      });
+      return {
+        opacity: progress,
+        transform: `translateY(${(1 - progress) * 40}px) scale(${0.8 + progress * 0.2})`,
+      };
+    }
+    
+    case 'slide': {
+      const direction = index % 2 === 0 ? 'left' : 'right';
+      return slideIn(frame, startFrame, durationFrames, direction, 60);
+    }
+    
+    case 'scale':
+      return scaleIn(frame, startFrame, durationFrames, 0.3);
+    
+    case 'fade':
+    default:
+      return fadeIn(frame, startFrame, durationFrames);
+  }
+};
+
+/**
+ * BubbleCalloutSequence Component
+ * 
+ * Focused use-case: Freeform callouts for annotations, thoughts, tips.
+ * NOT for structured layouts - use other mid-scenes for structured content.
+ * 
+ * @param {Object} props
+ * @param {Object} props.config - JSON configuration
+ * @param {Array} props.config.callouts - Array of callout items (required)
+ * @param {string} props.config.callouts[].text - Callout text content
+ * @param {string} [props.config.callouts[].icon] - Optional emoji/icon
+ * @param {string} [props.config.callouts[].color] - Custom bubble color
+ * @param {string} [props.config.callouts[].shape] - Shape override
+ * @param {string} [props.config.shape='speech'] - Default bubble shape: 'speech' | 'rounded' | 'notebook'
+ * @param {string} [props.config.pattern='scattered'] - Layout pattern: 'scattered' | 'zigzag' | 'diagonal'
+ * @param {string} [props.config.animation='float'] - Animation: 'pop' | 'float' | 'slide' | 'scale' | 'fade'
+ * @param {number} [props.config.staggerDelay=0.3] - Delay between callouts in seconds
+ * @param {number} [props.config.animationDuration=0.6] - Animation duration in seconds
+ * @param {Object} props.config.beats - Beat timings
+ * @param {number} props.config.beats.start - Start time in seconds (required)
+ * @param {Object} [props.config.position] - Slot position from layout resolver
+ * @param {Object} [props.config.style] - Optional style overrides
+ */
+export const BubbleCalloutSequence = ({ config }) => {
+  const frame = useCurrentFrame();
+  const { fps, width, height } = useVideoConfig();
+  
+  const {
+    callouts = [],
+    shape = 'speech',
+    pattern = 'scattered',
+    animation = 'float',
+    staggerDelay = 0.3,
+    animationDuration = 0.6,
+    beats = {},
+    position,
+    style = {},
+  } = config;
+
+  // Validate required fields
+  if (!callouts || callouts.length === 0) {
+    console.warn('BubbleCalloutSequence: No callouts provided');
+    return null;
+  }
+
+  const { start = 1.0 } = beats;
+  const startFrame = toFrames(start, fps);
+  const staggerFrames = toFrames(staggerDelay, fps);
+  const durationFrames = toFrames(animationDuration, fps);
+  
+  // Calculate slot dimensions
+  const slot = {
+    width: position?.width || width,
+    height: position?.height || height,
+    left: position?.left || 0,
+    top: position?.top || 0,
+  };
+
+  // Calculate bubble positions
+  const bubblePositions = useMemo(() => {
+    return calculateBubblePositions(callouts, pattern, slot);
+  }, [callouts, pattern, slot.width, slot.height]);
+
+  // Calculate dynamic bubble sizing
+  const maxBubbleWidth = Math.min(slot.width * 0.45, 320);
+
+  return (
+    <AbsoluteFill>
+      {callouts.map((callout, index) => {
+        // Normalize callout to object format
+        const calloutData = typeof callout === 'string' 
+          ? { text: callout } 
+          : callout;
+        
+        const calloutStartFrame = startFrame + index * staggerFrames;
+        const animStyle = getBubbleAnimationStyle(
+          animation,
+          frame,
+          calloutStartFrame,
+          durationFrames,
+          fps,
+          index
+        );
+        
+        const pos = bubblePositions[index];
+
+        return (
+          <div
+            key={index}
+            style={{
+              position: 'absolute',
+              left: slot.left + pos.x,
+              top: slot.top + pos.y,
+              transform: 'translate(-50%, -50%)',
+              maxWidth: maxBubbleWidth,
+              opacity: animStyle.opacity,
+              ...style.bubbleWrapper,
+            }}
+          >
+            <div style={{ transform: animStyle.transform }}>
+              <CalloutBubble
+                text={calloutData.text}
+                iconRef={calloutData.icon}
+                shape={calloutData.shape || shape}
+                color={calloutData.color}
+                style={style}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+
+export default BubbleCalloutSequence;

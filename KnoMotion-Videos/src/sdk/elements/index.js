@@ -47,10 +47,13 @@ export { TestimonialCard } from './compositions/TestimonialCard';
 export { PricingCard } from './compositions/PricingCard';
 export { HeroWithCTA } from './compositions/HeroWithCTA';
 
+// NEW Compositions - Mid-Scene Support (1)
+export { CalloutBubble } from './compositions/CalloutBubble';
+
 // ========================================
 // ELEMENT LIBRARY SUMMARY
 // ========================================
-// Total: 23 elements (14 atoms, 9 compositions)
+// Total: 24 elements (14 atoms, 10 compositions)
 //
 // Atoms (14):
 //   - Badge: Labels/tags with variants
@@ -61,23 +64,24 @@ export { HeroWithCTA } from './compositions/HeroWithCTA';
 //   - Indicator: Notification dots/badges
 //   - Progress: Progress bars with animation
 //   - Text: Themed text with typewriter support
-//   - Alert: Info/success/warning/error message boxes ✨ NEW
-//   - Avatar: User profile images with status indicators ✨ NEW
-//   - Loading: Animated spinners/dots/rings ✨ NEW
-//   - Skeleton: Loading state placeholders ✨ NEW
-//   - Rating: Star rating displays ✨ NEW
-//   - RadialProgress: Circular progress indicators ✨ NEW
+//   - Alert: Info/success/warning/error message boxes
+//   - Avatar: User profile images with status indicators
+//   - Loading: Animated spinners/dots/rings
+//   - Skeleton: Loading state placeholders
+//   - Rating: Star rating displays
+//   - RadialProgress: Circular progress indicators
 //
-// Compositions (9):
+// Compositions (10):
 //   - CardWithBadge: Card + Badge combo
 //   - CardWithIcon: Card + Icon + Text layout
 //   - HeroWithText: Hero section with title/subtitle
 //   - StatCard: Statistics display card
 //   - StepCard: Step-by-step instruction card
-//   - FeatureCard: Icon + Title + Description + CTA ✨ NEW
-//   - TestimonialCard: Avatar + Name + Quote + Rating ✨ NEW
-//   - PricingCard: Price + Features + CTA ✨ NEW
-//   - HeroWithCTA: Hero + Title + Subtitle + Button ✨ NEW
+//   - FeatureCard: Icon + Title + Description + CTA
+//   - TestimonialCard: Avatar + Name + Quote + Rating
+//   - PricingCard: Price + Features + CTA
+//   - HeroWithCTA: Hero + Title + Subtitle + Button
+//   - CalloutBubble: Speech/thought bubble for callouts ✨ NEW
 //
 // All elements:
 //   ✅ Use KNODE_THEME (no hardcoded colors/fonts)
