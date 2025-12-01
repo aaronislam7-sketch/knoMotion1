@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TimelineStrip",
-  "description": "Dynamic timeline with nodes, labels, badges, and hand-drawn Knode-style reveals",
+  "description": "Horizontal timeline with staggered up/down cards. Uses SDK TimelineCard composition.",
   "type": "object",
   "required": ["events", "beats"],
   "properties": {
@@ -10,60 +10,57 @@
       "description": "Array of timeline events",
       "items": {
         "type": "object",
-        "required": ["label"],
+        "required": ["title"],
         "properties": {
-          "label": {
+          "title": {
             "type": "string",
-            "description": "Event label/title"
+            "description": "Event title"
           },
-          "sublabel": {
+          "subtitle": {
             "type": "string",
-            "description": "Optional subtitle, date, or description"
+            "description": "Subtitle, date, or time period"
+          },
+          "description": {
+            "type": "string",
+            "description": "Additional description text"
           },
           "icon": {
             "type": "string",
-            "description": "Optional emoji or icon inside the node"
+            "description": "Optional emoji or icon"
           },
           "badge": {
             "type": "string",
-            "description": "Optional badge text above label (e.g., 'Step 1', 'Day 7')"
+            "description": "Badge text (e.g., 'Step 1', '2024')"
           },
           "color": {
             "type": "string",
-            "description": "Custom node color override"
+            "description": "Accent color for this node. Theme keys or hex/rgb."
           },
-          "type": {
-            "type": "string",
-            "enum": ["default", "start", "end", "milestone", "checkpoint", "current"],
-            "default": "default",
-            "description": "Node type determines visual style. 'start'/'end' auto-assigned if autoStartEnd is true."
-          },
-          "active": {
-            "type": "boolean",
-            "default": true,
-            "description": "Whether this node is active (highlighted) or inactive (muted)"
+          "beats": {
+            "type": "object",
+            "description": "Per-node beat timing (overrides global stagger)",
+            "properties": {
+              "start": {
+                "type": "number",
+                "description": "Start time for this node in seconds"
+              }
+            }
           }
         }
       },
-      "minItems": 1
-    },
-    "orientation": {
-      "type": "string",
-      "enum": ["horizontal", "vertical"],
-      "default": "horizontal",
-      "description": "Timeline direction"
+      "minItems": 2
     },
     "animation": {
       "type": "string",
-      "enum": ["pop", "draw", "slide", "bounce", "fade"],
-      "default": "draw",
-      "description": "Animation type for node reveals. 'draw' gives hand-drawn feel."
+      "enum": ["slide", "scale", "bounce", "fade"],
+      "default": "slide",
+      "description": "Animation type for card reveals"
     },
     "staggerDelay": {
       "type": "number",
-      "default": 0.3,
+      "default": 0.4,
       "minimum": 0,
-      "description": "Delay between nodes in seconds"
+      "description": "Default delay between nodes in seconds (when per-node beats not specified)"
     },
     "animationDuration": {
       "type": "number",
@@ -71,37 +68,21 @@
       "minimum": 0.1,
       "description": "Animation duration per node in seconds"
     },
-    "connectorStyle": {
-      "type": "string",
-      "enum": ["solid", "dashed", "dotted", "curved"],
-      "default": "dashed",
-      "description": "Style of connecting lines between nodes"
-    },
-    "nodeSize": {
-      "type": "number",
-      "minimum": 20,
-      "maximum": 100,
-      "description": "Base size of node markers in pixels (auto-calculated if not provided)"
-    },
     "showConnectors": {
       "type": "boolean",
       "default": true,
-      "description": "Show connecting lines between nodes"
-    },
-    "activeColor": {
-      "type": "string",
-      "default": "primary",
-      "description": "Color for active nodes. Theme keys: primary, secondary, accentGreen, accentBlue. Or hex/rgb."
+      "description": "Show connecting line between nodes"
     },
     "connectorColor": {
       "type": "string",
-      "default": "secondary",
-      "description": "Color for connector lines. Theme keys or hex/rgb."
+      "default": "textMuted",
+      "description": "Connector line color. Theme keys or hex/rgb."
     },
-    "autoStartEnd": {
-      "type": "boolean",
-      "default": true,
-      "description": "Automatically style first node as 'start' and last as 'end' if not explicitly set"
+    "cardVariant": {
+      "type": "string",
+      "enum": ["default", "bordered", "glass"],
+      "default": "default",
+      "description": "Card variant for all timeline cards"
     },
     "beats": {
       "type": "object",
@@ -109,7 +90,7 @@
       "properties": {
         "start": {
           "type": "number",
-          "description": "Start time in seconds"
+          "description": "Global start time in seconds"
         }
       }
     },
@@ -125,74 +106,67 @@
     },
     "style": {
       "type": "object",
-      "description": "Optional style overrides",
+      "description": "Optional style overrides (passed to TimelineCard)",
       "properties": {
-        "nodeWrapper": { "type": "object" },
-        "ring": { "type": "object" },
-        "node": { "type": "object" },
-        "labelContainer": { "type": "object" },
+        "cardWrapper": { "type": "object" },
+        "wrapper": { "type": "object" },
+        "card": { "type": "object" },
+        "content": { "type": "object" },
         "badge": { "type": "object" },
-        "label": { "type": "object" },
-        "sublabel": { "type": "object" }
+        "icon": { "type": "object" },
+        "title": { "type": "object" },
+        "subtitle": { "type": "object" },
+        "description": { "type": "object" },
+        "connector": { "type": "object" }
       }
     }
   },
   "examples": [
     {
       "events": [
-        { "label": "Start Journey", "sublabel": "Day 1", "icon": "🚀" },
-        { "label": "Learn Basics", "sublabel": "Week 1", "badge": "Step 1" },
-        { "label": "Practice", "sublabel": "Week 2", "badge": "Step 2", "type": "checkpoint" },
-        { "label": "Build Project", "sublabel": "Week 3", "badge": "Step 3", "type": "milestone" },
-        { "label": "Master It!", "sublabel": "Month 1", "icon": "🏆" }
+        { "title": "Start", "subtitle": "Day 1", "icon": "🚀", "badge": "Step 1" },
+        { "title": "Learn", "subtitle": "Week 1", "icon": "📚", "badge": "Step 2" },
+        { "title": "Practice", "subtitle": "Week 2", "icon": "💪", "badge": "Step 3" },
+        { "title": "Master", "subtitle": "Month 1", "icon": "🏆", "badge": "Step 4" }
       ],
-      "orientation": "horizontal",
-      "animation": "draw",
-      "connectorStyle": "dashed",
-      "autoStartEnd": true,
+      "animation": "slide",
+      "showConnectors": true,
       "beats": { "start": 1.0 }
     },
     {
       "events": [
-        { "label": "2020", "sublabel": "Foundation", "type": "start" },
-        { "label": "2021", "sublabel": "Growth Phase", "type": "milestone", "icon": "📈" },
-        { "label": "2022", "sublabel": "Expansion" },
-        { "label": "2023", "sublabel": "Current", "type": "current", "icon": "⭐" },
-        { "label": "2024", "sublabel": "Vision", "type": "end", "active": false }
+        { "title": "2020", "subtitle": "Foundation", "color": "secondary" },
+        { "title": "2021", "subtitle": "Growth" },
+        { "title": "2022", "subtitle": "Expansion", "color": "accentGreen" },
+        { "title": "2023", "subtitle": "Today", "color": "primary", "icon": "⭐" }
       ],
-      "orientation": "vertical",
-      "animation": "pop",
-      "connectorStyle": "curved",
-      "activeColor": "accentGreen",
+      "animation": "bounce",
+      "staggerDelay": 0.5,
+      "cardVariant": "bordered",
       "beats": { "start": 0.5 }
     },
     {
       "events": [
-        { "label": "Idea", "icon": "💡", "badge": "Phase 1" },
-        { "label": "Design", "icon": "🎨", "badge": "Phase 2" },
-        { "label": "Build", "icon": "🔧", "badge": "Phase 3" },
-        { "label": "Test", "icon": "🧪", "badge": "Phase 4" },
-        { "label": "Launch", "icon": "🚀", "badge": "Phase 5" }
+        { "title": "Idea", "icon": "💡", "beats": { "start": 1.0 } },
+        { "title": "Research", "icon": "🔍", "beats": { "start": 2.0 } },
+        { "title": "Build", "icon": "🔧", "beats": { "start": 3.0 } },
+        { "title": "Launch", "icon": "🚀", "beats": { "start": 4.5 } }
       ],
-      "connectorStyle": "solid",
-      "animation": "bounce",
-      "staggerDelay": 0.4,
-      "beats": { "start": 1.0 }
+      "animation": "scale",
+      "beats": { "start": 1.0 },
+      "_comment": "Per-node beats for precise timing control"
     }
   ],
-  "nodeTypes": {
-    "default": "Standard circular node",
-    "start": "Larger circle with dashed ring, green accent, rocket icon by default",
-    "end": "Larger circle with dashed ring, primary accent, target icon by default",
-    "milestone": "Diamond shape with ring, gold/doodle accent",
-    "checkpoint": "Square shape for intermediate markers",
-    "current": "Larger circle with ring and pulse animation"
+  "useCase": {
+    "description": "Timeline for showing progression, history, or steps",
+    "when": "Use for chronological events, milestones, or multi-step processes",
+    "layout": "Cards alternate up/down along a horizontal timeline axis"
   },
   "sizingBehavior": {
-    "description": "TimelineStrip adapts to slot dimensions",
-    "width": "Horizontal: uses full slot width with padding. Vertical: nodes at ~left edge, labels to right.",
-    "height": "Vertical: uses full slot height with padding. Horizontal: nodes in upper area, labels below.",
-    "nodeSize": "Auto-calculated based on slot dimensions, event count, and orientation",
-    "spacing": "Events are evenly distributed along the timeline axis"
+    "description": "TimelineStrip uses horizontal layout with up/down card stagger",
+    "width": "Cards evenly distributed across slot width with padding",
+    "height": "Cards positioned above/below center line based on index (even=up, odd=down)",
+    "cardWidth": "160-280px depending on content",
+    "positioning": "Uses SDK TimelineCard composition for consistent styling"
   }
 }

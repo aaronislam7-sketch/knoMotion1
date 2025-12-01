@@ -240,23 +240,20 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 ---
 
 ### 6. BubbleCalloutSequence
-**Purpose**: Floating speech-bubble callouts with sequential appearance.
+**Purpose**: Freeform floating callouts for annotations, thoughts, and tips.
 
 **Use Cases**:
-- Conversation sequences
 - Thought bubbles
 - Tip/hint callouts
 - Annotated explanations
-- Feature highlights
+- Scattered annotations
 
 **Features**:
-- 6 bubble shapes: speech, thought, rounded, pill, square, **notebook** (dashed Knode style)
-- 8 layout patterns: flow, vertical, horizontal, diagonal, zigzag, scattered, grid, **arc**
-- 6 animations: pop, float, slide, scale, fade, **drop**
-- Optional connecting lines between bubbles (solid, dashed, dotted)
-- Custom positions via percentages (0-100)
+- 3 bubble shapes: speech (with tail), rounded, notebook (dashed Knode style)
+- 3 freeform patterns: scattered (golden angle), zigzag, diagonal
+- 5 animations: pop, float, slide, scale, fade
+- Uses SDK **CalloutBubble** composition
 - Per-callout icons and colors
-- Uses SDK Text component for consistency
 
 **JSON Example**:
 ```json
@@ -266,10 +263,9 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
     { "text": "Break into small steps", "icon": "📝" },
     { "text": "Celebrate progress!", "icon": "🎉" }
   ],
-  "bubbleShape": "notebook",
-  "pattern": "arc",
-  "animation": "drop",
-  "showConnectors": true,
+  "shape": "notebook",
+  "pattern": "scattered",
+  "animation": "float",
   "beats": { "start": 1.0 }
 }
 ```
@@ -279,41 +275,48 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 ---
 
 ### 7. TimelineStrip
-**Purpose**: Dynamic, configurable timeline with nodes, labels, badges, and hand-drawn Knode-style reveals.
+**Purpose**: Horizontal timeline with staggered up/down cards for progression and milestones.
 
 **Use Cases**:
 - Historical timelines
 - Process steps / learning paths
 - Project milestones
 - Learning journeys
-- Event sequences with start/end markers
 
 **Features**:
-- Horizontal or vertical orientation
-- **6 node types**: default, start, end, milestone, checkpoint, current (each with unique styling)
-- **Auto start/end detection**: First and last nodes auto-styled if `autoStartEnd: true`
-- 5 animation types: pop, **draw** (hand-drawn feel), slide, bounce, fade
-- 4 connector styles: solid, dashed, dotted, **curved**
-- Badges above labels for step numbers
-- Icons inside nodes with rings for special nodes
-- Pulse animation for "current" nodes
-- Sublabels for dates/descriptions
-- Sketchy connector lines with wobble effect
+- Staggered up/down card layout (alternating positions)
+- Uses SDK **TimelineCard** composition for each node
+- **Per-node beats support**: Each event can have its own timing
+- 4 animations: slide, scale, bounce, fade
+- Animated connecting line between cards
+- Badges, icons, subtitles, and descriptions per card
+- Card variants: default, bordered, glass
 
 **JSON Example**:
 ```json
 {
   "events": [
-    { "label": "Start Journey", "sublabel": "Day 1", "icon": "🚀" },
-    { "label": "Learn Basics", "sublabel": "Week 1", "badge": "Step 1" },
-    { "label": "Practice", "sublabel": "Week 2", "badge": "Step 2", "type": "checkpoint" },
-    { "label": "Build Project", "sublabel": "Week 3", "badge": "Step 3", "type": "milestone" },
-    { "label": "Master It!", "sublabel": "Month 1", "icon": "🏆" }
+    { "title": "Start", "subtitle": "Day 1", "icon": "🚀", "badge": "Step 1" },
+    { "title": "Learn", "subtitle": "Week 1", "icon": "📚", "badge": "Step 2" },
+    { "title": "Practice", "subtitle": "Week 2", "icon": "💪", "badge": "Step 3" },
+    { "title": "Master", "subtitle": "Month 1", "icon": "🏆", "badge": "Step 4" }
   ],
-  "orientation": "horizontal",
-  "animation": "draw",
-  "connectorStyle": "dashed",
-  "autoStartEnd": true,
+  "animation": "slide",
+  "showConnectors": true,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Per-node beats example**:
+```json
+{
+  "events": [
+    { "title": "Idea", "icon": "💡", "beats": { "start": 1.0 } },
+    { "title": "Research", "icon": "🔍", "beats": { "start": 2.0 } },
+    { "title": "Build", "icon": "🔧", "beats": { "start": 3.0 } },
+    { "title": "Launch", "icon": "🚀", "beats": { "start": 4.5 } }
+  ],
+  "animation": "scale",
   "beats": { "start": 1.0 }
 }
 ```
@@ -323,51 +326,39 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 ---
 
 ### 8. SideBySideCompare
-**Purpose**: Left vs right comparison blocks with text, icons, or mixed content. Features hand-drawn divider options.
+**Purpose**: Left vs right comparison blocks for before/after, pros/cons, or A vs B scenarios.
 
 **Use Cases**:
 - Before/after comparisons
 - Pros and cons
 - Option A vs Option B
-- Feature comparisons
 - Concept contrasts
 
 **Features**:
+- Uses SDK **Card**, **Text**, **Icon**, **Badge** elements
 - 5 animations: slide, fade, scale, bounce, reveal
-- **7 divider styles**: none, line, dashed, vs (with badge), **equals** (hand-drawn), **arrows** (hand-drawn), **lottie** (animated)
+- 4 divider styles: none, line, dashed, vs (with circular badge)
 - Title, subtitle, icon, and item lists per side
 - Custom colors per side
-- Background colors for sections
-- Hand-drawn elements for Knode sketchbook style
+- Content alignment: center or inner (facing divider)
 
-**JSON Example** (with hand-drawn equals sign):
+**JSON Example**:
 ```json
 {
   "left": {
-    "title": "Learning",
-    "subtitle": "The journey",
-    "icon": "📚"
+    "title": "Before",
+    "icon": "😕",
+    "items": ["Confusing syntax", "Hard to debug", "Slow"],
+    "color": "secondary"
   },
   "right": {
-    "title": "Mastery",
-    "subtitle": "The destination",
-    "icon": "🏆"
+    "title": "After",
+    "icon": "🎉",
+    "items": ["Clean code", "Easy debugging", "Fast"],
+    "color": "accentGreen"
   },
-  "animation": "reveal",
-  "dividerType": "equals",
-  "dividerColor": "doodle",
-  "beats": { "start": 1.0 }
-}
-```
-
-**JSON Example** (with Lottie animation):
-```json
-{
-  "left": { "title": "Input", "icon": "⬇️" },
-  "right": { "title": "Output", "icon": "⬆️" },
-  "animation": "scale",
-  "dividerType": "lottie",
-  "dividerLabel": "burst",
+  "animation": "slide",
+  "dividerType": "vs",
   "beats": { "start": 1.0 }
 }
 ```
@@ -765,34 +756,36 @@ mid-scenes/
 
 **Last Updated**: December 1, 2025  
 **Status**: 9 mid-scenes complete (4 original + 5 new)  
-**New in this release**: ChecklistReveal, BubbleCalloutSequence, TimelineStrip, SideBySideCompare, GridCardReveal
+**SDK Elements Created**: CalloutBubble, TimelineCard
 
-### Recent Enhancements (v2.1)
+### Recent Refactoring (v2.2)
 
-Based on user feedback, the following improvements were made:
+Based on feedback, the following simplifications and SDK improvements were made:
 
-1. **TimelineStrip** (Major Rewrite)
-   - Added 6 node types: default, start, end, milestone, checkpoint, current
-   - Added `autoStartEnd` for automatic first/last node styling
-   - Added badges for step numbering
-   - Added `draw` animation for hand-drawn feel
-   - Added `curved` connector style
-   - Added pulse animation for current nodes
-   - Improved layout and visual structure
+**Design Principles Applied:**
+- **Use SDK elements** - No inline code; all styling via compositions
+- **Simplify variations** - Fewer options = easier for LLMs to configure
+- **Focused use-cases** - Each mid-scene has a clear, specific purpose
 
-2. **BubbleCalloutSequence** (Fixes & Enhancements)
-   - Fixed scattered, horizontal, and grid patterns
-   - Added `arc` pattern for semi-circular layouts
-   - Added `drop` animation (falls from above)
-   - Added `notebook` bubble shape (dashed Knode style)
-   - Refactored to use SDK elements instead of inline JSX
+1. **BubbleCalloutSequence** (Simplified)
+   - Reduced to 3 patterns: scattered, zigzag, diagonal (freeform only)
+   - Reduced to 3 shapes: speech, rounded, notebook
+   - **NEW**: Uses SDK `CalloutBubble` composition
+   - Removed structured layouts (use other mid-scenes for structured content)
 
-3. **ChecklistReveal** (Lottie Support)
+2. **TimelineStrip** (Major Rewrite)
+   - **NEW**: Uses SDK `TimelineCard` composition
+   - Staggered up/down card layout (visual improvement over circles)
+   - **Per-node beats support**: Each event can have independent timing
+   - Simplified to 4 animations: slide, scale, bounce, fade
+   - Cards use SDK Card variants: default, bordered, glass
+
+3. **SideBySideCompare** (Simplified)
+   - Removed custom hand-drawn dividers (too inline)
+   - Simplified to 4 divider types: none, line, dashed, vs
+   - Uses SDK Card, Text, Icon, Badge elements
+   - Made VS badge larger and more prominent
+
+4. **ChecklistReveal** (Lottie Support)
    - Added Lottie icon presets: lottieCheck, lottieTick, lottieSuccess, lottieStar
-   - Icons now support both static and animated variants
-
-4. **SideBySideCompare** (Hand-drawn Dividers)
-   - Added `equals` divider type (hand-drawn animated equals sign)
-   - Added `arrows` divider type (hand-drawn opposing arrows)
-   - Added `lottie` divider type for animated effects
-   - All new dividers support Knode sketchbook aesthetic
+   - Uses SDK RemotionLottie for animated icons

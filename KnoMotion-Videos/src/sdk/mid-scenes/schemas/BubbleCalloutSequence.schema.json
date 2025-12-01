@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "BubbleCalloutSequence",
-  "description": "Floating speech-bubble callouts with sequential appearance and optional connecting lines",
+  "description": "Freeform floating speech-bubble callouts. Use for annotations, thoughts, tips in scattered layouts.",
   "type": "object",
   "required": ["callouts", "beats"],
   "properties": {
@@ -32,16 +32,8 @@
               },
               "shape": {
                 "type": "string",
-                "enum": ["speech", "thought", "rounded", "pill", "square", "notebook"],
+                "enum": ["speech", "rounded", "notebook"],
                 "description": "Bubble shape override"
-              },
-              "position": {
-                "type": "object",
-                "description": "Custom position as percentages (0-100)",
-                "properties": {
-                  "x": { "type": "number", "minimum": 0, "maximum": 100 },
-                  "y": { "type": "number", "minimum": 0, "maximum": 100 }
-                }
               }
             }
           }
@@ -49,23 +41,23 @@
       },
       "minItems": 1
     },
-    "bubbleShape": {
+    "shape": {
       "type": "string",
-      "enum": ["speech", "thought", "rounded", "pill", "square", "notebook"],
+      "enum": ["speech", "rounded", "notebook"],
       "default": "speech",
-      "description": "Default bubble shape for all callouts. 'notebook' has dashed border for Knode style."
+      "description": "Default bubble shape. 'speech': with tail. 'rounded': pill-like. 'notebook': dashed Knode style."
     },
     "pattern": {
       "type": "string",
-      "enum": ["flow", "vertical", "horizontal", "diagonal", "zigzag", "scattered", "grid", "arc"],
-      "default": "flow",
-      "description": "Layout pattern for bubble positioning. All patterns now work correctly."
+      "enum": ["scattered", "zigzag", "diagonal"],
+      "default": "scattered",
+      "description": "Freeform layout pattern. 'scattered': golden angle distribution. 'zigzag': alternating L/R. 'diagonal': top-left to bottom-right."
     },
     "animation": {
       "type": "string",
-      "enum": ["pop", "float", "slide", "scale", "fade", "drop"],
+      "enum": ["pop", "float", "slide", "scale", "fade"],
       "default": "float",
-      "description": "Animation type for bubble entrance. 'drop' falls from above."
+      "description": "Animation type for bubble entrance"
     },
     "staggerDelay": {
       "type": "number",
@@ -78,27 +70,6 @@
       "default": 0.6,
       "minimum": 0.1,
       "description": "Animation duration per callout in seconds"
-    },
-    "showConnectors": {
-      "type": "boolean",
-      "default": false,
-      "description": "Show connecting lines between callouts"
-    },
-    "connectorStyle": {
-      "type": "string",
-      "enum": ["solid", "dashed", "dotted"],
-      "default": "dashed",
-      "description": "Style of connecting lines"
-    },
-    "bubbleColor": {
-      "type": "string",
-      "default": "cardBg",
-      "description": "Default bubble background color. Theme keys: cardBg, pageBg, primary, secondary. Or hex/rgb."
-    },
-    "textColor": {
-      "type": "string",
-      "default": "textMain",
-      "description": "Default text color. Theme keys: textMain, textSoft, textMuted. Or hex/rgb."
     },
     "beats": {
       "type": "object",
@@ -122,13 +93,15 @@
     },
     "style": {
       "type": "object",
-      "description": "Optional style overrides",
+      "description": "Optional style overrides (passed to CalloutBubble)",
       "properties": {
         "bubbleWrapper": { "type": "object" },
-        "bubble": { "type": "object" },
+        "wrapper": { "type": "object" },
+        "card": { "type": "object" },
         "content": { "type": "object" },
         "icon": { "type": "object" },
-        "text": { "type": "object" }
+        "text": { "type": "object" },
+        "tail": { "type": "object" }
       }
     }
   },
@@ -139,61 +112,44 @@
         { "text": "Break into small steps", "icon": "📝" },
         { "text": "Celebrate progress!", "icon": "🎉" }
       ],
-      "bubbleShape": "speech",
+      "shape": "speech",
       "pattern": "diagonal",
       "animation": "float",
-      "showConnectors": true,
       "staggerDelay": 0.4,
       "beats": { "start": 1.0 }
     },
     {
       "callouts": [
-        { "text": "What if we tried something new?", "shape": "thought" },
-        { "text": "That's a great idea!", "shape": "speech" },
-        { "text": "Let's make it happen!", "shape": "rounded" }
+        { "text": "Tip: Always test your code" },
+        { "text": "Remember: Keep it simple" },
+        { "text": "Note: Document everything" }
       ],
-      "pattern": "zigzag",
+      "shape": "notebook",
+      "pattern": "scattered",
       "animation": "pop",
       "beats": { "start": 0.5 }
     },
     {
       "callouts": [
-        { "text": "Step 1: Learn", "icon": "📚" },
-        { "text": "Step 2: Practice", "icon": "💪" },
-        { "text": "Step 3: Apply", "icon": "🎯" },
-        { "text": "Step 4: Share", "icon": "🌟" }
+        "What if we tried this?",
+        "That's a great idea!",
+        "Let's make it happen!"
       ],
-      "bubbleShape": "notebook",
-      "pattern": "grid",
-      "animation": "drop",
+      "shape": "rounded",
+      "pattern": "zigzag",
+      "animation": "slide",
       "beats": { "start": 1.0 }
-    },
-    {
-      "callouts": [
-        { "text": "Feature A", "position": { "x": 20, "y": 30 } },
-        { "text": "Feature B", "position": { "x": 80, "y": 30 } },
-        { "text": "Feature C", "position": { "x": 50, "y": 70 } }
-      ],
-      "bubbleShape": "pill",
-      "animation": "scale",
-      "beats": { "start": 0.5 }
     }
   ],
-  "patternDescriptions": {
-    "flow": "Vertical centered with slight horizontal alternation",
-    "vertical": "Evenly spaced vertical stack, centered horizontally",
-    "horizontal": "Evenly spaced horizontal row, centered vertically",
-    "diagonal": "Top-left to bottom-right diagonal progression",
-    "zigzag": "Alternating left-right positions vertically",
-    "scattered": "Deterministic scatter using golden angle distribution",
-    "grid": "Auto-calculated grid layout based on callout count",
-    "arc": "Semi-circular arc from left to right"
+  "useCase": {
+    "description": "Freeform callouts for annotations, thoughts, and tips",
+    "when": "Use when you need scattered, non-structured callouts that float around the scene",
+    "notFor": "Structured lists, step-by-step content, or grid layouts - use ChecklistReveal, TimelineStrip, or GridCardReveal instead"
   },
   "sizingBehavior": {
     "description": "BubbleCalloutSequence adapts to slot dimensions",
-    "width": "Bubbles are sized up to 50% of slot width or 350px max",
-    "height": "Bubbles are distributed within slot height based on pattern",
-    "fontScaling": "Font size scales based on callout count and slot height (14-22px)",
-    "positioning": "Bubbles can use auto-layout patterns or custom percentage positions"
+    "width": "Bubbles are sized up to 45% of slot width or 320px max",
+    "height": "Bubbles are distributed within slot using the selected pattern",
+    "positioning": "Uses SDK CalloutBubble composition for consistent styling"
   }
 }

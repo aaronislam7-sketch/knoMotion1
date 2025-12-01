@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SideBySideCompare",
-  "description": "Left vs right comparison blocks with text, icons, and animated reveals. Features hand-drawn divider options.",
+  "description": "Left vs right comparison blocks with text, icons, and animated reveals. Uses SDK Card and Text elements.",
   "type": "object",
   "required": ["left", "right", "beats"],
   "properties": {
@@ -61,7 +61,7 @@
     },
     "animation": {
       "type": "string",
-      "enum": ["slide", "fade", "scale", "bounce", "reveal", "slideIn", "fadeIn", "scaleIn", "bounceIn"],
+      "enum": ["slide", "fade", "scale", "bounce", "reveal"],
       "default": "slide",
       "description": "Animation type for side reveals"
     },
@@ -79,19 +79,19 @@
     },
     "dividerType": {
       "type": "string",
-      "enum": ["none", "line", "dashed", "vs", "equals", "arrows", "lottie"],
+      "enum": ["none", "line", "dashed", "vs"],
       "default": "vs",
-      "description": "Style of center divider. 'equals': hand-drawn equals sign. 'arrows': hand-drawn opposing arrows. 'lottie': animated Lottie."
+      "description": "Style of center divider. 'vs': circular badge with VS text."
     },
     "dividerLabel": {
       "type": "string",
       "default": "VS",
-      "description": "Label for VS badge OR lottie animation ref for 'lottie' type (e.g., 'burst', 'stars', 'celebration', 'success')"
+      "description": "Label text for VS badge"
     },
     "dividerColor": {
       "type": "string",
       "default": "primary",
-      "description": "Divider color. Theme keys: primary, secondary, accentGreen, doodle. Or hex/rgb."
+      "description": "Divider color. Theme keys: primary, secondary, accentGreen. Or hex/rgb."
     },
     "alignment": {
       "type": "string",
@@ -134,12 +134,8 @@
         "itemText": { "type": "object" },
         "dividerWrapper": { "type": "object" },
         "dividerLine": { "type": "object" },
-        "vsContainer": { "type": "object" },
         "vsBadge": { "type": "object" },
-        "vsText": { "type": "object" },
-        "equalsContainer": { "type": "object" },
-        "arrowsContainer": { "type": "object" },
-        "lottieContainer": { "type": "object" }
+        "vsText": { "type": "object" }
       }
     }
   },
@@ -171,66 +167,41 @@
     },
     {
       "left": {
-        "title": "Learning",
-        "subtitle": "The journey begins",
-        "icon": "📚"
+        "title": "Option A",
+        "subtitle": "Traditional approach",
+        "icon": "📚",
+        "items": [
+          { "text": "Well-documented", "icon": "✓" },
+          { "text": "Proven track record", "icon": "✓" }
+        ],
+        "backgroundColor": "pageBg"
       },
       "right": {
-        "title": "Mastery",
-        "subtitle": "The destination",
-        "icon": "🏆"
+        "title": "Option B",
+        "subtitle": "Modern solution",
+        "icon": "🚀",
+        "items": [
+          { "text": "Cutting-edge features", "icon": "✓" },
+          { "text": "Better scalability", "icon": "✓" }
+        ],
+        "backgroundColor": "pageBg"
       },
       "animation": "reveal",
-      "dividerType": "equals",
-      "dividerColor": "doodle",
-      "beats": { "start": 0.5 },
-      "_comment": "Uses hand-drawn equals sign for Knode style"
-    },
-    {
-      "left": {
-        "title": "Theory",
-        "items": ["Concepts", "Principles", "Foundations"]
-      },
-      "right": {
-        "title": "Practice",
-        "items": ["Exercises", "Projects", "Real-world"]
-      },
-      "animation": "bounce",
-      "dividerType": "arrows",
-      "dividerColor": "accentGreen",
-      "beats": { "start": 0.8 },
-      "_comment": "Uses hand-drawn arrows pointing at each other"
-    },
-    {
-      "left": {
-        "title": "Input",
-        "icon": "⬇️"
-      },
-      "right": {
-        "title": "Output",
-        "icon": "⬆️"
-      },
-      "animation": "scale",
-      "dividerType": "lottie",
-      "dividerLabel": "burst",
-      "beats": { "start": 1.0 },
-      "_comment": "Uses animated Lottie burst effect between sides"
+      "dividerType": "dashed",
+      "staggerDelay": 0.4,
+      "beats": { "start": 0.5 }
     }
   ],
-  "dividerTypes": {
-    "none": "No divider shown",
-    "line": "Simple solid vertical line",
-    "dashed": "Dashed vertical line",
-    "vs": "Circular VS badge with connecting lines",
-    "equals": "Hand-drawn animated equals sign (Knode sketchbook style)",
-    "arrows": "Hand-drawn arrows pointing at each other (Knode style)",
-    "lottie": "Animated Lottie effect (specify animation in dividerLabel)"
+  "useCase": {
+    "description": "Side-by-side comparison for before/after, pros/cons, or A vs B scenarios",
+    "when": "Use when comparing two options, showing transformation, or contrasting concepts",
+    "layout": "Two equal columns with optional VS divider in center"
   },
   "sizingBehavior": {
     "description": "SideBySideCompare splits the slot into two equal halves",
-    "width": "Each side uses 48% of slot width with divider in center",
+    "width": "Each side uses 50% of slot width",
     "height": "Content is vertically centered within full slot height",
-    "fontScaling": "Base font size scales with slot height (16-32px range)",
-    "divider": "Divider occupies 4% of width in center, badges/drawings sized to font"
+    "fontScaling": "Base font size scales with slot height (16-28px range)",
+    "divider": "VS badge sized relative to font size, with connecting lines spanning 25% of height each"
   }
 }

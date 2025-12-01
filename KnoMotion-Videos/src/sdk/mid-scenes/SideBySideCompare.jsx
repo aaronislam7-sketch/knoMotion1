@@ -1,9 +1,8 @@
 /**
  * SideBySideCompare - Mid-Scene Component
  * 
- * Renders left vs right comparison blocks with text, icons, or mixed content.
- * Features slide/fade animations with support for "vs" divider styling.
- * All configurable via JSON - pre-built for LLM JSON generation.
+ * Renders left vs right comparison blocks with optional divider.
+ * Uses SDK Card and Text elements for consistent styling.
  * 
  * @module mid-scenes/SideBySideCompare
  * @category SDK
@@ -11,11 +10,13 @@
  */
 
 import React from 'react';
-import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, spring } from 'remotion';
+import { Card } from '../elements/atoms/Card';
 import { Text } from '../elements/atoms/Text';
+import { Icon } from '../elements/atoms/Icon';
+import { Badge } from '../elements/atoms/Badge';
+import { Divider } from '../elements/atoms/Divider';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
-import { RemotionLottie } from '../lottie/lottieIntegration';
-import { getDoodleUnderline } from '../decorations/doodleEffects';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 
@@ -23,49 +24,44 @@ import { KNODE_THEME } from '../theme/knodeTheme';
  * Get animation style for comparison sides
  */
 const getSideAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, side = 'left') => {
-  const direction = side === 'left' ? 'left' : 'right';
+  const direction = side === 'left' ? 'right' : 'left';
   
   switch (animationType) {
     case 'slide':
-    case 'slideIn':
       return slideIn(frame, startFrame, durationFrames, direction, 80);
     
     case 'scale':
-    case 'scaleIn':
       return scaleIn(frame, startFrame, durationFrames, 0.7);
     
     case 'bounce':
-    case 'bounceIn':
       return bounceIn(frame, startFrame, durationFrames);
     
     case 'reveal': {
       const progress = spring({
         frame: Math.max(0, frame - startFrame),
         fps,
-        config: { damping: 15, mass: 1, stiffness: 120 },
+        config: { damping: 15, mass: 1, stiffness: 100 },
       });
-      const offsetX = side === 'left' ? -60 : 60;
       return {
         opacity: progress,
-        transform: `translateX(${(1 - progress) * offsetX}px) scale(${0.9 + progress * 0.1})`,
+        transform: `translateX(${(1 - progress) * (side === 'left' ? -60 : 60)}px)`,
       };
     }
     
     case 'fade':
-    case 'fadeIn':
     default:
       return fadeIn(frame, startFrame, durationFrames);
   }
 };
 
 /**
- * Divider animation
+ * Get divider animation style
  */
 const getDividerAnimationStyle = (frame, startFrame, durationFrames, fps) => {
   const progress = spring({
     frame: Math.max(0, frame - startFrame),
     fps,
-    config: { damping: 12, mass: 1, stiffness: 150 },
+    config: { damping: 12, mass: 1, stiffness: 120 },
   });
   
   return {
@@ -75,75 +71,67 @@ const getDividerAnimationStyle = (frame, startFrame, durationFrames, fps) => {
 };
 
 /**
- * Comparison Side Component
+ * Comparison Side Component using SDK elements
  */
 const ComparisonSide = ({
-  side,
   config,
-  slotWidth,
-  slotHeight,
+  side,
   animStyle,
-  resolveColor,
   baseFontSize,
+  slotHeight,
   style = {},
 }) => {
-  const {
-    title,
-    subtitle,
-    icon,
-    items = [],
-    color,
-    backgroundColor,
-    alignment = 'center',
-  } = config;
+  const theme = KNODE_THEME;
+  const { title, subtitle, icon, items = [], color, backgroundColor } = config;
+  
+  // Resolve colors
+  const accentColor = color 
+    ? (theme.colors[color] || color)
+    : theme.colors.primary;
+  
+  const bgColor = backgroundColor
+    ? (theme.colors[backgroundColor] || backgroundColor)
+    : 'transparent';
 
-  const sideColor = resolveColor(color);
-  const sideBgColor = resolveColor(backgroundColor, 'transparent');
-  const isLeft = side === 'left';
+  const alignment = config.alignment || 'center';
+  const textAlign = alignment === 'inner' 
+    ? (side === 'left' ? 'right' : 'left')
+    : 'center';
 
   return (
     <div
       style={{
-        position: 'absolute',
-        [isLeft ? 'left' : 'right']: 0,
-        top: 0,
-        width: '48%',
-        height: '100%',
+        flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: alignment === 'center' ? 'center' : isLeft ? 'flex-end' : 'flex-start',
         justifyContent: 'center',
-        padding: '5%',
-        boxSizing: 'border-box',
+        alignItems: alignment === 'inner' 
+          ? (side === 'left' ? 'flex-end' : 'flex-start')
+          : 'center',
+        padding: baseFontSize * 1.5,
         opacity: animStyle.opacity,
+        backgroundColor: bgColor,
         ...style.sideWrapper,
       }}
     >
       <div
         style={{
           transform: animStyle.transform,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: alignment === 'center' ? 'center' : isLeft ? 'flex-end' : 'flex-start',
-          gap: baseFontSize * 0.6,
-          padding: baseFontSize,
-          backgroundColor: sideBgColor !== 'transparent' ? sideBgColor : undefined,
-          borderRadius: sideBgColor !== 'transparent' ? 16 : 0,
-          maxWidth: '100%',
+          maxWidth: '90%',
           ...style.sideContent,
         }}
       >
         {/* Icon */}
         {icon && (
-          <div
-            style={{
-              fontSize: baseFontSize * 2.5,
-              lineHeight: 1,
-              marginBottom: baseFontSize * 0.3,
-              ...style.icon,
-            }}
-          >
-            {icon}
+          <div style={{ marginBottom: baseFontSize * 0.8, textAlign }}>
+            <Icon
+              iconRef={icon}
+              size="xl"
+              style={{
+                fontSize: baseFontSize * 2.5,
+                ...style.icon,
+              }}
+            />
           </div>
         )}
 
@@ -153,12 +141,12 @@ const ComparisonSide = ({
             text={title}
             variant="title"
             size="xl"
-            weight={700}
-            color="textMain"
+            weight="bold"
             style={{
-              fontSize: baseFontSize * 1.4,
-              color: sideColor || KNODE_THEME.colors.textMain,
-              textAlign: alignment,
+              fontSize: baseFontSize * 1.8,
+              marginBottom: baseFontSize * 0.4,
+              textAlign,
+              color: accentColor,
               ...style.title,
             }}
           />
@@ -170,12 +158,11 @@ const ComparisonSide = ({
             text={subtitle}
             variant="body"
             size="md"
-            weight={400}
             color="textSoft"
             style={{
-              fontSize: baseFontSize * 0.85,
-              textAlign: alignment,
-              maxWidth: '90%',
+              fontSize: baseFontSize * 0.9,
+              marginBottom: baseFontSize * 0.8,
+              textAlign,
               ...style.subtitle,
             }}
           />
@@ -185,44 +172,52 @@ const ComparisonSide = ({
         {items.length > 0 && (
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: baseFontSize * 0.4,
-              alignItems: alignment === 'center' ? 'center' : isLeft ? 'flex-end' : 'flex-start',
               marginTop: baseFontSize * 0.5,
               ...style.itemsList,
             }}
           >
-            {items.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: baseFontSize * 0.4,
-                  flexDirection: isLeft && alignment !== 'center' ? 'row-reverse' : 'row',
-                  ...style.item,
-                }}
-              >
-                {item.icon && (
-                  <span style={{ fontSize: baseFontSize * 0.9 }}>
-                    {item.icon}
-                  </span>
-                )}
-                <Text
-                  text={typeof item === 'string' ? item : item.text}
-                  variant="body"
-                  size="sm"
-                  weight={500}
-                  color="textMain"
+            {items.map((item, index) => {
+              const itemText = typeof item === 'string' ? item : item.text;
+              const itemIcon = typeof item === 'object' ? item.icon : null;
+              
+              return (
+                <div
+                  key={index}
                   style={{
-                    fontSize: baseFontSize * 0.75,
-                    textAlign: alignment,
-                    ...style.itemText,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: baseFontSize * 0.5,
+                    marginBottom: baseFontSize * 0.4,
+                    justifyContent: alignment === 'inner'
+                      ? (side === 'left' ? 'flex-end' : 'flex-start')
+                      : 'center',
+                    ...style.item,
                   }}
-                />
-              </div>
-            ))}
+                >
+                  {itemIcon && side === 'left' && alignment === 'inner' && (
+                    <Text
+                      text={itemText}
+                      variant="body"
+                      size="md"
+                      style={{ fontSize: baseFontSize, ...style.itemText }}
+                    />
+                  )}
+                  {itemIcon && (
+                    <span style={{ fontSize: baseFontSize * 1.1, color: accentColor }}>
+                      {itemIcon}
+                    </span>
+                  )}
+                  {(!itemIcon || side === 'right' || alignment !== 'inner') && (
+                    <Text
+                      text={itemText}
+                      variant="body"
+                      size="md"
+                      style={{ fontSize: baseFontSize, ...style.itemText }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -231,107 +226,7 @@ const ComparisonSide = ({
 };
 
 /**
- * Hand-drawn equals sign SVG
- */
-const HandDrawnEquals = ({ size, color, progress, frame }) => {
-  const wobble = Math.sin(frame * 0.05) * 1;
-  const lineLength = size * 0.8;
-  const lineSpacing = size * 0.25;
-  
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ overflow: 'visible' }}
-    >
-      {/* Top line */}
-      <path
-        d={`M ${size * 0.1} ${size * 0.5 - lineSpacing + wobble} 
-            Q ${size * 0.5} ${size * 0.5 - lineSpacing - 3 + wobble} 
-            ${size * 0.9} ${size * 0.5 - lineSpacing + wobble * 0.5}`}
-        stroke={color}
-        strokeWidth={3}
-        fill="none"
-        strokeLinecap="round"
-        strokeDasharray={lineLength}
-        strokeDashoffset={lineLength * (1 - progress)}
-        opacity={0.8}
-      />
-      {/* Bottom line */}
-      <path
-        d={`M ${size * 0.1} ${size * 0.5 + lineSpacing - wobble * 0.5} 
-            Q ${size * 0.5} ${size * 0.5 + lineSpacing + 2 - wobble} 
-            ${size * 0.9} ${size * 0.5 + lineSpacing - wobble}`}
-        stroke={color}
-        strokeWidth={3}
-        fill="none"
-        strokeLinecap="round"
-        strokeDasharray={lineLength}
-        strokeDashoffset={lineLength * (1 - Math.max(0, progress - 0.3) / 0.7)}
-        opacity={0.8}
-      />
-    </svg>
-  );
-};
-
-/**
- * Hand-drawn arrows pointing at each other
- */
-const HandDrawnArrows = ({ size, color, progress, frame }) => {
-  const wobble = Math.sin(frame * 0.08) * 1.5;
-  
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ overflow: 'visible' }}
-    >
-      {/* Left arrow pointing right */}
-      <g opacity={progress}>
-        <path
-          d={`M ${size * 0.15} ${size * 0.5 + wobble} 
-              L ${size * 0.4} ${size * 0.5 - wobble * 0.5}`}
-          stroke={color}
-          strokeWidth={2.5}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d={`M ${size * 0.35} ${size * 0.35} L ${size * 0.45} ${size * 0.5} L ${size * 0.35} ${size * 0.65}`}
-          stroke={color}
-          strokeWidth={2.5}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-      {/* Right arrow pointing left */}
-      <g opacity={Math.max(0, progress - 0.2) / 0.8}>
-        <path
-          d={`M ${size * 0.85} ${size * 0.5 - wobble} 
-              L ${size * 0.6} ${size * 0.5 + wobble * 0.5}`}
-          stroke={color}
-          strokeWidth={2.5}
-          fill="none"
-          strokeLinecap="round"
-        />
-        <path
-          d={`M ${size * 0.65} ${size * 0.35} L ${size * 0.55} ${size * 0.5} L ${size * 0.65} ${size * 0.65}`}
-          stroke={color}
-          strokeWidth={2.5}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-    </svg>
-  );
-};
-
-/**
- * VS Divider Component with hand-drawn and lottie support
+ * Divider Component
  */
 const VsDivider = ({
   type,
@@ -340,182 +235,90 @@ const VsDivider = ({
   animStyle,
   slotHeight,
   baseFontSize,
-  frame,
-  fps,
-  startFrame,
   style = {},
 }) => {
   if (type === 'none') return null;
 
-  // Calculate animation progress for hand-drawn effects
-  const drawProgress = interpolate(
-    frame,
-    [startFrame, startFrame + 30],
-    [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  const dividerSize = Math.min(baseFontSize * 4, slotHeight * 0.15);
 
   return (
     <div
       style={{
         position: 'absolute',
         left: '50%',
-        top: 0,
-        width: type === 'vs' || type === 'equals' || type === 'arrows' || type === 'lottie' 
-          ? baseFontSize * 3 
-          : 2,
-        height: '100%',
-        transform: 'translateX(-50%)',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: baseFontSize * 0.5,
         opacity: animStyle.opacity,
         ...style.dividerWrapper,
       }}
     >
-      {type === 'line' && (
+      {/* Top line */}
+      {(type === 'line' || type === 'dashed' || type === 'vs') && (
         <div
           style={{
-            width: 2,
-            height: '60%',
-            backgroundColor: color,
-            opacity: 0.3,
+            width: 3,
+            height: slotHeight * 0.25,
+            backgroundColor: type === 'dashed' ? 'transparent' : `${color}40`,
+            backgroundImage: type === 'dashed' 
+              ? `repeating-linear-gradient(to bottom, ${color} 0, ${color} 8px, transparent 8px, transparent 16px)`
+              : 'none',
             transform: animStyle.transform,
-            transformOrigin: 'center center',
+            transformOrigin: 'top center',
             ...style.dividerLine,
           }}
         />
       )}
       
-      {type === 'dashed' && (
-        <div
-          style={{
-            width: 2,
-            height: '60%',
-            backgroundImage: `repeating-linear-gradient(to bottom, ${color} 0, ${color} 8px, transparent 8px, transparent 16px)`,
-            opacity: 0.4,
-            transform: animStyle.transform,
-            transformOrigin: 'center center',
-            ...style.dividerLine,
-          }}
-        />
-      )}
-
-      {/* Hand-drawn equals sign */}
-      {type === 'equals' && (
-        <div
-          style={{
-            transform: animStyle.transform,
-            ...style.equalsContainer,
-          }}
-        >
-          <HandDrawnEquals
-            size={baseFontSize * 2.5}
-            color={color}
-            progress={drawProgress}
-            frame={frame}
-          />
-        </div>
-      )}
-
-      {/* Hand-drawn arrows */}
-      {type === 'arrows' && (
-        <div
-          style={{
-            transform: animStyle.transform,
-            ...style.arrowsContainer,
-          }}
-        >
-          <HandDrawnArrows
-            size={baseFontSize * 2.5}
-            color={color}
-            progress={drawProgress}
-            frame={frame}
-          />
-        </div>
-      )}
-
-      {/* Lottie animation divider */}
-      {type === 'lottie' && (
-        <div
-          style={{
-            transform: animStyle.transform,
-            width: baseFontSize * 3,
-            height: baseFontSize * 3,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            ...style.lottieContainer,
-          }}
-        >
-          <RemotionLottie
-            lottieRef={label || 'burst'}
-            loop={false}
-            startFrame={startFrame}
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
-          />
-        </div>
-      )}
-      
+      {/* VS Badge */}
       {type === 'vs' && (
         <div
           style={{
+            width: dividerSize,
+            height: dividerSize,
+            borderRadius: '50%',
+            backgroundColor: color,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: baseFontSize * 0.5,
-            transform: animStyle.transform,
-            ...style.vsContainer,
+            justifyContent: 'center',
+            boxShadow: `0 6px 20px ${color}50`,
+            transform: `scale(${animStyle.opacity})`,
+            ...style.vsBadge,
           }}
         >
-          <div
+          <Text
+            text={label || 'VS'}
+            variant="body"
+            weight={700}
             style={{
-              width: 2,
-              height: slotHeight * 0.2,
-              backgroundColor: color,
-              opacity: 0.3,
-              ...style.vsLineTop,
-            }}
-          />
-          <div
-            style={{
-              width: baseFontSize * 2.5,
-              height: baseFontSize * 2.5,
-              borderRadius: '50%',
-              backgroundColor: color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: `0 4px 12px ${color}40`,
-              ...style.vsBadge,
-            }}
-          >
-            <Text
-              text={label || 'VS'}
-              variant="body"
-              size="sm"
-              weight={700}
-              style={{
-                fontSize: baseFontSize * 0.7,
-                color: '#fff',
-                letterSpacing: 1,
-                ...style.vsText,
-              }}
-            />
-          </div>
-          <div
-            style={{
-              width: 2,
-              height: slotHeight * 0.2,
-              backgroundColor: color,
-              opacity: 0.3,
-              ...style.vsLineBottom,
+              fontSize: dividerSize * 0.35,
+              color: '#fff',
+              letterSpacing: 2,
+              ...style.vsText,
             }}
           />
         </div>
+      )}
+
+      {/* Bottom line */}
+      {(type === 'line' || type === 'dashed' || type === 'vs') && (
+        <div
+          style={{
+            width: 3,
+            height: slotHeight * 0.25,
+            backgroundColor: type === 'dashed' ? 'transparent' : `${color}40`,
+            backgroundImage: type === 'dashed' 
+              ? `repeating-linear-gradient(to bottom, ${color} 0, ${color} 8px, transparent 8px, transparent 16px)`
+              : 'none',
+            transform: animStyle.transform,
+            transformOrigin: 'bottom center',
+            ...style.dividerLine,
+          }}
+        />
       )}
     </div>
   );
@@ -528,23 +331,23 @@ const VsDivider = ({
  * @param {Object} props.config - JSON configuration
  * @param {Object} props.config.left - Left side configuration (required)
  * @param {string} props.config.left.title - Left side title
- * @param {string} props.config.left.subtitle - Left side subtitle/description
- * @param {string} props.config.left.icon - Left side icon/emoji
- * @param {Array} props.config.left.items - Left side bullet points
- * @param {string} props.config.left.color - Left side accent color
- * @param {string} props.config.left.backgroundColor - Left side background color
+ * @param {string} [props.config.left.subtitle] - Left side subtitle
+ * @param {string} [props.config.left.icon] - Left side icon/emoji
+ * @param {Array} [props.config.left.items] - List of items/bullets
+ * @param {string} [props.config.left.color] - Accent color
+ * @param {string} [props.config.left.backgroundColor] - Background color
  * @param {Object} props.config.right - Right side configuration (required)
- * @param {string} props.config.animation - Animation type: 'slide' | 'fade' | 'scale' | 'bounce' | 'reveal' (default: 'slide')
- * @param {number} props.config.staggerDelay - Delay between sides in seconds (default: 0.3)
- * @param {number} props.config.animationDuration - Animation duration per side in seconds (default: 0.6)
- * @param {string} props.config.dividerType - Divider style: 'none' | 'line' | 'dashed' | 'vs' (default: 'vs')
- * @param {string} props.config.dividerLabel - Custom divider label (default: 'VS')
- * @param {string} props.config.dividerColor - Divider color (default: 'primary')
- * @param {string} props.config.alignment - Content alignment: 'center' | 'inner' (default: 'center')
+ * @param {string} [props.config.animation='slide'] - Animation: 'slide' | 'fade' | 'scale' | 'bounce' | 'reveal'
+ * @param {number} [props.config.staggerDelay=0.3] - Delay between sides in seconds
+ * @param {number} [props.config.animationDuration=0.6] - Animation duration in seconds
+ * @param {string} [props.config.dividerType='vs'] - Divider type: 'none' | 'line' | 'dashed' | 'vs'
+ * @param {string} [props.config.dividerLabel='VS'] - Label for VS badge
+ * @param {string} [props.config.dividerColor='primary'] - Divider color
+ * @param {string} [props.config.alignment='center'] - Content alignment: 'center' | 'inner'
  * @param {Object} props.config.beats - Beat timings
- * @param {number} props.config.beats.start - Start beat in seconds (required)
- * @param {Object} props.config.position - Slot position from layout resolver
- * @param {Object} props.config.style - Optional style overrides
+ * @param {number} props.config.beats.start - Start time in seconds (required)
+ * @param {Object} [props.config.position] - Slot position from layout resolver
+ * @param {Object} [props.config.style] - Optional style overrides
  */
 export const SideBySideCompare = ({ config }) => {
   const frame = useCurrentFrame();
@@ -566,11 +369,9 @@ export const SideBySideCompare = ({ config }) => {
   } = config;
 
   // Validate required fields
-  if (!left.title && !left.icon && !left.items?.length) {
-    console.warn('SideBySideCompare: Left side has no content');
-  }
-  if (!right.title && !right.icon && !right.items?.length) {
-    console.warn('SideBySideCompare: Right side has no content');
+  if (!left.title && !right.title) {
+    console.warn('SideBySideCompare: No content provided');
+    return null;
   }
 
   const { start = 1.0 } = beats;
@@ -578,7 +379,7 @@ export const SideBySideCompare = ({ config }) => {
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   
-  // Calculate dimensions from position or viewport
+  // Calculate slot dimensions
   const slot = {
     width: position?.width || width,
     height: position?.height || height,
@@ -586,32 +387,21 @@ export const SideBySideCompare = ({ config }) => {
     top: position?.top || 0,
   };
 
-  // Resolve colors from theme
-  const resolveColor = (colorKey, fallback = null) => {
-    if (!colorKey) return fallback;
-    if (colorKey.startsWith('#') || colorKey.startsWith('rgb')) return colorKey;
-    return KNODE_THEME.colors[colorKey] || fallback;
-  };
-
-  const resolvedDividerColor = resolveColor(dividerColor, KNODE_THEME.colors.primary);
-
-  // Calculate base font size based on slot dimensions
-  const baseFontSize = Math.min(32, Math.max(16, slot.height / 12));
+  // Resolve divider color
+  const resolvedDividerColor = KNODE_THEME.colors[dividerColor] || dividerColor;
 
   // Calculate animation timings
   const leftStartFrame = startFrame;
   const dividerStartFrame = startFrame + staggerFrames * 0.5;
   const rightStartFrame = startFrame + staggerFrames;
 
-  const leftAnimStyle = getSideAnimationStyle(
-    animation, frame, leftStartFrame, durationFrames, fps, 'left'
-  );
-  const rightAnimStyle = getSideAnimationStyle(
-    animation, frame, rightStartFrame, durationFrames, fps, 'right'
-  );
-  const dividerAnimStyle = getDividerAnimationStyle(
-    frame, dividerStartFrame, durationFrames, fps
-  );
+  // Get animation styles
+  const leftAnimStyle = getSideAnimationStyle(animation, frame, leftStartFrame, durationFrames, fps, 'left');
+  const rightAnimStyle = getSideAnimationStyle(animation, frame, rightStartFrame, durationFrames, fps, 'right');
+  const dividerAnimStyle = getDividerAnimationStyle(frame, dividerStartFrame, durationFrames, fps);
+
+  // Calculate font size based on slot
+  const baseFontSize = Math.min(28, Math.max(16, slot.height / 20));
 
   return (
     <AbsoluteFill>
@@ -622,43 +412,49 @@ export const SideBySideCompare = ({ config }) => {
           top: slot.top,
           width: slot.width,
           height: slot.height,
+          display: 'flex',
+          flexDirection: 'row',
           ...style.container,
         }}
       >
         {/* Left side */}
         <ComparisonSide
-          side="left"
           config={{ ...left, alignment }}
-          slotWidth={slot.width}
-          slotHeight={slot.height}
+          side="left"
           animStyle={leftAnimStyle}
-          resolveColor={resolveColor}
           baseFontSize={baseFontSize}
+          slotHeight={slot.height}
           style={style}
         />
 
-        {/* Divider */}
+        {/* Right side */}
+        <ComparisonSide
+          config={{ ...right, alignment }}
+          side="right"
+          animStyle={rightAnimStyle}
+          baseFontSize={baseFontSize}
+          slotHeight={slot.height}
+          style={style}
+        />
+      </div>
+
+      {/* Divider (positioned absolutely over the container) */}
+      <div
+        style={{
+          position: 'absolute',
+          left: slot.left,
+          top: slot.top,
+          width: slot.width,
+          height: slot.height,
+          pointerEvents: 'none',
+        }}
+      >
         <VsDivider
           type={dividerType}
           label={dividerLabel}
           color={resolvedDividerColor}
           animStyle={dividerAnimStyle}
           slotHeight={slot.height}
-          baseFontSize={baseFontSize}
-          frame={frame}
-          fps={fps}
-          startFrame={dividerStartFrame}
-          style={style}
-        />
-
-        {/* Right side */}
-        <ComparisonSide
-          side="right"
-          config={{ ...right, alignment }}
-          slotWidth={slot.width}
-          slotHeight={slot.height}
-          animStyle={rightAnimStyle}
-          resolveColor={resolveColor}
           baseFontSize={baseFontSize}
           style={style}
         />
