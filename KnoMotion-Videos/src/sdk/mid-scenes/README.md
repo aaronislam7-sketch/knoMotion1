@@ -200,6 +200,202 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 
 ---
 
+### 5. ChecklistReveal
+**Purpose**: Renders checklist with bullet/tick items and staggered pop animations.
+
+**Use Cases**:
+- To-do lists
+- Feature checklists
+- Step completion tracking
+- Requirements lists
+- Progress indicators
+
+**Features**:
+- 6 animation types: pop, slide, fade, scale, spring, bounceIn
+- Icon presets: check, bullet, dot, arrow, star, diamond, plus, minus
+- Auto-fit text to available width
+- Per-item checked/unchecked state
+- Custom colors per item
+- Layout-aware sizing
+
+**JSON Example**:
+```json
+{
+  "items": [
+    { "text": "Complete the tutorial", "checked": true },
+    { "text": "Practice with examples", "checked": true },
+    { "text": "Build your first project", "checked": false }
+  ],
+  "revealType": "pop",
+  "icon": "check",
+  "iconColor": "accentGreen",
+  "staggerDelay": 0.25,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/ChecklistReveal.schema.json`](./schemas/ChecklistReveal.schema.json)
+
+---
+
+### 6. BubbleCalloutSequence
+**Purpose**: Floating speech-bubble callouts with sequential appearance.
+
+**Use Cases**:
+- Conversation sequences
+- Thought bubbles
+- Tip/hint callouts
+- Annotated explanations
+- Feature highlights
+
+**Features**:
+- 5 bubble shapes: speech, thought, rounded, pill, square
+- 7 layout patterns: flow, diagonal, zigzag, scattered, vertical, horizontal, grid
+- 5 animations: pop, float, slide, scale, fade
+- Optional connecting lines between bubbles
+- Custom positions via percentages
+- Per-callout icons and colors
+
+**JSON Example**:
+```json
+{
+  "callouts": [
+    { "text": "Start with a clear goal", "icon": "🎯" },
+    { "text": "Break into small steps", "icon": "📝" },
+    { "text": "Celebrate progress!", "icon": "🎉" }
+  ],
+  "bubbleShape": "speech",
+  "pattern": "diagonal",
+  "animation": "float",
+  "showConnectors": true,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/BubbleCalloutSequence.schema.json`](./schemas/BubbleCalloutSequence.schema.json)
+
+---
+
+### 7. TimelineStrip
+**Purpose**: Horizontal or vertical timeline with nodes, labels, and reveals.
+
+**Use Cases**:
+- Historical timelines
+- Process steps
+- Project milestones
+- Learning journeys
+- Event sequences
+
+**Features**:
+- Horizontal or vertical orientation
+- 4 marker shapes: circle, square, diamond, dot
+- Animated connecting lines
+- Node labels with sublabels
+- Active/inactive node states
+- Icons inside nodes
+
+**JSON Example**:
+```json
+{
+  "events": [
+    { "label": "Start", "sublabel": "Day 1", "icon": "🚀" },
+    { "label": "Learn", "sublabel": "Week 1-2", "icon": "📚" },
+    { "label": "Practice", "sublabel": "Week 3-4", "icon": "💪" },
+    { "label": "Master", "sublabel": "Month 2", "icon": "🏆" }
+  ],
+  "orientation": "horizontal",
+  "animation": "slide",
+  "markerShape": "circle",
+  "showConnectors": true,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/TimelineStrip.schema.json`](./schemas/TimelineStrip.schema.json)
+
+---
+
+### 8. SideBySideCompare
+**Purpose**: Left vs right comparison blocks with text, icons, or mixed content.
+
+**Use Cases**:
+- Before/after comparisons
+- Pros and cons
+- Option A vs Option B
+- Feature comparisons
+- Concept contrasts
+
+**Features**:
+- 5 animations: slide, fade, scale, bounce, reveal
+- 4 divider styles: none, line, dashed, vs (with badge)
+- Title, subtitle, icon, and item lists per side
+- Custom colors per side
+- Background colors for sections
+
+**JSON Example**:
+```json
+{
+  "left": {
+    "title": "Before",
+    "icon": "😕",
+    "items": ["Confusing syntax", "Hard to debug", "Slow"],
+    "color": "secondary"
+  },
+  "right": {
+    "title": "After",
+    "icon": "🎉",
+    "items": ["Clean code", "Easy debugging", "Fast"],
+    "color": "accentGreen"
+  },
+  "animation": "slide",
+  "dividerType": "vs",
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/SideBySideCompare.schema.json`](./schemas/SideBySideCompare.schema.json)
+
+---
+
+### 9. GridCardReveal
+**Purpose**: Mini-cards in a grid with image/icon and label, mask or slide reveals.
+
+**Use Cases**:
+- Feature grids
+- Team member displays
+- Product showcases
+- Category displays
+- Icon galleries
+
+**Features**:
+- 7 animations: fade, slide, scale, bounce, flip, mask, cascade
+- 5 card variants: default, bordered, glass, flat, elevated
+- Auto-calculated grid columns
+- Image support with rounded option
+- Labels with positioning control
+- Per-card customization
+
+**JSON Example**:
+```json
+{
+  "cards": [
+    { "icon": "🎯", "label": "Focus" },
+    { "icon": "📚", "label": "Learn" },
+    { "icon": "💪", "label": "Practice" },
+    { "icon": "🏆", "label": "Master" }
+  ],
+  "columns": 2,
+  "animation": "cascade",
+  "cardVariant": "default",
+  "showLabels": true,
+  "beats": { "start": 1.0 }
+}
+```
+
+**Schema**: [`schemas/GridCardReveal.schema.json`](./schemas/GridCardReveal.schema.json)
+
+---
+
 ## Usage Guide
 
 ### Basic Integration
@@ -503,15 +699,25 @@ npm run dev
 mid-scenes/
 ├── README.md                          # This file
 ├── index.js                           # Exports all mid-scenes
-├── HeroTextEntranceExit.jsx          # Mid-scene component
-├── CardSequence.jsx                   # Mid-scene component
-├── TextRevealSequence.jsx            # Mid-scene component
-├── IconGrid.jsx                       # Mid-scene component
+├── HeroTextEntranceExit.jsx          # Hero + text with entrance/exit
+├── CardSequence.jsx                   # Cards in sequence/grid
+├── TextRevealSequence.jsx            # Text lines with reveals
+├── IconGrid.jsx                       # Icon grid with animations
+├── ChecklistReveal.jsx               # Checklist with pop animations
+├── BubbleCalloutSequence.jsx         # Speech bubble callouts
+├── TimelineStrip.jsx                 # Horizontal/vertical timeline
+├── SideBySideCompare.jsx             # Left vs right comparison
+├── GridCardReveal.jsx                # Mini-cards in grid layout
 └── schemas/
     ├── HeroTextEntranceExit.schema.json
     ├── CardSequence.schema.json
     ├── TextRevealSequence.schema.json
-    └── IconGrid.schema.json
+    ├── IconGrid.schema.json
+    ├── ChecklistReveal.schema.json
+    ├── BubbleCalloutSequence.schema.json
+    ├── TimelineStrip.schema.json
+    ├── SideBySideCompare.schema.json
+    └── GridCardReveal.schema.json
 ```
 
 ### Dependencies
@@ -538,6 +744,6 @@ mid-scenes/
 
 ---
 
-**Last Updated**: November 21, 2025  
-**Status**: 4 mid-scenes complete, 15+ planned  
-**Week 2 Progress**: 80% complete
+**Last Updated**: December 1, 2025  
+**Status**: 9 mid-scenes complete (4 original + 5 new)
+**New in this release**: ChecklistReveal, BubbleCalloutSequence, TimelineStrip, SideBySideCompare, GridCardReveal

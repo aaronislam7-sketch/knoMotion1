@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SideBySideCompare",
+  "description": "Left vs right comparison blocks with text, icons, and animated reveals",
+  "type": "object",
+  "required": ["left", "right", "beats"],
+  "properties": {
+    "left": {
+      "type": "object",
+      "description": "Left side configuration",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Main title for left side"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Subtitle or description"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Emoji or icon"
+        },
+        "items": {
+          "type": "array",
+          "description": "List of bullet points",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "text": { "type": "string" },
+                  "icon": { "type": "string" }
+                }
+              }
+            ]
+          }
+        },
+        "color": {
+          "type": "string",
+          "description": "Accent color for this side"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "description": "Background color for content area"
+        }
+      }
+    },
+    "right": {
+      "type": "object",
+      "description": "Right side configuration (same structure as left)",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "icon": { "type": "string" },
+        "items": { "type": "array" },
+        "color": { "type": "string" },
+        "backgroundColor": { "type": "string" }
+      }
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["slide", "fade", "scale", "bounce", "reveal", "slideIn", "fadeIn", "scaleIn", "bounceIn"],
+      "default": "slide",
+      "description": "Animation type for side reveals"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.3,
+      "minimum": 0,
+      "description": "Delay between sides in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.6,
+      "minimum": 0.1,
+      "description": "Animation duration per side in seconds"
+    },
+    "dividerType": {
+      "type": "string",
+      "enum": ["none", "line", "dashed", "vs"],
+      "default": "vs",
+      "description": "Style of center divider"
+    },
+    "dividerLabel": {
+      "type": "string",
+      "default": "VS",
+      "description": "Custom label for VS divider badge"
+    },
+    "dividerColor": {
+      "type": "string",
+      "default": "primary",
+      "description": "Divider color. Theme keys: primary, secondary, accentGreen, etc. Or hex/rgb."
+    },
+    "alignment": {
+      "type": "string",
+      "enum": ["center", "inner"],
+      "default": "center",
+      "description": "Content alignment. 'center': both sides centered. 'inner': content faces the divider."
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "container": { "type": "object" },
+        "sideWrapper": { "type": "object" },
+        "sideContent": { "type": "object" },
+        "icon": { "type": "object" },
+        "title": { "type": "object" },
+        "subtitle": { "type": "object" },
+        "itemsList": { "type": "object" },
+        "item": { "type": "object" },
+        "itemText": { "type": "object" },
+        "dividerWrapper": { "type": "object" },
+        "dividerLine": { "type": "object" },
+        "vsContainer": { "type": "object" },
+        "vsBadge": { "type": "object" },
+        "vsText": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "left": {
+        "title": "Before",
+        "icon": "😕",
+        "items": [
+          "Confusing syntax",
+          "Hard to debug",
+          "Slow performance"
+        ],
+        "color": "secondary"
+      },
+      "right": {
+        "title": "After",
+        "icon": "🎉",
+        "items": [
+          "Clean code",
+          "Easy debugging",
+          "Lightning fast"
+        ],
+        "color": "accentGreen"
+      },
+      "animation": "slide",
+      "dividerType": "vs",
+      "beats": { "start": 1.0 }
+    },
+    {
+      "left": {
+        "title": "Option A",
+        "subtitle": "Traditional approach",
+        "icon": "📚",
+        "items": [
+          { "text": "Well-documented", "icon": "✓" },
+          { "text": "Proven track record", "icon": "✓" }
+        ],
+        "backgroundColor": "pageBg"
+      },
+      "right": {
+        "title": "Option B",
+        "subtitle": "Modern solution",
+        "icon": "🚀",
+        "items": [
+          { "text": "Cutting-edge features", "icon": "✓" },
+          { "text": "Better scalability", "icon": "✓" }
+        ],
+        "backgroundColor": "pageBg"
+      },
+      "animation": "reveal",
+      "dividerType": "line",
+      "staggerDelay": 0.4,
+      "beats": { "start": 0.5 }
+    }
+  ],
+  "sizingBehavior": {
+    "description": "SideBySideCompare splits the slot into two equal halves",
+    "width": "Each side uses 48% of slot width with divider in center",
+    "height": "Content is vertically centered within full slot height",
+    "fontScaling": "Base font size scales with slot height (16-32px range)",
+    "divider": "Divider occupies 4% of width in center, VS badge sized to font"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GridCardReveal",
+  "description": "Mini-cards in a grid layout with image/icon and labels, featuring mask or slide reveal animations",
+  "type": "object",
+  "required": ["cards", "beats"],
+  "properties": {
+    "cards": {
+      "type": "array",
+      "description": "Array of card items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "description": "Icon or emoji for the card"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image URL for the card"
+          },
+          "imageRounded": {
+            "type": "boolean",
+            "default": false,
+            "description": "Make image circular"
+          },
+          "label": {
+            "type": "string",
+            "description": "Label text below icon/image"
+          },
+          "color": {
+            "type": "string",
+            "description": "Custom icon color"
+          },
+          "backgroundColor": {
+            "type": "string",
+            "description": "Custom card background color"
+          },
+          "borderColor": {
+            "type": "string",
+            "description": "Custom border color (for bordered variant)"
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["default", "bordered", "glass", "flat", "elevated"],
+            "description": "Card variant override"
+          },
+          "wrapLabel": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow label text to wrap to multiple lines"
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "columns": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 8,
+      "description": "Number of columns (auto-calculated if not provided)"
+    },
+    "rows": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Number of rows (calculated from cards and columns)"
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["fade", "slide", "scale", "bounce", "flip", "mask", "cascade", "fadeIn", "slideIn", "scaleIn", "bounceIn"],
+      "default": "cascade",
+      "description": "Animation type for card reveals"
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["up", "down", "left", "right"],
+      "default": "up",
+      "description": "Direction for slide animation"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.1,
+      "minimum": 0,
+      "description": "Delay between cards in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.4,
+      "minimum": 0.1,
+      "description": "Animation duration per card in seconds"
+    },
+    "showLabels": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show labels on cards"
+    },
+    "labelPosition": {
+      "type": "string",
+      "enum": ["bottom", "top"],
+      "default": "bottom",
+      "description": "Position of labels relative to icon/image"
+    },
+    "cardVariant": {
+      "type": "string",
+      "enum": ["default", "bordered", "glass", "flat", "elevated"],
+      "default": "default",
+      "description": "Default card variant for all cards"
+    },
+    "gap": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Gap between cards in pixels (auto-calculated if not provided)"
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "container": { "type": "object" },
+        "cardWrapper": { "type": "object" },
+        "card": { "type": "object" },
+        "cardStyle": { "type": "object" },
+        "imageWrapper": { "type": "object" },
+        "image": { "type": "object" },
+        "icon": { "type": "object" },
+        "label": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "cards": [
+        { "icon": "🎯", "label": "Focus" },
+        { "icon": "📚", "label": "Learn" },
+        { "icon": "💪", "label": "Practice" },
+        { "icon": "🏆", "label": "Master" }
+      ],
+      "columns": 2,
+      "animation": "cascade",
+      "cardVariant": "default",
+      "beats": { "start": 1.0 }
+    },
+    {
+      "cards": [
+        { "icon": "⚡", "label": "Fast", "color": "doodle" },
+        { "icon": "🔒", "label": "Secure", "color": "accentGreen" },
+        { "icon": "🎨", "label": "Beautiful", "color": "secondary" },
+        { "icon": "🔧", "label": "Flexible", "color": "accentBlue" },
+        { "icon": "📱", "label": "Responsive", "color": "primary" },
+        { "icon": "💡", "label": "Smart", "color": "doodle" }
+      ],
+      "columns": 3,
+      "animation": "mask",
+      "cardVariant": "glass",
+      "showLabels": true,
+      "staggerDelay": 0.15,
+      "beats": { "start": 0.5 }
+    },
+    {
+      "cards": [
+        { "image": "/images/team1.jpg", "label": "Alice", "imageRounded": true },
+        { "image": "/images/team2.jpg", "label": "Bob", "imageRounded": true },
+        { "image": "/images/team3.jpg", "label": "Carol", "imageRounded": true },
+        { "image": "/images/team4.jpg", "label": "David", "imageRounded": true }
+      ],
+      "columns": 4,
+      "animation": "flip",
+      "cardVariant": "elevated",
+      "beats": { "start": 1.0 }
+    }
+  ],
+  "sizingBehavior": {
+    "description": "GridCardReveal auto-layouts cards in a responsive grid",
+    "columns": "Auto-calculated from card count and slot width if not specified",
+    "cardSize": "Cards sized to fill available space evenly with gap",
+    "gap": "Auto-calculated based on slot dimensions if not provided",
+    "fontScaling": "Font size scales with card dimensions",
+    "iconSize": "Icons sized proportionally to card dimensions (50% of min dimension)"
+  }
+}

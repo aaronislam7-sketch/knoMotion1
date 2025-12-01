@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TimelineStrip",
+  "description": "Horizontal or vertical timeline with nodes, labels, and animated reveals",
+  "type": "object",
+  "required": ["events", "beats"],
+  "properties": {
+    "events": {
+      "type": "array",
+      "description": "Array of timeline events",
+      "items": {
+        "type": "object",
+        "required": ["label"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Event label/title"
+          },
+          "sublabel": {
+            "type": "string",
+            "description": "Optional subtitle, date, or description"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Optional emoji or icon inside the node marker"
+          },
+          "color": {
+            "type": "string",
+            "description": "Custom node color override"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this node is active (highlighted) or inactive (muted)"
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "orientation": {
+      "type": "string",
+      "enum": ["horizontal", "vertical"],
+      "default": "horizontal",
+      "description": "Timeline direction"
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["slide", "fade", "scale", "pop", "slideIn", "fadeIn", "scaleIn"],
+      "default": "slide",
+      "description": "Animation type for node reveals"
+    },
+    "staggerDelay": {
+      "type": "number",
+      "default": 0.25,
+      "minimum": 0,
+      "description": "Delay between nodes in seconds"
+    },
+    "animationDuration": {
+      "type": "number",
+      "default": 0.5,
+      "minimum": 0.1,
+      "description": "Animation duration per node in seconds"
+    },
+    "markerShape": {
+      "type": "string",
+      "enum": ["circle", "square", "diamond", "dot"],
+      "default": "circle",
+      "description": "Shape of the node markers"
+    },
+    "nodeSize": {
+      "type": "number",
+      "minimum": 10,
+      "maximum": 100,
+      "description": "Size of node markers in pixels (auto-calculated if not provided)"
+    },
+    "showConnectors": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show connecting lines between nodes"
+    },
+    "connectorDelay": {
+      "type": "number",
+      "default": 0.1,
+      "minimum": 0,
+      "description": "Delay before connector animation starts (relative to node animation)"
+    },
+    "activeColor": {
+      "type": "string",
+      "default": "primary",
+      "description": "Color for active nodes. Theme keys: primary, secondary, accentGreen, accentBlue. Or hex/rgb."
+    },
+    "inactiveColor": {
+      "type": "string",
+      "default": "textMuted",
+      "description": "Color for inactive nodes. Theme keys or hex/rgb."
+    },
+    "connectorColor": {
+      "type": "string",
+      "default": "ruleLine",
+      "description": "Color for connector lines. Theme keys or hex/rgb."
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "track": { "type": "object" },
+        "connector": { "type": "object" },
+        "nodeWrapper": { "type": "object" },
+        "marker": { "type": "object" },
+        "icon": { "type": "object" },
+        "labelContainer": { "type": "object" },
+        "label": { "type": "object" },
+        "sublabel": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "events": [
+        { "label": "Start", "sublabel": "Day 1", "icon": "🚀" },
+        { "label": "Learn", "sublabel": "Week 1-2", "icon": "📚" },
+        { "label": "Practice", "sublabel": "Week 3-4", "icon": "💪" },
+        { "label": "Master", "sublabel": "Month 2", "icon": "🏆" }
+      ],
+      "orientation": "horizontal",
+      "animation": "slide",
+      "markerShape": "circle",
+      "showConnectors": true,
+      "staggerDelay": 0.3,
+      "beats": { "start": 1.0 }
+    },
+    {
+      "events": [
+        { "label": "2020", "sublabel": "Foundation", "active": true },
+        { "label": "2021", "sublabel": "Growth", "active": true },
+        { "label": "2022", "sublabel": "Expansion", "active": true },
+        { "label": "2023", "sublabel": "Innovation", "active": false },
+        { "label": "2024", "sublabel": "Future", "active": false }
+      ],
+      "orientation": "vertical",
+      "animation": "pop",
+      "markerShape": "diamond",
+      "activeColor": "accentGreen",
+      "beats": { "start": 0.5 }
+    }
+  ],
+  "sizingBehavior": {
+    "description": "TimelineStrip adapts to slot dimensions",
+    "width": "Horizontal: uses full slot width with padding. Vertical: nodes positioned at ~25% width.",
+    "height": "Vertical: uses full slot height with padding. Horizontal: nodes positioned at ~40% height.",
+    "nodeSize": "Auto-calculated based on slot dimensions and event count, capped at 40px",
+    "spacing": "Events are evenly distributed along the timeline axis"
+  }
+}

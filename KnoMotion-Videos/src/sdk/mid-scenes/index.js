@@ -8,7 +8,43 @@
  * @category SDK
  */
 
+// Original Mid-Scenes
 export { HeroTextEntranceExit } from './HeroTextEntranceExit';
 export { CardSequence } from './CardSequence';
 export { TextRevealSequence } from './TextRevealSequence';
 export { IconGrid } from './IconGrid';
+
+// New Mid-Scenes (Phase 2)
+export { ChecklistReveal } from './ChecklistReveal';
+export { BubbleCalloutSequence } from './BubbleCalloutSequence';
+export { TimelineStrip } from './TimelineStrip';
+export { SideBySideCompare } from './SideBySideCompare';
+export { GridCardReveal } from './GridCardReveal';
+
+/**
+ * Mid-Scene Registry for dynamic rendering
+ * Maps type strings to component references
+ */
+export const MID_SCENE_REGISTRY = {
+  // Original
+  heroTextEntranceExit: 'HeroTextEntranceExit',
+  cardSequence: 'CardSequence',
+  textReveal: 'TextRevealSequence',
+  textRevealSequence: 'TextRevealSequence',
+  iconGrid: 'IconGrid',
+  
+  // New Mid-Scenes
+  checklistReveal: 'ChecklistReveal',
+  checklist: 'ChecklistReveal',
+  bubbleCalloutSequence: 'BubbleCalloutSequence',
+  bubbleCallout: 'BubbleCalloutSequence',
+  callouts: 'BubbleCalloutSequence',
+  timelineStrip: 'TimelineStrip',
+  timeline: 'TimelineStrip',
+  sideBySideCompare: 'SideBySideCompare',
+  sideBySide: 'SideBySideCompare',
+  compare: 'SideBySideCompare',
+  gridCardReveal: 'GridCardReveal',
+  gridCards: 'GridCardReveal',
+  cardGrid: 'GridCardReveal',
+};
