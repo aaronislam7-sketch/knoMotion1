@@ -274,58 +274,7 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 
 ---
 
-### 7. TimelineStrip
-**Purpose**: Horizontal timeline with staggered up/down cards for progression and milestones.
-
-**Use Cases**:
-- Historical timelines
-- Process steps / learning paths
-- Project milestones
-- Learning journeys
-
-**Features**:
-- Staggered up/down card layout (alternating positions)
-- Uses SDK **TimelineCard** composition for each node
-- **Per-node beats support**: Each event can have its own timing
-- 4 animations: slide, scale, bounce, fade
-- Animated connecting line between cards
-- Badges, icons, subtitles, and descriptions per card
-- Card variants: default, bordered, glass
-
-**JSON Example**:
-```json
-{
-  "events": [
-    { "title": "Start", "subtitle": "Day 1", "icon": "🚀", "badge": "Step 1" },
-    { "title": "Learn", "subtitle": "Week 1", "icon": "📚", "badge": "Step 2" },
-    { "title": "Practice", "subtitle": "Week 2", "icon": "💪", "badge": "Step 3" },
-    { "title": "Master", "subtitle": "Month 1", "icon": "🏆", "badge": "Step 4" }
-  ],
-  "animation": "slide",
-  "showConnectors": true,
-  "beats": { "start": 1.0 }
-}
-```
-
-**Per-node beats example**:
-```json
-{
-  "events": [
-    { "title": "Idea", "icon": "💡", "beats": { "start": 1.0 } },
-    { "title": "Research", "icon": "🔍", "beats": { "start": 2.0 } },
-    { "title": "Build", "icon": "🔧", "beats": { "start": 3.0 } },
-    { "title": "Launch", "icon": "🚀", "beats": { "start": 4.5 } }
-  ],
-  "animation": "scale",
-  "beats": { "start": 1.0 }
-}
-```
-
-**Schema**: [`schemas/TimelineStrip.schema.json`](./schemas/TimelineStrip.schema.json)
-
----
-
-### 8. SideBySideCompare
+### 7. SideBySideCompare
 **Purpose**: Left vs right comparison blocks for before/after, pros/cons, or A vs B scenarios.
 
 **Use Cases**:
@@ -367,7 +316,7 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 
 ---
 
-### 9. GridCardReveal
+### 8. GridCardReveal
 **Purpose**: Mini-cards in a grid with image/icon and label, mask or slide reveals.
 
 **Use Cases**:
@@ -715,7 +664,6 @@ mid-scenes/
 ├── IconGrid.jsx                       # Icon grid with animations
 ├── ChecklistReveal.jsx               # Checklist with pop animations
 ├── BubbleCalloutSequence.jsx         # Speech bubble callouts
-├── TimelineStrip.jsx                 # Horizontal/vertical timeline
 ├── SideBySideCompare.jsx             # Left vs right comparison
 ├── GridCardReveal.jsx                # Mini-cards in grid layout
 └── schemas/
@@ -725,7 +673,6 @@ mid-scenes/
     ├── IconGrid.schema.json
     ├── ChecklistReveal.schema.json
     ├── BubbleCalloutSequence.schema.json
-    ├── TimelineStrip.schema.json
     ├── SideBySideCompare.schema.json
     └── GridCardReveal.schema.json
 ```
@@ -755,8 +702,8 @@ mid-scenes/
 ---
 
 **Last Updated**: December 1, 2025  
-**Status**: 9 mid-scenes complete (4 original + 5 new)  
-**SDK Elements Created**: CalloutBubble, TimelineCard
+**Status**: 8 mid-scenes complete (4 original + 4 new)  
+**SDK Elements Created**: CalloutBubble
 
 ### Recent Refactoring (v2.2)
 
@@ -773,19 +720,11 @@ Based on feedback, the following simplifications and SDK improvements were made:
    - **NEW**: Uses SDK `CalloutBubble` composition
    - Removed structured layouts (use other mid-scenes for structured content)
 
-2. **TimelineStrip** (Major Rewrite)
-   - **NEW**: Uses SDK `TimelineCard` composition
-   - Staggered up/down card layout (visual improvement over circles)
-   - **Per-node beats support**: Each event can have independent timing
-   - Simplified to 4 animations: slide, scale, bounce, fade
-   - Cards use SDK Card variants: default, bordered, glass
-
-3. **SideBySideCompare** (Simplified)
-   - Removed custom hand-drawn dividers (too inline)
+2. **SideBySideCompare** (Simplified)
    - Simplified to 4 divider types: none, line, dashed, vs
    - Uses SDK Card, Text, Icon, Badge elements
    - Made VS badge larger and more prominent
 
-4. **ChecklistReveal** (Lottie Support)
+3. **ChecklistReveal** (Lottie Support)
    - Added Lottie icon presets: lottieCheck, lottieTick, lottieSuccess, lottieStar
    - Uses SDK RemotionLottie for animated icons

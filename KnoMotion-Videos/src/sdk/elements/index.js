@@ -47,14 +47,13 @@ export { TestimonialCard } from './compositions/TestimonialCard';
 export { PricingCard } from './compositions/PricingCard';
 export { HeroWithCTA } from './compositions/HeroWithCTA';
 
-// NEW Compositions - Mid-Scene Support (2)
+// NEW Compositions - Mid-Scene Support (1)
 export { CalloutBubble } from './compositions/CalloutBubble';
-export { TimelineCard } from './compositions/TimelineCard';
 
 // ========================================
 // ELEMENT LIBRARY SUMMARY
 // ========================================
-// Total: 25 elements (14 atoms, 11 compositions)
+// Total: 24 elements (14 atoms, 10 compositions)
 //
 // Atoms (14):
 //   - Badge: Labels/tags with variants
@@ -72,7 +71,7 @@ export { TimelineCard } from './compositions/TimelineCard';
 //   - Rating: Star rating displays
 //   - RadialProgress: Circular progress indicators
 //
-// Compositions (11):
+// Compositions (10):
 //   - CardWithBadge: Card + Badge combo
 //   - CardWithIcon: Card + Icon + Text layout
 //   - HeroWithText: Hero section with title/subtitle
@@ -83,7 +82,6 @@ export { TimelineCard } from './compositions/TimelineCard';
 //   - PricingCard: Price + Features + CTA
 //   - HeroWithCTA: Hero + Title + Subtitle + Button
 //   - CalloutBubble: Speech/thought bubble for callouts ✨ NEW
-//   - TimelineCard: Timeline node card with connector ✨ NEW
 //
 // All elements:
 //   ✅ Use KNODE_THEME (no hardcoded colors/fonts)

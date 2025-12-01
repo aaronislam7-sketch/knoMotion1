@@ -17,7 +17,6 @@ export { IconGrid } from './IconGrid';
 // New Mid-Scenes (Phase 2)
 export { ChecklistReveal } from './ChecklistReveal';
 export { BubbleCalloutSequence } from './BubbleCalloutSequence';
-export { TimelineStrip } from './TimelineStrip';
 export { SideBySideCompare } from './SideBySideCompare';
 export { GridCardReveal } from './GridCardReveal';
 
@@ -39,8 +38,6 @@ export const MID_SCENE_REGISTRY = {
   bubbleCalloutSequence: 'BubbleCalloutSequence',
   bubbleCallout: 'BubbleCalloutSequence',
   callouts: 'BubbleCalloutSequence',
-  timelineStrip: 'TimelineStrip',
-  timeline: 'TimelineStrip',
   sideBySideCompare: 'SideBySideCompare',
   sideBySide: 'SideBySideCompare',
   compare: 'SideBySideCompare',
