@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "TimelineStrip",
-  "description": "Horizontal or vertical timeline with nodes, labels, and animated reveals",
+  "description": "Dynamic timeline with nodes, labels, badges, and hand-drawn Knode-style reveals",
   "type": "object",
   "required": ["events", "beats"],
   "properties": {
@@ -22,11 +22,21 @@
           },
           "icon": {
             "type": "string",
-            "description": "Optional emoji or icon inside the node marker"
+            "description": "Optional emoji or icon inside the node"
+          },
+          "badge": {
+            "type": "string",
+            "description": "Optional badge text above label (e.g., 'Step 1', 'Day 7')"
           },
           "color": {
             "type": "string",
             "description": "Custom node color override"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["default", "start", "end", "milestone", "checkpoint", "current"],
+            "default": "default",
+            "description": "Node type determines visual style. 'start'/'end' auto-assigned if autoStartEnd is true."
           },
           "active": {
             "type": "boolean",
@@ -45,13 +55,13 @@
     },
     "animation": {
       "type": "string",
-      "enum": ["slide", "fade", "scale", "pop", "slideIn", "fadeIn", "scaleIn"],
-      "default": "slide",
-      "description": "Animation type for node reveals"
+      "enum": ["pop", "draw", "slide", "bounce", "fade"],
+      "default": "draw",
+      "description": "Animation type for node reveals. 'draw' gives hand-drawn feel."
     },
     "staggerDelay": {
       "type": "number",
-      "default": 0.25,
+      "default": 0.3,
       "minimum": 0,
       "description": "Delay between nodes in seconds"
     },
@@ -61,43 +71,37 @@
       "minimum": 0.1,
       "description": "Animation duration per node in seconds"
     },
-    "markerShape": {
+    "connectorStyle": {
       "type": "string",
-      "enum": ["circle", "square", "diamond", "dot"],
-      "default": "circle",
-      "description": "Shape of the node markers"
+      "enum": ["solid", "dashed", "dotted", "curved"],
+      "default": "dashed",
+      "description": "Style of connecting lines between nodes"
     },
     "nodeSize": {
       "type": "number",
-      "minimum": 10,
+      "minimum": 20,
       "maximum": 100,
-      "description": "Size of node markers in pixels (auto-calculated if not provided)"
+      "description": "Base size of node markers in pixels (auto-calculated if not provided)"
     },
     "showConnectors": {
       "type": "boolean",
       "default": true,
       "description": "Show connecting lines between nodes"
     },
-    "connectorDelay": {
-      "type": "number",
-      "default": 0.1,
-      "minimum": 0,
-      "description": "Delay before connector animation starts (relative to node animation)"
-    },
     "activeColor": {
       "type": "string",
       "default": "primary",
       "description": "Color for active nodes. Theme keys: primary, secondary, accentGreen, accentBlue. Or hex/rgb."
     },
-    "inactiveColor": {
-      "type": "string",
-      "default": "textMuted",
-      "description": "Color for inactive nodes. Theme keys or hex/rgb."
-    },
     "connectorColor": {
       "type": "string",
-      "default": "ruleLine",
+      "default": "secondary",
       "description": "Color for connector lines. Theme keys or hex/rgb."
+    },
+    "autoStartEnd": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically style first node as 'start' and last as 'end' if not explicitly set"
     },
     "beats": {
       "type": "object",
@@ -123,12 +127,11 @@
       "type": "object",
       "description": "Optional style overrides",
       "properties": {
-        "track": { "type": "object" },
-        "connector": { "type": "object" },
         "nodeWrapper": { "type": "object" },
-        "marker": { "type": "object" },
-        "icon": { "type": "object" },
+        "ring": { "type": "object" },
+        "node": { "type": "object" },
         "labelContainer": { "type": "object" },
+        "badge": { "type": "object" },
         "label": { "type": "object" },
         "sublabel": { "type": "object" }
       }
@@ -137,38 +140,59 @@
   "examples": [
     {
       "events": [
-        { "label": "Start", "sublabel": "Day 1", "icon": "🚀" },
-        { "label": "Learn", "sublabel": "Week 1-2", "icon": "📚" },
-        { "label": "Practice", "sublabel": "Week 3-4", "icon": "💪" },
-        { "label": "Master", "sublabel": "Month 2", "icon": "🏆" }
+        { "label": "Start Journey", "sublabel": "Day 1", "icon": "🚀" },
+        { "label": "Learn Basics", "sublabel": "Week 1", "badge": "Step 1" },
+        { "label": "Practice", "sublabel": "Week 2", "badge": "Step 2", "type": "checkpoint" },
+        { "label": "Build Project", "sublabel": "Week 3", "badge": "Step 3", "type": "milestone" },
+        { "label": "Master It!", "sublabel": "Month 1", "icon": "🏆" }
       ],
       "orientation": "horizontal",
-      "animation": "slide",
-      "markerShape": "circle",
-      "showConnectors": true,
-      "staggerDelay": 0.3,
+      "animation": "draw",
+      "connectorStyle": "dashed",
+      "autoStartEnd": true,
       "beats": { "start": 1.0 }
     },
     {
       "events": [
-        { "label": "2020", "sublabel": "Foundation", "active": true },
-        { "label": "2021", "sublabel": "Growth", "active": true },
-        { "label": "2022", "sublabel": "Expansion", "active": true },
-        { "label": "2023", "sublabel": "Innovation", "active": false },
-        { "label": "2024", "sublabel": "Future", "active": false }
+        { "label": "2020", "sublabel": "Foundation", "type": "start" },
+        { "label": "2021", "sublabel": "Growth Phase", "type": "milestone", "icon": "📈" },
+        { "label": "2022", "sublabel": "Expansion" },
+        { "label": "2023", "sublabel": "Current", "type": "current", "icon": "⭐" },
+        { "label": "2024", "sublabel": "Vision", "type": "end", "active": false }
       ],
       "orientation": "vertical",
       "animation": "pop",
-      "markerShape": "diamond",
+      "connectorStyle": "curved",
       "activeColor": "accentGreen",
       "beats": { "start": 0.5 }
+    },
+    {
+      "events": [
+        { "label": "Idea", "icon": "💡", "badge": "Phase 1" },
+        { "label": "Design", "icon": "🎨", "badge": "Phase 2" },
+        { "label": "Build", "icon": "🔧", "badge": "Phase 3" },
+        { "label": "Test", "icon": "🧪", "badge": "Phase 4" },
+        { "label": "Launch", "icon": "🚀", "badge": "Phase 5" }
+      ],
+      "connectorStyle": "solid",
+      "animation": "bounce",
+      "staggerDelay": 0.4,
+      "beats": { "start": 1.0 }
     }
   ],
+  "nodeTypes": {
+    "default": "Standard circular node",
+    "start": "Larger circle with dashed ring, green accent, rocket icon by default",
+    "end": "Larger circle with dashed ring, primary accent, target icon by default",
+    "milestone": "Diamond shape with ring, gold/doodle accent",
+    "checkpoint": "Square shape for intermediate markers",
+    "current": "Larger circle with ring and pulse animation"
+  },
   "sizingBehavior": {
     "description": "TimelineStrip adapts to slot dimensions",
-    "width": "Horizontal: uses full slot width with padding. Vertical: nodes positioned at ~25% width.",
-    "height": "Vertical: uses full slot height with padding. Horizontal: nodes positioned at ~40% height.",
-    "nodeSize": "Auto-calculated based on slot dimensions and event count, capped at 40px",
+    "width": "Horizontal: uses full slot width with padding. Vertical: nodes at ~left edge, labels to right.",
+    "height": "Vertical: uses full slot height with padding. Horizontal: nodes in upper area, labels below.",
+    "nodeSize": "Auto-calculated based on slot dimensions, event count, and orientation",
     "spacing": "Events are evenly distributed along the timeline axis"
   }
 }

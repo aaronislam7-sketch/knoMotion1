@@ -3,6 +3,7 @@
  * 
  * Renders floating speech-bubble callouts with sequential appearance.
  * Features customizable bubble shapes, optional connecting lines, and staggered reveals.
+ * Uses SDK elements for consistency with Knode design system.
  * All configurable via JSON - pre-built for LLM JSON generation.
  * 
  * @module mid-scenes/BubbleCalloutSequence
@@ -13,108 +14,153 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
-import { fadeIn, slideIn, scaleIn, bounceIn, drawLine } from '../animations/index';
+import { Card } from '../elements/atoms/Card';
+import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 
 /**
- * Bubble shape configurations
+ * Bubble shape configurations with CSS properties
  */
 const BUBBLE_SHAPES = {
   speech: {
-    borderRadius: '20px',
+    borderRadius: 20,
+    showTail: true,
     tailPosition: 'bottom-left',
   },
   thought: {
     borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-    tailType: 'dots',
+    showTail: false,
+    showDots: true,
   },
   rounded: {
-    borderRadius: '24px',
-    tailPosition: null,
+    borderRadius: 24,
+    showTail: false,
   },
   pill: {
-    borderRadius: '999px',
-    tailPosition: null,
+    borderRadius: 999,
+    showTail: false,
   },
   square: {
-    borderRadius: '8px',
-    tailPosition: null,
+    borderRadius: 8,
+    showTail: false,
+  },
+  notebook: {
+    borderRadius: 16,
+    showTail: false,
+    dashed: true,
   },
 };
 
 /**
- * Calculate bubble position based on index and layout pattern
- * 
- * @param {number} index - Bubble index
- * @param {number} total - Total number of bubbles
- * @param {string} pattern - Layout pattern
- * @param {Object} slot - Slot dimensions
- * @returns {Object} Position { x, y }
+ * Calculate bubble positions based on pattern and slot dimensions
+ * Fixed patterns for consistent, predictable layouts
  */
-const calculateBubblePosition = (index, total, pattern, slot) => {
+const calculateBubblePositions = (callouts, pattern, slot) => {
   const { width, height } = slot;
-  const padding = Math.min(width, height) * 0.1;
+  const count = callouts.length;
+  const padding = Math.min(width, height) * 0.08;
   const usableWidth = width - padding * 2;
   const usableHeight = height - padding * 2;
   
   switch (pattern) {
-    case 'diagonal':
-      return {
-        x: padding + (usableWidth / (total + 1)) * (index + 1),
-        y: padding + (usableHeight / (total + 1)) * (index + 1),
-      };
-    
-    case 'zigzag':
-      const isEven = index % 2 === 0;
-      return {
-        x: isEven ? padding + usableWidth * 0.25 : padding + usableWidth * 0.75,
-        y: padding + (usableHeight / (total + 1)) * (index + 1),
-      };
-    
-    case 'scattered':
-      // Pseudo-random scatter based on index
-      const angle = (index * 137.5) * (Math.PI / 180); // Golden angle
-      const radius = Math.min(usableWidth, usableHeight) * 0.3;
-      return {
-        x: width / 2 + Math.cos(angle) * radius * (0.5 + (index % 3) * 0.25),
-        y: height / 2 + Math.sin(angle) * radius * (0.5 + (index % 2) * 0.5),
-      };
-    
     case 'vertical':
-      return {
+      // Evenly spaced vertical stack, centered horizontally
+      return callouts.map((_, index) => ({
         x: width / 2,
-        y: padding + (usableHeight / (total + 1)) * (index + 1),
-      };
+        y: padding + (usableHeight / (count + 1)) * (index + 1),
+      }));
     
     case 'horizontal':
-      return {
-        x: padding + (usableWidth / (total + 1)) * (index + 1),
+      // Evenly spaced horizontal row, centered vertically
+      return callouts.map((_, index) => ({
+        x: padding + (usableWidth / (count + 1)) * (index + 1),
         y: height / 2,
-      };
+      }));
     
-    case 'grid':
-      const cols = Math.ceil(Math.sqrt(total));
-      const col = index % cols;
-      const row = Math.floor(index / cols);
-      const rows = Math.ceil(total / cols);
-      return {
-        x: padding + (usableWidth / (cols + 1)) * (col + 1),
-        y: padding + (usableHeight / (rows + 1)) * (row + 1),
-      };
+    case 'diagonal':
+      // Top-left to bottom-right diagonal
+      return callouts.map((_, index) => ({
+        x: padding + (usableWidth / (count + 1)) * (index + 1),
+        y: padding + (usableHeight / (count + 1)) * (index + 1),
+      }));
     
-    default: // 'flow'
-      return {
-        x: width / 2,
-        y: padding + (usableHeight / (total + 1)) * (index + 1),
-      };
+    case 'zigzag':
+      // Alternating left-right positions
+      return callouts.map((_, index) => {
+        const isEven = index % 2 === 0;
+        return {
+          x: isEven ? padding + usableWidth * 0.25 : padding + usableWidth * 0.75,
+          y: padding + (usableHeight / (count + 1)) * (index + 1),
+        };
+      });
+    
+    case 'scattered': {
+      // Deterministic scatter using golden angle for good distribution
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const maxRadius = Math.min(usableWidth, usableHeight) * 0.35;
+      
+      return callouts.map((_, index) => {
+        // Golden angle distribution
+        const angle = index * 137.5 * (Math.PI / 180);
+        // Vary radius based on index for better spread
+        const radiusFactor = 0.4 + ((index % 3) * 0.2);
+        const radius = maxRadius * radiusFactor;
+        
+        return {
+          x: centerX + Math.cos(angle) * radius,
+          y: centerY + Math.sin(angle) * radius,
+        };
+      });
+    }
+    
+    case 'grid': {
+      // Auto-calculated grid layout
+      const cols = Math.ceil(Math.sqrt(count));
+      const rows = Math.ceil(count / cols);
+      const cellWidth = usableWidth / cols;
+      const cellHeight = usableHeight / rows;
+      
+      return callouts.map((_, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        return {
+          x: padding + cellWidth * (col + 0.5),
+          y: padding + cellHeight * (row + 0.5),
+        };
+      });
+    }
+    
+    case 'arc': {
+      // Semi-circular arc from left to right
+      const centerX = width / 2;
+      const centerY = height * 0.7;
+      const radius = Math.min(usableWidth, usableHeight) * 0.4;
+      
+      return callouts.map((_, index) => {
+        const angle = Math.PI + (Math.PI / (count + 1)) * (index + 1);
+        return {
+          x: centerX + Math.cos(angle) * radius,
+          y: centerY + Math.sin(angle) * radius,
+        };
+      });
+    }
+    
+    case 'flow':
+    default:
+      // Default: vertical centered flow with slight horizontal offset
+      return callouts.map((_, index) => ({
+        x: width / 2 + (index % 2 === 0 ? -20 : 20),
+        y: padding + (usableHeight / (count + 1)) * (index + 1),
+      }));
   }
 };
 
 /**
  * Get animation style for bubble entrance
  */
-const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, direction = 'up') => {
+const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, index = 0) => {
   switch (animationType) {
     case 'pop':
     case 'bounceIn':
@@ -133,12 +179,27 @@ const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrame
     }
     
     case 'slide':
-    case 'slideIn':
+    case 'slideIn': {
+      // Alternate slide direction for visual interest
+      const direction = index % 2 === 0 ? 'left' : 'right';
       return slideIn(frame, startFrame, durationFrames, direction, 60);
+    }
     
     case 'scale':
     case 'scaleIn':
-      return scaleIn(frame, startFrame, durationFrames, 0);
+      return scaleIn(frame, startFrame, durationFrames, 0.3);
+    
+    case 'drop': {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 12, mass: 0.8, stiffness: 150 },
+      });
+      return {
+        opacity: progress,
+        transform: `translateY(${(1 - progress) * -50}px) scale(${0.9 + progress * 0.1})`,
+      };
+    }
     
     case 'fade':
     case 'fadeIn':
@@ -148,69 +209,55 @@ const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrame
 };
 
 /**
- * SVG Speech Bubble Tail
+ * Bubble Tail Component - Speech bubble pointer
  */
-const BubbleTail = ({ position, color, size = 20 }) => {
+const BubbleTail = ({ position, color, size = 16 }) => {
   if (!position) return null;
   
   const [vertical, horizontal] = position.split('-');
   
-  const tailPath = useMemo(() => {
-    const w = size;
-    const h = size * 0.8;
-    
-    switch (position) {
-      case 'bottom-left':
-        return `M0,0 L${w},0 L${w * 0.3},${h} Z`;
-      case 'bottom-right':
-        return `M0,0 L${w},0 L${w * 0.7},${h} Z`;
-      case 'top-left':
-        return `M0,${h} L${w},${h} L${w * 0.3},0 Z`;
-      case 'top-right':
-        return `M0,${h} L${w},${h} L${w * 0.7},0 Z`;
-      case 'left':
-        return `M${w},0 L${w},${h} L0,${h * 0.5} Z`;
-      case 'right':
-        return `M0,0 L0,${h} L${w},${h * 0.5} Z`;
-      default:
-        return `M0,0 L${w},0 L${w * 0.5},${h} Z`;
-    }
-  }, [position, size]);
-  
   const tailStyle = {
     position: 'absolute',
-    width: size,
-    height: size,
-    ...(vertical === 'bottom' && { bottom: -size + 2, left: horizontal === 'left' ? 20 : 'auto', right: horizontal === 'right' ? 20 : 'auto' }),
-    ...(vertical === 'top' && { top: -size + 2, left: horizontal === 'left' ? 20 : 'auto', right: horizontal === 'right' ? 20 : 'auto' }),
-    ...(position === 'left' && { left: -size + 2, top: '50%', transform: 'translateY(-50%)' }),
-    ...(position === 'right' && { right: -size + 2, top: '50%', transform: 'translateY(-50%)' }),
+    width: 0,
+    height: 0,
+    borderStyle: 'solid',
   };
   
-  return (
-    <svg
-      viewBox={`0 0 ${size} ${size}`}
-      style={tailStyle}
-    >
-      <path d={tailPath} fill={color} />
-    </svg>
-  );
+  // Triangle pointing in the appropriate direction
+  if (vertical === 'bottom') {
+    Object.assign(tailStyle, {
+      bottom: -size + 2,
+      [horizontal]: 20,
+      borderWidth: `${size}px ${size * 0.7}px 0 ${size * 0.7}px`,
+      borderColor: `${color} transparent transparent transparent`,
+    });
+  } else if (vertical === 'top') {
+    Object.assign(tailStyle, {
+      top: -size + 2,
+      [horizontal]: 20,
+      borderWidth: `0 ${size * 0.7}px ${size}px ${size * 0.7}px`,
+      borderColor: `transparent transparent ${color} transparent`,
+    });
+  }
+  
+  return <div style={tailStyle} />;
 };
 
 /**
- * Thought bubble dots
+ * Thought Bubble Dots Component
  */
-const ThoughtDots = ({ color, size = 8 }) => (
+const ThoughtDots = ({ color, size = 10 }) => (
   <div
     style={{
       position: 'absolute',
-      bottom: -size * 3,
-      left: 20,
+      bottom: -size * 3.5,
+      left: 24,
       display: 'flex',
-      gap: size * 0.5,
+      flexDirection: 'column',
+      gap: size * 0.4,
     }}
   >
-    {[1, 0.7, 0.4].map((scale, i) => (
+    {[1, 0.6, 0.3].map((scale, i) => (
       <div
         key={i}
         style={{
@@ -218,6 +265,7 @@ const ThoughtDots = ({ color, size = 8 }) => (
           height: size * scale,
           borderRadius: '50%',
           backgroundColor: color,
+          marginLeft: i * 4,
         }}
       />
     ))}
@@ -225,36 +273,149 @@ const ThoughtDots = ({ color, size = 8 }) => (
 );
 
 /**
- * Connecting line between bubbles
+ * Animated Connecting Line between bubbles
  */
-const ConnectingLine = ({ from, to, progress, color, style: lineStyle }) => {
+const ConnectorLine = ({ from, to, progress, color, style: lineStyle }) => {
   if (!from || !to || progress <= 0) return null;
   
-  const x1 = from.x;
-  const y1 = from.y;
-  const x2 = to.x;
-  const y2 = to.y;
+  const length = Math.sqrt((to.x - from.x) ** 2 + (to.y - from.y) ** 2);
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
   
-  const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+  return (
+    <svg
+      style={{
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        overflow: 'visible',
+      }}
+    >
+      <line
+        x1={from.x}
+        y1={from.y}
+        x2={from.x + (to.x - from.x) * progress}
+        y2={from.y + (to.y - from.y) * progress}
+        stroke={color}
+        strokeWidth={2}
+        strokeDasharray={lineStyle === 'dashed' ? '8 6' : lineStyle === 'dotted' ? '3 5' : 'none'}
+        strokeLinecap="round"
+        opacity={0.4}
+      />
+    </svg>
+  );
+};
+
+/**
+ * Single Bubble Component using SDK elements
+ */
+const Bubble = ({
+  callout,
+  position,
+  maxWidth,
+  bubbleShape,
+  bubbleBg,
+  textColor,
+  animStyle,
+  baseFontSize,
+  style = {},
+}) => {
+  const calloutText = typeof callout === 'string' ? callout : callout.text;
+  const calloutIcon = typeof callout === 'object' ? callout.icon : null;
+  const shape = BUBBLE_SHAPES[callout.shape || bubbleShape] || BUBBLE_SHAPES.speech;
   
+  const bubbleColor = callout.color 
+    ? (callout.color.startsWith('#') ? callout.color : KNODE_THEME.colors[callout.color] || bubbleBg)
+    : bubbleBg;
+
   return (
     <div
       style={{
         position: 'absolute',
-        left: x1,
-        top: y1,
-        width: length * progress,
-        height: 2,
-        backgroundColor: color,
-        transformOrigin: 'left center',
-        transform: `rotate(${angle}deg)`,
-        opacity: lineStyle === 'dashed' ? 0.6 : 0.4,
-        borderStyle: lineStyle || 'solid',
-        borderWidth: lineStyle === 'dashed' ? '0 0 2px 0' : 0,
-        borderColor: color,
+        left: position.x,
+        top: position.y,
+        transform: 'translate(-50%, -50%)',
+        opacity: animStyle.opacity,
+        ...style.bubbleWrapper,
       }}
-    />
+    >
+      <div
+        style={{
+          transform: animStyle.transform,
+          position: 'relative',
+          maxWidth,
+        }}
+      >
+        {/* Main bubble using Card-like styling */}
+        <div
+          style={{
+            padding: baseFontSize * 0.8,
+            backgroundColor: bubbleColor,
+            borderRadius: typeof shape.borderRadius === 'number' 
+              ? shape.borderRadius 
+              : shape.borderRadius,
+            boxShadow: KNODE_THEME.shadows.card,
+            border: shape.dashed 
+              ? `2px dashed ${KNODE_THEME.colors.textMuted}40` 
+              : 'none',
+            ...style.bubble,
+          }}
+        >
+          {/* Speech bubble tail */}
+          {shape.showTail && (
+            <BubbleTail
+              position={shape.tailPosition}
+              color={bubbleColor}
+              size={14}
+            />
+          )}
+          
+          {/* Thought bubble dots */}
+          {shape.showDots && (
+            <ThoughtDots color={bubbleColor} size={10} />
+          )}
+
+          {/* Content */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: calloutIcon ? baseFontSize * 0.5 : 0,
+              ...style.content,
+            }}
+          >
+            {calloutIcon && (
+              <span
+                style={{
+                  fontSize: baseFontSize * 1.4,
+                  lineHeight: 1,
+                  flexShrink: 0,
+                  ...style.icon,
+                }}
+              >
+                {calloutIcon}
+              </span>
+            )}
+            <Text
+              text={calloutText}
+              variant="body"
+              size="md"
+              weight={500}
+              color="textMain"
+              style={{
+                fontSize: baseFontSize,
+                lineHeight: 1.4,
+                color: textColor,
+                textAlign: calloutIcon ? 'left' : 'center',
+                ...style.text,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -268,10 +429,10 @@ const ConnectingLine = ({ from, to, progress, color, style: lineStyle }) => {
  * @param {string} props.config.callouts[].icon - Optional emoji/icon
  * @param {string} props.config.callouts[].color - Custom bubble color
  * @param {string} props.config.callouts[].shape - Bubble shape override
- * @param {Object} props.config.callouts[].position - Custom position { x, y } as percentages
- * @param {string} props.config.bubbleShape - Default bubble shape: 'speech' | 'thought' | 'rounded' | 'pill' | 'square' (default: 'speech')
- * @param {string} props.config.pattern - Layout pattern: 'flow' | 'diagonal' | 'zigzag' | 'scattered' | 'vertical' | 'horizontal' | 'grid' (default: 'flow')
- * @param {string} props.config.animation - Animation type: 'pop' | 'float' | 'slide' | 'scale' | 'fade' (default: 'float')
+ * @param {Object} props.config.callouts[].position - Custom position { x, y } as percentages (0-100)
+ * @param {string} props.config.bubbleShape - Default bubble shape: 'speech' | 'thought' | 'rounded' | 'pill' | 'square' | 'notebook' (default: 'speech')
+ * @param {string} props.config.pattern - Layout pattern: 'flow' | 'vertical' | 'horizontal' | 'diagonal' | 'zigzag' | 'scattered' | 'grid' | 'arc' (default: 'flow')
+ * @param {string} props.config.animation - Animation type: 'pop' | 'float' | 'slide' | 'scale' | 'fade' | 'drop' (default: 'float')
  * @param {number} props.config.staggerDelay - Delay between callouts in seconds (default: 0.3)
  * @param {number} props.config.animationDuration - Animation duration per callout in seconds (default: 0.6)
  * @param {boolean} props.config.showConnectors - Show connecting lines between callouts (default: false)
@@ -331,29 +492,31 @@ export const BubbleCalloutSequence = ({ config }) => {
 
   const defaultBubbleBg = resolveColor(bubbleColor, KNODE_THEME.colors.cardBg);
   const defaultTextColor = resolveColor(textColor, KNODE_THEME.colors.textMain);
+  const connectorColor = resolveColor('textMuted', KNODE_THEME.colors.textMuted);
 
-  // Calculate bubble positions
+  // Calculate bubble positions - use custom positions if provided
   const bubblePositions = useMemo(() => {
     return callouts.map((callout, index) => {
-      if (callout.position) {
-        // Custom position as percentages
+      // Check for custom position (as percentages)
+      if (typeof callout === 'object' && callout.position) {
         return {
           x: slot.left + (callout.position.x / 100) * slot.width,
           y: slot.top + (callout.position.y / 100) * slot.height,
         };
       }
-      const pos = calculateBubblePosition(index, callouts.length, pattern, slot);
+      
+      // Use pattern-based positioning
+      const positions = calculateBubblePositions(callouts, pattern, slot);
       return {
-        x: slot.left + pos.x,
-        y: slot.top + pos.y,
+        x: slot.left + positions[index].x,
+        y: slot.top + positions[index].y,
       };
     });
   }, [callouts, pattern, slot]);
 
-  // Calculate dynamic bubble size based on slot and content
-  const maxBubbleWidth = Math.min(slot.width * 0.6, 400);
-  const baseFontSize = Math.min(24, slot.height / (callouts.length * 4));
-  const bubblePadding = Math.max(16, baseFontSize * 0.8);
+  // Calculate dynamic bubble sizing
+  const maxBubbleWidth = Math.min(slot.width * 0.5, 350);
+  const baseFontSize = Math.min(22, Math.max(14, slot.height / (callouts.length * 5)));
 
   return (
     <AbsoluteFill>
@@ -362,17 +525,21 @@ export const BubbleCalloutSequence = ({ config }) => {
         if (index === 0) return null;
         
         const prevPos = bubblePositions[index - 1];
-        const lineStartFrame = startFrame + (index - 1) * staggerFrames + durationFrames;
-        const lineDuration = staggerFrames * 0.8;
-        const lineProgress = drawLine(frame, lineStartFrame, lineDuration);
+        const lineStartFrame = startFrame + (index - 1) * staggerFrames + durationFrames * 0.5;
+        const lineProgress = interpolate(
+          frame,
+          [lineStartFrame, lineStartFrame + staggerFrames * 0.8],
+          [0, 1],
+          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+        );
         
         return (
-          <ConnectingLine
+          <ConnectorLine
             key={`line-${index}`}
             from={prevPos}
             to={pos}
             progress={lineProgress}
-            color={resolveColor('textMuted')}
+            color={connectorColor}
             style={connectorStyle}
           />
         );
@@ -380,12 +547,6 @@ export const BubbleCalloutSequence = ({ config }) => {
 
       {/* Bubbles */}
       {callouts.map((callout, index) => {
-        const calloutText = typeof callout === 'string' ? callout : callout.text;
-        const calloutIcon = callout.icon;
-        const calloutColor = resolveColor(callout.color || bubbleColor, defaultBubbleBg);
-        const shape = BUBBLE_SHAPES[callout.shape || bubbleShape] || BUBBLE_SHAPES.speech;
-        
-        // Calculate animation timing for this callout
         const calloutStartFrame = startFrame + index * staggerFrames;
         const animStyle = getBubbleAnimationStyle(
           animation,
@@ -393,87 +554,22 @@ export const BubbleCalloutSequence = ({ config }) => {
           calloutStartFrame,
           durationFrames,
           fps,
-          pattern === 'horizontal' ? 'left' : 'up'
+          index
         );
 
-        const pos = bubblePositions[index];
-
         return (
-          <div
+          <Bubble
             key={index}
-            style={{
-              position: 'absolute',
-              left: pos.x,
-              top: pos.y,
-              transform: 'translate(-50%, -50%)',
-              opacity: animStyle.opacity,
-              ...style.bubbleWrapper,
-            }}
-          >
-            <div
-              style={{
-                transform: animStyle.transform,
-                position: 'relative',
-                maxWidth: maxBubbleWidth,
-                padding: bubblePadding,
-                backgroundColor: calloutColor,
-                borderRadius: shape.borderRadius,
-                boxShadow: KNODE_THEME.shadows.card,
-                ...style.bubble,
-              }}
-            >
-              {/* Bubble tail for speech bubbles */}
-              {shape.tailPosition && (
-                <BubbleTail
-                  position={shape.tailPosition}
-                  color={calloutColor}
-                  size={16}
-                />
-              )}
-              
-              {/* Thought bubble dots */}
-              {shape.tailType === 'dots' && (
-                <ThoughtDots color={calloutColor} size={10} />
-              )}
-
-              {/* Content */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: calloutIcon ? 12 : 0,
-                  ...style.content,
-                }}
-              >
-                {calloutIcon && (
-                  <span
-                    style={{
-                      fontSize: baseFontSize * 1.5,
-                      lineHeight: 1,
-                      flexShrink: 0,
-                      ...style.icon,
-                    }}
-                  >
-                    {calloutIcon}
-                  </span>
-                )}
-                <Text
-                  text={calloutText}
-                  variant="body"
-                  size="md"
-                  weight={500}
-                  color="textMain"
-                  style={{
-                    fontSize: baseFontSize,
-                    lineHeight: 1.4,
-                    color: resolveColor(callout.textColor || textColor, defaultTextColor),
-                    textAlign: 'center',
-                    ...style.text,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+            callout={callout}
+            position={bubblePositions[index]}
+            maxWidth={maxBubbleWidth}
+            bubbleShape={bubbleShape}
+            bubbleBg={defaultBubbleBg}
+            textColor={defaultTextColor}
+            animStyle={animStyle}
+            baseFontSize={baseFontSize}
+            style={style}
+          />
         );
       })}
     </AbsoluteFill>

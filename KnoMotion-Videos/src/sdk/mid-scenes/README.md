@@ -212,7 +212,8 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 
 **Features**:
 - 6 animation types: pop, slide, fade, scale, spring, bounceIn
-- Icon presets: check, bullet, dot, arrow, star, diamond, plus, minus
+- **Static icon presets**: check, bullet, dot, arrow, star, diamond, plus, minus
+- **Lottie icon presets**: lottieCheck, lottieTick, lottieSuccess, lottieStar
 - Auto-fit text to available width
 - Per-item checked/unchecked state
 - Custom colors per item
@@ -227,7 +228,7 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
     { "text": "Build your first project", "checked": false }
   ],
   "revealType": "pop",
-  "icon": "check",
+  "icon": "lottieTick",
   "iconColor": "accentGreen",
   "staggerDelay": 0.25,
   "beats": { "start": 1.0 }
@@ -249,12 +250,13 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 - Feature highlights
 
 **Features**:
-- 5 bubble shapes: speech, thought, rounded, pill, square
-- 7 layout patterns: flow, diagonal, zigzag, scattered, vertical, horizontal, grid
-- 5 animations: pop, float, slide, scale, fade
-- Optional connecting lines between bubbles
-- Custom positions via percentages
+- 6 bubble shapes: speech, thought, rounded, pill, square, **notebook** (dashed Knode style)
+- 8 layout patterns: flow, vertical, horizontal, diagonal, zigzag, scattered, grid, **arc**
+- 6 animations: pop, float, slide, scale, fade, **drop**
+- Optional connecting lines between bubbles (solid, dashed, dotted)
+- Custom positions via percentages (0-100)
 - Per-callout icons and colors
+- Uses SDK Text component for consistency
 
 **JSON Example**:
 ```json
@@ -264,9 +266,9 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
     { "text": "Break into small steps", "icon": "📝" },
     { "text": "Celebrate progress!", "icon": "🎉" }
   ],
-  "bubbleShape": "speech",
-  "pattern": "diagonal",
-  "animation": "float",
+  "bubbleShape": "notebook",
+  "pattern": "arc",
+  "animation": "drop",
   "showConnectors": true,
   "beats": { "start": 1.0 }
 }
@@ -277,36 +279,41 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 ---
 
 ### 7. TimelineStrip
-**Purpose**: Horizontal or vertical timeline with nodes, labels, and reveals.
+**Purpose**: Dynamic, configurable timeline with nodes, labels, badges, and hand-drawn Knode-style reveals.
 
 **Use Cases**:
 - Historical timelines
-- Process steps
+- Process steps / learning paths
 - Project milestones
 - Learning journeys
-- Event sequences
+- Event sequences with start/end markers
 
 **Features**:
 - Horizontal or vertical orientation
-- 4 marker shapes: circle, square, diamond, dot
-- Animated connecting lines
-- Node labels with sublabels
-- Active/inactive node states
-- Icons inside nodes
+- **6 node types**: default, start, end, milestone, checkpoint, current (each with unique styling)
+- **Auto start/end detection**: First and last nodes auto-styled if `autoStartEnd: true`
+- 5 animation types: pop, **draw** (hand-drawn feel), slide, bounce, fade
+- 4 connector styles: solid, dashed, dotted, **curved**
+- Badges above labels for step numbers
+- Icons inside nodes with rings for special nodes
+- Pulse animation for "current" nodes
+- Sublabels for dates/descriptions
+- Sketchy connector lines with wobble effect
 
 **JSON Example**:
 ```json
 {
   "events": [
-    { "label": "Start", "sublabel": "Day 1", "icon": "🚀" },
-    { "label": "Learn", "sublabel": "Week 1-2", "icon": "📚" },
-    { "label": "Practice", "sublabel": "Week 3-4", "icon": "💪" },
-    { "label": "Master", "sublabel": "Month 2", "icon": "🏆" }
+    { "label": "Start Journey", "sublabel": "Day 1", "icon": "🚀" },
+    { "label": "Learn Basics", "sublabel": "Week 1", "badge": "Step 1" },
+    { "label": "Practice", "sublabel": "Week 2", "badge": "Step 2", "type": "checkpoint" },
+    { "label": "Build Project", "sublabel": "Week 3", "badge": "Step 3", "type": "milestone" },
+    { "label": "Master It!", "sublabel": "Month 1", "icon": "🏆" }
   ],
   "orientation": "horizontal",
-  "animation": "slide",
-  "markerShape": "circle",
-  "showConnectors": true,
+  "animation": "draw",
+  "connectorStyle": "dashed",
+  "autoStartEnd": true,
   "beats": { "start": 1.0 }
 }
 ```
@@ -316,7 +323,7 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 ---
 
 ### 8. SideBySideCompare
-**Purpose**: Left vs right comparison blocks with text, icons, or mixed content.
+**Purpose**: Left vs right comparison blocks with text, icons, or mixed content. Features hand-drawn divider options.
 
 **Use Cases**:
 - Before/after comparisons
@@ -327,28 +334,40 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
 
 **Features**:
 - 5 animations: slide, fade, scale, bounce, reveal
-- 4 divider styles: none, line, dashed, vs (with badge)
+- **7 divider styles**: none, line, dashed, vs (with badge), **equals** (hand-drawn), **arrows** (hand-drawn), **lottie** (animated)
 - Title, subtitle, icon, and item lists per side
 - Custom colors per side
 - Background colors for sections
+- Hand-drawn elements for Knode sketchbook style
 
-**JSON Example**:
+**JSON Example** (with hand-drawn equals sign):
 ```json
 {
   "left": {
-    "title": "Before",
-    "icon": "😕",
-    "items": ["Confusing syntax", "Hard to debug", "Slow"],
-    "color": "secondary"
+    "title": "Learning",
+    "subtitle": "The journey",
+    "icon": "📚"
   },
   "right": {
-    "title": "After",
-    "icon": "🎉",
-    "items": ["Clean code", "Easy debugging", "Fast"],
-    "color": "accentGreen"
+    "title": "Mastery",
+    "subtitle": "The destination",
+    "icon": "🏆"
   },
-  "animation": "slide",
-  "dividerType": "vs",
+  "animation": "reveal",
+  "dividerType": "equals",
+  "dividerColor": "doodle",
+  "beats": { "start": 1.0 }
+}
+```
+
+**JSON Example** (with Lottie animation):
+```json
+{
+  "left": { "title": "Input", "icon": "⬇️" },
+  "right": { "title": "Output", "icon": "⬆️" },
+  "animation": "scale",
+  "dividerType": "lottie",
+  "dividerLabel": "burst",
   "beats": { "start": 1.0 }
 }
 ```
@@ -745,5 +764,35 @@ mid-scenes/
 ---
 
 **Last Updated**: December 1, 2025  
-**Status**: 9 mid-scenes complete (4 original + 5 new)
+**Status**: 9 mid-scenes complete (4 original + 5 new)  
 **New in this release**: ChecklistReveal, BubbleCalloutSequence, TimelineStrip, SideBySideCompare, GridCardReveal
+
+### Recent Enhancements (v2.1)
+
+Based on user feedback, the following improvements were made:
+
+1. **TimelineStrip** (Major Rewrite)
+   - Added 6 node types: default, start, end, milestone, checkpoint, current
+   - Added `autoStartEnd` for automatic first/last node styling
+   - Added badges for step numbering
+   - Added `draw` animation for hand-drawn feel
+   - Added `curved` connector style
+   - Added pulse animation for current nodes
+   - Improved layout and visual structure
+
+2. **BubbleCalloutSequence** (Fixes & Enhancements)
+   - Fixed scattered, horizontal, and grid patterns
+   - Added `arc` pattern for semi-circular layouts
+   - Added `drop` animation (falls from above)
+   - Added `notebook` bubble shape (dashed Knode style)
+   - Refactored to use SDK elements instead of inline JSX
+
+3. **ChecklistReveal** (Lottie Support)
+   - Added Lottie icon presets: lottieCheck, lottieTick, lottieSuccess, lottieStar
+   - Icons now support both static and animated variants
+
+4. **SideBySideCompare** (Hand-drawn Dividers)
+   - Added `equals` divider type (hand-drawn animated equals sign)
+   - Added `arrows` divider type (hand-drawn opposing arrows)
+   - Added `lottie` divider type for animated effects
+   - All new dividers support Knode sketchbook aesthetic

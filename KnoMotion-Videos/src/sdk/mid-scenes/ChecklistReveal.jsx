@@ -16,13 +16,16 @@ import { Text } from '../elements/atoms/Text';
 import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
 import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
+import { RemotionLottie } from '../lottie/lottieIntegration';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 
 /**
  * Icon presets for checklist items
+ * Includes static icons and lottie animation references
  */
 const ICON_PRESETS = {
+  // Static icons
   check: '✓',
   checkmark: '✓',
   tick: '✓',
@@ -35,23 +38,56 @@ const ICON_PRESETS = {
   square: '■',
   plus: '+',
   minus: '−',
+  // Lottie presets (these get special handling)
+  lottieCheck: { type: 'lottie', ref: 'checkmark', loop: false },
+  lottieTick: { type: 'lottie', ref: 'success', loop: false },
+  lottieSuccess: { type: 'lottie', ref: 'success', loop: false },
+  lottieStar: { type: 'lottie', ref: 'stars', loop: false },
 };
 
 /**
  * Get icon based on configuration
+ * Returns either a string icon or a lottie config object
  * 
  * @param {string|Object} iconConfig - Icon preset name or custom emoji/text
  * @param {boolean} checked - Whether item is checked (for toggle states)
- * @returns {string} Icon character/emoji
+ * @returns {string|Object} Icon character/emoji or lottie config
  */
 const getIcon = (iconConfig, checked = true) => {
   if (!iconConfig) return checked ? '✓' : '○';
   
   if (typeof iconConfig === 'string') {
-    return ICON_PRESETS[iconConfig] || iconConfig;
+    const preset = ICON_PRESETS[iconConfig];
+    // Check if it's a lottie preset
+    if (preset && typeof preset === 'object' && preset.type === 'lottie') {
+      return preset;
+    }
+    return preset || iconConfig;
   }
   
-  return checked ? (iconConfig.checked || '✓') : (iconConfig.unchecked || '○');
+  // Handle object config with checked/unchecked states
+  if (iconConfig.checked || iconConfig.unchecked) {
+    const icon = checked ? (iconConfig.checked || '✓') : (iconConfig.unchecked || '○');
+    // Check if the selected icon is a lottie preset
+    if (typeof icon === 'string' && ICON_PRESETS[icon]?.type === 'lottie') {
+      return ICON_PRESETS[icon];
+    }
+    return icon;
+  }
+  
+  // Handle direct lottie config
+  if (iconConfig.type === 'lottie') {
+    return iconConfig;
+  }
+  
+  return checked ? '✓' : '○';
+};
+
+/**
+ * Check if icon is a lottie animation
+ */
+const isLottieIcon = (icon) => {
+  return typeof icon === 'object' && icon.type === 'lottie';
 };
 
 /**
@@ -310,21 +346,49 @@ export const ChecklistReveal = ({ config }) => {
                 ...style.iconContainer,
               }}
             >
-              <span
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: itemChecked ? `${itemIconColor}15` : 'transparent',
-                  borderRadius: '50%',
-                  border: itemChecked ? 'none' : `2px solid ${KNODE_THEME.colors.textMuted}`,
-                  ...style.icon,
-                }}
-              >
-                {itemIcon}
-              </span>
+              {isLottieIcon(itemIcon) ? (
+                // Lottie animated icon
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: itemChecked ? `${itemIconColor}15` : 'transparent',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    ...style.icon,
+                  }}
+                >
+                  <RemotionLottie
+                    lottieRef={itemIcon.ref}
+                    loop={itemIcon.loop !== undefined ? itemIcon.loop : false}
+                    startFrame={itemStartFrame}
+                    style={{
+                      width: iconWidth * 0.85,
+                      height: iconWidth * 0.85,
+                    }}
+                  />
+                </div>
+              ) : (
+                // Static icon (emoji or character)
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: itemChecked ? `${itemIconColor}15` : 'transparent',
+                    borderRadius: '50%',
+                    border: itemChecked ? 'none' : `2px solid ${KNODE_THEME.colors.textMuted}`,
+                    ...style.icon,
+                  }}
+                >
+                  {itemIcon}
+                </span>
+              )}
             </div>
 
             {/* Text container with main animation */}

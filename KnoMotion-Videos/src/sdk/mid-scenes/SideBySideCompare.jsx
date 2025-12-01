@@ -14,6 +14,8 @@ import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
+import { RemotionLottie } from '../lottie/lottieIntegration';
+import { getDoodleUnderline } from '../decorations/doodleEffects';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 
@@ -229,7 +231,107 @@ const ComparisonSide = ({
 };
 
 /**
- * VS Divider Component
+ * Hand-drawn equals sign SVG
+ */
+const HandDrawnEquals = ({ size, color, progress, frame }) => {
+  const wobble = Math.sin(frame * 0.05) * 1;
+  const lineLength = size * 0.8;
+  const lineSpacing = size * 0.25;
+  
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      style={{ overflow: 'visible' }}
+    >
+      {/* Top line */}
+      <path
+        d={`M ${size * 0.1} ${size * 0.5 - lineSpacing + wobble} 
+            Q ${size * 0.5} ${size * 0.5 - lineSpacing - 3 + wobble} 
+            ${size * 0.9} ${size * 0.5 - lineSpacing + wobble * 0.5}`}
+        stroke={color}
+        strokeWidth={3}
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray={lineLength}
+        strokeDashoffset={lineLength * (1 - progress)}
+        opacity={0.8}
+      />
+      {/* Bottom line */}
+      <path
+        d={`M ${size * 0.1} ${size * 0.5 + lineSpacing - wobble * 0.5} 
+            Q ${size * 0.5} ${size * 0.5 + lineSpacing + 2 - wobble} 
+            ${size * 0.9} ${size * 0.5 + lineSpacing - wobble}`}
+        stroke={color}
+        strokeWidth={3}
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray={lineLength}
+        strokeDashoffset={lineLength * (1 - Math.max(0, progress - 0.3) / 0.7)}
+        opacity={0.8}
+      />
+    </svg>
+  );
+};
+
+/**
+ * Hand-drawn arrows pointing at each other
+ */
+const HandDrawnArrows = ({ size, color, progress, frame }) => {
+  const wobble = Math.sin(frame * 0.08) * 1.5;
+  
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      style={{ overflow: 'visible' }}
+    >
+      {/* Left arrow pointing right */}
+      <g opacity={progress}>
+        <path
+          d={`M ${size * 0.15} ${size * 0.5 + wobble} 
+              L ${size * 0.4} ${size * 0.5 - wobble * 0.5}`}
+          stroke={color}
+          strokeWidth={2.5}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d={`M ${size * 0.35} ${size * 0.35} L ${size * 0.45} ${size * 0.5} L ${size * 0.35} ${size * 0.65}`}
+          stroke={color}
+          strokeWidth={2.5}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      {/* Right arrow pointing left */}
+      <g opacity={Math.max(0, progress - 0.2) / 0.8}>
+        <path
+          d={`M ${size * 0.85} ${size * 0.5 - wobble} 
+              L ${size * 0.6} ${size * 0.5 + wobble * 0.5}`}
+          stroke={color}
+          strokeWidth={2.5}
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d={`M ${size * 0.65} ${size * 0.35} L ${size * 0.55} ${size * 0.5} L ${size * 0.65} ${size * 0.65}`}
+          stroke={color}
+          strokeWidth={2.5}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+/**
+ * VS Divider Component with hand-drawn and lottie support
  */
 const VsDivider = ({
   type,
@@ -238,9 +340,20 @@ const VsDivider = ({
   animStyle,
   slotHeight,
   baseFontSize,
+  frame,
+  fps,
+  startFrame,
   style = {},
 }) => {
   if (type === 'none') return null;
+
+  // Calculate animation progress for hand-drawn effects
+  const drawProgress = interpolate(
+    frame,
+    [startFrame, startFrame + 30],
+    [0, 1],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
 
   return (
     <div
@@ -248,7 +361,9 @@ const VsDivider = ({
         position: 'absolute',
         left: '50%',
         top: 0,
-        width: type === 'vs' ? baseFontSize * 3 : 2,
+        width: type === 'vs' || type === 'equals' || type === 'arrows' || type === 'lottie' 
+          ? baseFontSize * 3 
+          : 2,
         height: '100%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -284,6 +399,65 @@ const VsDivider = ({
             ...style.dividerLine,
           }}
         />
+      )}
+
+      {/* Hand-drawn equals sign */}
+      {type === 'equals' && (
+        <div
+          style={{
+            transform: animStyle.transform,
+            ...style.equalsContainer,
+          }}
+        >
+          <HandDrawnEquals
+            size={baseFontSize * 2.5}
+            color={color}
+            progress={drawProgress}
+            frame={frame}
+          />
+        </div>
+      )}
+
+      {/* Hand-drawn arrows */}
+      {type === 'arrows' && (
+        <div
+          style={{
+            transform: animStyle.transform,
+            ...style.arrowsContainer,
+          }}
+        >
+          <HandDrawnArrows
+            size={baseFontSize * 2.5}
+            color={color}
+            progress={drawProgress}
+            frame={frame}
+          />
+        </div>
+      )}
+
+      {/* Lottie animation divider */}
+      {type === 'lottie' && (
+        <div
+          style={{
+            transform: animStyle.transform,
+            width: baseFontSize * 3,
+            height: baseFontSize * 3,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            ...style.lottieContainer,
+          }}
+        >
+          <RemotionLottie
+            lottieRef={label || 'burst'}
+            loop={false}
+            startFrame={startFrame}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </div>
       )}
       
       {type === 'vs' && (
@@ -471,6 +645,9 @@ export const SideBySideCompare = ({ config }) => {
           animStyle={dividerAnimStyle}
           slotHeight={slot.height}
           baseFontSize={baseFontSize}
+          frame={frame}
+          fps={fps}
+          startFrame={dividerStartFrame}
           style={style}
         />
 

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SideBySideCompare",
-  "description": "Left vs right comparison blocks with text, icons, and animated reveals",
+  "description": "Left vs right comparison blocks with text, icons, and animated reveals. Features hand-drawn divider options.",
   "type": "object",
   "required": ["left", "right", "beats"],
   "properties": {
@@ -79,19 +79,19 @@
     },
     "dividerType": {
       "type": "string",
-      "enum": ["none", "line", "dashed", "vs"],
+      "enum": ["none", "line", "dashed", "vs", "equals", "arrows", "lottie"],
       "default": "vs",
-      "description": "Style of center divider"
+      "description": "Style of center divider. 'equals': hand-drawn equals sign. 'arrows': hand-drawn opposing arrows. 'lottie': animated Lottie."
     },
     "dividerLabel": {
       "type": "string",
       "default": "VS",
-      "description": "Custom label for VS divider badge"
+      "description": "Label for VS badge OR lottie animation ref for 'lottie' type (e.g., 'burst', 'stars', 'celebration', 'success')"
     },
     "dividerColor": {
       "type": "string",
       "default": "primary",
-      "description": "Divider color. Theme keys: primary, secondary, accentGreen, etc. Or hex/rgb."
+      "description": "Divider color. Theme keys: primary, secondary, accentGreen, doodle. Or hex/rgb."
     },
     "alignment": {
       "type": "string",
@@ -136,7 +136,10 @@
         "dividerLine": { "type": "object" },
         "vsContainer": { "type": "object" },
         "vsBadge": { "type": "object" },
-        "vsText": { "type": "object" }
+        "vsText": { "type": "object" },
+        "equalsContainer": { "type": "object" },
+        "arrowsContainer": { "type": "object" },
+        "lottieContainer": { "type": "object" }
       }
     }
   },
@@ -168,36 +171,66 @@
     },
     {
       "left": {
-        "title": "Option A",
-        "subtitle": "Traditional approach",
-        "icon": "📚",
-        "items": [
-          { "text": "Well-documented", "icon": "✓" },
-          { "text": "Proven track record", "icon": "✓" }
-        ],
-        "backgroundColor": "pageBg"
+        "title": "Learning",
+        "subtitle": "The journey begins",
+        "icon": "📚"
       },
       "right": {
-        "title": "Option B",
-        "subtitle": "Modern solution",
-        "icon": "🚀",
-        "items": [
-          { "text": "Cutting-edge features", "icon": "✓" },
-          { "text": "Better scalability", "icon": "✓" }
-        ],
-        "backgroundColor": "pageBg"
+        "title": "Mastery",
+        "subtitle": "The destination",
+        "icon": "🏆"
       },
       "animation": "reveal",
-      "dividerType": "line",
-      "staggerDelay": 0.4,
-      "beats": { "start": 0.5 }
+      "dividerType": "equals",
+      "dividerColor": "doodle",
+      "beats": { "start": 0.5 },
+      "_comment": "Uses hand-drawn equals sign for Knode style"
+    },
+    {
+      "left": {
+        "title": "Theory",
+        "items": ["Concepts", "Principles", "Foundations"]
+      },
+      "right": {
+        "title": "Practice",
+        "items": ["Exercises", "Projects", "Real-world"]
+      },
+      "animation": "bounce",
+      "dividerType": "arrows",
+      "dividerColor": "accentGreen",
+      "beats": { "start": 0.8 },
+      "_comment": "Uses hand-drawn arrows pointing at each other"
+    },
+    {
+      "left": {
+        "title": "Input",
+        "icon": "⬇️"
+      },
+      "right": {
+        "title": "Output",
+        "icon": "⬆️"
+      },
+      "animation": "scale",
+      "dividerType": "lottie",
+      "dividerLabel": "burst",
+      "beats": { "start": 1.0 },
+      "_comment": "Uses animated Lottie burst effect between sides"
     }
   ],
+  "dividerTypes": {
+    "none": "No divider shown",
+    "line": "Simple solid vertical line",
+    "dashed": "Dashed vertical line",
+    "vs": "Circular VS badge with connecting lines",
+    "equals": "Hand-drawn animated equals sign (Knode sketchbook style)",
+    "arrows": "Hand-drawn arrows pointing at each other (Knode style)",
+    "lottie": "Animated Lottie effect (specify animation in dividerLabel)"
+  },
   "sizingBehavior": {
     "description": "SideBySideCompare splits the slot into two equal halves",
     "width": "Each side uses 48% of slot width with divider in center",
     "height": "Content is vertically centered within full slot height",
     "fontScaling": "Base font size scales with slot height (16-32px range)",
-    "divider": "Divider occupies 4% of width in center, VS badge sized to font"
+    "divider": "Divider occupies 4% of width in center, badges/drawings sized to font"
   }
 }

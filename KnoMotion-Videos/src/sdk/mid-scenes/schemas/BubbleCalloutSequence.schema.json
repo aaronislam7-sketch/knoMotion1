@@ -30,18 +30,14 @@
                 "type": "string",
                 "description": "Custom bubble background color"
               },
-              "textColor": {
-                "type": "string",
-                "description": "Custom text color"
-              },
               "shape": {
                 "type": "string",
-                "enum": ["speech", "thought", "rounded", "pill", "square"],
+                "enum": ["speech", "thought", "rounded", "pill", "square", "notebook"],
                 "description": "Bubble shape override"
               },
               "position": {
                 "type": "object",
-                "description": "Custom position as percentages",
+                "description": "Custom position as percentages (0-100)",
                 "properties": {
                   "x": { "type": "number", "minimum": 0, "maximum": 100 },
                   "y": { "type": "number", "minimum": 0, "maximum": 100 }
@@ -55,21 +51,21 @@
     },
     "bubbleShape": {
       "type": "string",
-      "enum": ["speech", "thought", "rounded", "pill", "square"],
+      "enum": ["speech", "thought", "rounded", "pill", "square", "notebook"],
       "default": "speech",
-      "description": "Default bubble shape for all callouts"
+      "description": "Default bubble shape for all callouts. 'notebook' has dashed border for Knode style."
     },
     "pattern": {
       "type": "string",
-      "enum": ["flow", "diagonal", "zigzag", "scattered", "vertical", "horizontal", "grid"],
+      "enum": ["flow", "vertical", "horizontal", "diagonal", "zigzag", "scattered", "grid", "arc"],
       "default": "flow",
-      "description": "Layout pattern for bubble positioning"
+      "description": "Layout pattern for bubble positioning. All patterns now work correctly."
     },
     "animation": {
       "type": "string",
-      "enum": ["pop", "float", "slide", "scale", "fade", "bounceIn", "slideIn", "scaleIn", "fadeIn"],
+      "enum": ["pop", "float", "slide", "scale", "fade", "drop"],
       "default": "float",
-      "description": "Animation type for bubble entrance"
+      "description": "Animation type for bubble entrance. 'drop' falls from above."
     },
     "staggerDelay": {
       "type": "number",
@@ -153,18 +149,51 @@
     {
       "callouts": [
         { "text": "What if we tried something new?", "shape": "thought" },
-        { "text": "That's a great idea!", "shape": "speech" }
+        { "text": "That's a great idea!", "shape": "speech" },
+        { "text": "Let's make it happen!", "shape": "rounded" }
       ],
       "pattern": "zigzag",
       "animation": "pop",
       "beats": { "start": 0.5 }
+    },
+    {
+      "callouts": [
+        { "text": "Step 1: Learn", "icon": "📚" },
+        { "text": "Step 2: Practice", "icon": "💪" },
+        { "text": "Step 3: Apply", "icon": "🎯" },
+        { "text": "Step 4: Share", "icon": "🌟" }
+      ],
+      "bubbleShape": "notebook",
+      "pattern": "grid",
+      "animation": "drop",
+      "beats": { "start": 1.0 }
+    },
+    {
+      "callouts": [
+        { "text": "Feature A", "position": { "x": 20, "y": 30 } },
+        { "text": "Feature B", "position": { "x": 80, "y": 30 } },
+        { "text": "Feature C", "position": { "x": 50, "y": 70 } }
+      ],
+      "bubbleShape": "pill",
+      "animation": "scale",
+      "beats": { "start": 0.5 }
     }
   ],
+  "patternDescriptions": {
+    "flow": "Vertical centered with slight horizontal alternation",
+    "vertical": "Evenly spaced vertical stack, centered horizontally",
+    "horizontal": "Evenly spaced horizontal row, centered vertically",
+    "diagonal": "Top-left to bottom-right diagonal progression",
+    "zigzag": "Alternating left-right positions vertically",
+    "scattered": "Deterministic scatter using golden angle distribution",
+    "grid": "Auto-calculated grid layout based on callout count",
+    "arc": "Semi-circular arc from left to right"
+  },
   "sizingBehavior": {
     "description": "BubbleCalloutSequence adapts to slot dimensions",
-    "width": "Bubbles are sized up to 60% of slot width or 400px max",
+    "width": "Bubbles are sized up to 50% of slot width or 350px max",
     "height": "Bubbles are distributed within slot height based on pattern",
-    "fontScaling": "Font size scales based on callout count and slot height",
+    "fontScaling": "Font size scales based on callout count and slot height (14-22px)",
     "positioning": "Bubbles can use auto-layout patterns or custom percentage positions"
   }
 }

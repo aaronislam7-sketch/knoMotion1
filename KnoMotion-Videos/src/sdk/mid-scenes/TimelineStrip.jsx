@@ -1,8 +1,8 @@
 /**
  * TimelineStrip - Mid-Scene Component
  * 
- * Renders a horizontal or vertical timeline with nodes, labels, and animated reveals.
- * Features slide/fade animations, connecting lines, and customizable markers.
+ * Renders a dynamic, configurable timeline with nodes, labels, and hand-drawn reveals.
+ * Features Knode sketchbook style with doodle effects and customizable node types.
  * All configurable via JSON - pre-built for LLM JSON generation.
  * 
  * @module mid-scenes/TimelineStrip
@@ -13,33 +13,60 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
-import { fadeIn, slideIn, scaleIn, drawLine } from '../animations/index';
+import { Badge } from '../elements/atoms/Badge';
+import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
+import { getDoodleCircle, getDoodleArrow } from '../decorations/doodleEffects';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 
 /**
- * Node marker presets
+ * Node type configurations for different visual styles
  */
-const MARKER_SHAPES = {
-  circle: { borderRadius: '50%' },
-  square: { borderRadius: '4px' },
-  diamond: { borderRadius: '4px', transform: 'rotate(45deg)' },
-  dot: { borderRadius: '50%', scale: 0.6 },
+const NODE_TYPES = {
+  default: {
+    shape: 'circle',
+    size: 1,
+    showRing: false,
+  },
+  start: {
+    shape: 'circle',
+    size: 1.2,
+    showRing: true,
+    ringColor: 'accentGreen',
+    icon: '🚀',
+  },
+  end: {
+    shape: 'circle',
+    size: 1.2,
+    showRing: true,
+    ringColor: 'primary',
+    icon: '🎯',
+  },
+  milestone: {
+    shape: 'diamond',
+    size: 1.3,
+    showRing: true,
+    ringColor: 'doodle',
+  },
+  checkpoint: {
+    shape: 'square',
+    size: 1.1,
+    showRing: false,
+  },
+  current: {
+    shape: 'circle',
+    size: 1.4,
+    showRing: true,
+    ringColor: 'primary',
+    pulse: true,
+  },
 };
 
 /**
  * Get animation style for timeline elements
  */
-const getElementAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, direction = 'left') => {
+const getNodeAnimationStyle = (animationType, frame, startFrame, durationFrames, fps) => {
   switch (animationType) {
-    case 'slide':
-    case 'slideIn':
-      return slideIn(frame, startFrame, durationFrames, direction, 50);
-    
-    case 'scale':
-    case 'scaleIn':
-      return scaleIn(frame, startFrame, durationFrames, 0);
-    
     case 'pop': {
       const progress = spring({
         frame: Math.max(0, frame - startFrame),
@@ -52,33 +79,133 @@ const getElementAnimationStyle = (animationType, frame, startFrame, durationFram
       };
     }
     
+    case 'draw': {
+      // Simulates hand-drawn appearance
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 15, mass: 1, stiffness: 100 },
+      });
+      return {
+        opacity: progress,
+        transform: `scale(${progress}) rotate(${(1 - progress) * 10}deg)`,
+      };
+    }
+    
+    case 'slide':
+      return slideIn(frame, startFrame, durationFrames, 'up', 40);
+    
+    case 'bounce':
+      return bounceIn(frame, startFrame, durationFrames);
+    
     case 'fade':
-    case 'fadeIn':
     default:
       return fadeIn(frame, startFrame, durationFrames);
   }
 };
 
 /**
- * Timeline Node Component
+ * Hand-drawn Node Component with sketchy style
  */
 const TimelineNode = ({
   event,
   position,
   nodeSize,
-  markerShape,
-  activeColor,
-  inactiveColor,
+  isFirst,
+  isLast,
   animStyle,
+  frame,
+  startFrame,
+  fps,
   orientation,
-  index,
   style = {},
+  resolveColor,
 }) => {
-  const shape = MARKER_SHAPES[markerShape] || MARKER_SHAPES.circle;
-  const isActive = event.active !== false;
-  const nodeColor = isActive 
-    ? (event.color || activeColor) 
-    : inactiveColor;
+  const nodeType = NODE_TYPES[event.type] || NODE_TYPES.default;
+  const isVertical = orientation === 'vertical';
+  
+  // Determine node color
+  const nodeColor = resolveColor(
+    event.color || 
+    (event.type === 'start' ? 'accentGreen' : 
+     event.type === 'end' ? 'primary' : 
+     event.active === false ? 'textMuted' : 'primary')
+  );
+  
+  const ringColor = resolveColor(nodeType.ringColor || 'primary');
+  const actualSize = nodeSize * (nodeType.size || 1);
+  
+  // Pulse animation for current/active nodes
+  const pulseScale = nodeType.pulse 
+    ? 1 + Math.sin(frame * 0.15) * 0.05 
+    : 1;
+  
+  // Get shape based on node type
+  const renderNodeShape = () => {
+    const shapeStyle = {
+      width: actualSize,
+      height: actualSize,
+      backgroundColor: nodeColor,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: `0 4px 12px ${nodeColor}40`,
+      transition: 'transform 0.2s ease',
+    };
+    
+    switch (nodeType.shape) {
+      case 'diamond':
+        return (
+          <div
+            style={{
+              ...shapeStyle,
+              borderRadius: 4,
+              transform: `rotate(45deg) scale(${pulseScale})`,
+            }}
+          >
+            <span style={{ transform: 'rotate(-45deg)', fontSize: actualSize * 0.45 }}>
+              {event.icon || nodeType.icon}
+            </span>
+          </div>
+        );
+      
+      case 'square':
+        return (
+          <div
+            style={{
+              ...shapeStyle,
+              borderRadius: actualSize * 0.15,
+              transform: `scale(${pulseScale})`,
+            }}
+          >
+            <span style={{ fontSize: actualSize * 0.45 }}>
+              {event.icon || nodeType.icon}
+            </span>
+          </div>
+        );
+      
+      case 'circle':
+      default:
+        return (
+          <div
+            style={{
+              ...shapeStyle,
+              borderRadius: '50%',
+              transform: `scale(${pulseScale})`,
+            }}
+          >
+            <span style={{ fontSize: actualSize * 0.45, color: '#fff' }}>
+              {event.icon || nodeType.icon}
+            </span>
+          </div>
+        );
+    }
+  };
+
+  // Label positioning based on orientation and index
+  const labelPosition = isVertical
+    ? { left: actualSize + 20, top: '50%', transform: 'translateY(-50%)' }
+    : { top: actualSize + 12, left: '50%', transform: 'translateX(-50%)' };
 
   return (
     <div
@@ -87,68 +214,80 @@ const TimelineNode = ({
         left: position.x,
         top: position.y,
         transform: 'translate(-50%, -50%)',
-        display: 'flex',
-        flexDirection: orientation === 'vertical' ? 'row' : 'column',
-        alignItems: 'center',
-        gap: 12,
         opacity: animStyle.opacity,
         ...style.nodeWrapper,
       }}
     >
-      {/* Node marker */}
+      {/* Outer ring for special nodes */}
+      {nodeType.showRing && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: `translate(-50%, -50%) scale(${animStyle.transform?.includes('scale') ? 1 : pulseScale})`,
+            width: actualSize + 16,
+            height: actualSize + 16,
+            borderRadius: nodeType.shape === 'diamond' ? 4 : nodeType.shape === 'square' ? actualSize * 0.2 : '50%',
+            border: `3px dashed ${ringColor}60`,
+            rotate: nodeType.shape === 'diamond' ? '45deg' : '0deg',
+            ...style.ring,
+          }}
+        />
+      )}
+
+      {/* Node shape */}
       <div
         style={{
           transform: animStyle.transform,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: nodeSize,
-          height: nodeSize,
-          backgroundColor: nodeColor,
-          boxShadow: isActive ? `0 0 0 4px ${nodeColor}30` : 'none',
-          ...shape,
-          ...style.marker,
+          ...style.node,
         }}
       >
-        {event.icon && (
-          <span
-            style={{
-              fontSize: nodeSize * 0.5,
-              transform: shape.transform ? `rotate(-45deg)` : 'none',
-              color: '#fff',
-              ...style.icon,
-            }}
-          >
-            {event.icon}
-          </span>
-        )}
+        {renderNodeShape()}
       </div>
 
       {/* Label container */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: orientation === 'vertical' ? 'flex-start' : 'center',
-          gap: 4,
-          transform: animStyle.transform,
+          position: 'absolute',
+          ...labelPosition,
+          whiteSpace: 'nowrap',
+          transform: `${labelPosition.transform} ${animStyle.transform}`,
+          opacity: animStyle.opacity,
           ...style.labelContainer,
         }}
       >
+        {/* Badge for type indicator */}
+        {event.badge && (
+          <Badge
+            text={event.badge}
+            variant={event.type === 'start' ? 'success' : event.type === 'end' ? 'primary' : 'default'}
+            size="sm"
+            style={{
+              marginBottom: 6,
+              fontSize: nodeSize * 0.35,
+              ...style.badge,
+            }}
+          />
+        )}
+        
+        {/* Main label */}
         {event.label && (
           <Text
             text={event.label}
             variant="body"
             size="md"
-            weight={600}
+            weight={event.type === 'current' || isFirst || isLast ? 700 : 600}
             color="textMain"
             style={{
-              fontSize: nodeSize * 0.6,
-              whiteSpace: 'nowrap',
+              fontSize: nodeSize * 0.55,
+              textAlign: isVertical ? 'left' : 'center',
               ...style.label,
             }}
           />
         )}
+        
+        {/* Sublabel / description */}
         {event.sublabel && (
           <Text
             text={event.sublabel}
@@ -157,8 +296,9 @@ const TimelineNode = ({
             weight={400}
             color="textSoft"
             style={{
-              fontSize: nodeSize * 0.45,
-              whiteSpace: 'nowrap',
+              fontSize: nodeSize * 0.4,
+              marginTop: 4,
+              textAlign: isVertical ? 'left' : 'center',
               ...style.sublabel,
             }}
           />
@@ -169,39 +309,85 @@ const TimelineNode = ({
 };
 
 /**
- * Timeline Connector Line Component
+ * Animated connector with hand-drawn style
  */
-const TimelineConnector = ({
+const SketchyConnector = ({
   from,
   to,
   progress,
   color,
   thickness,
+  connectorStyle,
   orientation,
-  style = {},
+  frame,
+  fps,
 }) => {
   if (progress <= 0) return null;
 
   const isVertical = orientation === 'vertical';
-  
-  const lineLength = isVertical 
+  const length = isVertical 
     ? Math.abs(to.y - from.y)
     : Math.abs(to.x - from.x);
 
+  // Add slight wobble for hand-drawn feel
+  const wobble = Math.sin(frame * 0.1) * 0.5;
+  
+  // Calculate path for sketchy line
+  const getSketchyPath = () => {
+    if (connectorStyle === 'curved') {
+      const midX = (from.x + to.x) / 2;
+      const midY = (from.y + to.y) / 2;
+      const curveOffset = isVertical ? 20 : -20;
+      
+      return `M ${from.x} ${from.y} Q ${midX + (isVertical ? curveOffset : 0)} ${midY + (isVertical ? 0 : curveOffset)} ${to.x} ${to.y}`;
+    }
+    
+    // Straight with slight wobble
+    const midX = (from.x + to.x) / 2 + wobble;
+    const midY = (from.y + to.y) / 2 + wobble;
+    
+    return `M ${from.x} ${from.y} L ${midX} ${midY} L ${to.x} ${to.y}`;
+  };
+
+  const strokeDasharray = connectorStyle === 'dashed' 
+    ? '12 8' 
+    : connectorStyle === 'dotted' 
+      ? '4 6' 
+      : 'none';
+
   return (
-    <div
+    <svg
       style={{
         position: 'absolute',
-        left: isVertical ? from.x : Math.min(from.x, to.x),
-        top: isVertical ? Math.min(from.y, to.y) : from.y,
-        width: isVertical ? thickness : lineLength * progress,
-        height: isVertical ? lineLength * progress : thickness,
-        backgroundColor: color,
-        transform: 'translate(-50%, -50%)',
-        borderRadius: thickness / 2,
-        ...style.connector,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        overflow: 'visible',
       }}
-    />
+    >
+      {/* Background track */}
+      <path
+        d={getSketchyPath()}
+        stroke={`${color}20`}
+        strokeWidth={thickness + 2}
+        fill="none"
+        strokeLinecap="round"
+      />
+      
+      {/* Animated foreground line */}
+      <path
+        d={getSketchyPath()}
+        stroke={color}
+        strokeWidth={thickness}
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray={strokeDasharray !== 'none' ? strokeDasharray : length * 1.5}
+        strokeDashoffset={strokeDasharray !== 'none' ? 0 : length * 1.5 * (1 - progress)}
+        opacity={0.7}
+      />
+    </svg>
   );
 };
 
@@ -214,19 +400,20 @@ const TimelineConnector = ({
  * @param {string} props.config.events[].label - Event label/title
  * @param {string} props.config.events[].sublabel - Optional subtitle/date
  * @param {string} props.config.events[].icon - Optional icon/emoji
+ * @param {string} props.config.events[].badge - Optional badge text (e.g., "Step 1")
  * @param {string} props.config.events[].color - Custom node color
+ * @param {string} props.config.events[].type - Node type: 'default' | 'start' | 'end' | 'milestone' | 'checkpoint' | 'current'
  * @param {boolean} props.config.events[].active - Whether node is active (default: true)
  * @param {string} props.config.orientation - Timeline direction: 'horizontal' | 'vertical' (default: 'horizontal')
- * @param {string} props.config.animation - Animation type: 'slide' | 'fade' | 'scale' | 'pop' (default: 'slide')
- * @param {number} props.config.staggerDelay - Delay between nodes in seconds (default: 0.25)
+ * @param {string} props.config.animation - Animation type: 'pop' | 'draw' | 'slide' | 'bounce' | 'fade' (default: 'draw')
+ * @param {number} props.config.staggerDelay - Delay between nodes in seconds (default: 0.3)
  * @param {number} props.config.animationDuration - Animation duration per node in seconds (default: 0.5)
- * @param {string} props.config.markerShape - Node marker shape: 'circle' | 'square' | 'diamond' | 'dot' (default: 'circle')
- * @param {number} props.config.nodeSize - Size of node markers in pixels (default: auto-calculated)
+ * @param {string} props.config.connectorStyle - Connector style: 'solid' | 'dashed' | 'dotted' | 'curved' (default: 'dashed')
+ * @param {number} props.config.nodeSize - Base size of node markers in pixels (default: auto-calculated)
  * @param {boolean} props.config.showConnectors - Show connecting lines (default: true)
- * @param {number} props.config.connectorDelay - Delay before connector animation starts (default: 0.1)
  * @param {string} props.config.activeColor - Color for active nodes (default: 'primary')
- * @param {string} props.config.inactiveColor - Color for inactive nodes (default: 'textMuted')
- * @param {string} props.config.connectorColor - Color for connector lines (default: 'ruleLine')
+ * @param {string} props.config.connectorColor - Color for connector lines (default: 'secondary')
+ * @param {boolean} props.config.autoStartEnd - Auto-style first as 'start' and last as 'end' (default: true)
  * @param {Object} props.config.beats - Beat timings
  * @param {number} props.config.beats.start - Start beat in seconds (required)
  * @param {Object} props.config.position - Slot position from layout resolver
@@ -239,16 +426,15 @@ export const TimelineStrip = ({ config }) => {
   const {
     events = [],
     orientation = 'horizontal',
-    animation = 'slide',
-    staggerDelay = 0.25,
+    animation = 'draw',
+    staggerDelay = 0.3,
     animationDuration = 0.5,
-    markerShape = 'circle',
+    connectorStyle = 'dashed',
     nodeSize: customNodeSize,
     showConnectors = true,
-    connectorDelay = 0.1,
     activeColor = 'primary',
-    inactiveColor = 'textMuted',
-    connectorColor = 'ruleLine',
+    connectorColor = 'secondary',
+    autoStartEnd = true,
     beats = {},
     position,
     style = {},
@@ -264,7 +450,6 @@ export const TimelineStrip = ({ config }) => {
   const startFrame = toFrames(start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
-  const connectorDelayFrames = toFrames(connectorDelay, fps);
   
   // Calculate dimensions from position or viewport
   const slot = {
@@ -281,103 +466,101 @@ export const TimelineStrip = ({ config }) => {
     return KNODE_THEME.colors[colorKey] || fallback;
   };
 
-  const resolvedActiveColor = resolveColor(activeColor, KNODE_THEME.colors.primary);
-  const resolvedInactiveColor = resolveColor(inactiveColor, KNODE_THEME.colors.textMuted);
-  const resolvedConnectorColor = resolveColor(connectorColor, KNODE_THEME.colors.ruleLine);
+  const resolvedActiveColor = resolveColor(activeColor);
+  const resolvedConnectorColor = resolveColor(connectorColor);
 
-  // Calculate node positions
+  // Calculate layout
   const isVertical = orientation === 'vertical';
-  const padding = isVertical ? slot.height * 0.15 : slot.width * 0.1;
+  const padding = isVertical ? slot.height * 0.12 : slot.width * 0.08;
+  const labelSpace = isVertical ? slot.width * 0.4 : slot.height * 0.35;
+  
   const usableLength = isVertical 
     ? slot.height - padding * 2 
     : slot.width - padding * 2;
   
-  const nodeSpacing = usableLength / (events.length - 1 || 1);
+  const nodeSpacing = events.length > 1 
+    ? usableLength / (events.length - 1) 
+    : 0;
   
   // Auto-calculate node size based on slot and event count
   const nodeSize = customNodeSize || Math.min(
-    isVertical ? slot.width * 0.15 : slot.height * 0.2,
-    nodeSpacing * 0.4,
-    40
+    isVertical ? (slot.width - labelSpace) * 0.35 : slot.height * 0.25,
+    nodeSpacing * 0.35,
+    50
   );
 
-  const connectorThickness = Math.max(2, nodeSize * 0.12);
+  const connectorThickness = Math.max(3, nodeSize * 0.08);
+
+  // Process events with auto start/end
+  const processedEvents = useMemo(() => {
+    return events.map((event, index) => {
+      let type = event.type || 'default';
+      
+      if (autoStartEnd) {
+        if (index === 0 && !event.type) type = 'start';
+        if (index === events.length - 1 && !event.type) type = 'end';
+      }
+      
+      return { ...event, type };
+    });
+  }, [events, autoStartEnd]);
 
   // Calculate positions for each node
   const nodePositions = useMemo(() => {
-    return events.map((_, index) => {
+    return processedEvents.map((_, index) => {
       if (isVertical) {
         return {
-          x: slot.left + slot.width * 0.25,
+          x: slot.left + nodeSize + 20,
           y: slot.top + padding + nodeSpacing * index,
         };
       }
       return {
         x: slot.left + padding + nodeSpacing * index,
-        y: slot.top + slot.height * 0.4,
+        y: slot.top + slot.height * 0.35,
       };
     });
-  }, [events, slot, isVertical, padding, nodeSpacing]);
+  }, [processedEvents, slot, isVertical, padding, nodeSpacing, nodeSize]);
 
   return (
     <AbsoluteFill>
-      {/* Background track line */}
-      {showConnectors && events.length > 1 && (
-        <div
-          style={{
-            position: 'absolute',
-            left: isVertical 
-              ? nodePositions[0].x - connectorThickness / 2 
-              : nodePositions[0].x,
-            top: isVertical 
-              ? nodePositions[0].y 
-              : nodePositions[0].y - connectorThickness / 2,
-            width: isVertical 
-              ? connectorThickness 
-              : nodePositions[events.length - 1].x - nodePositions[0].x,
-            height: isVertical 
-              ? nodePositions[events.length - 1].y - nodePositions[0].y 
-              : connectorThickness,
-            backgroundColor: `${resolvedConnectorColor}40`,
-            borderRadius: connectorThickness / 2,
-            ...style.track,
-          }}
-        />
-      )}
-
-      {/* Animated connector segments */}
+      {/* Connector lines (behind nodes) */}
       {showConnectors && nodePositions.map((pos, index) => {
         if (index === 0) return null;
         
         const prevPos = nodePositions[index - 1];
-        const connectorStartFrame = startFrame + (index - 1) * staggerFrames + connectorDelayFrames;
-        const connectorDuration = staggerFrames - connectorDelayFrames;
-        const progress = drawLine(frame, connectorStartFrame, connectorDuration);
+        const connectorStartFrame = startFrame + (index - 1) * staggerFrames;
+        const connectorProgress = interpolate(
+          frame,
+          [connectorStartFrame, connectorStartFrame + staggerFrames],
+          [0, 1],
+          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+        );
 
         return (
-          <TimelineConnector
+          <SketchyConnector
             key={`connector-${index}`}
             from={prevPos}
             to={pos}
-            progress={progress}
-            color={resolvedActiveColor}
+            progress={connectorProgress}
+            color={resolvedConnectorColor}
             thickness={connectorThickness}
+            connectorStyle={connectorStyle}
             orientation={orientation}
-            style={style}
+            frame={frame}
+            fps={fps}
           />
         );
       })}
 
       {/* Timeline nodes */}
-      {events.map((event, index) => {
+      {processedEvents.map((event, index) => {
         const eventStartFrame = startFrame + index * staggerFrames;
-        const animStyle = getElementAnimationStyle(
+        const animStyle = getNodeAnimationStyle(
           animation,
           frame,
           eventStartFrame,
           durationFrames,
-          fps,
-          isVertical ? 'left' : 'up'
+          fps
         );
 
         return (
@@ -386,13 +569,15 @@ export const TimelineStrip = ({ config }) => {
             event={event}
             position={nodePositions[index]}
             nodeSize={nodeSize}
-            markerShape={markerShape}
-            activeColor={resolvedActiveColor}
-            inactiveColor={resolvedInactiveColor}
+            isFirst={index === 0}
+            isLast={index === processedEvents.length - 1}
             animStyle={animStyle}
+            frame={frame}
+            startFrame={eventStartFrame}
+            fps={fps}
             orientation={orientation}
-            index={index}
             style={style}
+            resolveColor={resolveColor}
           />
         );
       })}

@@ -62,7 +62,7 @@
     "icon": {
       "type": "string",
       "default": "check",
-      "description": "Default icon for all items. Presets: check, bullet, dot, arrow, star, diamond, circle, square, plus, minus. Or use custom emoji."
+      "description": "Default icon for all items. Static presets: check, bullet, dot, arrow, star, diamond, circle, square, plus, minus. Lottie presets: lottieCheck, lottieTick, lottieSuccess, lottieStar. Or use custom emoji."
     },
     "iconColor": {
       "type": "string",
