@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@remotion/animated-emoji": "^4.0.373",
+    "@remotion/animated-emoji": "4.0.373",
     "@remotion/fonts": "^4.0.373",
     "@remotion/google-fonts": "^4.0.373",
     "@remotion/lottie": "^4.0.373",
