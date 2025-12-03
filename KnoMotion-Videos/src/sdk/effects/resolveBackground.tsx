@@ -1,31 +1,27 @@
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
 import { KNODE_THEME } from '../theme/knodeTheme';
-import { SpotlightEffect } from './backgrounds';
+import { NoiseTexture, SpotlightEffect } from './backgrounds';
 
 type GradientVariant = 'sunriseGradient' | 'cleanCard' | 'chalkboardGradient';
 
+type BaseBackground = {
+  layerNoise?: boolean;
+};
+
 export type BackgroundPresetConfig =
-  | {
-      preset: 'notebookSoft';
-    }
-  | {
-      preset: 'sunriseGradient';
-    }
-  | {
-      preset: 'cleanCard';
-    }
-  | {
-      preset: 'chalkboardGradient';
-    }
-  | {
+  | ({ preset: 'notebookSoft' } & BaseBackground)
+  | ({ preset: 'sunriseGradient' } & BaseBackground)
+  | ({ preset: 'cleanCard' } & BaseBackground)
+  | ({ preset: 'chalkboardGradient' } & BaseBackground)
+  | ({
       preset: 'spotlight';
       spotlight?: { x?: number; y?: number; intensity?: number };
-    }
-  | {
-    preset: 'custom';
-    style: React.CSSProperties;
-  };
+    } & BaseBackground)
+  | ({
+      preset: 'custom';
+      style: React.CSSProperties;
+    } & BaseBackground);
 
 export type ResolvedBackground = {
   style: React.CSSProperties;
@@ -45,65 +41,83 @@ export const resolveBackground = (
     return { style: { backgroundColor: KNODE_THEME.colors.pageBg } };
   }
 
+  let overlay: React.ReactNode = null;
+  let style: React.CSSProperties = {
+    backgroundColor: KNODE_THEME.colors.pageBg,
+  };
+
   switch (config.preset) {
     case 'notebookSoft':
-      return {
-        style: {
-          backgroundColor: KNODE_THEME.colors.pageBg,
-        },
-        overlay: (
-          <AbsoluteFill>
-            <svg width="100%" height="100%">
-              {Array.from({ length: 40 }).map((_, i) => (
-                <line
-                  key={i}
-                  x1="0"
-                  y1={i * 32}
-                  x2="100%"
-                  y2={i * 32}
-                  stroke={KNODE_THEME.colors.ruleLine}
-                  opacity={0.25}
-                />
-              ))}
-            </svg>
-          </AbsoluteFill>
-        ),
-      };
+      overlay = (
+        <AbsoluteFill>
+          <svg width="100%" height="100%">
+            {Array.from({ length: 40 }).map((_, i) => (
+              <line
+                key={i}
+                x1="0"
+                y1={i * 32}
+                x2="100%"
+                y2={i * 32}
+                stroke={KNODE_THEME.colors.ruleLine}
+                opacity={0.25}
+              />
+            ))}
+          </svg>
+        </AbsoluteFill>
+      );
+      break;
     case 'sunriseGradient':
-      return {
-        style: {
-          backgroundImage: gradientMap.sunriseGradient,
-        },
+      style = {
+        backgroundImage: gradientMap.sunriseGradient,
       };
+      break;
     case 'cleanCard':
-      return {
-        style: {
-          backgroundColor: gradientMap.cleanCard,
-        },
+      style = {
+        backgroundColor: gradientMap.cleanCard,
       };
+      break;
     case 'chalkboardGradient':
-      return {
-        style: {
-          backgroundImage: gradientMap.chalkboardGradient,
-          color: '#fff',
-        },
+      style = {
+        backgroundImage: gradientMap.chalkboardGradient,
+        color: '#fff',
       };
+      break;
     case 'spotlight':
-      return {
-        style: {
-          backgroundColor: KNODE_THEME.colors.pageBg,
-        },
-        overlay: (
-          <SpotlightEffect
-            x={config.spotlight?.x ?? 45}
-            y={config.spotlight?.y ?? 45}
-            opacity={config.spotlight?.intensity ?? 0.25}
-          />
-        ),
-      };
+      overlay = (
+        <SpotlightEffect
+          x={config.spotlight?.x ?? 45}
+          y={config.spotlight?.y ?? 45}
+          opacity={config.spotlight?.intensity ?? 0.25}
+        />
+      );
+      break;
     case 'custom':
-      return { style: config.style };
+      style = config.style;
+      break;
     default:
-      return { style: { backgroundColor: KNODE_THEME.colors.pageBg } };
+      break;
   }
+
+  const overlays: React.ReactNode[] = [];
+  if (overlay) {
+    overlays.push(overlay);
+  }
+  if (config.layerNoise) {
+    overlays.push(
+      <AbsoluteFill key="noise">
+        <NoiseTexture opacity={0.04} />
+      </AbsoluteFill>,
+    );
+  }
+
+  return {
+    style,
+    overlay: overlays.length > 0 ? (
+      <>
+        {overlays.map((node, idx) => (
+          <React.Fragment key={idx}>{node}</React.Fragment>
+        ))}
+      </>
+    ) : undefined,
+  };
 };
