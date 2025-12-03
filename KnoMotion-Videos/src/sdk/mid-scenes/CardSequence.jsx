@@ -19,6 +19,7 @@ import { positionToCSS as positionToCSSWithTransform } from '../layout/positionS
 import { fadeIn, slideIn, scaleIn, fadeSlide } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Get animation style based on animation type
@@ -82,8 +83,11 @@ export const CardSequence = ({ config }) => {
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 1.0,
+    holdDuration: animationDuration,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   const viewport = { width, height };
@@ -116,7 +120,12 @@ export const CardSequence = ({ config }) => {
         const card = cards[index];
         if (!card) return null;
 
-        const cardStartFrame = startFrame + index * staggerFrames;
+        // Calculate animation timing using beats resolver
+        const itemBeats = resolveBeats(card.beats, {
+          start: sequenceBeats.start + index * staggerDelay,
+          holdDuration: animationDuration,
+        });
+        const cardStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getAnimationStyle(
           animation,
           frame,
@@ -124,6 +133,12 @@ export const CardSequence = ({ config }) => {
           durationFrames,
           'up'
         );
+
+        // Calculate exit animation
+        const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitProgress = frame > exitFrame
+          ? Math.min(1, (frame - exitFrame) / toFrames(0.25, fps))
+          : 0;
 
         // Get card position - use correct function based on layout type
         // GRID has width/height, STACKED only has x/y
@@ -141,7 +156,7 @@ export const CardSequence = ({ config }) => {
           >
             <div
               style={{
-                opacity: animStyle.opacity,
+                opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
                 transform: animStyle.transform,
               }}
             >

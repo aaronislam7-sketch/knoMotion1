@@ -18,6 +18,7 @@ import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../lay
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Get animation style based on animation type
@@ -102,8 +103,11 @@ export const IconGrid = ({ config }) => {
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 1.0,
+    holdDuration: animationDuration,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   const viewport = { width, height };
@@ -140,9 +144,13 @@ export const IconGrid = ({ config }) => {
         if (!icon || !icon.iconRef) return null;
 
         // Calculate stagger for this icon
+        const itemBeats = resolveBeats(icon.beats, {
+          start: sequenceBeats.start + index * staggerDelay,
+          holdDuration: animationDuration,
+        });
         const iconStartFrame = animation === 'cascade' 
-          ? startFrame // Cascade handles delay internally
-          : startFrame + index * staggerFrames;
+          ? toFrames(itemBeats.start, fps) // Cascade handles delay internally
+          : toFrames(itemBeats.start, fps);
 
         const animStyle = getAnimationStyle(
           animation,
@@ -152,6 +160,12 @@ export const IconGrid = ({ config }) => {
           direction,
           index
         );
+
+        // Calculate exit animation
+        const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitProgress = frame > exitFrame
+          ? Math.min(1, (frame - exitFrame) / toFrames(0.25, fps))
+          : 0;
 
         const iconPosition = positionToCSS(pos);
 
@@ -165,7 +179,7 @@ export const IconGrid = ({ config }) => {
           >
             <div
               style={{
-                opacity: animStyle.opacity,
+                opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
                 transform: animStyle.transform,
                 display: 'flex',
                 flexDirection: 'column',

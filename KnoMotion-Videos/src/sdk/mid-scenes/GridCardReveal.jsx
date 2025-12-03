@@ -219,23 +219,45 @@ const GridCard = ({
 
         {/* Label */}
         {hasLabel && (
-          <Text
-            text={card.label}
-            variant="body"
-            size="sm"
-            weight={600}
-            color={textColor}
-            style={{
-              fontSize: baseFontSize * 0.7,
-              textAlign: 'center',
-              lineHeight: 1.2,
-              maxWidth: '90%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: card.wrapLabel ? 'normal' : 'nowrap',
-              ...style.label,
-            }}
-          />
+          <div style={{ textAlign: 'center', maxWidth: '90%' }}>
+            <Text
+              text={card.label}
+              variant="body"
+              size="sm"
+              weight={600}
+              color={textColor}
+              style={{
+                fontSize: baseFontSize * 0.7,
+                textAlign: 'center',
+                lineHeight: 1.2,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: card.wrapLabel ? 'normal' : 'nowrap',
+                ...style.label,
+              }}
+            />
+            {/* Sublabel */}
+            {card.sublabel && (
+              <Text
+                text={card.sublabel}
+                variant="body"
+                size="sm"
+                weight={400}
+                color="textSoft"
+                style={{
+                  fontSize: baseFontSize * 0.55,
+                  textAlign: 'center',
+                  lineHeight: 1.3,
+                  marginTop: 4,
+                  opacity: 0.8,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: card.wrapLabel ? 'normal' : 'nowrap',
+                  ...style.sublabel,
+                }}
+              />
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -252,6 +274,7 @@ const GridCard = ({
  * @param {string} props.config.cards[].image - Image URL for the card
  * @param {boolean} props.config.cards[].imageRounded - Make image circular (default: false)
  * @param {string} props.config.cards[].label - Label text below icon/image
+ * @param {string} props.config.cards[].sublabel - Secondary label text below the label (optional)
  * @param {string} props.config.cards[].color - Custom icon color
  * @param {string} props.config.cards[].backgroundColor - Custom card background
  * @param {string} props.config.cards[].borderColor - Custom border color (for bordered variant)
