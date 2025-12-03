@@ -12,6 +12,18 @@ import { ShowcaseScene9_MidSceneIconGrid } from '../compositions/ShowcaseScene9_
 import { ShowcaseScene10_SceneLayout } from '../compositions/ShowcaseScene10_SceneLayout';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 import { CanonShowerVideo } from '../compositions/CanonShowerVideo';
+import {
+  KnodoviaAccidentalArrival,
+  KNODOVIA_VIDEO1_DURATION,
+} from '../compositions/KnodoviaVideo1_AccidentalArrival';
+import {
+  KnodoviaCultureAnthro,
+  KNODOVIA_VIDEO2_DURATION,
+} from '../compositions/KnodoviaVideo2_Culture';
+import {
+  KnodoviaEconomics,
+  KNODOVIA_VIDEO3_DURATION,
+} from '../compositions/KnodoviaVideo3_Economics';
 
 /**
  * Showcase Preview Tool
@@ -32,6 +44,36 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: 'Full Showcase (3.5 minutes)',
+    },
+    knodovia1: {
+      component: KnodoviaAccidentalArrival,
+      duration: KNODOVIA_VIDEO1_DURATION,
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: `Knodovia 1: Accidental Arrival (~${Math.round(
+        KNODOVIA_VIDEO1_DURATION / 30,
+      )}s)`,
+    },
+    knodovia2: {
+      component: KnodoviaCultureAnthro,
+      duration: KNODOVIA_VIDEO2_DURATION,
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: `Knodovia 2: Culture Audit (~${Math.round(
+        KNODOVIA_VIDEO2_DURATION / 30,
+      )}s)`,
+    },
+    knodovia3: {
+      component: KnodoviaEconomics,
+      duration: KNODOVIA_VIDEO3_DURATION,
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: `Knodovia 3: Economics (~${Math.round(
+        KNODOVIA_VIDEO3_DURATION / 30,
+      )}s)`,
     },
     scene1: {
       component: ShowcaseScene1_IntroValueProp,

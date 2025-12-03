@@ -22,7 +22,10 @@ export type TransitionStyle =
   | 'wipe'
   | 'wipe-reverse'
   | 'clock'
-  | 'iris';
+  | 'iris'
+  | 'doodle-wipe'
+  | 'page-turn'
+  | 'eraser';
 
 export type TransitionEasing = 'linear' | 'smooth' | 'snappy';
 
@@ -57,6 +60,20 @@ const DEFAULT_TRANSITION: Required<TransitionOptions> = {
   axis: 'horizontal',
 };
 
+const normalizeStyle = (style?: string): TransitionStyle => {
+  if (!style) {
+    return 'fade';
+  }
+  const map: Record<string, TransitionStyle> = {
+    doodleWipe: 'doodle-wipe',
+    doodle_wipe: 'doodle-wipe',
+    pageTurn: 'page-turn',
+    page_turn: 'page-turn',
+    eraser: 'eraser',
+  };
+  return (map[style] ?? style) as TransitionStyle;
+};
+
 const getPresentation = (options: Required<TransitionOptions>) => {
   switch (options.style) {
     case 'fade':
@@ -88,6 +105,12 @@ const getPresentation = (options: Required<TransitionOptions>) => {
       return clockWipe();
     case 'iris':
       return iris();
+    case 'doodle-wipe':
+      return wipe({ direction: 'from-left' });
+    case 'page-turn':
+      return slide({ direction: 'from-right' });
+    case 'eraser':
+      return wipe({ direction: 'from-right' });
     case 'none':
     default:
       return undefined;
@@ -118,9 +141,11 @@ const getTiming = (
 export const createTransitionProps = (
   options?: TransitionOptions,
 ): { presentation?: TransitionPresentation<any>; timing?: TransitionTiming } => {
+  const normalizedStyle = normalizeStyle(options?.style);
   const merged: Required<TransitionOptions> = {
     ...DEFAULT_TRANSITION,
     ...options,
+    style: normalizedStyle,
     durationInFrames: options?.durationInFrames ?? DEFAULT_TRANSITION.durationInFrames,
     easing: options?.easing ?? DEFAULT_TRANSITION.easing,
     direction: options?.direction ?? DEFAULT_TRANSITION.direction,

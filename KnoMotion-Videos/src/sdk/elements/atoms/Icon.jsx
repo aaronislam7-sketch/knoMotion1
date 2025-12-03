@@ -1,5 +1,11 @@
 import React from 'react';
-import { useCurrentFrame, useVideoConfig } from 'remotion';
+import { AnimatedEmoji, getAvailableEmojis } from '@remotion/animated-emoji';
+import {
+  getRemotionEnvironment,
+  getStaticFiles,
+  useCurrentFrame,
+  useVideoConfig,
+} from 'remotion';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 import { scaleIn, getContinuousRotation } from '../../animations';
 
@@ -14,6 +20,79 @@ import { scaleIn, getContinuousRotation } from '../../animations';
  * @param {boolean} props.spin - Whether icon should spin continuously
  * @param {object} props.style - Style overrides
  */
+const EMOJI_REGEX = /\p{Extended_Pictographic}/u;
+const animatedEmojiData = getAvailableEmojis();
+const emojiAliasToName = new Map();
+animatedEmojiData.forEach((entry) => {
+  emojiAliasToName.set(entry.codepoint.toLowerCase(), entry.name);
+  const char = entry.codepoint
+    .split('_')
+    .map((cp) => String.fromCodePoint(parseInt(cp, 16)))
+    .join('');
+  emojiAliasToName.set(char, entry.name);
+  entry.tags.forEach((tag) => {
+    emojiAliasToName.set(tag, entry.name);
+  });
+});
+const animatedEmojiAssetCache = new Map();
+
+const toCodepointKey = (value) => {
+  if (typeof value !== 'string') return null;
+  const codepoints = Array.from(value)
+    .map((char) => {
+      const cp = char.codePointAt(0);
+      return cp !== undefined ? cp.toString(16) : null;
+    })
+    .filter(Boolean);
+  if (codepoints.length === 0) return null;
+  return codepoints.join('_').toLowerCase();
+};
+
+const resolveEmojiName = (value) => {
+  if (!value) return null;
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  if (emojiAliasToName.has(normalized)) {
+    return emojiAliasToName.get(normalized);
+  }
+  const codepointKey = toCodepointKey(normalized);
+  if (codepointKey && emojiAliasToName.has(codepointKey)) {
+    return emojiAliasToName.get(codepointKey);
+  }
+  return null;
+};
+
+const hasAnimatedEmojiAsset = (emojiName, scale = '1') => {
+  const cacheKey = `${emojiName}-${scale}`;
+  if (animatedEmojiAssetCache.has(cacheKey)) {
+    return animatedEmojiAssetCache.get(cacheKey);
+  }
+
+  if (typeof window === 'undefined') {
+    animatedEmojiAssetCache.set(cacheKey, false);
+    return false;
+  }
+
+  const env = getRemotionEnvironment();
+  if (!env?.isStudio) {
+    animatedEmojiAssetCache.set(cacheKey, false);
+    return false;
+  }
+
+  const staticFiles = getStaticFiles();
+  if (!staticFiles || staticFiles.length === 0) {
+    animatedEmojiAssetCache.set(cacheKey, false);
+    return false;
+  }
+
+  const webmName = `${emojiName}-${scale}x.webm`;
+  const mp4Name = `${emojiName}-${scale}x.mp4`;
+  const exists = staticFiles.some(
+    (file) => file.name.endsWith(webmName) || file.name.endsWith(mp4Name),
+  );
+  animatedEmojiAssetCache.set(cacheKey, exists);
+  return exists;
+};
+
 export const Icon = ({ 
   iconRef, 
   size = 'md',
@@ -61,6 +140,31 @@ export const Icon = ({
   
   const iconColor = color ? (theme.colors[color] || color) : 'inherit';
   
+  const renderContent = () => {
+    if (React.isValidElement(iconRef)) {
+      return iconRef;
+    }
+
+    if (typeof iconRef === 'string') {
+      const containsEmoji = EMOJI_REGEX.test(iconRef);
+      if (containsEmoji) {
+        const emojiName = resolveEmojiName(iconRef);
+        if (emojiName && hasAnimatedEmojiAsset(emojiName)) {
+          return (
+            <AnimatedEmoji
+              emoji={emojiName}
+              style={{ width: sizes[size], height: sizes[size] }}
+              layout="none"
+            />
+          );
+        }
+      }
+      return iconRef;
+    }
+
+    return iconRef ?? null;
+  };
+
   return (
     <div 
       className={`icon ${className}`}
@@ -77,7 +181,7 @@ export const Icon = ({
       }}
       {...props}
     >
-      {iconRef}
+      {renderContent()}
     </div>
   );
 };

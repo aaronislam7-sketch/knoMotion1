@@ -13,12 +13,15 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
+import { Icon } from '../elements/atoms/Icon';
 import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
 import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { RemotionLottie } from '../lottie/lottieIntegration';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Icon presets for checklist items
@@ -201,7 +204,7 @@ const getIconAnimationStyle = (frame, startFrame, durationFrames, fps) => {
  * @param {Object} props.config.position - Optional position override { left, top, width, height }
  * @param {Object} props.config.style - Optional style overrides
  */
-export const ChecklistReveal = ({ config }) => {
+export const ChecklistReveal = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
@@ -220,6 +223,7 @@ export const ChecklistReveal = ({ config }) => {
     position,
     style = {},
   } = config;
+  const preset = resolveStylePreset(stylePreset);
 
   // Validate required fields
   if (!items || items.length === 0) {
@@ -227,8 +231,11 @@ export const ChecklistReveal = ({ config }) => {
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 0.8,
+    holdDuration: animationDuration,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   
@@ -269,7 +276,9 @@ export const ChecklistReveal = ({ config }) => {
 
   // Resolve icon color from theme
   const resolveColor = (colorKey) => {
-    if (!colorKey) return KNODE_THEME.colors.accentGreen;
+    if (!colorKey) {
+      return KNODE_THEME.colors[preset.textColor] || KNODE_THEME.colors.accentGreen;
+    }
     if (colorKey.startsWith('#') || colorKey.startsWith('rgb')) return colorKey;
     return KNODE_THEME.colors[colorKey] || KNODE_THEME.colors.accentGreen;
   };
@@ -291,7 +300,11 @@ export const ChecklistReveal = ({ config }) => {
           : baseFontSize;
 
         // Calculate animation timing for this item
-        const itemStartFrame = startFrame + index * staggerFrames;
+        const itemBeats = resolveBeats(item.beats, {
+          start: sequenceBeats.start + index * staggerDelay,
+          holdDuration: animationDuration,
+        });
+        const itemStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getRevealAnimationStyle(
           revealType,
           frame,
@@ -300,6 +313,11 @@ export const ChecklistReveal = ({ config }) => {
           fps,
           true
         );
+        const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitProgress =
+          frame > exitFrame
+            ? Math.min(1, (frame - exitFrame) / toFrames(0.25, fps))
+            : 0;
 
         // Separate icon animation with pop effect
         const iconAnimStyle = getIconAnimationStyle(frame, itemStartFrame, durationFrames, fps);
@@ -332,7 +350,7 @@ export const ChecklistReveal = ({ config }) => {
             {/* Icon container with separate animation */}
             <div
               style={{
-                opacity: iconAnimStyle.opacity,
+                opacity: (iconAnimStyle.opacity ?? 1) * (1 - exitProgress),
                 transform: iconAnimStyle.transform,
                 display: 'flex',
                 alignItems: 'center',
@@ -347,7 +365,6 @@ export const ChecklistReveal = ({ config }) => {
               }}
             >
               {isLottieIcon(itemIcon) ? (
-                // Lottie animated icon
                 <div
                   style={{
                     width: '100%',
@@ -372,8 +389,7 @@ export const ChecklistReveal = ({ config }) => {
                   />
                 </div>
               ) : (
-                // Static icon (emoji or character)
-                <span
+                <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -386,15 +402,20 @@ export const ChecklistReveal = ({ config }) => {
                     ...style.icon,
                   }}
                 >
-                  {itemIcon}
-                </span>
+                  <Icon
+                    iconRef={itemIcon}
+                    size="md"
+                    color={itemChecked ? 'textMain' : 'textSoft'}
+                    style={{ fontSize: baseFontSize * iconSize }}
+                  />
+                </div>
               )}
             </div>
 
             {/* Text container with main animation */}
             <div
               style={{
-                opacity: animStyle.opacity,
+                opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
                 transform: animStyle.transform,
                 flex: 1,
                 maxWidth: textWidth,
@@ -406,7 +427,7 @@ export const ChecklistReveal = ({ config }) => {
                 variant="body"
                 size="lg"
                 weight={itemChecked ? 600 : 400}
-                color="textMain"
+                color={preset.textColor}
                 style={{
                   fontSize,
                   lineHeight: `${lineHeight}px`,

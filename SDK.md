@@ -56,6 +56,45 @@ import * as lottie from '../sdk/lottie-helpers';
 
 ---
 
+## 🎨 Theme System (Presets & Emphasis)
+
+### Module: `theme/stylePresets.ts`
+
+Curated style bundles that keep JSON configs short and brand-safe.
+
+```javascript
+import { resolveStylePreset, STYLE_PRESETS } from '../sdk/theme/stylePresets';
+
+const preset = resolveStylePreset('playful');
+// => {
+//   textVariant: 'display',
+//   textColor: 'primary',
+//   decoration: 'highlight',
+//   doodle: { type: 'circle', color: 'accentBlue', thickness: 3 },
+//   animationPreset: 'bouncy',
+//   background: { preset: 'sunriseGradient' }
+// }
+```
+
+**Presets available:** `educational`, `playful`, `minimal`, `mentor`, `focus`.  
+Each preset controls typography, doodle type, animation tone, and suggested background. Mid-scenes accept a `stylePreset` prop and merge it with their own config.
+
+### Module: `theme/emphasisEffects.ts`
+
+Standardised emphasis treatments (colors + looping micro-animations).
+
+```javascript
+import { resolveEmphasisEffect } from '../sdk/theme/emphasisEffects';
+
+const { textStyle, animation } = resolveEmphasisEffect('high');
+// textStyle → bold coral text w/ highlight background
+// animation → { type: 'pulse', amount: 0.05 }
+```
+
+`EmphasisEffect` objects contain `textStyle`, optional `doodle` instructions, and animation metadata (`pulse` or `breathe`). Use them in mid-scenes to give per-line emphasis without custom CSS.
+
+---
+
 ## 🎯 Mid-Scenes
 
 **Location:** `/workspace/KnoMotion-Videos/src/sdk/mid-scenes/`
@@ -533,6 +572,32 @@ import { GradientOverlay } from '../sdk/broadcastEffects';
 
 ---
 
+### Module: `effects/resolveBackground.tsx`
+
+Central helper for scene backgrounds; turns simple JSON presets into styled fills + overlays.
+
+```javascript
+import { resolveBackground } from '../sdk/effects/resolveBackground';
+
+const { style, overlay } = resolveBackground({
+  preset: 'spotlight',
+  spotlight: { x: 40, y: 60, intensity: 0.35 },
+  layerNoise: true,
+});
+```
+
+**Presets supported:**
+- `notebookSoft` – lined paper overlay
+- `sunriseGradient` – warm diagonal gradient
+- `cleanCard` – neutral panel
+- `chalkboardGradient` – deep green/blue gradient
+- `spotlight` – animated vignette (customizable focus)
+- `custom` – direct CSS style
+
+Set `layerNoise: true` to add a subtle `NoiseTexture` on any preset. `SceneFromConfig` (see compositions) consumes this helper automatically.
+
+---
+
 ### Module: `particleSystem.jsx`
 
 **Ambient and burst particle effects:**
@@ -624,6 +689,28 @@ import { getLottiePreset } from '../sdk/lottiePresets';
 - `celebrationCheck` - Confetti checkmark
 - `loadingDots` - Loading indicator
 - `starBurst` - Star explosion
+
+---
+
+### Module: `lottie/lottieRegistry.ts`
+
+Single source of truth for all inline + static Lottie assets.
+
+```javascript
+import { resolveLottieSource } from '../sdk/lottie/lottieRegistry';
+
+const source = resolveLottieSource('core/celebration');
+// { kind: 'static', src: staticFile('lotties/celebration-stars.json') }
+```
+
+Features:
+- Canonical keys grouped by domain (`core/*`, `education/*`, `nature/*`, etc.)
+- Aliases for legacy/JSON-friendly names (`success`, `arrowFlow`, `loading-spinner`, etc.)
+- Dev-only warning (`[LottieRegistry] Unknown lottieRef "..."`) when a key is missing
+
+### Module: `lottie/lottiePresets.js`
+
+Template-facing presets that map semantic names (`correctAnswer`, `insight`, `stepComplete`) to registry keys plus playback styles. Use `getLottiePreset(presetName)` to retrieve the config and pass it to `RemotionLottie` helpers.
 
 ---
 
@@ -988,6 +1075,42 @@ const { x, y } = resolvePosition('centerRight', {
 
 ---
 
+## 🎞️ Scene Rendering Helpers
+
+### Module: `compositions/SceneRenderer.jsx`
+
+Utilities for turning JSON scene configs into rendered shots with consistent transitions.
+
+```jsx
+import {
+  SceneFromConfig,
+  SceneTransitionWrapper,
+} from '../compositions/SceneRenderer';
+
+const Scene = ({ config, durationInFrames }) => (
+  <SceneTransitionWrapper
+    durationInFrames={durationInFrames}
+    transition={{ type: 'doodle-wipe' }}
+  >
+    <SceneFromConfig config={config} />
+  </SceneTransitionWrapper>
+);
+```
+
+- **`SceneFromConfig`**
+  - Calls `resolveSceneSlots(layout, viewport)` to position header/body/columns.
+  - Applies `resolveBackground` (including overlays/noise) if `config.background` is provided.
+  - For each slot: renders the requested mid-scene with `stylePreset` + `config`.
+
+- **`SceneTransitionWrapper`**
+  - Accepts `transition.type`: `fade`, `slide`, `page-turn`, `doodle-wipe`, or `eraser`.
+  - `durationInFrames` controls both enter + exit easing windows.
+  - Slide/page-turn respect `transition.direction` (`left/right/up/down`).
+
+Use these helpers for any multi-scene composition so transitions stay consistent with beats and layouts.
+
+---
+
 ## ✅ Validation
 
 ### Module: `scene-validator.js`
@@ -1065,6 +1188,24 @@ const frames = toFrames(5.5, 30);  // 165 frames at 30fps
 // Convert frames to seconds
 const seconds = toSeconds(165, 30); // 5.5 seconds
 ```
+
+---
+
+### Module: `utils/beats.ts`
+
+Deterministic beat resolver to keep `start`, `hold`, `exit`, and `emphasis` timings consistent across mid-scenes.
+
+```javascript
+import { resolveBeats } from '../sdk/utils/beats';
+
+const beats = resolveBeats(
+  { start: 1.2, emphasis: 1.5 },           // overrides
+  { start: 0.8, holdDuration: 1.8, exitOffset: 0.4 } // defaults
+);
+// => { start: 1.2, hold: 3.0, exit: 3.4, emphasis: 1.5 }
+```
+
+Use the helper at both scene level and per-item level to avoid overlapping exits with transitions. Defaults favour a 0.5s delay, ~1.6s hold, and 0.3s exit buffer unless overridden.
 
 ---
 
@@ -1504,6 +1645,46 @@ import { Text, Button, Progress, Avatar } from '../sdk/elements';
   ring={true}
 />
 ```
+
+#### `ImageAtom` (Animated Static Images)
+
+Location: `elements/atoms/Image.jsx`
+
+```jsx
+import { ImageAtom } from '../sdk/elements';
+
+<ImageAtom
+  src="https://cdn.knode/imgs/map.svg"
+  alt="Knodovia map"
+  fit="cover"              // cover | contain
+  borderRadius={24}
+  beats={{ start: 0.8 }}   // seconds
+  animation={{ type: 'slide', duration: 0.5, direction: 'up' }}
+/>
+```
+
+Supports `fade`, `slide`, and `zoom` entrances with beat-aware timing (`resolveBeats` friendly). Automatically fills its container and respects theme radius defaults—ideal for grid cards, side-by-side comparisons, or hero shots.
+
+#### `Icon` with Animated Emoji
+
+Location: `elements/atoms/Icon.jsx`
+
+- Accepts emoji strings, React nodes, or registry icons.
+- Detects if the emoji has an entry in `@remotion/animated-emoji`; renders animated assets automatically when available.
+- Falls back to static emoji when the asset isn’t present (e.g., Remotion Player).
+
+```jsx
+import { Icon } from '../sdk/elements';
+
+<Icon
+  iconRef="🎯"
+  size="lg"
+  variant="primary"
+  beats={{ start: 1.0 }}
+/>
+```
+
+Behind the scenes it uses `getRemotionEnvironment()` to avoid Studio-only APIs in the player and caches emoji → asset lookups for performance.
 
 ### Compositions (9)
 

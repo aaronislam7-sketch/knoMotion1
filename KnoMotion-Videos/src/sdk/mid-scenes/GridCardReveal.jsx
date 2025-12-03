@@ -11,12 +11,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring, Img } from 'remotion';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
+import { Icon } from '../elements/atoms/Icon';
+import { ImageAtom } from '../elements/atoms/Image';
 import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../layout/layoutEngine';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Card reveal animation styles
@@ -101,6 +105,8 @@ const GridCard = ({
   cardVariant,
   resolveColor,
   style = {},
+  beats,
+  textColor = 'textMain',
 }) => {
   const hasIcon = card.icon && !card.image;
   const hasImage = card.image;
@@ -181,33 +187,34 @@ const GridCard = ({
             style={{
               width: imageSize,
               height: imageSize,
-              borderRadius: card.imageRounded ? '50%' : 8,
-              overflow: 'hidden',
               flexShrink: 0,
               ...style.imageWrapper,
             }}
           >
-            <Img
+            <ImageAtom
               src={card.image}
+              fit={card.imageFit || 'cover'}
+              borderRadius={card.imageRounded ? imageSize : 12}
+              beats={card.imageBeats || beats}
+              animation={card.imageAnimation || { type: 'fade', duration: 0.5 }}
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
                 ...style.image,
               }}
             />
           </div>
         ) : hasIcon ? (
-          <div
+          <Icon
+            iconRef={card.icon}
+            size="lg"
+            color={card.color || 'primary'}
             style={{
               fontSize: iconSize,
-              lineHeight: 1,
               color: iconColor,
               ...style.icon,
             }}
-          >
-            {card.icon}
-          </div>
+          />
         ) : null}
 
         {/* Label */}
@@ -217,7 +224,7 @@ const GridCard = ({
             variant="body"
             size="sm"
             weight={600}
-            color="textMain"
+            color={textColor}
             style={{
               fontSize: baseFontSize * 0.7,
               textAlign: 'center',
@@ -265,7 +272,7 @@ const GridCard = ({
  * @param {Object} props.config.position - Slot position from layout resolver
  * @param {Object} props.config.style - Optional style overrides
  */
-export const GridCardReveal = ({ config }) => {
+export const GridCardReveal = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
@@ -284,6 +291,7 @@ export const GridCardReveal = ({ config }) => {
     position,
     style = {},
   } = config;
+  const preset = resolveStylePreset(stylePreset);
 
   // Validate required fields
   if (!cards || cards.length === 0) {
@@ -291,8 +299,11 @@ export const GridCardReveal = ({ config }) => {
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 0.9,
+    holdDuration: animationDuration,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   
@@ -360,9 +371,14 @@ export const GridCardReveal = ({ config }) => {
           const col = pos.column ?? index % columns;
 
           // Calculate animation timing for this card
-          const cardStartFrame = animation === 'cascade' 
-            ? startFrame // Cascade handles delay internally
-            : startFrame + index * staggerFrames;
+          const itemBeats = resolveBeats(card.beats, {
+            start: sequenceBeats.start + index * staggerDelay,
+            holdDuration: animationDuration,
+          });
+          const baseStartFrame = toFrames(itemBeats.start, fps);
+          const cardStartFrame = animation === 'cascade'
+            ? baseStartFrame
+            : baseStartFrame;
 
           const animStyle = getCardAnimationStyle(
             animation,
@@ -373,7 +389,15 @@ export const GridCardReveal = ({ config }) => {
             direction,
             { row, col }
           );
-
+          const exitFrame = toFrames(itemBeats.exit, fps);
+          const exitProgress =
+            frame > exitFrame
+              ? Math.min(1, (frame - exitFrame) / toFrames(0.25, fps))
+              : 0;
+          const mergedAnimStyle = {
+            ...animStyle,
+            opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
+          };
           // Convert position to CSS (layout engine returns center coordinates)
           const cardPosition = positionToCSS(pos);
 
@@ -384,7 +408,7 @@ export const GridCardReveal = ({ config }) => {
               cardPosition={cardPosition}
               cardWidth={pos.width || cardWidth}
               cardHeight={pos.height || cardHeight}
-              animStyle={animStyle}
+              animStyle={mergedAnimStyle}
               baseFontSize={baseFontSize}
               cardStyle={style.cardStyle}
               showLabels={showLabels}
@@ -392,6 +416,8 @@ export const GridCardReveal = ({ config }) => {
               cardVariant={cardVariant}
               resolveColor={resolveColor}
               style={style}
+              beats={card.imageBeats || itemBeats}
+              textColor={preset.textColor}
             />
           );
         })}

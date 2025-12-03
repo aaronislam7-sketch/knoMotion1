@@ -1,275 +1,128 @@
-# 🎬 KnoMotion Video Templates
+# KnoMotion POC Video Engine — Knodovia Showcase
 
-**Production-ready educational video templates powered by Remotion**
+Modernised Remotion workspace that proves the JSON-first KnoMotion engine can deliver multi-scene, on-brand stories end-to-end. This refresh focuses on a cohesive "Knodovia" trilogy, a reusable style/beat/asset system, and the docs future agents need to spin up new personalised videos fast.
 
----
-
-## 🚀 Quick Start (30 seconds)
-
+## ⚡ Quick Start
 ```bash
 cd /workspace/KnoMotion-Videos
 npm install
 npm run dev
 ```
+Open `http://localhost:5173`, click **Showcase Preview**, and pick any Knodovia video.
 
-**Then:** Click **"🎛️ Template Gallery & Config"** button → Select a template → Configure → Preview
+## ✅ What Shipped in This POC
+- **Ground truth stays `docs/videoGaps.md`** – feature cut lives there; this README only reflects what is currently implemented.
+- **Three showcase compositions** (`src/compositions/KnodoviaVideo[1-3]_*.jsx`) plus registration in `src/admin/ShowcasePreview.jsx` – each is 90–120s with varied layouts, beats, transitions, and assets.
+- **Scene renderer + transitions** – `src/compositions/SceneRenderer.jsx` centralises slot rendering, `SceneFromConfig`, and `SceneTransitionWrapper` with `fade`, `slide`, `page-turn`, `doodle-wipe`, and `eraser` types.
+- **Style + emphasis system** – `src/sdk/theme/stylePresets.ts` and `src/sdk/theme/emphasisEffects.ts` expose curated presets with doodles, motion, and emphasis loops that mid-scenes consume via a single prop.
+- **Beats helper** – `src/sdk/utils/beats.ts` enforces `start/hold/exit/emphasis` timing at scene and item level.
+- **Background resolver** – `src/sdk/effects/resolveBackground.tsx` unlocks notebook, gradient, spotlight, clean card, and chalkboard looks with optional noise.
+- **Asset registry upgrades** – `src/sdk/lottie/lottieRegistry.ts` + presets cover all inline/static Lotties, including aliases for legacy keys (e.g. `arrowFlow`). Icon atoms now support `@remotion/animated-emoji`, and `src/sdk/elements/atoms/Image.jsx` provides a reusable animated image primitive.
+- **Documentation set** – this README, `SDK.md`, `TEMPLATES.md`, and the new `docs/POC_SHOWCASE.md` anchor everything that changed in this pass.
 
----
-
-## 📖 What Is This?
-
-KnoMotion is a **JSON-first video engine** for creating educational content at scale. It provides:
-
-- ✅ **100% configurable** via JSON (no code changes needed)
-- ✅ **23 production-ready UI elements** (atoms + compositions)
-- ✅ **8 continuous life animations** (breathing, floating, rotation, etc.)
-- ✅ **4-layer architecture** (SDK, Layout, Mid-Scene, JSON)
-- ✅ **Broadcast quality** visuals (not PowerPoint)
-- ✅ **Learning intention-aligned** (Hook, Explain, Apply, Reflect, etc.)
-- ✅ **Domain agnostic** (works for any subject matter)
-
-**Built with:** React, Remotion, Vite, DaisyUI, Tailwind CSS
-
-**See it in action**: 🎬 [KnoMotion Showcase](./SHOWCASE.md) - 3.5-minute demo video
-
----
-
-## 📚 Documentation
-
-### Essential Guides
-- **[SHOWCASE.md](./SHOWCASE.md)** ⭐ - Complete showcase demo and guide (3.5-minute video)
-- **[showCasePlan.md](./showCasePlan.md)** - Project plan and progress tracker
-- **[SDK.md](./SDK.md)** - SDK framework reference (23 elements, 8 animations, layouts)
-- **[CONFIGURATION.md](./CONFIGURATION.md)** - How to configure templates using JSON
-- **[TEMPLATES.md](./TEMPLATES.md)** - Template catalog and usage guide
-
-### For Developers
-- **[SDK.md](./SDK.md)** - Complete SDK API documentation
-- **[TEMPLATES.md](./TEMPLATES.md)** - How to create new templates
-- **[docs/methodology/TEMPLATE_POLISH.md](./docs/methodology/TEMPLATE_POLISH.md)** - Polish standards
-
-### Historical Reference
-- **[docs/archive/](./docs/archive/)** - Progress logs and historical documentation
-
----
-
-## 🎯 Template Library
-
-**V6 Templates (17 active):**
-- **Hook1A, Hook1E** - Attention-grabbing openers
-- **Explain2A, Explain2B** - Concept teaching
-- **Apply3A, Apply3B** - Interactive practice
-- **Reflect4A, Reflect4D** - Summaries and takeaways
-- **Reveal9** - Progressive unveil
-- **Guide10** - Step-by-step sequences
-- **Compare11, Compare12** - Comparisons
-- **Challenge13** - Polls and quizzes
-- **Spotlight14, Connect15, Quote16, Progress18** - Specialized formats
-
-See **[TEMPLATES.md](./TEMPLATES.md)** for full details.
-
----
-
-## 🏗️ Project Structure
-
+## 🗂️ Engine Map (Essentials)
 ```
-/workspace/
-├── README.md                    ← You are here
-├── TEMPLATES.md                 ← Template guide
-├── CONFIGURATION.md             ← Config guide
-├── SDK.md                       ← SDK reference
+/workspace
+├── README.md                     ← You are here
+├── SDK.md / TEMPLATES.md / CONFIGURATION.md
 ├── docs/
-│   ├── archive/                 ← Historical docs
-│   └── methodology/             ← Best practices
+│   ├── videoGaps.md             ← Authoritative gaps + POC cut
+│   └── POC_SHOWCASE.md          ← Knodovia video breakdowns
 └── KnoMotion-Videos/
     ├── src/
-    │   ├── templates/           ← Template components
-    │   │   ├── v6/              ← Active V6 templates
-    │   │   └── archive_v5/      ← Archived V5 templates
-    │   ├── sdk/                 ← Shared utilities
-    │   │   ├── animations.ts    ← Animation helpers
-    │   │   ├── effects.tsx      ← Visual effects
-    │   │   ├── lottie.ts        ← Lottie integration
-    │   │   ├── layout.ts        ← Layout engine
-    │   │   ├── validation/      ← Schema validators
-    │   │   ├── core/            ← Core utilities
-    │   │   ├── components/      ← Shared components
-    │   │   └── index.ts         ← SDK exports
-    │   ├── scenes/              ← Scene configurations
-    │   │   ├── v6/              ← Active V6 scenes
-    │   │   ├── examples/        ← Example scenes
-    │   │   └── archive_v5/      ← Archived V5 scenes
-    │   └── components/
-    │       ├── UnifiedAdminConfig.jsx  ← Config UI
-    │       └── TemplateGallery.jsx     ← Template catalog
-    └── package.json
+    │   ├── compositions/        ← KnodoviaVideo*.jsx, SceneRenderer.jsx
+    │   ├── admin/ShowcasePreview.jsx
+    │   ├── sdk/
+    │   │   ├── theme/stylePresets.ts, emphasisEffects.ts
+    │   │   ├── effects/resolveBackground.tsx
+    │   │   ├── utils/beats.ts
+    │   │   ├── lottie/lottieRegistry.ts, lottieIntegration.tsx
+    │   │   └── elements/atoms/Image.jsx, Icon.jsx (animated emoji)
+    │   └── mid-scenes/…        ← TextReveal, BubbleCallout, GridCard, etc.
+    └── package.json / vite.config.js
 ```
+Use `rg`, `Read`, or the docs above to dive into specifics.
 
----
+## 🎨 Presets, Beats & Asset Registries
 
-## 🎨 Features
+### Style Presets (`src/sdk/theme/stylePresets.ts`)
+| Preset | Vibe & Defaults |
+|--------|-----------------|
+| `educational` | Title text, notebook background, underline doodle, steady pacing. |
+| `playful` | Display text, sunrise gradient, highlight doodle, bouncy motion. |
+| `minimal` | Body text, clean card background, minimal animation. |
+| `mentor` | Chalkboard gradient, circular doodles, dramatic timing. |
+| `focus` | Spotlight background, muted text, subtle underline.
 
-### For Content Creators
-- **Visual configuration UI** - No JSON editing required
-- **Template gallery** - Browse and select templates visually
-- **Live preview** - See changes in real-time
-- **Example presets** - Start from working examples
-- **Export to JSON** - Save configurations for reuse
+Mid-scenes accept `stylePreset` and inherit typography, doodles, and suggested backgrounds automatically.
 
-### For Developers
-- **Modular SDK** - Reusable animation, effect, and layout utilities
-- **Type-safe schemas** - Zod validation for all configurations
-- **Hot reload** - Fast development iteration
-- **Extensible registry** - Easy to add new template types
-- **Collision detection** - Automatic layout validation
+### Emphasis & Beats
+- `src/sdk/theme/emphasisEffects.ts` defines `high/normal/low` treatments (color, highlight, pulse/breathe loops) that TextReveal, Checklist, etc. apply per line or bullet.
+- `src/sdk/utils/beats.ts` returns consistent `{ start, hold, exit, emphasis }` values so layouts, transitions, and beats never fight each other. Every Knodovia scene uses it at block level; TextReveal, Checklist, BubbleCallout, GridCard, and SideBySide also use it per item.
 
----
+### Background Presets
+`src/sdk/effects/resolveBackground.tsx` unlocks:
+- `notebookSoft` (lined pad overlay)
+- `sunriseGradient`
+- `cleanCard`
+- `chalkboardGradient`
+- `spotlight` (with adjustable focus)
+- optional `layerNoise` on any preset
 
-## 🛠️ Development
+### Lottie, Icons & Images
+- `src/sdk/lottie/lottieRegistry.ts` + presets cover all assets (core checkmark, celebration, thermometer, snowflake, water drop, arrow flow, etc.). Legacy refs like `success`, `arrowFlow`, or raw filenames resolve through aliases; dev builds warn on unknown keys.
+- `src/sdk/elements/atoms/Icon.jsx` integrates `@remotion/animated-emoji` so any emoji string becomes animated when assets exist; falls back gracefully otherwise.
+- `src/sdk/elements/atoms/Image.jsx` is the new static image atom with fade/slide/zoom entrances, border radius control, and beat-aware timing. Side-by-side compare + grid cards use it for hero shots and data URI SVGs.
 
-### Start Development Server
-```bash
-cd /workspace/KnoMotion-Videos
-npm run dev
-```
+## 📼 Showcase Videos ("Knodovia Orientation Pack")
+| Video | Scenes | File | Highlights |
+|-------|--------|------|------------|
+| **Accidental Arrival** | 5 | `src/compositions/KnodoviaVideo1_AccidentalArrival.jsx` | Cold-open hook, before/after infrastructure, notebook + sunrise backgrounds, overlapping callouts, animated hero Lottie. |
+| **Culture Engine Room** | 5 | `src/compositions/KnodoviaVideo2_Culture.jsx` | Chalkboard + spotlight looks, animated checklist, grid cards with emoji icons, chaotic bubble overlaps, eraser + doodle-wipe transitions. |
+| **Economic Playground** | 5 | `src/compositions/KnodoviaVideo3_Economics.jsx` | Stat-driven TextReveal, before/after currency market, badge grid cards, playful CTA scene, layered slide/page-turn transitions. |
 
-### Build for Production
-```bash
-npm run build
-```
+Full scene-by-scene tables live in `docs/POC_SHOWCASE.md`.
 
-### Render a Video
-```bash
-npm run render -- src/scenes/your_scene.json
-```
+## 🧩 Creating or Editing a Video
+1. **Pick a layout per scene** – `scene.layout` values (`full`, `rowStack`, `columnSplit`, `headerRowColumns`, `gridSlots`) resolve through `resolveSceneSlots`. Valid slot names must match the layout.
+2. **Assign mid-scenes** – each slot config looks like:
+   ```js
+   slots: {
+     header: { midScene: 'textReveal', stylePreset: 'playful', config: { /* ... */ } },
+     body:   { midScene: 'gridCards',  stylePreset: 'educational', config: { /* ... */ } },
+   }
+   ```
+   Keep JSON concise and rely on presets instead of inline styling.
+3. **Set beats + emphasis** – top-level `config.beats` controls when the slot enters/exits; nested `lines`, `cards`, or `callouts` can add their own `beats` object. Use `emphasis: 'high' | 'normal' | 'low'` when you need pulsing highlights.
+4. **Choose backgrounds & transitions** – pass `background: { preset: 'notebookSoft', layerNoise: true }` and `transition: { type: 'page-turn', direction: 'right' }`. Only use the supported presets/types listed above.
+5. **Register the video** – export the composition in `src/compositions/`, then add it to `src/admin/ShowcasePreview.jsx` so it appears in the admin UI.
+6. **Preview & iterate** – `npm run dev` for interactive preview, `npm run build` to ensure the bundle stays clean.
 
-### Run Tests (when available)
-```bash
-npm test
-```
+## 🔁 Personalisation Hooks
+These fields are intentionally simple so an LLM or rules engine can swap values at runtime:
+- `stylePreset`, `background.preset`, `transition.type`
+- Mid-scene content arrays (`lines`, `callouts`, `cards`, `before/after` blocks)
+- `beats` and `defaultBeats` (timing tweaks per learner profile)
+- `icon` / `emoji` strings, `lottieRef` keys, `image.src` (from a controlled registry)
+- `heroType` + `heroRef` in `HeroTextEntranceExit`
+Document personalised choices in your scene JSON so future agents can follow the narrative thread.
 
----
+## 📚 Docs & References
+- `docs/videoGaps.md` – authoritative backlog + POC feature cut.
+- `docs/POC_SHOWCASE.md` – Knodovia scene tables, transitions, beats per scene.
+- `SDK.md` – SDK exports, atoms, compositions.
+- `TEMPLATES.md` – survey of legacy and V6 templates.
+- `CONFIGURATION.md` – JSON schema and validation notes.
+- `docs/template-content-blueprints/` – longer-form design blueprints per learning intention.
 
-## 📝 Creating Your First Video
-
-### Method 1: Using the UI (Easiest)
-1. Start dev server: `npm run dev`
-2. Click **"Template Gallery & Config"**
-3. Select a template (e.g., Explain2A)
-4. Configure using the visual controls
-5. Preview in real-time
-6. Download JSON when satisfied
-
-### Method 2: Using JSON (Power Users)
-1. Copy an example scene from `/src/scenes/examples/`
-2. Edit the JSON configuration
-3. Load in the UI or use directly in code
-4. Render with `npm run render`
-
-See **[CONFIGURATION.md](./CONFIGURATION.md)** for JSON schema details.
-
----
-
-## 🎯 Core Principles
-
-### 1. Everything is Configurable
-No hardcoded content. All text, colors, timing, and visuals are configured via JSON.
-
-### 2. Broadcast Quality
-Templates follow professional video standards, not PowerPoint aesthetics:
-- Glassmorphic effects
-- Particle systems
-- Sophisticated animations
-- Full-screen usage (90-95%)
-
-### 3. Learning Intention Aligned
-Templates map to pedagogical goals:
-- **Hook** - Capture attention
-- **Explain** - Teach concepts
-- **Apply** - Practice skills
-- **Reflect** - Consolidate learning
-
-### 4. Domain Agnostic
-Same template works for geography, sports, science, business, etc. Zero code changes.
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Preview not loading?**
-- Check console for errors
-- Verify JSON schema is valid
-- Reload player with refresh button
-
-**Build failing?**
-- Clear node_modules: `rm -rf node_modules && npm install`
-- Check for missing dependencies
-- Verify all imports are correct
-
-**Template not rendering?**
-- Ensure template is registered in TemplateRouter
-- Check template_id in JSON matches registration
-- Verify getDuration function exists
-
-See **[SDK.md](./SDK.md)** for detailed troubleshooting.
-
----
-
-## 🤝 Contributing
-
-### Adding a New Template
-See **[TEMPLATES.md](./TEMPLATES.md)** → "Creating New Templates" section
-
-### Improving the SDK
-See **[SDK.md](./SDK.md)** → "Contributing" section
-
-### Reporting Issues
-- Check existing documentation first
-- Provide reproducible example
-- Include error messages and screenshots
-
----
-
-## 📊 System Stats
-
-- **Templates:** 17 V6 templates (active)
-- **SDK Elements:** 23 production-ready components (14 atoms, 9 compositions)
-- **Animations:** 20+ animation functions (8 continuous life animations)
-- **Layout Engines:** 7 types (GRID, RADIAL, CASCADE, STACK, etc.)
-- **SDK Modules:** 20+ organized modules
-- **Learning Intentions:** 8 core intentions
-- **Scene Examples:** 25+ example configurations
-- **Documentation:** 6 core docs + methodology
-- **Showcase:** 3.5-minute demo video showcasing all capabilities
-
----
-
-## 🔗 Quick Links
-
-- **🎬 Showcase Demo:** [SHOWCASE.md](./SHOWCASE.md) ⭐ NEW!
-- **📋 Project Plan:** [showCasePlan.md](./showCasePlan.md)
-- **SDK Reference:** [SDK.md](./SDK.md) (23 elements, 8 animations)
-- **Template Catalog:** [TEMPLATES.md](./TEMPLATES.md)
-- **Configuration Guide:** [CONFIGURATION.md](./CONFIGURATION.md)
-- **Polish Standards:** [docs/methodology/TEMPLATE_POLISH.md](./docs/methodology/TEMPLATE_POLISH.md)
-- **Archive:** [docs/archive/](./docs/archive/)
-
----
+## 🛠️ Troubleshooting Cheatsheet
+- **Multiple Remotion versions** – ensure `@remotion/*` dependencies share the same version (already pinned in `package.json`).
+- **Missing Lottie** – check the key exists in `LOTTIE_REGISTRY`. Dev mode logs `[LottieRegistry] Unknown lottieRef` with the offending key.
+- **Animated emoji fallback** – if Studio assets are missing, icons fall back to static emoji; add assets to `public/animated-emoji` for full animation.
+- **Layout warnings** – slot names must match the chosen layout; see `src/sdk/scene-layout/sceneLayout.js` for valid keys.
+- **Readability** – keep scene JSON short, prefer presets, and re-use `stylePreset` + `beats` defaults to stay LLM-friendly.
 
 ## 📄 License
+Add your license text here.
 
-[Your License Here]
-
----
-
-## 🎉 Get Started Now
-
-```bash
-cd /workspace/KnoMotion-Videos
-npm install
-npm run dev
-```
-
-**Happy creating!** 🚀
+Happy creating, and welcome to Knodovia! 🌍

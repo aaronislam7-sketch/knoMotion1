@@ -452,6 +452,215 @@ export const celebrationAnimation = {
 };
 
 /**
+ * Simple thermometer animation - temperature bar rises
+ */
+export const thermometerAnimation = {
+  v: "5.9.0",
+  fr: 30,
+  ip: 0,
+  op: 60,
+  w: 200,
+  h: 200,
+  assets: [],
+  layers: [
+    // Thermometer body
+    {
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "body",
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 },
+        p: { a: 0, k: [100, 100, 0] },
+        s: { a: 0, k: [100, 100, 100] },
+      },
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            {
+              ty: "rc",
+              p: { a: 0, k: [0, -30] },
+              s: { a: 0, k: [40, 120] },
+              r: { a: 0, k: 20 },
+            },
+            {
+              ty: "el",
+              p: { a: 0, k: [0, 50] },
+              s: { a: 0, k: [60, 60] },
+            },
+            {
+              ty: "st",
+              c: { a: 0, k: [0.84, 0.84, 0.84, 1] },
+              o: { a: 0, k: 100 },
+              w: { a: 0, k: 6 },
+            },
+          ],
+        },
+      ],
+    },
+    // Rising mercury
+    {
+      ddd: 0,
+      ind: 2,
+      ty: 4,
+      nm: "mercury",
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 },
+        p: { a: 0, k: [100, 100, 0] },
+        s: { a: 1, k: [{ t: 0, s: [100, 0, 100] }, { t: 45, s: [100, 90, 100] }] },
+      },
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            {
+              ty: "rc",
+              p: { a: 0, k: [0, -10] },
+              s: { a: 0, k: [28, 100] },
+              r: { a: 0, k: 12 },
+            },
+            {
+              ty: "el",
+              p: { a: 0, k: [0, 60] },
+              s: { a: 0, k: [48, 48] },
+            },
+            {
+              ty: "fl",
+              c: { a: 0, k: [1, 0.36, 0.21, 1] },
+              o: { a: 0, k: 100 },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * Snowflake twinkle animation
+ */
+export const snowflakeAnimation = {
+  v: "5.9.0",
+  fr: 30,
+  ip: 0,
+  op: 60,
+  w: 200,
+  h: 200,
+  assets: [],
+  layers: [
+    {
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "flake",
+      sr: 1,
+      ks: {
+        o: {
+          a: 1,
+          k: [
+            { t: 0, s: [0] },
+            { t: 10, s: [100] },
+            { t: 50, s: [0] },
+          ],
+        },
+        p: { a: 0, k: [100, 100, 0] },
+        s: {
+          a: 1,
+          k: [
+            { t: 0, s: [80, 80, 100] },
+            { t: 30, s: [120, 120, 100] },
+            { t: 60, s: [90, 90, 100] },
+          ],
+        },
+        r: { a: 1, k: [{ t: 0, s: [0] }, { t: 60, s: [120] }] },
+      },
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            {
+              ty: "sr",
+              sy: 2,
+              pt: { a: 0, k: 6 },
+              p: { a: 0, k: [0, 0] },
+              r: { a: 0, k: 0 },
+              or: { a: 0, k: 60 },
+            },
+            {
+              ty: "st",
+              c: { a: 0, k: [0.66, 0.86, 1, 1] },
+              o: { a: 0, k: 100 },
+              w: { a: 0, k: 4 },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * Water drop bounce animation
+ */
+export const waterDropAnimation = {
+  v: "5.9.0",
+  fr: 30,
+  ip: 0,
+  op: 60,
+  w: 200,
+  h: 200,
+  assets: [],
+  layers: [
+    {
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "drop",
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 },
+        p: {
+          a: 1,
+          k: [
+            { t: 0, s: [100, 60, 0] },
+            { t: 30, s: [100, 120, 0] },
+            { t: 60, s: [100, 60, 0] },
+          ],
+        },
+        s: {
+          a: 1,
+          k: [
+            { t: 0, s: [60, 60, 100] },
+            { t: 30, s: [80, 80, 100] },
+            { t: 60, s: [60, 60, 100] },
+          ],
+        },
+      },
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            {
+              ty: "el",
+              p: { a: 0, k: [0, 0] },
+              s: { a: 0, k: [50, 70] },
+            },
+            {
+              ty: "fl",
+              c: { a: 0, k: [0.32, 0.66, 1, 1] },
+              o: { a: 0, k: 100 },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/**
  * Arrow pointer - For directing attention
  */
 export const arrowAnimation = {

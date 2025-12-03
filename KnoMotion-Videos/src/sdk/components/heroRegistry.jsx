@@ -12,6 +12,7 @@
 import React from 'react';
 import { interpolate } from 'remotion';
 import { toFrames } from '../core/time';
+import { RemotionLottie } from '../lottie/lottieIntegration';
 
 /**
  * Hero Type Registry
@@ -132,16 +133,22 @@ const EmojiRenderer = ({ config, frame, beats, colors, easingMap, fps }) => {
  * @param {string} config.colorize - Color to apply
  * @returns {JSX.Element} Lottie player element
  */
-const LottieRenderer = ({ config, frame, beats, colors, easingMap, fps }) => {
-  const { asset, colorize, style = {} } = config;
-  
-  // Simplified Lottie rendering
-  // In production, use proper Lottie integration
+const LottieRenderer = ({ config }) => {
+  const { asset, lottieRef, loop = true, playbackRate = 1, style = {} } = config;
+
+  const ref = lottieRef || asset;
+  if (!ref) {
+    console.warn('Lottie hero requires `asset` or `lottieRef`');
+    return null;
+  }
+
   return (
-    <div style={{ ...style }}>
-      {/* Lottie player would go here */}
-      <div>Lottie: {asset}</div>
-    </div>
+    <RemotionLottie
+      lottieRef={ref}
+      loop={loop}
+      playbackRate={playbackRate}
+      style={{ width: '100%', height: '100%', ...style }}
+    />
   );
 };
 
