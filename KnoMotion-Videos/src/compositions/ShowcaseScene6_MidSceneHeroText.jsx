@@ -18,8 +18,8 @@ import { KNODE_THEME } from '../sdk/theme/knodeTheme';
 // Example configuration
 const exampleConfig = {
   text: "Welcome to KnoMotion",
-  heroType: "image",
-  heroRef: "/lotties/arrowFlow.json", // Using a placeholder - in real usage, this would be an actual image path
+  heroType: "lottie",
+  heroRef: "education/lightbulb",
   animationEntrance: "fadeSlide",
   animationExit: "fadeOut",
   beats: {
