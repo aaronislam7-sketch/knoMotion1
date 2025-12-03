@@ -17,6 +17,7 @@ const createBadge = (color) => {
 const BADGE_AMBER = createBadge('#FBBF24');
 const BADGE_TEAL = createBadge('#2DD4BF');
 const BADGE_LILAC = createBadge('#C4B5FD');
+const BADGE_NAVY = createBadge('#93C5FD');
 
 const video3Scenes = [
   {
