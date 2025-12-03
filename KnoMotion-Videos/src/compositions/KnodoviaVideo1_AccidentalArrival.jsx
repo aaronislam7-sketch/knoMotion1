@@ -180,14 +180,14 @@ const video1Scenes = [
           config: {
             cards: [
               {
-                icon: '🧠',
+                icon: '💡',
                 label: 'Idea District',
                 sublabel: 'Visual metaphors queue here',
                 animated: true, // Showcase animated emoji!
                 beats: { start: 1.2, hold: 3.8, exit: 4.8 },
               },
               {
-                icon: '📚',
+                icon: '🔥',
                 label: 'Reference Clouds',
                 sublabel: 'Pulls context in real time',
                 animated: true, // Showcase animated emoji!
