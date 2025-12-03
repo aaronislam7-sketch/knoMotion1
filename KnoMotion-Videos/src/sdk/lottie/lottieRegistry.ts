@@ -29,12 +29,19 @@ const inlineEntry = (data: LottieAnimationData): LottieSource => ({
 
 export const LOTTIE_REGISTRY = {
   success: staticEntry('lotties/success-checkmark.json'),
+  checkmark: staticEntry('lotties/success-checkmark.json'),
+  'success-checkmark': staticEntry('lotties/success-checkmark.json'),
   celebration: staticEntry('lotties/celebration-stars.json'),
+  'celebration-stars': staticEntry('lotties/celebration-stars.json'),
   burst: staticEntry('lotties/particle-burst.json'),
+  'particle-burst': staticEntry('lotties/particle-burst.json'),
   particles: staticEntry('lotties/particle-burst.json'),
   loading: staticEntry('lotties/loading-spinner.json'),
+  'loading-spinner': staticEntry('lotties/loading-spinner.json'),
   spinner: staticEntry('lotties/loading-spinner.json'),
   stars: staticEntry('lotties/celebration-stars.json'),
+  arrowFlow: inlineEntry(arrowAnimation),
+  'arrow-flow': inlineEntry(arrowAnimation),
   'core/checkmark': staticEntry('lotties/success-checkmark.json'),
   'core/celebration': staticEntry('lotties/celebration-stars.json'),
   'core/particles': staticEntry('lotties/particle-burst.json'),
@@ -46,7 +53,9 @@ export const LOTTIE_REGISTRY = {
   'nature/thermometer': inlineEntry(thermometerAnimation),
   'nature/snowflake': inlineEntry(snowflakeAnimation),
   'nature/water-drop': inlineEntry(waterDropAnimation),
+  'nature/waterDrop': inlineEntry(waterDropAnimation),
   'ui/arrow': inlineEntry(arrowAnimation),
+  'ui/arrow-flow': inlineEntry(arrowAnimation),
   'ui/loading': inlineEntry(loadingAnimation),
   'celebration/confetti': inlineEntry(celebrationAnimation),
 } as const satisfies Record<string, LottieSource>;
@@ -54,5 +63,12 @@ export const LOTTIE_REGISTRY = {
 export type LottieKey = keyof typeof LOTTIE_REGISTRY;
 
 export const resolveLottieSource = (key: string): LottieSource | null => {
-  return LOTTIE_REGISTRY[key as LottieKey] ?? null;
+  const entry = LOTTIE_REGISTRY[key as LottieKey];
+  if (!entry) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`[LottieRegistry] Unknown lottieRef "${key}"`);
+    }
+    return null;
+  }
+  return entry;
 };
