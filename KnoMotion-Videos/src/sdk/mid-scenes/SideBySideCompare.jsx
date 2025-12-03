@@ -349,13 +349,22 @@ const MediaLayer = ({ media = {}, beats }) => {
   }
 
   if (media.image) {
+    const imageConfig =
+      typeof media.image === 'string' ? { src: media.image } : media.image;
+
+    if (!imageConfig.src) {
+      console.warn('SideBySideCompare: image media requires src');
+      return null;
+    }
+
     return (
       <ImageAtom
-        src={media.image}
-        fit={media.fit || 'cover'}
+        src={imageConfig.src}
+        alt={imageConfig.alt || media.alt || ''}
+        fit={imageConfig.fit || media.fit || 'cover'}
         beats={beats}
-        borderRadius={media.borderRadius ?? 24}
-        style={{ width: '100%', height: '100%' }}
+        borderRadius={imageConfig.borderRadius ?? media.borderRadius ?? 24}
+        style={{ width: '100%', height: '100%', ...(imageConfig.style || {}) }}
       />
     );
   }
