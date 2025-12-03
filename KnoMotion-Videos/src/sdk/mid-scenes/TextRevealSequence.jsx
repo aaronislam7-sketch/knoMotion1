@@ -72,14 +72,20 @@ const getEmphasisMotion = (effect, frame, beats, fps) => {
     return {};
   }
   const elapsed = frame - emphasisFrame;
+  const speed = effect.animation.speed || 1;
+  
   if (effect.animation.type === 'pulse') {
-    const cycle = Math.sin(elapsed / 6);
-    const scale = 1 + (effect.animation.amount || 0.04) * Math.max(0, cycle);
+    // Apply speed to pulse frequency
+    const frequency = 6 / speed; // Higher speed = faster pulse
+    const cycle = Math.sin(elapsed / frequency);
+    const amount = effect.animation.amount || 0.04;
+    const scale = 1 + amount * Math.max(0, cycle);
     return { transform: `scale(${scale})` };
   }
   if (effect.animation.type === 'breathe') {
+    const frequency = 12 / speed;
     const amount = effect.animation.amount || 0.01;
-    const scale = 1 + amount * Math.sin(elapsed / 12);
+    const scale = 1 + amount * Math.sin(elapsed / frequency);
     return { transform: `scale(${scale})` };
   }
   return {};
@@ -96,15 +102,20 @@ const getEmphasisMotion = (effect, frame, beats, fps) => {
  * @param {string} text - Text content (for typewriter)
  * @returns {Object} Style object with opacity, transform, and/or visible text
  */
-const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, direction = 'up', text = '') => {
+const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, direction = 'up', text = '', showCursor = true) => {
   switch (revealType) {
     case 'typewriter':
       const visibleText = typewriter(frame, startFrame, durationFrames, text);
+      const isTyping = frame >= startFrame && frame < startFrame + durationFrames;
+      const showCursorNow = showCursor && (isTyping || frame < startFrame + durationFrames + 15);
+      const cursorBlink = Math.floor((frame - startFrame) / 8) % 2 === 0;
+      
       return {
         opacity: 1,
         transform: 'none',
         visibleText,
         isTypewriter: true,
+        showCursor: showCursorNow && cursorBlink,
       };
     
     case 'slide':
@@ -142,6 +153,7 @@ const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, 
  * @param {Object} props.config - JSON configuration
  * @param {Array} props.config.lines - Array of line objects with text and emphasis (required)
  * @param {string} props.config.revealType - Type of reveal: 'typewriter' | 'fade' | 'slide' | 'mask' (default: 'fade')
+ * @param {boolean} props.config.showCursor - Show blinking cursor for typewriter effect (default: true)
  * @param {string} props.config.direction - Direction for slide/mask reveals: 'up' | 'down' | 'left' | 'right' (default: 'up')
  * @param {number} props.config.staggerDelay - Delay between lines in seconds (default: 0.2)
  * @param {number} props.config.animationDuration - Animation duration per line in seconds (default: 0.8)
@@ -159,6 +171,7 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
   const {
     lines = [],
     revealType = 'fade',
+    showCursor = true,
     direction = 'up',
     staggerDelay = 0.2,
     animationDuration = 0.8,
@@ -222,8 +235,16 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
           lineStartFrame,
           durationFrames,
           direction,
-          line.text
+          line.text,
+          showCursor
         );
+
+        // Calculate exit animation
+        const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitDuration = toFrames(0.3, fps);
+        const exitProgress = frame > exitFrame
+          ? Math.min(1, (frame - exitFrame) / exitDuration)
+          : 0;
 
         const emphasisEffect = getEmphasisStyle(line.emphasis);
         const emphasisMotion = getEmphasisMotion(emphasisEffect, frame, itemBeats, fps);
@@ -232,6 +253,7 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
 
         // Handle typewriter vs. other animations
         const displayText = animStyle.isTypewriter ? animStyle.visibleText : line.text;
+        const cursorVisible = animStyle.isTypewriter && animStyle.showCursor;
 
         // Combine centering transform with animation transform properly
         // The linePosition.transform handles centering (-50%, -50%)
@@ -249,6 +271,11 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
         const textWeight =
           weightValue >= 700 ? 'bold' : weightValue <= 400 ? 'normal' : 'medium';
 
+        // Calculate final opacity including exit
+        const entranceOpacity = animStyle.opacity ?? 1;
+        const exitOpacity = 1 - exitProgress;
+        const finalOpacity = entranceOpacity * exitOpacity;
+
         return (
           <div
             key={index}
@@ -256,28 +283,42 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
               ...linePosition,
               // Override transform to include animation
               transform: combinedTransform,
-              opacity: animStyle.opacity,
+              opacity: finalOpacity,
               clipPath: animStyle.clipPath || 'none',
-              ...('opacity' in emphasisMotion ? { opacity: emphasisMotion.opacity } : {}),
+              ...('opacity' in emphasisMotion ? { opacity: emphasisMotion.opacity * exitOpacity } : {}),
               ...style.lineContainer,
             }}
           >
-            <Text
-              text={displayText}
-              variant={preset.textVariant}
-              size="xl"
-              weight={textWeight}
-              color={preset.textColor}
-              style={{
-                fontSize: baseFontSize,
-                lineHeight: `${lineHeight}px`,
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                ...presetDecorationStyle,
-                ...emphasisEffect.textStyle,
-                ...style.text,
-              }}
-            />
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <Text
+                text={displayText}
+                variant={preset.textVariant}
+                size="xl"
+                weight={textWeight}
+                color={preset.textColor}
+                style={{
+                  fontSize: baseFontSize,
+                  lineHeight: `${lineHeight}px`,
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  ...presetDecorationStyle,
+                  ...emphasisEffect.textStyle,
+                  ...style.text,
+                }}
+              />
+              {cursorVisible && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 3,
+                    height: baseFontSize * 0.9,
+                    backgroundColor: KNODE_THEME.colors[preset.textColor] || KNODE_THEME.colors.textMain,
+                    marginLeft: 2,
+                    ...style.cursor,
+                  }}
+                />
+              )}
+            </span>
           </div>
         );
       })}

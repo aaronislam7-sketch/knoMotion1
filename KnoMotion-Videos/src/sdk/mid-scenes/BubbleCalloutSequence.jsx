@@ -18,34 +18,61 @@ import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 import { resolveStylePreset } from '../theme/stylePresets';
 import { resolveBeats } from '../utils/beats';
+import { enforceMinimumSpacing } from '../layout/layoutEngine';
+
+/**
+ * Estimate bubble dimensions based on text content
+ */
+const estimateBubbleSize = (text, maxWidth = 280) => {
+  const textLength = typeof text === 'string' ? text.length : 40;
+  const avgCharWidth = 10;
+  const estimatedWidth = Math.min(maxWidth, Math.max(120, textLength * avgCharWidth));
+  const lines = Math.ceil((textLength * avgCharWidth) / estimatedWidth);
+  const estimatedHeight = Math.max(60, lines * 28 + 40);
+  return { width: estimatedWidth, height: estimatedHeight };
+};
 
 /**
  * Calculate bubble positions based on pattern (simplified to freeform patterns only)
  */
-const calculateBubblePositions = (callouts, pattern, slot) => {
+const calculateBubblePositions = (callouts, pattern, slot, enableCollisionDetection = true) => {
   const { width, height } = slot;
   const count = callouts.length;
   const padding = Math.min(width, height) * 0.1;
   const usableWidth = width - padding * 2;
   const usableHeight = height - padding * 2;
   
+  let positions;
+  
   switch (pattern) {
     case 'diagonal':
       // Top-left to bottom-right diagonal
-      return callouts.map((_, index) => ({
-        x: padding + (usableWidth / (count + 1)) * (index + 1),
-        y: padding + (usableHeight / (count + 1)) * (index + 1),
-      }));
+      positions = callouts.map((callout, index) => {
+        const text = typeof callout === 'string' ? callout : callout.text;
+        const size = estimateBubbleSize(text);
+        return {
+          id: `bubble-${index}`,
+          x: padding + (usableWidth / (count + 1)) * (index + 1),
+          y: padding + (usableHeight / (count + 1)) * (index + 1),
+          ...size,
+        };
+      });
+      break;
     
     case 'zigzag':
       // Alternating left-right positions
-      return callouts.map((_, index) => {
+      positions = callouts.map((callout, index) => {
+        const text = typeof callout === 'string' ? callout : callout.text;
+        const size = estimateBubbleSize(text);
         const isEven = index % 2 === 0;
         return {
+          id: `bubble-${index}`,
           x: isEven ? padding + usableWidth * 0.25 : padding + usableWidth * 0.75,
           y: padding + (usableHeight / (count + 1)) * (index + 1),
+          ...size,
         };
       });
+      break;
     
     case 'scattered':
     default: {
@@ -54,19 +81,30 @@ const calculateBubblePositions = (callouts, pattern, slot) => {
       const centerY = height / 2;
       const maxRadius = Math.min(usableWidth, usableHeight) * 0.35;
       
-      return callouts.map((_, index) => {
+      positions = callouts.map((callout, index) => {
+        const text = typeof callout === 'string' ? callout : callout.text;
+        const size = estimateBubbleSize(text);
         // Golden angle distribution for natural-looking scatter
         const angle = index * 137.5 * (Math.PI / 180);
-        const radiusFactor = 0.4 + ((index % 3) * 0.2);
+        const radiusFactor = 0.5 + ((index % 3) * 0.15);
         const radius = maxRadius * radiusFactor;
         
         return {
+          id: `bubble-${index}`,
           x: centerX + Math.cos(angle) * radius,
           y: centerY + Math.sin(angle) * radius,
+          ...size,
         };
       });
     }
   }
+  
+  // Apply collision detection to avoid overlaps
+  if (enableCollisionDetection && positions.length > 1) {
+    return enforceMinimumSpacing(positions, 20);
+  }
+  
+  return positions;
 };
 
 /**
@@ -121,6 +159,10 @@ const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrame
  * @param {string} [props.config.animation='float'] - Animation: 'pop' | 'float' | 'slide' | 'scale' | 'fade'
  * @param {number} [props.config.staggerDelay=0.3] - Delay between callouts in seconds
  * @param {number} [props.config.animationDuration=0.6] - Animation duration in seconds
+ * @param {boolean} [props.config.collisionDetection=true] - Enable collision-aware positioning
+ * @param {Object} [props.config.jitter] - Optional jitter configuration
+ * @param {number} [props.config.jitter.x=0] - X-axis jitter in pixels
+ * @param {number} [props.config.jitter.y=0] - Y-axis jitter in pixels
  * @param {Object} props.config.beats - Beat timings
  * @param {number} props.config.beats.start - Start time in seconds (required)
  * @param {Object} [props.config.position] - Slot position from layout resolver
@@ -137,10 +179,11 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
     animation = 'float',
     staggerDelay = 0.3,
     animationDuration = 0.6,
+    collisionDetection = true,
+    jitter = null,
     beats = {},
     position,
     style = {},
-    overlap = false,
   } = config;
   const preset = resolveStylePreset(stylePreset);
 
@@ -166,10 +209,10 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
     top: position?.top || 0,
   };
 
-  // Calculate bubble positions
+  // Calculate bubble positions with collision detection
   const bubblePositions = useMemo(() => {
-    return calculateBubblePositions(callouts, pattern, slot);
-  }, [callouts, pattern, slot.width, slot.height]);
+    return calculateBubblePositions(callouts, pattern, slot, collisionDetection);
+  }, [callouts, pattern, slot.width, slot.height, collisionDetection]);
 
   // Calculate dynamic bubble sizing
   const maxBubbleWidth = Math.min(slot.width * 0.45, 320);
@@ -201,16 +244,22 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
             ? Math.min(1, (frame - exitFrame) / toFrames(0.3, fps))
             : 0;
         const pos = bubblePositions[index];
-        const jitterX = overlap ? ((index % 3) - 1) * 25 : 0;
-        const jitterY = overlap ? (((index + 1) % 3) - 1) * 20 : 0;
+        
+        // Apply configurable jitter for organic feel
+        const jitterX = jitter 
+          ? ((index % 3) - 1) * (jitter.x || 0)
+          : 0;
+        const jitterY = jitter 
+          ? (((index + 1) % 3) - 1) * (jitter.y || 0)
+          : 0;
 
         return (
           <div
             key={index}
             style={{
               position: 'absolute',
-              left: slot.left + pos.x + jitterX,
-              top: slot.top + pos.y + jitterY,
+              left: pos.x + jitterX,
+              top: pos.y + jitterY,
               transform: 'translate(-50%, -50%)',
               maxWidth: maxBubbleWidth,
               opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
@@ -221,6 +270,7 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
               <CalloutBubble
                 text={calloutData.text}
                 iconRef={calloutData.icon}
+                animated={calloutData.animated}
                 shape={calloutData.shape || shape}
                 color={calloutData.color || preset.doodle?.color || 'cardBg'}
                 style={style}

@@ -322,21 +322,15 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
         // Separate icon animation with pop effect
         const iconAnimStyle = getIconAnimationStyle(frame, itemStartFrame, durationFrames, fps);
 
-        // Position the item
+        // Position the item within the slot
+        // Note: Don't add slotLeft/slotTop here - parent SceneFromConfig handles slot positioning
         const itemPosition = positionToCSSWithTransform(pos, 'center');
-
-        // Offset to account for slot position
-        const adjustedPosition = {
-          ...itemPosition,
-          left: `${slotLeft + pos.x}px`,
-          top: `${slotTop + pos.y}px`,
-        };
 
         return (
           <div
             key={index}
             style={{
-              ...adjustedPosition,
+              ...itemPosition,
               display: 'flex',
               alignItems: 'center',
               justifyContent: alignment === 'center' ? 'center' : 'flex-start',
@@ -406,6 +400,7 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                     iconRef={itemIcon}
                     size="md"
                     color={itemChecked ? 'textMain' : 'textSoft'}
+                    animated={typeof item === 'object' ? item.animated : false}
                     style={{ fontSize: baseFontSize * iconSize }}
                   />
                 </div>

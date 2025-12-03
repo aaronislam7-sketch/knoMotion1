@@ -23,9 +23,20 @@ const video3Scenes = [
   {
     id: 'economics-cold-open',
     durationInFrames: 360,
-    transition: { type: 'slide', direction: 'up' },
+    transition: { type: 'slide', direction: 'up', animationPreset: 'bouncy' },
     config: {
-      background: { preset: 'sunriseGradient', layerNoise: true },
+      background: {
+        preset: 'sunriseGradient',
+        layerNoise: true,
+        particles: {
+          enabled: true,
+          style: 'dots',
+          count: 18,
+          color: '#F59E0B',
+          opacity: 0.2,
+          speed: 0.6,
+        },
+      },
       layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
       slots: {
         full: {
@@ -130,7 +141,7 @@ const video3Scenes = [
           config: {
             cards: [
               { image: BADGE_LILAC, label: 'Ask a great question', sublabel: '+2 scribs' },
-              { icon: '🤯', label: 'Make someone say “wait what?”', sublabel: 'Variable payout' },
+              { icon: '🤯', label: 'Make someone say “wait what?”', sublabel: 'Variable payout', animated: true },
             ],
             columns: 2,
             animation: 'scale',

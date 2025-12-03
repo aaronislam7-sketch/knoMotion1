@@ -24,6 +24,7 @@ import {
   KnodoviaEconomics,
   KNODOVIA_VIDEO3_DURATION,
 } from '../compositions/KnodoviaVideo3_Economics';
+import { LottieDebugTest } from '../compositions/LottieDebugTest';
 
 /**
  * Showcase Preview Tool
@@ -162,6 +163,14 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: '🚿 Canon: Shower Video (2 min)',
+    },
+    lottieDebug: {
+      component: LottieDebugTest,
+      duration: 300, // 10 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: '🔧 Lottie Debug Test',
     },
   };
 

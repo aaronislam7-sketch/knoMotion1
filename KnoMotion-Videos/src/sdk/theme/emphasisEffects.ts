@@ -13,7 +13,10 @@ export type EmphasisEffect = {
   };
   animation?: {
     type: 'pulse' | 'breathe';
+    /** Scale amount (e.g., 0.05 = 5% scale change) */
     amount?: number;
+    /** Speed multiplier (higher = faster, default 1) */
+    speed?: number;
   };
 };
 
@@ -35,7 +38,7 @@ export const EMPHASIS_EFFECTS: Record<EmphasisLevel, EmphasisEffect> = {
       borderRadius: 6,
     },
     doodle: { type: 'highlight', color: 'doodle', animate: true, thickness: 4 },
-    animation: { type: 'pulse', amount: 0.05 },
+    animation: { type: 'pulse', amount: 0.08, speed: 1.5 }, // Enhanced: more visible pulse
   },
   normal: {
     ...baseEffect,
@@ -43,7 +46,7 @@ export const EMPHASIS_EFFECTS: Record<EmphasisLevel, EmphasisEffect> = {
       fontWeight: 600,
       color: KNODE_THEME.colors.textMain,
     },
-    animation: { type: 'breathe', amount: 0.01 },
+    animation: { type: 'breathe', amount: 0.015, speed: 1 },
   },
   low: {
     ...baseEffect,

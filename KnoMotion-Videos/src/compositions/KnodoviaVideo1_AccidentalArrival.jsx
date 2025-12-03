@@ -27,9 +27,20 @@ const video1Scenes = [
   {
     id: 'knodovia-cold-open',
     durationInFrames: 360,
-    transition: { type: 'doodle-wipe', direction: 'right' },
+    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
     config: {
-      background: { preset: 'sunriseGradient', layerNoise: true },
+      background: {
+        preset: 'sunriseGradient',
+        layerNoise: true,
+        particles: {
+          enabled: true,
+          style: 'sparkle',
+          count: 15,
+          color: '#FBBF24',
+          opacity: 0.25,
+          speed: 0.8,
+        },
+      },
       layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
       slots: {
         full: {
@@ -152,7 +163,8 @@ const video1Scenes = [
           stylePreset: 'playful',
           config: {
             pattern: 'scattered',
-            overlap: true,
+            collisionDetection: true,
+            jitter: { x: 15, y: 10 },
             animation: 'float',
             callouts: [
               { text: "Guide: \"You're really not cleared.\"", icon: '🚫' },
@@ -168,15 +180,17 @@ const video1Scenes = [
           config: {
             cards: [
               {
-                icon: '🧠',
+                icon: '💡',
                 label: 'Idea District',
                 sublabel: 'Visual metaphors queue here',
+                animated: true, // Showcase animated emoji!
                 beats: { start: 1.2, hold: 3.8, exit: 4.8 },
               },
               {
-                icon: '📚',
+                icon: '🔥',
                 label: 'Reference Clouds',
                 sublabel: 'Pulls context in real time',
+                animated: true, // Showcase animated emoji!
                 beats: { start: 1.4, hold: 4.0, exit: 4.9 },
               },
               {
@@ -218,6 +232,7 @@ const video1Scenes = [
                 icon: '✨',
                 label: 'Animated Emoji',
                 sublabel: 'No more static icons',
+                animated: true, // Showcase animated emoji!
               },
             ],
             columns: 3,

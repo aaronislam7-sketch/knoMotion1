@@ -1,16 +1,16 @@
 import React from 'react';
-import { AnimatedEmoji, getAvailableEmojis } from '@remotion/animated-emoji';
-import {
-  getRemotionEnvironment,
-  getStaticFiles,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
+import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 import { scaleIn, getContinuousRotation } from '../../animations';
+import { AnimatedEmojiLottie } from './AnimatedEmojiLottie';
 
 /**
  * Icon - Atomic element for icons/emojis
+ * 
+ * Supports:
+ * - Emoji characters (renders as AnimatedEmojiLottie when animated=true)
+ * - React elements (renders as-is)
+ * - Any other string (renders as text)
  * 
  * @param {object} props
  * @param {string} props.iconRef - Icon content (emoji, SVG, etc.) (STANDARDIZED)
@@ -18,80 +18,12 @@ import { scaleIn, getContinuousRotation } from '../../animations';
  * @param {string} props.color - Color from theme (optional)
  * @param {object} props.animation - Optional animation config
  * @param {boolean} props.spin - Whether icon should spin continuously
+ * @param {boolean} props.animated - Whether to use animated emoji (default: false)
  * @param {object} props.style - Style overrides
  */
+
+// Regex to detect emoji characters
 const EMOJI_REGEX = /\p{Extended_Pictographic}/u;
-const animatedEmojiData = getAvailableEmojis();
-const emojiAliasToName = new Map();
-animatedEmojiData.forEach((entry) => {
-  emojiAliasToName.set(entry.codepoint.toLowerCase(), entry.name);
-  const char = entry.codepoint
-    .split('_')
-    .map((cp) => String.fromCodePoint(parseInt(cp, 16)))
-    .join('');
-  emojiAliasToName.set(char, entry.name);
-  entry.tags.forEach((tag) => {
-    emojiAliasToName.set(tag, entry.name);
-  });
-});
-const animatedEmojiAssetCache = new Map();
-
-const toCodepointKey = (value) => {
-  if (typeof value !== 'string') return null;
-  const codepoints = Array.from(value)
-    .map((char) => {
-      const cp = char.codePointAt(0);
-      return cp !== undefined ? cp.toString(16) : null;
-    })
-    .filter(Boolean);
-  if (codepoints.length === 0) return null;
-  return codepoints.join('_').toLowerCase();
-};
-
-const resolveEmojiName = (value) => {
-  if (!value) return null;
-  const normalized = typeof value === 'string' ? value.trim() : '';
-  if (emojiAliasToName.has(normalized)) {
-    return emojiAliasToName.get(normalized);
-  }
-  const codepointKey = toCodepointKey(normalized);
-  if (codepointKey && emojiAliasToName.has(codepointKey)) {
-    return emojiAliasToName.get(codepointKey);
-  }
-  return null;
-};
-
-const hasAnimatedEmojiAsset = (emojiName, scale = '1') => {
-  const cacheKey = `${emojiName}-${scale}`;
-  if (animatedEmojiAssetCache.has(cacheKey)) {
-    return animatedEmojiAssetCache.get(cacheKey);
-  }
-
-  if (typeof window === 'undefined') {
-    animatedEmojiAssetCache.set(cacheKey, false);
-    return false;
-  }
-
-  const env = getRemotionEnvironment();
-  if (!env?.isStudio) {
-    animatedEmojiAssetCache.set(cacheKey, false);
-    return false;
-  }
-
-  const staticFiles = getStaticFiles();
-  if (!staticFiles || staticFiles.length === 0) {
-    animatedEmojiAssetCache.set(cacheKey, false);
-    return false;
-  }
-
-  const webmName = `${emojiName}-${scale}x.webm`;
-  const mp4Name = `${emojiName}-${scale}x.mp4`;
-  const exists = staticFiles.some(
-    (file) => file.name.endsWith(webmName) || file.name.endsWith(mp4Name),
-  );
-  animatedEmojiAssetCache.set(cacheKey, exists);
-  return exists;
-};
 
 export const Icon = ({ 
   iconRef, 
@@ -99,6 +31,7 @@ export const Icon = ({
   color = null,
   animation = null,
   spin = false,
+  animated = false,
   style = {},
   className = '',
   ...props 
@@ -114,6 +47,8 @@ export const Icon = ({
     lg: 60,
     xl: 80,
   };
+  
+  const pixelSize = sizes[size] || sizes.md;
   
   // Animation support
   let animStyle = {};
@@ -141,24 +76,28 @@ export const Icon = ({
   const iconColor = color ? (theme.colors[color] || color) : 'inherit';
   
   const renderContent = () => {
+    // If it's already a React element, render it as-is
     if (React.isValidElement(iconRef)) {
       return iconRef;
     }
 
     if (typeof iconRef === 'string') {
+      // Check if the string contains an emoji and animated is requested
       const containsEmoji = EMOJI_REGEX.test(iconRef);
-      if (containsEmoji) {
-        const emojiName = resolveEmojiName(iconRef);
-        if (emojiName && hasAnimatedEmojiAsset(emojiName)) {
-          return (
-            <AnimatedEmoji
-              emoji={emojiName}
-              style={{ width: sizes[size], height: sizes[size] }}
-              layout="none"
-            />
-          );
-        }
+      
+      if (containsEmoji && animated) {
+        // Use Lottie-based animated emoji from Google's CDN
+        return (
+          <AnimatedEmojiLottie
+            emoji={iconRef}
+            size={pixelSize}
+            loop={true}
+            playbackRate={1}
+          />
+        );
       }
+      
+      // Fallback: render the string as-is (static emoji or text)
       return iconRef;
     }
 
@@ -172,7 +111,7 @@ export const Icon = ({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: sizes[size],
+        fontSize: pixelSize,
         lineHeight: 1,
         color: iconColor,
         ...animStyle,

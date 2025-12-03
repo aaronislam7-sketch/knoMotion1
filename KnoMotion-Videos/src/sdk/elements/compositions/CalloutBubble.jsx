@@ -19,6 +19,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
 export const CalloutBubble = ({
   text,
   iconRef,
+  animated = false,
   shape = 'speech',
   variant = 'default',
   color,
@@ -84,6 +85,7 @@ export const CalloutBubble = ({
             <Icon
               iconRef={iconRef}
               size="md"
+              animated={animated}
               style={style.icon}
             />
           )}
