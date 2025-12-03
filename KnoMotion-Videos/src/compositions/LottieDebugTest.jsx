@@ -30,7 +30,8 @@ const LOTTIE_FILES_URL = 'https://assets4.lottiefiles.com/packages/lf20_zyquagfl
  */
 const RawLottieTest = () => {
   // Minimal inline animation - just a circle that pulses
-  // Now includes ALL required fields for lottie-web
+  // CRITICAL: Keyframes MUST include proper easing data (h, i, o) for smooth animation
+  // See: https://lottiefiles.github.io/lottie-docs/concepts/#keyframe
   const simpleAnimation = {
     v: "5.7.4",
     fr: 30,
@@ -38,8 +39,8 @@ const RawLottieTest = () => {
     op: 60,
     w: 100,
     h: 100,
-    nm: "Simple Circle",  // Required!
-    ddd: 0,               // Required!
+    nm: "Simple Circle",
+    ddd: 0,
     assets: [],
     layers: [{
       ddd: 0,
@@ -49,23 +50,24 @@ const RawLottieTest = () => {
       sr: 1,
       ks: {
         o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },  // rotation
+        r: { a: 0, k: 0 },
         p: { a: 0, k: [50, 50, 0] },
-        a: { a: 0, k: [0, 0, 0] },  // anchor
+        a: { a: 0, k: [0, 0, 0] },
         s: { 
           a: 1, 
           k: [
-            { t: 0, s: [100, 100, 100] }, 
-            { t: 30, s: [120, 120, 100] },
-            { t: 60, s: [100, 100, 100] }
+            // Each keyframe needs: t (time), s (value), and either h:1 or easing curves (i, o)
+            { t: 0, s: [100, 100, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
+            { t: 30, s: [120, 120, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } },
+            { t: 60, s: [100, 100, 100] }  // Last keyframe doesn't need easing
           ] 
         }
       },
-      ao: 0,      // auto-orient
-      ip: 0,      // in point - Required!
-      op: 60,     // out point - Required!
-      st: 0,      // start time - Required!
-      bm: 0,      // blend mode - Required!
+      ao: 0,
+      ip: 0,
+      op: 60,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [
