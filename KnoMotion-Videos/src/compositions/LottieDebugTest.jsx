@@ -23,16 +23,23 @@ const LOTTIE_FILES_URL = 'https://assets4.lottiefiles.com/packages/lf20_zyquagfl
 
 /**
  * Test 1: Raw hardcoded animation data (simplest possible case)
+ * 
+ * Key fields that lottie-web REQUIRES:
+ * - Root: v, fr, ip, op, w, h, nm, ddd, assets, layers
+ * - Layer: ddd, ind, ty, nm, sr, ks, ip, op, st, bm
  */
 const RawLottieTest = () => {
   // Minimal inline animation - just a circle that pulses
+  // Now includes ALL required fields for lottie-web
   const simpleAnimation = {
-    v: "5.9.0",
+    v: "5.7.4",
     fr: 30,
     ip: 0,
     op: 60,
     w: 100,
     h: 100,
+    nm: "Simple Circle",  // Required!
+    ddd: 0,               // Required!
     assets: [],
     layers: [{
       ddd: 0,
@@ -42,7 +49,9 @@ const RawLottieTest = () => {
       sr: 1,
       ks: {
         o: { a: 0, k: 100 },
+        r: { a: 0, k: 0 },  // rotation
         p: { a: 0, k: [50, 50, 0] },
+        a: { a: 0, k: [0, 0, 0] },  // anchor
         s: { 
           a: 1, 
           k: [
@@ -52,14 +61,22 @@ const RawLottieTest = () => {
           ] 
         }
       },
+      ao: 0,      // auto-orient
+      ip: 0,      // in point - Required!
+      op: 60,     // out point - Required!
+      st: 0,      // start time - Required!
+      bm: 0,      // blend mode - Required!
       shapes: [{
         ty: "gr",
         it: [
           { ty: "el", p: { a: 0, k: [0, 0] }, s: { a: 0, k: [60, 60] } },
-          { ty: "fl", c: { a: 0, k: [0.2, 0.8, 0.4, 1] }, o: { a: 0, k: 100 } }
-        ]
+          { ty: "fl", c: { a: 0, k: [0.2, 0.8, 0.4, 1] }, o: { a: 0, k: 100 } },
+          { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+        ],
+        nm: "Circle Group"
       }]
-    }]
+    }],
+    markers: []
   };
 
   return (

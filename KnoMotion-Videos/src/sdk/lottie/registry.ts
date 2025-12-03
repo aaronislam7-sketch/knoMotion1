@@ -35,14 +35,20 @@ export interface LottiePreset {
 
 /**
  * Animated checkmark - Perfect for quiz reveals, completion states
+ * 
+ * NOTE: All inline Lottie animations MUST include these fields:
+ * - Root: v, fr, ip, op, w, h, nm, ddd, assets, layers, markers
+ * - Layer: ddd, ind, ty, nm, sr, ks, ao, ip, op, st, bm
  */
 export const checkmarkAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 45,
   w: 200,
   h: 200,
+  nm: "Checkmark",
+  ddd: 0,
   assets: [],
   layers: [{
     ddd: 0,
@@ -64,17 +70,24 @@ export const checkmarkAnimation: LottieAnimationData = {
         ]
       }
     },
+    ao: 0,
+    ip: 0,
+    op: 45,
+    st: 0,
+    bm: 0,
     shapes: [{
       ty: "gr",
       it: [{
+        ind: 0,
         ty: "sh",
         ks: {
-          a: 1,
-          k: [
-            { t: 0, s: [{ c: false, v: [[0, 0], [0, 0]], i: [[0, 0]], o: [[0, 0]] }] },
-            { t: 15, s: [{ c: false, v: [[-40, 0], [-15, 25]], i: [[0, 0]], o: [[0, 0]] }] },
-            { t: 30, s: [{ c: false, v: [[-40, 0], [-15, 25], [40, -30]], i: [[0, 0], [0, 0]], o: [[0, 0], [0, 0]] }] }
-          ]
+          a: 0,
+          k: {
+            i: [[0, 0], [0, 0], [0, 0]],
+            o: [[0, 0], [0, 0], [0, 0]],
+            v: [[-40, 0], [-15, 25], [40, -30]],
+            c: false
+          }
         }
       }, {
         ty: "st",
@@ -83,21 +96,44 @@ export const checkmarkAnimation: LottieAnimationData = {
         w: { a: 0, k: 16 },
         lc: 2,
         lj: 2
-      }]
+      }, {
+        ty: "tr",
+        p: { a: 0, k: [0, 0] },
+        a: { a: 0, k: [0, 0] },
+        s: { a: 0, k: [100, 100] },
+        r: { a: 0, k: 0 },
+        o: { a: 0, k: 100 }
+      }],
+      nm: "Check Shape"
+    }, {
+      ty: "tm",
+      s: { a: 0, k: 0 },
+      e: {
+        a: 1,
+        k: [
+          { t: 0, s: [0] },
+          { t: 30, s: [100] }
+        ]
+      },
+      o: { a: 0, k: 0 },
+      m: 1
     }]
-  }]
+  }],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Sparkle burst animation
  */
 export const sparkleAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 35,
   w: 200,
   h: 200,
+  nm: "Sparkle",
+  ddd: 0,
   assets: [],
   layers: [
     {
@@ -110,8 +146,14 @@ export const sparkleAnimation: LottieAnimationData = {
         o: { a: 1, k: [{ t: 0, s: [0] }, { t: 8, s: [100] }, { t: 25, s: [0] }] },
         r: { a: 1, k: [{ t: 0, s: [0] }, { t: 35, s: [180] }] },
         p: { a: 0, k: [100, 100, 0] },
+        a: { a: 0, k: [0, 0, 0] },
         s: { a: 1, k: [{ t: 0, s: [50, 50, 100] }, { t: 12, s: [130, 130, 100] }, { t: 25, s: [80, 80, 100] }] }
       },
+      ao: 0,
+      ip: 0,
+      op: 35,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [{
@@ -126,22 +168,33 @@ export const sparkleAnimation: LottieAnimationData = {
           ty: "fl",
           c: { a: 0, k: [1, 0.84, 0, 1] },
           o: { a: 0, k: 100 }
-        }]
+        }, {
+          ty: "tr",
+          p: { a: 0, k: [0, 0] },
+          a: { a: 0, k: [0, 0] },
+          s: { a: 0, k: [100, 100] },
+          r: { a: 0, k: 0 },
+          o: { a: 0, k: 100 }
+        }],
+        nm: "Star Group"
       }]
     }
-  ]
+  ],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Lightbulb "aha moment" animation
  */
 export const lightbulbAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 50,
   w: 200,
   h: 200,
+  nm: "Lightbulb",
+  ddd: 0,
   assets: [],
   layers: [
     {
@@ -152,9 +205,16 @@ export const lightbulbAnimation: LottieAnimationData = {
       sr: 1,
       ks: {
         o: { a: 0, k: 100 },
+        r: { a: 0, k: 0 },
         p: { a: 0, k: [100, 100, 0] },
+        a: { a: 0, k: [0, 0, 0] },
         s: { a: 1, k: [{ t: 0, s: [80, 80, 100] }, { t: 10, s: [100, 100, 100] }] }
       },
+      ao: 0,
+      ip: 0,
+      op: 50,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [{
@@ -170,22 +230,33 @@ export const lightbulbAnimation: LottieAnimationData = {
           c: { a: 0, k: [0.3, 0.3, 0.3, 1] },
           o: { a: 0, k: 100 },
           w: { a: 0, k: 3 }
-        }]
+        }, {
+          ty: "tr",
+          p: { a: 0, k: [0, 0] },
+          a: { a: 0, k: [0, 0] },
+          s: { a: 0, k: [100, 100] },
+          r: { a: 0, k: 0 },
+          o: { a: 0, k: 100 }
+        }],
+        nm: "Bulb Shape"
       }]
     }
-  ]
+  ],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Thinking emoji animation
  */
 export const thinkingAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 60,
   w: 200,
   h: 200,
+  nm: "Thinking",
+  ddd: 0,
   assets: [],
   layers: [
     {
@@ -196,8 +267,16 @@ export const thinkingAnimation: LottieAnimationData = {
       sr: 1,
       ks: {
         o: { a: 0, k: 100 },
-        p: { a: 0, k: [100, 100, 0] }
+        r: { a: 0, k: 0 },
+        p: { a: 0, k: [100, 100, 0] },
+        a: { a: 0, k: [0, 0, 0] },
+        s: { a: 0, k: [100, 100, 100] }
       },
+      ao: 0,
+      ip: 0,
+      op: 60,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [{
@@ -213,22 +292,33 @@ export const thinkingAnimation: LottieAnimationData = {
           c: { a: 0, k: [0.2, 0.2, 0.2, 1] },
           o: { a: 0, k: 100 },
           w: { a: 0, k: 3 }
-        }]
+        }, {
+          ty: "tr",
+          p: { a: 0, k: [0, 0] },
+          a: { a: 0, k: [0, 0] },
+          s: { a: 0, k: [100, 100] },
+          r: { a: 0, k: 0 },
+          o: { a: 0, k: 100 }
+        }],
+        nm: "Face Shape"
       }]
     }
-  ]
+  ],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Celebration confetti animation
  */
 export const celebrationAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 60,
   w: 200,
   h: 200,
+  nm: "Celebration",
+  ddd: 0,
   assets: [],
   layers: Array.from({ length: 12 }, (_, i) => {
     const angle = (i / 12) * Math.PI * 2;
@@ -248,9 +338,15 @@ export const celebrationAnimation: LottieAnimationData = {
       ks: {
         o: { a: 1, k: [{ t: 0, s: [0] }, { t: 5, s: [100] }, { t: 50, s: [0] }] },
         r: { a: 1, k: [{ t: 0, s: [0] }, { t: 60, s: [360 * (i % 2 === 0 ? 1 : -1)] }] },
-        p: { a: 1, k: [{ t: 0, s: [100, 100] }, { t: 40, s: [100 + Math.cos(angle) * 80, 100 + Math.sin(angle) * 80 + 30] }] },
+        p: { a: 1, k: [{ t: 0, s: [100, 100, 0] }, { t: 40, s: [100 + Math.cos(angle) * 80, 100 + Math.sin(angle) * 80 + 30, 0] }] },
+        a: { a: 0, k: [0, 0, 0] },
         s: { a: 1, k: [{ t: 0, s: [100, 100, 100] }, { t: 40, s: [60, 60, 100] }] }
       },
+      ao: 0,
+      ip: 0,
+      op: 60,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [{
@@ -262,22 +358,33 @@ export const celebrationAnimation: LottieAnimationData = {
           ty: "fl",
           c: { a: 0, k: colors[i % colors.length] },
           o: { a: 0, k: 100 }
-        }]
+        }, {
+          ty: "tr",
+          p: { a: 0, k: [0, 0] },
+          a: { a: 0, k: [0, 0] },
+          s: { a: 0, k: [100, 100] },
+          r: { a: 0, k: 0 },
+          o: { a: 0, k: 100 }
+        }],
+        nm: `Confetti ${i}`
       }]
     };
-  })
+  }),
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Thermometer animation
  */
 export const thermometerAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 60,
   w: 200,
   h: 200,
+  nm: "Thermometer",
+  ddd: 0,
   assets: [],
   layers: [
     {
@@ -288,16 +395,25 @@ export const thermometerAnimation: LottieAnimationData = {
       sr: 1,
       ks: {
         o: { a: 0, k: 100 },
+        r: { a: 0, k: 0 },
         p: { a: 0, k: [100, 100, 0] },
-        s: { a: 0, k: [100, 100, 100] },
+        a: { a: 0, k: [0, 0, 0] },
+        s: { a: 0, k: [100, 100, 100] }
       },
+      ao: 0,
+      ip: 0,
+      op: 60,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [
           { ty: "rc", p: { a: 0, k: [0, -30] }, s: { a: 0, k: [40, 120] }, r: { a: 0, k: 20 } },
           { ty: "el", p: { a: 0, k: [0, 50] }, s: { a: 0, k: [60, 60] } },
-          { ty: "st", c: { a: 0, k: [0.84, 0.84, 0.84, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 6 } }
-        ]
+          { ty: "st", c: { a: 0, k: [0.84, 0.84, 0.84, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 6 } },
+          { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+        ],
+        nm: "Body Shape"
       }]
     },
     {
@@ -308,31 +424,43 @@ export const thermometerAnimation: LottieAnimationData = {
       sr: 1,
       ks: {
         o: { a: 0, k: 100 },
+        r: { a: 0, k: 0 },
         p: { a: 0, k: [100, 100, 0] },
+        a: { a: 0, k: [0, 0, 0] },
         s: { a: 1, k: [{ t: 0, s: [100, 0, 100] }, { t: 45, s: [100, 90, 100] }] }
       },
+      ao: 0,
+      ip: 0,
+      op: 60,
+      st: 0,
+      bm: 0,
       shapes: [{
         ty: "gr",
         it: [
           { ty: "rc", p: { a: 0, k: [0, -10] }, s: { a: 0, k: [28, 100] }, r: { a: 0, k: 12 } },
           { ty: "el", p: { a: 0, k: [0, 60] }, s: { a: 0, k: [48, 48] } },
-          { ty: "fl", c: { a: 0, k: [1, 0.36, 0.21, 1] }, o: { a: 0, k: 100 } }
-        ]
+          { ty: "fl", c: { a: 0, k: [1, 0.36, 0.21, 1] }, o: { a: 0, k: 100 } },
+          { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+        ],
+        nm: "Mercury Shape"
       }]
     }
-  ]
+  ],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Snowflake animation
  */
 export const snowflakeAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 60,
   w: 200,
   h: 200,
+  nm: "Snowflake",
+  ddd: 0,
   assets: [],
   layers: [{
     ddd: 0,
@@ -342,30 +470,41 @@ export const snowflakeAnimation: LottieAnimationData = {
     sr: 1,
     ks: {
       o: { a: 1, k: [{ t: 0, s: [0] }, { t: 10, s: [100] }, { t: 50, s: [0] }] },
+      r: { a: 1, k: [{ t: 0, s: [0] }, { t: 60, s: [120] }] },
       p: { a: 0, k: [100, 100, 0] },
-      s: { a: 1, k: [{ t: 0, s: [80, 80, 100] }, { t: 30, s: [120, 120, 100] }, { t: 60, s: [90, 90, 100] }] },
-      r: { a: 1, k: [{ t: 0, s: [0] }, { t: 60, s: [120] }] }
+      a: { a: 0, k: [0, 0, 0] },
+      s: { a: 1, k: [{ t: 0, s: [80, 80, 100] }, { t: 30, s: [120, 120, 100] }, { t: 60, s: [90, 90, 100] }] }
     },
+    ao: 0,
+    ip: 0,
+    op: 60,
+    st: 0,
+    bm: 0,
     shapes: [{
       ty: "gr",
       it: [
         { ty: "sr", sy: 2, pt: { a: 0, k: 6 }, p: { a: 0, k: [0, 0] }, r: { a: 0, k: 0 }, or: { a: 0, k: 60 } },
-        { ty: "st", c: { a: 0, k: [0.66, 0.86, 1, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 4 } }
-      ]
+        { ty: "st", c: { a: 0, k: [0.66, 0.86, 1, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 4 } },
+        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+      ],
+      nm: "Flake Shape"
     }]
-  }]
+  }],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Water drop animation
  */
 export const waterDropAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 60,
   w: 200,
   h: 200,
+  nm: "Water Drop",
+  ddd: 0,
   assets: [],
   layers: [{
     ddd: 0,
@@ -375,29 +514,41 @@ export const waterDropAnimation: LottieAnimationData = {
     sr: 1,
     ks: {
       o: { a: 0, k: 100 },
+      r: { a: 0, k: 0 },
       p: { a: 1, k: [{ t: 0, s: [100, 60, 0] }, { t: 30, s: [100, 120, 0] }, { t: 60, s: [100, 60, 0] }] },
+      a: { a: 0, k: [0, 0, 0] },
       s: { a: 1, k: [{ t: 0, s: [60, 60, 100] }, { t: 30, s: [80, 80, 100] }, { t: 60, s: [60, 60, 100] }] }
     },
+    ao: 0,
+    ip: 0,
+    op: 60,
+    st: 0,
+    bm: 0,
     shapes: [{
       ty: "gr",
       it: [
         { ty: "el", p: { a: 0, k: [0, 0] }, s: { a: 0, k: [50, 70] } },
-        { ty: "fl", c: { a: 0, k: [0.32, 0.66, 1, 1] }, o: { a: 0, k: 100 } }
-      ]
+        { ty: "fl", c: { a: 0, k: [0.32, 0.66, 1, 1] }, o: { a: 0, k: 100 } },
+        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+      ],
+      nm: "Drop Shape"
     }]
-  }]
+  }],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Arrow animation
  */
 export const arrowAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 45,
   w: 200,
   h: 200,
+  nm: "Arrow",
+  ddd: 0,
   assets: [],
   layers: [{
     ddd: 0,
@@ -407,30 +558,42 @@ export const arrowAnimation: LottieAnimationData = {
     sr: 1,
     ks: {
       o: { a: 1, k: [{ t: 0, s: [0] }, { t: 10, s: [100] }] },
-      p: { a: 1, k: [{ t: 0, s: [60, 100] }, { t: 20, s: [140, 100] }, { t: 35, s: [120, 100] }, { t: 45, s: [140, 100] }] },
+      r: { a: 0, k: 0 },
+      p: { a: 1, k: [{ t: 0, s: [60, 100, 0] }, { t: 20, s: [140, 100, 0] }, { t: 35, s: [120, 100, 0] }, { t: 45, s: [140, 100, 0] }] },
+      a: { a: 0, k: [0, 0, 0] },
       s: { a: 0, k: [100, 100, 100] }
     },
+    ao: 0,
+    ip: 0,
+    op: 45,
+    st: 0,
+    bm: 0,
     shapes: [{
       ty: "gr",
       it: [
         { ty: "sh", ks: { a: 0, k: { c: false, v: [[-30, 0], [20, 0]], i: [[0, 0], [0, 0]], o: [[0, 0], [0, 0]] } } },
         { ty: "sh", ks: { a: 0, k: { c: false, v: [[15, -10], [30, 0], [15, 10]], i: [[0, 0], [0, 0], [0, 0]], o: [[0, 0], [0, 0], [0, 0]] } } },
-        { ty: "st", c: { a: 0, k: [1, 0.42, 0.21, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 8 }, lc: 2, lj: 2 }
-      ]
+        { ty: "st", c: { a: 0, k: [1, 0.42, 0.21, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 8 }, lc: 2, lj: 2 },
+        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+      ],
+      nm: "Arrow Shape"
     }]
-  }]
+  }],
+  markers: []
 } as LottieAnimationData;
 
 /**
  * Loading spinner animation
  */
 export const loadingAnimation: LottieAnimationData = {
-  v: "5.9.0",
+  v: "5.7.4",
   fr: 30,
   ip: 0,
   op: 60,
   w: 200,
   h: 200,
+  nm: "Loading",
+  ddd: 0,
   assets: [],
   layers: [{
     ddd: 0,
@@ -441,17 +604,26 @@ export const loadingAnimation: LottieAnimationData = {
     ks: {
       o: { a: 0, k: 100 },
       r: { a: 1, k: [{ t: 0, s: [0] }, { t: 60, s: [360] }] },
-      p: { a: 0, k: [100, 100, 0] }
+      p: { a: 0, k: [100, 100, 0] },
+      a: { a: 0, k: [0, 0, 0] },
+      s: { a: 0, k: [100, 100, 100] }
     },
+    ao: 0,
+    ip: 0,
+    op: 60,
+    st: 0,
+    bm: 0,
     shapes: Array.from({ length: 8 }, (_, i) => ({
       ty: "gr",
       it: [
         { ty: "rc", p: { a: 0, k: [0, -35] }, s: { a: 0, k: [8, 25] }, r: { a: 0, k: 4 } },
         { ty: "fl", c: { a: 0, k: [0.18, 0.5, 0.89, 1] }, o: { a: 0, k: 100 - (i * 10) } },
-        { ty: "tr", r: { a: 0, k: (i / 8) * 360 } }
-      ]
+        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: (i / 8) * 360 }, o: { a: 0, k: 100 } }
+      ],
+      nm: `Spinner Segment ${i}`
     }))
-  }]
+  }],
+  markers: []
 } as LottieAnimationData;
 
 // ============================================================================
