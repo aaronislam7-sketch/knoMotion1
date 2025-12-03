@@ -2,7 +2,7 @@
  * Lottie Animation Integration
  * 
  * @deprecated This file is maintained for backward compatibility.
- * Please import from './index' or './LottiePlayer' instead.
+ * Please import from './index' instead.
  * 
  * @module lottie/lottieIntegration
  */
@@ -15,10 +15,11 @@ export {
   LottieIcon,
   LottieOverlay,
   LottieFromPreset,
-  useLottieData,
+  useLottieEntry,
 } from './LottiePlayer';
 
 export {
+  resolveLottieRef,
   resolveLottieSource,
   LOTTIE_REGISTRY,
   getLottiePreset,

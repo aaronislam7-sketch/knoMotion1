@@ -1,7 +1,8 @@
 /**
  * Lottie Integration - Single Entry Point
  * 
- * Consolidated module for all Lottie-related functionality.
+ * URL-based Lottie animations for Remotion.
+ * All animations are fetched from LottieFiles or other CDN sources.
  * 
  * @module lottie
  * 
@@ -10,13 +11,17 @@
  * import { LottiePlayer, LottieIcon, LottieOverlay } from '../sdk/lottie';
  * 
  * // Use with a registry key
- * <LottiePlayer lottieRef="education/lightbulb" loop={false} />
+ * <LottiePlayer lottieRef="success" />
+ * <LottiePlayer lottieRef="confetti" loop={false} />
+ * 
+ * // Use with a direct URL
+ * <LottiePlayer lottieRef="https://assets.lottiefiles.com/..." />
  * 
  * // Use with a preset
  * <LottieFromPreset preset="insight" />
  * 
  * // Icon size
- * <LottieIcon lottieRef="core/checkmark" size={32} />
+ * <LottieIcon lottieRef="checkmark" size={32} />
  */
 
 // Main player components
@@ -25,7 +30,7 @@ export {
   LottieIcon,
   LottieOverlay,
   LottieFromPreset,
-  useLottieData,
+  useLottieEntry,
   // Backward compatibility
   RemotionLottie,
   AnimatedLottie,
@@ -37,30 +42,18 @@ export type { LottiePlayerProps } from './LottiePlayer';
 export {
   LOTTIE_REGISTRY,
   LOTTIE_PRESETS,
-  resolveLottieSource,
+  resolveLottieRef,
   getLottiePreset,
   getAvailableLottieKeys,
+  searchLottieByTag,
   hasLottie,
+  // Backward compatibility
+  resolveLottieSource,
 } from './registry';
 
 export type {
-  LottieSource,
+  LottieEntry,
   LottiePreset,
-  LottieKey,
-} from './registry';
-
-// Inline animations for direct use
-export {
-  checkmarkAnimation,
-  sparkleAnimation,
-  lightbulbAnimation,
-  thinkingAnimation,
-  celebrationAnimation,
-  thermometerAnimation,
-  snowflakeAnimation,
-  waterDropAnimation,
-  arrowAnimation,
-  loadingAnimation,
 } from './registry';
 
 // Default export is the main player

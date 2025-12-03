@@ -1,8 +1,7 @@
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
 import { 
-  RemotionLottie, 
-  AnimatedLottie, 
+  LottiePlayer,
   LottieIcon, 
   LottieBackground,
   LottieOverlay 
@@ -11,8 +10,8 @@ import { Text, Divider } from '../sdk/elements';
 import { KNODE_THEME } from '../sdk/theme/knodeTheme';
 
 /**
- * LottieTest - Test composition for @remotion/lottie migration
- * Verifies all Lottie components render correctly with local files
+ * LottieTest - Test composition for URL-based Lottie integration
+ * Verifies all Lottie components render correctly with remote URLs
  */
 export const LottieTest = () => {
   const theme = KNODE_THEME;
@@ -30,14 +29,14 @@ export const LottieTest = () => {
     >
       {/* Background Lottie (subtle) */}
       <LottieBackground 
-        lottieRef="particles" 
+        lottieRef="sparkles" 
         opacity={0.1} 
         scale={2}
         position="center"
       />
 
       {/* Header */}
-      <Text text="Lottie Integration Test (@remotion/lottie)" variant="display" size="xl" weight="bold" color="primary" />
+      <Text text="Lottie Integration Test (URL-Based)" variant="display" size="xl" weight="bold" color="primary" />
       
       <Divider orientation="horizontal" thickness={3} color="primary" />
 
@@ -49,7 +48,7 @@ export const LottieTest = () => {
           {/* Success Checkmark */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 120, height: 120 }}>
-              <RemotionLottie lottieRef="success" loop={false} />
+              <LottiePlayer lottieRef="success" loop={false} />
             </div>
             <Text text="Success" variant="body" size="sm" style={{ marginTop: 10 }} />
           </div>
@@ -57,60 +56,62 @@ export const LottieTest = () => {
           {/* Loading Spinner */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 120, height: 120 }}>
-              <RemotionLottie lottieRef="loading" loop playbackRate={1.2} />
+              <LottiePlayer lottieRef="loading" playbackRate={1.2} />
             </div>
             <Text text="Loading" variant="body" size="sm" style={{ marginTop: 10 }} />
           </div>
 
-          {/* Particle Burst */}
+          {/* Confetti */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 120, height: 120 }}>
-              <RemotionLottie lottieRef="burst" loop={false} playbackRate={1.5} />
+              <LottiePlayer lottieRef="confetti" loop={false} playbackRate={1.5} />
             </div>
-            <Text text="Burst" variant="body" size="sm" style={{ marginTop: 10 }} />
+            <Text text="Confetti" variant="body" size="sm" style={{ marginTop: 10 }} />
           </div>
 
-          {/* Celebration Stars */}
+          {/* Sparkles */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 120, height: 120 }}>
-              <RemotionLottie lottieRef="celebration" loop playbackRate={0.8} />
+              <LottiePlayer lottieRef="sparkles" playbackRate={0.8} />
             </div>
-            <Text text="Celebration" variant="body" size="sm" style={{ marginTop: 10 }} />
+            <Text text="Sparkles" variant="body" size="sm" style={{ marginTop: 10 }} />
           </div>
         </div>
       </div>
 
       <Divider orientation="horizontal" thickness={2} style={{ margin: '20px 0' }} />
 
-      {/* Section 2: Animated Lottie with Entrance */}
+      {/* Section 2: Education Animations */}
       <div>
-        <Text text="Animated Lottie (with entrance effects)" variant="title" size="lg" weight="bold" />
+        <Text text="Education Animations" variant="title" size="lg" weight="bold" />
         
         <div style={{ display: 'flex', gap: 40, marginTop: 20, alignItems: 'center' }}>
-          {/* Entrance with delay */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 100, height: 100 }}>
-              <AnimatedLottie 
-                lottieRef="stars" 
-                entranceDelay={0} 
-                entranceDuration={30}
-                loop
-              />
+              <LottiePlayer lottieRef="lightbulb" loop={false} />
             </div>
-            <Text text="Delayed Entrance" variant="body" size="sm" style={{ marginTop: 10 }} />
+            <Text text="Lightbulb" variant="body" size="sm" style={{ marginTop: 10 }} />
           </div>
 
-          {/* Fast entrance */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 100, height: 100 }}>
-              <AnimatedLottie 
-                lottieRef="success" 
-                entranceDelay={15} 
-                entranceDuration={20}
-                loop={false}
-              />
+              <LottiePlayer lottieRef="thinking" />
             </div>
-            <Text text="Fast Entrance" variant="body" size="sm" style={{ marginTop: 10 }} />
+            <Text text="Thinking" variant="body" size="sm" style={{ marginTop: 10 }} />
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 100, height: 100 }}>
+              <LottiePlayer lottieRef="brain" />
+            </div>
+            <Text text="Brain" variant="body" size="sm" style={{ marginTop: 10 }} />
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 100, height: 100 }}>
+              <LottiePlayer lottieRef="book" />
+            </div>
+            <Text text="Book" variant="body" size="sm" style={{ marginTop: 10 }} />
           </div>
         </div>
       </div>
@@ -122,14 +123,14 @@ export const LottieTest = () => {
         <Text text="Lottie Icons (inline usage)" variant="title" size="lg" weight="bold" />
         
         <div style={{ display: 'flex', gap: 20, marginTop: 20, alignItems: 'center' }}>
-          <Text text="Small icon:" variant="body" size="md" />
-          <LottieIcon lottieRef="success" size={40} delay={0} />
+          <Text text="Small:" variant="body" size="md" />
+          <LottieIcon lottieRef="success" size={40} delay={0} loop={false} />
           
-          <Text text="Medium icon:" variant="body" size="md" />
-          <LottieIcon lottieRef="spinner" size={60} delay={10} />
+          <Text text="Medium:" variant="body" size="md" />
+          <LottieIcon lottieRef="loading" size={60} delay={10} />
           
-          <Text text="Large icon:" variant="body" size="md" />
-          <LottieIcon lottieRef="stars" size={80} delay={20} />
+          <Text text="Large:" variant="body" size="md" />
+          <LottieIcon lottieRef="sparkles" size={80} delay={20} />
         </div>
       </div>
 
@@ -141,7 +142,7 @@ export const LottieTest = () => {
         
         {/* Overlay appears between frames 90-150 */}
         <LottieOverlay 
-          lottieRef="celebration" 
+          lottieRef="fireworks" 
           startFrame={90} 
           duration={60}
           opacity={0.6}
@@ -149,7 +150,7 @@ export const LottieTest = () => {
         
         <div style={{ marginTop: 20 }}>
           <Text 
-            text="Watch for a celebration overlay to appear and disappear!" 
+            text="Watch for a fireworks overlay to appear and disappear!" 
             variant="body" 
             size="md" 
             color="textSecondary"
@@ -162,13 +163,13 @@ export const LottieTest = () => {
       {/* Footer */}
       <div style={{ textAlign: 'center', marginTop: 20 }}>
         <Text 
-          text="✅ Lottie Migration Complete!" 
+          text="✅ URL-Based Lottie Registry" 
           variant="body" 
           size="sm" 
           color="textSecondary" 
         />
         <Text 
-          text="Using @remotion/lottie | Local Files | Standardized lottieRef Props | Proper Timeline Sync" 
+          text="Using @remotion/lottie | LottieFiles CDN | Registry Pattern | Remotion Timeline Sync" 
           variant="body" 
           size="xs" 
           color="textSecondary" 

@@ -1,24 +1,38 @@
 /**
- * Lottie Registry - Single Source of Truth
+ * Lottie Registry - URL-Based Animation Library
  * 
- * Consolidated registry for all Lottie animations:
- * - Inline animations (no external files needed)
- * - Static file references
- * - Presets with playback configurations
+ * Simple mapping of friendly names to Lottie animation URLs.
+ * All animations are fetched from LottieFiles or other CDN sources.
+ * 
+ * Usage in scene JSON:
+ * ```json
+ * {
+ *   "heroType": "lottie",
+ *   "heroRef": "stickman-walking"
+ * }
+ * ```
  * 
  * @module lottie/registry
  */
-
-import type { LottieAnimationData } from '@remotion/lottie';
-import { staticFile } from 'remotion';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type LottieSource =
-  | { kind: 'static'; src: string }
-  | { kind: 'inline'; data: LottieAnimationData };
+export interface LottieEntry {
+  /** URL to the Lottie JSON file */
+  url: string;
+  /** Human-readable description */
+  description?: string;
+  /** Suggested loop behavior */
+  loop?: boolean;
+  /** Suggested playback rate */
+  playbackRate?: number;
+  /** Tags for categorization/search */
+  tags?: string[];
+  /** Attribution/source info */
+  source?: string;
+}
 
 export interface LottiePreset {
   lottieRef: string;
@@ -30,767 +44,331 @@ export interface LottiePreset {
 }
 
 // ============================================================================
-// INLINE ANIMATIONS
+// LOTTIE REGISTRY - URL-BASED
 // ============================================================================
 
 /**
- * Animated checkmark - Perfect for quiz reveals, completion states
+ * Central registry of all available Lottie animations.
  * 
- * NOTE: All inline Lottie animations MUST include these fields:
- * - Root: v, fr, ip, op, w, h, nm, ddd, assets, layers, markers
- * - Layer: ddd, ind, ty, nm, sr, ks, ao, ip, op, st, bm
+ * To add a new animation:
+ * 1. Find an animation on lottiefiles.com
+ * 2. Copy the JSON URL (click "..." > "Copy Lottie JSON URL")
+ * 3. Add an entry below with a descriptive key
+ * 
+ * Naming conventions:
+ * - Use kebab-case: 'stickman-walking', 'confetti-burst'
+ * - Be descriptive: 'checkmark-success' not 'check1'
+ * - Use categories as prefixes: 'ui/loading', 'character/waving'
  */
-export const checkmarkAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 45,
-  w: 200,
-  h: 200,
-  nm: "Checkmark",
-  ddd: 0,
-  assets: [],
-  layers: [{
-    ddd: 0,
-    ind: 1,
-    ty: 4,
-    nm: "check",
-    sr: 1,
-    ks: {
-      o: { a: 0, k: 100 },
-      r: { a: 0, k: 0 },
-      p: { a: 0, k: [100, 100, 0] },
-      a: { a: 0, k: [0, 0, 0] },
-      s: {
-        a: 1,
-        k: [
-          { t: 0, s: [0, 0, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } },
-          { t: 15, s: [120, 120, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } },
-          { t: 25, s: [100, 100, 100] }
-        ]
-      }
-    },
-    ao: 0,
-    ip: 0,
-    op: 45,
-    st: 0,
-    bm: 0,
-    shapes: [{
-      ty: "gr",
-      it: [{
-        ind: 0,
-        ty: "sh",
-        ks: {
-          a: 0,
-          k: {
-            i: [[0, 0], [0, 0], [0, 0]],
-            o: [[0, 0], [0, 0], [0, 0]],
-            v: [[-40, 0], [-15, 25], [40, -30]],
-            c: false
-          }
-        }
-      }, {
-        ty: "st",
-        c: { a: 0, k: [0.16, 0.68, 0.38, 1] },
-        o: { a: 0, k: 100 },
-        w: { a: 0, k: 16 },
-        lc: 2,
-        lj: 2
-      }, {
-        ty: "tr",
-        p: { a: 0, k: [0, 0] },
-        a: { a: 0, k: [0, 0] },
-        s: { a: 0, k: [100, 100] },
-        r: { a: 0, k: 0 },
-        o: { a: 0, k: 100 }
-      }],
-      nm: "Check Shape"
-    }, {
-      ty: "tm",
-      s: { a: 0, k: 0 },
-      e: {
-        a: 1,
-        k: [
-          { t: 0, s: [0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } },
-          { t: 30, s: [100] }
-        ]
-      },
-      o: { a: 0, k: 0 },
-      m: 1
-    }]
-  }],
-  markers: []
-} as LottieAnimationData;
+export const LOTTIE_REGISTRY: Record<string, LottieEntry> = {
+  // =========================================================================
+  // UI & FEEDBACK
+  // =========================================================================
+  'success': {
+    url: 'https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json',
+    description: 'Green checkmark with circle animation',
+    loop: false,
+    tags: ['ui', 'feedback', 'success', 'checkmark'],
+    source: 'LottieFiles',
+  },
+  'checkmark': {
+    url: 'https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json',
+    description: 'Green checkmark with circle animation',
+    loop: false,
+    tags: ['ui', 'feedback', 'success'],
+    source: 'LottieFiles',
+  },
+  'loading': {
+    url: 'https://assets10.lottiefiles.com/packages/lf20_a2chheio.json',
+    description: 'Smooth loading spinner',
+    loop: true,
+    tags: ['ui', 'loading', 'spinner'],
+    source: 'LottieFiles',
+  },
+  'error': {
+    url: 'https://assets4.lottiefiles.com/packages/lf20_qp1q7mct.json',
+    description: 'Error/failure X mark animation',
+    loop: false,
+    tags: ['ui', 'feedback', 'error'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Sparkle burst animation
- */
-export const sparkleAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 35,
-  w: 200,
-  h: 200,
-  nm: "Sparkle",
-  ddd: 0,
-  assets: [],
-  layers: [
-    {
-      ddd: 0,
-      ind: 1,
-      ty: 4,
-      nm: "star",
-      sr: 1,
-      ks: {
-        o: { a: 1, k: [
-          { t: 0, s: [0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 8, s: [100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 25, s: [0] }
-        ] },
-        r: { a: 1, k: [
-          { t: 0, s: [0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 35, s: [180] }
-        ] },
-        p: { a: 0, k: [100, 100, 0] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 1, k: [
-          { t: 0, s: [50, 50, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 12, s: [130, 130, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 25, s: [80, 80, 100] }
-        ] }
-      },
-      ao: 0,
-      ip: 0,
-      op: 35,
-      st: 0,
-      bm: 0,
-      shapes: [{
-        ty: "gr",
-        it: [{
-          ty: "sr",
-          sy: 1,
-          pt: { a: 0, k: 4 },
-          p: { a: 0, k: [0, 0] },
-          r: { a: 0, k: 0 },
-          ir: { a: 0, k: 15 },
-          or: { a: 0, k: 35 }
-        }, {
-          ty: "fl",
-          c: { a: 0, k: [1, 0.84, 0, 1] },
-          o: { a: 0, k: 100 }
-        }, {
-          ty: "tr",
-          p: { a: 0, k: [0, 0] },
-          a: { a: 0, k: [0, 0] },
-          s: { a: 0, k: [100, 100] },
-          r: { a: 0, k: 0 },
-          o: { a: 0, k: 100 }
-        }],
-        nm: "Star Group"
-      }]
-    }
-  ],
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // CELEBRATIONS & EFFECTS
+  // =========================================================================
+  'confetti': {
+    url: 'https://assets1.lottiefiles.com/packages/lf20_rovf9gzu.json',
+    description: 'Colorful confetti celebration',
+    loop: false,
+    tags: ['celebration', 'confetti', 'party'],
+    source: 'LottieFiles',
+  },
+  'celebration': {
+    url: 'https://assets1.lottiefiles.com/packages/lf20_rovf9gzu.json',
+    description: 'Colorful confetti celebration',
+    loop: false,
+    tags: ['celebration', 'party'],
+    source: 'LottieFiles',
+  },
+  'fireworks': {
+    url: 'https://assets2.lottiefiles.com/packages/lf20_xlkxtmul.json',
+    description: 'Fireworks explosion',
+    loop: true,
+    tags: ['celebration', 'fireworks', 'party'],
+    source: 'LottieFiles',
+  },
+  'sparkles': {
+    url: 'https://assets9.lottiefiles.com/packages/lf20_UJNc2t.json',
+    description: 'Twinkling sparkle effect',
+    loop: true,
+    tags: ['effects', 'sparkle', 'magic'],
+    source: 'LottieFiles',
+  },
+  'stars': {
+    url: 'https://assets9.lottiefiles.com/packages/lf20_UJNc2t.json',
+    description: 'Twinkling stars effect',
+    loop: true,
+    tags: ['effects', 'stars'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Lightbulb "aha moment" animation
- */
-export const lightbulbAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 50,
-  w: 200,
-  h: 200,
-  nm: "Lightbulb",
-  ddd: 0,
-  assets: [],
-  layers: [
-    {
-      ddd: 0,
-      ind: 1,
-      ty: 4,
-      nm: "bulb",
-      sr: 1,
-      ks: {
-        o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },
-        p: { a: 0, k: [100, 100, 0] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 1, k: [
-          { t: 0, s: [80, 80, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 10, s: [100, 100, 100] }
-        ] }
-      },
-      ao: 0,
-      ip: 0,
-      op: 50,
-      st: 0,
-      bm: 0,
-      shapes: [{
-        ty: "gr",
-        it: [{
-          ty: "el",
-          p: { a: 0, k: [0, -10] },
-          s: { a: 0, k: [50, 60] }
-        }, {
-          ty: "fl",
-          c: { a: 1, k: [
-            { t: 0, s: [0.8, 0.8, 0.8, 1], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-            { t: 15, s: [1, 0.95, 0.4, 1], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-            { t: 25, s: [1, 0.95, 0.4, 1] }
-          ] },
-          o: { a: 0, k: 100 }
-        }, {
-          ty: "st",
-          c: { a: 0, k: [0.3, 0.3, 0.3, 1] },
-          o: { a: 0, k: 100 },
-          w: { a: 0, k: 3 }
-        }, {
-          ty: "tr",
-          p: { a: 0, k: [0, 0] },
-          a: { a: 0, k: [0, 0] },
-          s: { a: 0, k: [100, 100] },
-          r: { a: 0, k: 0 },
-          o: { a: 0, k: 100 }
-        }],
-        nm: "Bulb Shape"
-      }]
-    }
-  ],
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // EDUCATION & LEARNING
+  // =========================================================================
+  'lightbulb': {
+    url: 'https://assets3.lottiefiles.com/packages/lf20_HpFqiS.json',
+    description: 'Idea lightbulb turning on',
+    loop: false,
+    tags: ['education', 'idea', 'lightbulb', 'aha'],
+    source: 'LottieFiles',
+  },
+  'thinking': {
+    url: 'https://assets5.lottiefiles.com/packages/lf20_TBKozE.json',
+    description: 'Thinking/pondering animation',
+    loop: true,
+    tags: ['education', 'thinking', 'question'],
+    source: 'LottieFiles',
+  },
+  'question': {
+    url: 'https://assets5.lottiefiles.com/packages/lf20_sy6jjyct.json',
+    description: 'Question mark animation',
+    loop: true,
+    tags: ['education', 'question', 'quiz'],
+    source: 'LottieFiles',
+  },
+  'brain': {
+    url: 'https://assets5.lottiefiles.com/packages/lf20_1cazwtnc.json',
+    description: 'Brain thinking animation',
+    loop: true,
+    tags: ['education', 'brain', 'thinking'],
+    source: 'LottieFiles',
+  },
+  'book': {
+    url: 'https://assets6.lottiefiles.com/packages/lf20_4XmSkB.json',
+    description: 'Open book with pages turning',
+    loop: true,
+    tags: ['education', 'book', 'reading'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Thinking emoji animation
- */
-export const thinkingAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 200,
-  h: 200,
-  nm: "Thinking",
-  ddd: 0,
-  assets: [],
-  layers: [
-    {
-      ddd: 0,
-      ind: 1,
-      ty: 4,
-      nm: "face",
-      sr: 1,
-      ks: {
-        o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },
-        p: { a: 0, k: [100, 100, 0] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 0, k: [100, 100, 100] }
-      },
-      ao: 0,
-      ip: 0,
-      op: 60,
-      st: 0,
-      bm: 0,
-      shapes: [{
-        ty: "gr",
-        it: [{
-          ty: "el",
-          p: { a: 0, k: [0, 0] },
-          s: { a: 0, k: [80, 80] }
-        }, {
-          ty: "fl",
-          c: { a: 0, k: [1, 0.8, 0.2, 1] },
-          o: { a: 0, k: 100 }
-        }, {
-          ty: "st",
-          c: { a: 0, k: [0.2, 0.2, 0.2, 1] },
-          o: { a: 0, k: 100 },
-          w: { a: 0, k: 3 }
-        }, {
-          ty: "tr",
-          p: { a: 0, k: [0, 0] },
-          a: { a: 0, k: [0, 0] },
-          s: { a: 0, k: [100, 100] },
-          r: { a: 0, k: 0 },
-          o: { a: 0, k: 100 }
-        }],
-        nm: "Face Shape"
-      }]
-    }
-  ],
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // CHARACTERS & PEOPLE
+  // =========================================================================
+  'waving': {
+    url: 'https://assets2.lottiefiles.com/packages/lf20_puciaact.json',
+    description: 'Person waving hello',
+    loop: true,
+    tags: ['character', 'waving', 'hello', 'greeting'],
+    source: 'LottieFiles',
+  },
+  'walking': {
+    url: 'https://assets3.lottiefiles.com/packages/lf20_M9p23l.json',
+    description: 'Character walking animation',
+    loop: true,
+    tags: ['character', 'walking', 'movement'],
+    source: 'LottieFiles',
+  },
+  'thumbs-up': {
+    url: 'https://assets4.lottiefiles.com/packages/lf20_j3yeurta.json',
+    description: 'Thumbs up gesture',
+    loop: false,
+    tags: ['gesture', 'thumbs-up', 'approval'],
+    source: 'LottieFiles',
+  },
+  'clapping': {
+    url: 'https://assets3.lottiefiles.com/packages/lf20_wBgsZN.json',
+    description: 'Hands clapping animation',
+    loop: true,
+    tags: ['gesture', 'clapping', 'applause'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Celebration confetti animation
- */
-export const celebrationAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 200,
-  h: 200,
-  nm: "Celebration",
-  ddd: 0,
-  assets: [],
-  layers: Array.from({ length: 12 }, (_, i) => {
-    const angle = (i / 12) * Math.PI * 2;
-    const colors = [
-      [1, 0.42, 0.21, 1],
-      [0.61, 0.35, 0.71, 1],
-      [0.18, 0.5, 0.89, 1],
-      [0.15, 0.68, 0.38, 1],
-      [0.95, 0.61, 0.07, 1]
-    ];
-    const easing = { o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } };
-    return {
-      ddd: 0,
-      ind: i + 1,
-      ty: 4,
-      nm: `confetti-${i}`,
-      sr: 1,
-      ks: {
-        o: { a: 1, k: [
-          { t: 0, s: [0], ...easing }, 
-          { t: 5, s: [100], ...easing }, 
-          { t: 50, s: [0] }
-        ] },
-        r: { a: 1, k: [
-          { t: 0, s: [0], ...easing }, 
-          { t: 60, s: [360 * (i % 2 === 0 ? 1 : -1)] }
-        ] },
-        p: { a: 1, k: [
-          { t: 0, s: [100, 100, 0], ...easing }, 
-          { t: 40, s: [100 + Math.cos(angle) * 80, 100 + Math.sin(angle) * 80 + 30, 0] }
-        ] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 1, k: [
-          { t: 0, s: [100, 100, 100], ...easing }, 
-          { t: 40, s: [60, 60, 100] }
-        ] }
-      },
-      ao: 0,
-      ip: 0,
-      op: 60,
-      st: 0,
-      bm: 0,
-      shapes: [{
-        ty: "gr",
-        it: [{
-          ty: "rc",
-          p: { a: 0, k: [0, 0] },
-          s: { a: 0, k: [12, 8] },
-          r: { a: 0, k: 1 }
-        }, {
-          ty: "fl",
-          c: { a: 0, k: colors[i % colors.length] },
-          o: { a: 0, k: 100 }
-        }, {
-          ty: "tr",
-          p: { a: 0, k: [0, 0] },
-          a: { a: 0, k: [0, 0] },
-          s: { a: 0, k: [100, 100] },
-          r: { a: 0, k: 0 },
-          o: { a: 0, k: 100 }
-        }],
-        nm: `Confetti ${i}`
-      }]
-    };
-  }),
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // ARROWS & POINTERS
+  // =========================================================================
+  'arrow-right': {
+    url: 'https://assets9.lottiefiles.com/packages/lf20_qdba2wlm.json',
+    description: 'Animated arrow pointing right',
+    loop: true,
+    tags: ['ui', 'arrow', 'direction', 'pointer'],
+    source: 'LottieFiles',
+  },
+  'arrow-down': {
+    url: 'https://assets7.lottiefiles.com/packages/lf20_rxdmjqxl.json',
+    description: 'Animated arrow pointing down',
+    loop: true,
+    tags: ['ui', 'arrow', 'direction', 'scroll'],
+    source: 'LottieFiles',
+  },
+  'swipe': {
+    url: 'https://assets9.lottiefiles.com/packages/lf20_vi1sge8p.json',
+    description: 'Swipe gesture indicator',
+    loop: true,
+    tags: ['ui', 'gesture', 'swipe', 'tutorial'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Thermometer animation
- */
-export const thermometerAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 200,
-  h: 200,
-  nm: "Thermometer",
-  ddd: 0,
-  assets: [],
-  layers: [
-    {
-      ddd: 0,
-      ind: 1,
-      ty: 4,
-      nm: "body",
-      sr: 1,
-      ks: {
-        o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },
-        p: { a: 0, k: [100, 100, 0] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 0, k: [100, 100, 100] }
-      },
-      ao: 0,
-      ip: 0,
-      op: 60,
-      st: 0,
-      bm: 0,
-      shapes: [{
-        ty: "gr",
-        it: [
-          { ty: "rc", p: { a: 0, k: [0, -30] }, s: { a: 0, k: [40, 120] }, r: { a: 0, k: 20 } },
-          { ty: "el", p: { a: 0, k: [0, 50] }, s: { a: 0, k: [60, 60] } },
-          { ty: "st", c: { a: 0, k: [0.84, 0.84, 0.84, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 6 } },
-          { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-        ],
-        nm: "Body Shape"
-      }]
-    },
-    {
-      ddd: 0,
-      ind: 2,
-      ty: 4,
-      nm: "mercury",
-      sr: 1,
-      ks: {
-        o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },
-        p: { a: 0, k: [100, 100, 0] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 1, k: [
-          { t: 0, s: [100, 0, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-          { t: 45, s: [100, 90, 100] }
-        ] }
-      },
-      ao: 0,
-      ip: 0,
-      op: 60,
-      st: 0,
-      bm: 0,
-      shapes: [{
-        ty: "gr",
-        it: [
-          { ty: "rc", p: { a: 0, k: [0, -10] }, s: { a: 0, k: [28, 100] }, r: { a: 0, k: 12 } },
-          { ty: "el", p: { a: 0, k: [0, 60] }, s: { a: 0, k: [48, 48] } },
-          { ty: "fl", c: { a: 0, k: [1, 0.36, 0.21, 1] }, o: { a: 0, k: 100 } },
-          { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-        ],
-        nm: "Mercury Shape"
-      }]
-    }
-  ],
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // SCIENCE & NATURE
+  // =========================================================================
+  'atom': {
+    url: 'https://assets7.lottiefiles.com/packages/lf20_kyu7xb1v.json',
+    description: 'Spinning atom with electrons',
+    loop: true,
+    tags: ['science', 'atom', 'physics'],
+    source: 'LottieFiles',
+  },
+  'dna': {
+    url: 'https://assets5.lottiefiles.com/packages/lf20_ikvz7qhc.json',
+    description: 'Rotating DNA helix',
+    loop: true,
+    tags: ['science', 'dna', 'biology'],
+    source: 'LottieFiles',
+  },
+  'planet': {
+    url: 'https://assets10.lottiefiles.com/packages/lf20_cbrbre30.json',
+    description: 'Rotating planet Earth',
+    loop: true,
+    tags: ['science', 'earth', 'planet', 'globe'],
+    source: 'LottieFiles',
+  },
+  'rocket': {
+    url: 'https://assets3.lottiefiles.com/packages/lf20_l3qxn9jy.json',
+    description: 'Rocket launching',
+    loop: false,
+    tags: ['science', 'rocket', 'space', 'launch'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Snowflake animation
- */
-export const snowflakeAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 200,
-  h: 200,
-  nm: "Snowflake",
-  ddd: 0,
-  assets: [],
-  layers: [{
-    ddd: 0,
-    ind: 1,
-    ty: 4,
-    nm: "flake",
-    sr: 1,
-    ks: {
-      o: { a: 1, k: [
-        { t: 0, s: [0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 10, s: [100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 50, s: [0] }
-      ] },
-      r: { a: 1, k: [
-        { t: 0, s: [0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 60, s: [120] }
-      ] },
-      p: { a: 0, k: [100, 100, 0] },
-      a: { a: 0, k: [0, 0, 0] },
-      s: { a: 1, k: [
-        { t: 0, s: [80, 80, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 30, s: [120, 120, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 60, s: [90, 90, 100] }
-      ] }
-    },
-    ao: 0,
-    ip: 0,
-    op: 60,
-    st: 0,
-    bm: 0,
-    shapes: [{
-      ty: "gr",
-      it: [
-        { ty: "sr", sy: 2, pt: { a: 0, k: 6 }, p: { a: 0, k: [0, 0] }, r: { a: 0, k: 0 }, or: { a: 0, k: 60 } },
-        { ty: "st", c: { a: 0, k: [0.66, 0.86, 1, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 4 } },
-        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-      ],
-      nm: "Flake Shape"
-    }]
-  }],
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // MUSIC & AUDIO
+  // =========================================================================
+  'music-notes': {
+    url: 'https://assets10.lottiefiles.com/packages/lf20_ikk4jhps.json',
+    description: 'Floating music notes',
+    loop: true,
+    tags: ['music', 'notes', 'audio'],
+    source: 'LottieFiles',
+  },
+  'equalizer': {
+    url: 'https://assets4.lottiefiles.com/packages/lf20_mDnxBp.json',
+    description: 'Audio equalizer bars',
+    loop: true,
+    tags: ['music', 'audio', 'equalizer', 'visualization'],
+    source: 'LottieFiles',
+  },
+  'headphones': {
+    url: 'https://assets1.lottiefiles.com/packages/lf20_khrclx93.json',
+    description: 'Headphones with music',
+    loop: true,
+    tags: ['music', 'headphones', 'audio'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Water drop animation
- */
-export const waterDropAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 200,
-  h: 200,
-  nm: "Water Drop",
-  ddd: 0,
-  assets: [],
-  layers: [{
-    ddd: 0,
-    ind: 1,
-    ty: 4,
-    nm: "drop",
-    sr: 1,
-    ks: {
-      o: { a: 0, k: 100 },
-      r: { a: 0, k: 0 },
-      p: { a: 1, k: [
-        { t: 0, s: [100, 60, 0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 30, s: [100, 120, 0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 60, s: [100, 60, 0] }
-      ] },
-      a: { a: 0, k: [0, 0, 0] },
-      s: { a: 1, k: [
-        { t: 0, s: [60, 60, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 30, s: [80, 80, 100], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 60, s: [60, 60, 100] }
-      ] }
-    },
-    ao: 0,
-    ip: 0,
-    op: 60,
-    st: 0,
-    bm: 0,
-    shapes: [{
-      ty: "gr",
-      it: [
-        { ty: "el", p: { a: 0, k: [0, 0] }, s: { a: 0, k: [50, 70] } },
-        { ty: "fl", c: { a: 0, k: [0.32, 0.66, 1, 1] }, o: { a: 0, k: 100 } },
-        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-      ],
-      nm: "Drop Shape"
-    }]
-  }],
-  markers: []
-} as LottieAnimationData;
+  // =========================================================================
+  // TECH & DEVICES
+  // =========================================================================
+  'laptop': {
+    url: 'https://assets9.lottiefiles.com/packages/lf20_w51pcehl.json',
+    description: 'Laptop with typing animation',
+    loop: true,
+    tags: ['tech', 'laptop', 'computer', 'typing'],
+    source: 'LottieFiles',
+  },
+  'phone': {
+    url: 'https://assets6.lottiefiles.com/packages/lf20_yd8fbnml.json',
+    description: 'Smartphone notification',
+    loop: true,
+    tags: ['tech', 'phone', 'mobile', 'notification'],
+    source: 'LottieFiles',
+  },
+  'wifi': {
+    url: 'https://assets1.lottiefiles.com/packages/lf20_bz029dxy.json',
+    description: 'WiFi signal animation',
+    loop: true,
+    tags: ['tech', 'wifi', 'signal', 'network'],
+    source: 'LottieFiles',
+  },
 
-/**
- * Arrow animation
- */
-export const arrowAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 45,
-  w: 200,
-  h: 200,
-  nm: "Arrow",
-  ddd: 0,
-  assets: [],
-  layers: [{
-    ddd: 0,
-    ind: 1,
-    ty: 4,
-    nm: "arrow",
-    sr: 1,
-    ks: {
-      o: { a: 1, k: [
-        { t: 0, s: [0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 10, s: [100] }
-      ] },
-      r: { a: 0, k: 0 },
-      p: { a: 1, k: [
-        { t: 0, s: [60, 100, 0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 20, s: [140, 100, 0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 35, s: [120, 100, 0], o: { x: [0.33], y: [0] }, i: { x: [0.67], y: [1] } }, 
-        { t: 45, s: [140, 100, 0] }
-      ] },
-      a: { a: 0, k: [0, 0, 0] },
-      s: { a: 0, k: [100, 100, 100] }
-    },
-    ao: 0,
-    ip: 0,
-    op: 45,
-    st: 0,
-    bm: 0,
-    shapes: [{
-      ty: "gr",
-      it: [
-        { ty: "sh", ks: { a: 0, k: { c: false, v: [[-30, 0], [20, 0]], i: [[0, 0], [0, 0]], o: [[0, 0], [0, 0]] } } },
-        { ty: "sh", ks: { a: 0, k: { c: false, v: [[15, -10], [30, 0], [15, 10]], i: [[0, 0], [0, 0], [0, 0]], o: [[0, 0], [0, 0], [0, 0]] } } },
-        { ty: "st", c: { a: 0, k: [1, 0.42, 0.21, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 8 }, lc: 2, lj: 2 },
-        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-      ],
-      nm: "Arrow Shape"
-    }]
-  }],
-  markers: []
-} as LottieAnimationData;
-
-/**
- * Loading spinner animation
- */
-export const loadingAnimation: LottieAnimationData = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 200,
-  h: 200,
-  nm: "Loading",
-  ddd: 0,
-  assets: [],
-  layers: [{
-    ddd: 0,
-    ind: 1,
-    ty: 4,
-    nm: "spinner",
-    sr: 1,
-    ks: {
-      o: { a: 0, k: 100 },
-      r: { a: 1, k: [
-        // Linear rotation (no easing) for smooth continuous spin
-        { t: 0, s: [0], o: { x: [0], y: [0] }, i: { x: [1], y: [1] } }, 
-        { t: 60, s: [360] }
-      ] },
-      p: { a: 0, k: [100, 100, 0] },
-      a: { a: 0, k: [0, 0, 0] },
-      s: { a: 0, k: [100, 100, 100] }
-    },
-    ao: 0,
-    ip: 0,
-    op: 60,
-    st: 0,
-    bm: 0,
-    shapes: Array.from({ length: 8 }, (_, i) => ({
-      ty: "gr",
-      it: [
-        { ty: "rc", p: { a: 0, k: [0, -35] }, s: { a: 0, k: [8, 25] }, r: { a: 0, k: 4 } },
-        { ty: "fl", c: { a: 0, k: [0.18, 0.5, 0.89, 1] }, o: { a: 0, k: 100 - (i * 10) } },
-        { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: (i / 8) * 360 }, o: { a: 0, k: 100 } }
-      ],
-      nm: `Spinner Segment ${i}`
-    }))
-  }],
-  markers: []
-} as LottieAnimationData;
-
-// ============================================================================
-// STATIC FILE HELPERS
-// ============================================================================
-
-/**
- * Create a static file entry
- * NOTE: In Vite projects, staticFile() may not work correctly.
- * We use a direct path (served from /public) as fallback.
- */
-const staticEntry = (path: string): LottieSource => {
-  // Try staticFile first, fall back to direct path for Vite compatibility
-  let src: string;
-  try {
-    src = staticFile(path);
-  } catch {
-    // Fallback for Vite: direct path from public folder
-    src = `/${path}`;
-  }
-  
-  // In development with Vite, staticFile might return something unexpected
-  // Ensure we have a proper URL format
-  if (!src.startsWith('/') && !src.startsWith('http')) {
-    src = `/${path}`;
-  }
-  
-  return {
-    kind: 'static',
-    src,
-  };
+  // =========================================================================
+  // WEATHER
+  // =========================================================================
+  'sunny': {
+    url: 'https://assets5.lottiefiles.com/temp/lf20_Kuot2e.json',
+    description: 'Bright sun animation',
+    loop: true,
+    tags: ['weather', 'sun', 'sunny'],
+    source: 'LottieFiles',
+  },
+  'cloudy': {
+    url: 'https://assets5.lottiefiles.com/temp/lf20_dgjK9i.json',
+    description: 'Cloudy weather animation',
+    loop: true,
+    tags: ['weather', 'clouds', 'cloudy'],
+    source: 'LottieFiles',
+  },
+  'rainy': {
+    url: 'https://assets5.lottiefiles.com/temp/lf20_rpC1Rd.json',
+    description: 'Rain with clouds',
+    loop: true,
+    tags: ['weather', 'rain', 'rainy'],
+    source: 'LottieFiles',
+  },
+  'snowy': {
+    url: 'https://assets5.lottiefiles.com/temp/lf20_WtPCZs.json',
+    description: 'Snowfall animation',
+    loop: true,
+    tags: ['weather', 'snow', 'winter'],
+    source: 'LottieFiles',
+  },
 };
-
-const inlineEntry = (data: LottieAnimationData): LottieSource => ({
-  kind: 'inline',
-  data,
-});
-
-// ============================================================================
-// MAIN REGISTRY
-// ============================================================================
-
-export const LOTTIE_REGISTRY: Record<string, LottieSource> = {
-  // Static files (from /public/lotties/)
-  'success': staticEntry('lotties/success-checkmark.json'),
-  'checkmark': staticEntry('lotties/success-checkmark.json'),
-  'success-checkmark': staticEntry('lotties/success-checkmark.json'),
-  'celebration': staticEntry('lotties/celebration-stars.json'),
-  'celebration-stars': staticEntry('lotties/celebration-stars.json'),
-  'burst': staticEntry('lotties/particle-burst.json'),
-  'particle-burst': staticEntry('lotties/particle-burst.json'),
-  'particles': staticEntry('lotties/particle-burst.json'),
-  'loading': staticEntry('lotties/loading-spinner.json'),
-  'loading-spinner': staticEntry('lotties/loading-spinner.json'),
-  'spinner': staticEntry('lotties/loading-spinner.json'),
-  'stars': staticEntry('lotties/celebration-stars.json'),
-
-  // Inline animations
-  'arrowFlow': inlineEntry(arrowAnimation),
-  'arrow-flow': inlineEntry(arrowAnimation),
-
-  // Namespaced keys (recommended)
-  'core/checkmark': staticEntry('lotties/success-checkmark.json'),
-  'core/celebration': staticEntry('lotties/celebration-stars.json'),
-  'core/particles': staticEntry('lotties/particle-burst.json'),
-  'core/loading': staticEntry('lotties/loading-spinner.json'),
-
-  'education/lightbulb': inlineEntry(lightbulbAnimation),
-  'education/checkmark': inlineEntry(checkmarkAnimation),
-  'education/stars-burst': inlineEntry(sparkleAnimation),
-  'education/question': inlineEntry(thinkingAnimation),
-
-  'nature/thermometer': inlineEntry(thermometerAnimation),
-  'nature/snowflake': inlineEntry(snowflakeAnimation),
-  'nature/water-drop': inlineEntry(waterDropAnimation),
-  'nature/waterDrop': inlineEntry(waterDropAnimation),
-
-  'ui/arrow': inlineEntry(arrowAnimation),
-  'ui/arrow-flow': inlineEntry(arrowAnimation),
-  'ui/loading': inlineEntry(loadingAnimation),
-
-  'celebration/confetti': inlineEntry(celebrationAnimation),
-};
-
-export type LottieKey = keyof typeof LOTTIE_REGISTRY;
 
 // ============================================================================
 // RESOLVER
 // ============================================================================
 
 /**
- * Resolve a Lottie source from a key
+ * Resolve a Lottie reference to its URL.
+ * 
+ * @param ref - Either a registry key ('success') or a direct URL
+ * @returns The Lottie entry or a synthesized entry for direct URLs
  */
-export const resolveLottieSource = (key: string): LottieSource | null => {
-  const entry = LOTTIE_REGISTRY[key as LottieKey];
+export const resolveLottieRef = (ref: string): LottieEntry | null => {
+  // Check if it's a direct URL
+  if (ref.startsWith('http://') || ref.startsWith('https://')) {
+    return {
+      url: ref,
+      description: 'Direct URL',
+    };
+  }
+
+  // Look up in registry
+  const entry = LOTTIE_REGISTRY[ref];
   if (!entry) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(`[LottieRegistry] Unknown lottieRef "${key}"`);
-    }
+    console.warn(`[LottieRegistry] Unknown lottieRef "${ref}". Available keys: ${Object.keys(LOTTIE_REGISTRY).join(', ')}`);
     return null;
   }
+
   return entry;
 };
 
@@ -802,26 +380,35 @@ export const getAvailableLottieKeys = (): string[] => {
 };
 
 /**
+ * Search for Lottie animations by tag
+ */
+export const searchLottieByTag = (tag: string): string[] => {
+  return Object.entries(LOTTIE_REGISTRY)
+    .filter(([_, entry]) => entry.tags?.includes(tag.toLowerCase()))
+    .map(([key]) => key);
+};
+
+/**
  * Check if a Lottie key exists
  */
 export const hasLottie = (key: string): boolean => {
-  return key in LOTTIE_REGISTRY;
+  return key in LOTTIE_REGISTRY || key.startsWith('http://') || key.startsWith('https://');
 };
 
 // ============================================================================
-// PRESETS
+// PRESETS (for common use cases)
 // ============================================================================
 
 export const LOTTIE_PRESETS: Record<string, LottiePreset> = {
   // Quiz & Assessment
   correctAnswer: {
-    lottieRef: 'core/celebration',
+    lottieRef: 'confetti',
     loop: false,
     playbackRate: 1.2,
     style: { width: 300, height: 300 },
   },
   checkmark: {
-    lottieRef: 'core/checkmark',
+    lottieRef: 'success',
     loop: false,
     playbackRate: 1.0,
     style: { width: 60, height: 60 },
@@ -829,40 +416,34 @@ export const LOTTIE_PRESETS: Record<string, LottiePreset> = {
 
   // Concept & Learning
   insight: {
-    lottieRef: 'education/lightbulb',
+    lottieRef: 'lightbulb',
     loop: false,
     playbackRate: 1.0,
     style: { width: 120, height: 120 },
     entranceDelay: 10,
     entranceDuration: 20,
   },
-  sparkle: {
-    lottieRef: 'education/stars-burst',
-    loop: false,
-    playbackRate: 1.0,
-    style: { width: 80, height: 80 },
+  thinking: {
+    lottieRef: 'thinking',
+    loop: true,
+    playbackRate: 0.8,
+    style: { width: 100, height: 100 },
   },
 
   // Progress
-  stepComplete: {
-    lottieRef: 'core/checkmark',
-    loop: false,
-    playbackRate: 1.0,
-    style: { width: 50, height: 50 },
-  },
   loading: {
-    lottieRef: 'core/loading',
+    lottieRef: 'loading',
     loop: true,
     playbackRate: 1.0,
     style: { width: 60, height: 60 },
   },
 
   // Ambient
-  backgroundParticles: {
-    lottieRef: 'core/particles',
+  backgroundSparkles: {
+    lottieRef: 'sparkles',
     loop: true,
-    playbackRate: 0.3,
-    style: { width: '40%', height: '40%', opacity: 0.1 },
+    playbackRate: 0.5,
+    style: { width: '40%', height: '40%', opacity: 0.3 },
   },
 };
 
@@ -878,8 +459,8 @@ export const getLottiePreset = (
   if (!preset) {
     console.warn(`[LottieRegistry] Unknown preset "${presetName}", using default`);
     return {
-      lottieRef: 'education/stars-burst',
-      loop: false,
+      lottieRef: 'sparkles',
+      loop: true,
       playbackRate: 1.0,
       style: { width: 100, height: 100 },
       ...overrides,
@@ -891,4 +472,15 @@ export const getLottiePreset = (
     ...overrides,
     style: { ...preset.style, ...(overrides?.style || {}) },
   };
+};
+
+// ============================================================================
+// DEPRECATED - Keep for backward compatibility
+// ============================================================================
+
+/** @deprecated Use resolveLottieRef instead */
+export const resolveLottieSource = (key: string) => {
+  const entry = resolveLottieRef(key);
+  if (!entry) return null;
+  return { kind: 'url' as const, url: entry.url };
 };
