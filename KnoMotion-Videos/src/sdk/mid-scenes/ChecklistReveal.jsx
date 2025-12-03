@@ -400,6 +400,7 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                     iconRef={itemIcon}
                     size="md"
                     color={itemChecked ? 'textMain' : 'textSoft'}
+                    animated={typeof item === 'object' ? item.animated : false}
                     style={{ fontSize: baseFontSize * iconSize }}
                   />
                 </div>

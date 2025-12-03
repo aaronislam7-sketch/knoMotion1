@@ -192,6 +192,7 @@ export const IconGrid = ({ config }) => {
                 iconRef={icon.iconRef}
                 size={iconSize}
                 color={icon.color || 'primary'}
+                animated={icon.animated}
                 style={{
                   marginBottom: showLabels ? 8 : 0,
                   ...icon.style,

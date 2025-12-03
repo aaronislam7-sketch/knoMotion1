@@ -270,6 +270,7 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
               <CalloutBubble
                 text={calloutData.text}
                 iconRef={calloutData.icon}
+                animated={calloutData.animated}
                 shape={calloutData.shape || shape}
                 color={calloutData.color || preset.doodle?.color || 'cardBg'}
                 style={style}

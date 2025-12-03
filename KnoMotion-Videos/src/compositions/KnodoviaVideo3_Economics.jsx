@@ -141,7 +141,7 @@ const video3Scenes = [
           config: {
             cards: [
               { image: BADGE_LILAC, label: 'Ask a great question', sublabel: '+2 scribs' },
-              { icon: '🤯', label: 'Make someone say “wait what?”', sublabel: 'Variable payout' },
+              { icon: '🤯', label: 'Make someone say “wait what?”', sublabel: 'Variable payout', animated: true },
             ],
             columns: 2,
             animation: 'scale',

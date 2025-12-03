@@ -209,6 +209,7 @@ const GridCard = ({
             iconRef={card.icon}
             size="lg"
             color={card.color || 'primary'}
+            animated={card.animated}
             style={{
               fontSize: iconSize,
               color: iconColor,

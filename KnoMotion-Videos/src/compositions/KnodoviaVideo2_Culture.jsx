@@ -95,7 +95,7 @@ const video2Scenes = [
           config: {
             items: [
               { text: 'Morning doodle meditation', icon: '🌀', checked: true },
-              { text: 'The Great Idea Swap', icon: '💡', checked: true },
+              { text: 'The Great Idea Swap', icon: '💡', checked: true, animated: true },
               { text: '3pm Confusion Break', icon: '😵‍💫', checked: false },
             ],
             staggerDelay: 0.4,
