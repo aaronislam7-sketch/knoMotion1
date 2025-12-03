@@ -511,7 +511,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
   const preset = resolveStylePreset(stylePreset);
 
   // Validate required fields
-  if (!left.title && !right.title) {
+  if (mode !== 'beforeAfter' && !left.title && !right.title) {
     console.warn('SideBySideCompare: No content provided');
     return null;
   }

@@ -19,6 +19,8 @@ import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../lay
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Card reveal animation styles
