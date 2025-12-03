@@ -1,6 +1,11 @@
 import React from 'react';
 import { AnimatedEmoji, getAvailableEmojis } from '@remotion/animated-emoji';
-import { getStaticFiles, useCurrentFrame, useVideoConfig } from 'remotion';
+import {
+  getRemotionEnvironment,
+  getStaticFiles,
+  useCurrentFrame,
+  useVideoConfig,
+} from 'remotion';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 import { scaleIn, getContinuousRotation } from '../../animations';
 
@@ -67,7 +72,13 @@ const hasAnimatedEmojiAsset = (emojiName, scale = '1') => {
     return false;
   }
 
-  const staticFiles = getStaticFiles?.();
+  const env = getRemotionEnvironment();
+  if (!env?.isStudio) {
+    animatedEmojiAssetCache.set(cacheKey, false);
+    return false;
+  }
+
+  const staticFiles = getStaticFiles();
   if (!staticFiles || staticFiles.length === 0) {
     animatedEmojiAssetCache.set(cacheKey, false);
     return false;
