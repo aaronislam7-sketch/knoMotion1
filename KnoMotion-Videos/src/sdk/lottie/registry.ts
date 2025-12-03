@@ -458,10 +458,32 @@ export const loadingAnimation: LottieAnimationData = {
 // STATIC FILE HELPERS
 // ============================================================================
 
-const staticEntry = (path: string): LottieSource => ({
-  kind: 'static',
-  src: staticFile(path),
-});
+/**
+ * Create a static file entry
+ * NOTE: In Vite projects, staticFile() may not work correctly.
+ * We use a direct path (served from /public) as fallback.
+ */
+const staticEntry = (path: string): LottieSource => {
+  // Try staticFile first, fall back to direct path for Vite compatibility
+  let src: string;
+  try {
+    src = staticFile(path);
+  } catch {
+    // Fallback for Vite: direct path from public folder
+    src = `/${path}`;
+  }
+  
+  // In development with Vite, staticFile might return something unexpected
+  // Ensure we have a proper URL format
+  if (!src.startsWith('/') && !src.startsWith('http')) {
+    src = `/${path}`;
+  }
+  
+  return {
+    kind: 'static',
+    src,
+  };
+};
 
 const inlineEntry = (data: LottieAnimationData): LottieSource => ({
   kind: 'inline',

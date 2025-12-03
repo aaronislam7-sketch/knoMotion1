@@ -1,95 +1,153 @@
 /**
  * LottieDebugTest - Minimal test of Lottie integration
  * 
- * This tests the exact pattern from Remotion docs.
+ * This test helps diagnose Lottie rendering issues by testing:
+ * 1. Remote URL from LottieFiles (known working)
+ * 2. Inline animation data from our registry
+ * 3. Static file from public folder
  */
 
 import React, { useEffect, useState } from 'react';
-import { AbsoluteFill, useCurrentFrame, staticFile, delayRender, continueRender, cancelRender } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, staticFile, delayRender, continueRender } from 'remotion';
 import { Lottie } from '@remotion/lottie';
-import { lightbulbAnimation, checkmarkAnimation, sparkleAnimation } from '../sdk/lottie/registry';
+import { 
+  lightbulbAnimation, 
+  checkmarkAnimation, 
+  sparkleAnimation,
+  resolveLottieSource,
+  LOTTIE_REGISTRY
+} from '../sdk/lottie/registry';
+
+// Known working Lottie URL from LottieFiles (balloon animation)
+const LOTTIE_FILES_URL = 'https://assets4.lottiefiles.com/packages/lf20_zyquagfl.json';
 
 /**
- * Test 1: Direct inline data (no fetch needed)
- * This should work immediately
+ * Test 1: Raw hardcoded animation data (simplest possible case)
  */
-const InlineLottieTest = ({ data, label }) => {
+const RawLottieTest = () => {
+  // Minimal inline animation - just a circle that pulses
+  const simpleAnimation = {
+    v: "5.9.0",
+    fr: 30,
+    ip: 0,
+    op: 60,
+    w: 100,
+    h: 100,
+    assets: [],
+    layers: [{
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "circle",
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 },
+        p: { a: 0, k: [50, 50, 0] },
+        s: { 
+          a: 1, 
+          k: [
+            { t: 0, s: [100, 100, 100] }, 
+            { t: 30, s: [120, 120, 100] },
+            { t: 60, s: [100, 100, 100] }
+          ] 
+        }
+      },
+      shapes: [{
+        ty: "gr",
+        it: [
+          { ty: "el", p: { a: 0, k: [0, 0] }, s: { a: 0, k: [60, 60] } },
+          { ty: "fl", c: { a: 0, k: [0.2, 0.8, 0.4, 1] }, o: { a: 0, k: 100 } }
+        ]
+      }]
+    }]
+  };
+
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ color: 'white', marginBottom: 10, fontSize: 14 }}>{label}</div>
-      <div style={{ 
-        width: 120, 
-        height: 120, 
-        backgroundColor: 'rgba(255,255,255,0.1)', 
-        borderRadius: 10,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <Lottie
-          animationData={data}
-          loop={true}
-          style={{ width: 100, height: 100 }}
-        />
-      </div>
+    <div style={{ width: 100, height: 100, border: '2px solid lime' }}>
+      <Lottie 
+        animationData={simpleAnimation} 
+        loop={true}
+        style={{ width: '100%', height: '100%' }}
+      />
     </div>
   );
 };
 
 /**
- * Test 2: Fetch from static file (following Remotion docs exactly)
+ * Test: Fetched URL with delayRender pattern (Remotion official pattern)
  */
-const FetchedLottieTest = ({ path, label }) => {
-  const [handle] = useState(() => delayRender(`Loading: ${path}`));
+const FetchedLottieTest = ({ url, label }) => {
+  const [handle] = useState(() => delayRender(`Loading: ${label || url}`));
   const [animationData, setAnimationData] = useState(null);
   const [error, setError] = useState(null);
+  const [status, setStatus] = useState('loading');
 
   useEffect(() => {
-    const url = staticFile(path);
-    console.log(`[FetchedLottie] Fetching ${url}`);
+    console.log(`[FetchedLottie:${label}] Fetching: ${url}`);
     
     fetch(url)
       .then((res) => {
+        console.log(`[FetchedLottie:${label}] Response status: ${res.status}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
       .then((json) => {
-        console.log(`[FetchedLottie] Loaded ${path}`);
+        console.log(`[FetchedLottie:${label}] Loaded successfully, keys:`, Object.keys(json));
         setAnimationData(json);
+        setStatus('loaded');
         continueRender(handle);
       })
       .catch((err) => {
-        console.error(`[FetchedLottie] Error loading ${path}:`, err);
+        console.error(`[FetchedLottie:${label}] Error:`, err);
         setError(err.message);
-        // Don't cancel render for this test - just show error
-        continueRender(handle);
+        setStatus('error');
+        continueRender(handle); // Continue anyway to show error state
       });
-  }, [handle, path]);
+  }, [handle, url, label]);
+
+  const boxStyle = {
+    width: 100, 
+    height: 100, 
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  if (status === 'error') {
+    return (
+      <div style={{ 
+        ...boxStyle,
+        border: '2px solid red', 
+        color: 'red', 
+        fontSize: 10, 
+        textAlign: 'center', 
+        padding: 4
+      }}>
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (status === 'loading' || !animationData) {
+    return (
+      <div style={{ 
+        ...boxStyle,
+        border: '2px dashed yellow', 
+        color: 'yellow', 
+        fontSize: 10
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ color: 'white', marginBottom: 10, fontSize: 14 }}>{label}</div>
-      <div style={{ 
-        width: 120, 
-        height: 120, 
-        backgroundColor: 'rgba(255,255,255,0.1)', 
-        borderRadius: 10,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        {error ? (
-          <div style={{ color: 'red', fontSize: 12 }}>{error}</div>
-        ) : animationData ? (
-          <Lottie
-            animationData={animationData}
-            loop={true}
-            style={{ width: 100, height: 100 }}
-          />
-        ) : (
-          <div style={{ color: 'gray', fontSize: 12 }}>Loading...</div>
-        )}
-      </div>
+    <div style={{ ...boxStyle, border: '2px solid lime' }}>
+      <Lottie 
+        animationData={animationData} 
+        loop={true}
+        style={{ width: 80, height: 80 }}
+      />
     </div>
   );
 };
@@ -97,34 +155,148 @@ const FetchedLottieTest = ({ path, label }) => {
 export const LottieDebugTest = () => {
   const frame = useCurrentFrame();
 
+  // Debug: Check what staticFile returns
+  const staticFileResult = staticFile('lotties/success-checkmark.json');
+  
+  // Debug: Check what's in the registry
+  const checkmarkSource = resolveLottieSource('checkmark');
+  const lightbulbSource = resolveLottieSource('education/lightbulb');
+
+  // Log once at frame 0
+  if (frame === 0) {
+    console.log('=== LOTTIE DEBUG TEST ===');
+    console.log('staticFile result:', staticFileResult);
+    console.log('checkmark source:', checkmarkSource);
+    console.log('lightbulb source:', lightbulbSource);
+    console.log('Registry keys:', Object.keys(LOTTIE_REGISTRY));
+  }
+
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#1e1e2e',
+        backgroundColor: '#0f0f23',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 30,
+        justifyContent: 'flex-start',
+        gap: 15,
         fontFamily: 'system-ui, sans-serif',
+        padding: 30,
+        overflow: 'auto',
       }}
     >
-      <div style={{ color: 'white', fontSize: 24 }}>Lottie Debug Test - Frame: {frame}</div>
+      <div style={{ color: 'white', fontSize: 20 }}>Frame: {frame}</div>
 
-      {/* Inline animations - these should definitely work */}
-      <div style={{ color: '#8be9fd', fontSize: 16 }}>Inline Data (from registry)</div>
-      <div style={{ display: 'flex', gap: 30 }}>
-        <InlineLottieTest data={lightbulbAnimation} label="lightbulb" />
-        <InlineLottieTest data={checkmarkAnimation} label="checkmark" />
-        <InlineLottieTest data={sparkleAnimation} label="sparkle" />
+      {/* Debug Info */}
+      <div style={{ 
+        backgroundColor: '#1a1a2e', 
+        padding: 15, 
+        borderRadius: 8, 
+        fontSize: 12,
+        color: '#888',
+        maxWidth: 800,
+        textAlign: 'left',
+      }}>
+        <div><strong>staticFile('lotties/success-checkmark.json'):</strong> {staticFileResult}</div>
+        <div><strong>checkmark source kind:</strong> {checkmarkSource?.kind || 'null'}</div>
+        <div><strong>lightbulb source kind:</strong> {lightbulbSource?.kind || 'null'}</div>
+      </div>
+      
+      {/* Test 1: Raw Lottie component with hardcoded data */}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#50fa7b', fontSize: 14, marginBottom: 5 }}>
+          Test 1: Raw Lottie (hardcoded simple animation)
+        </div>
+        <RawLottieTest />
       </div>
 
-      {/* Static file animations - test fetch pattern */}
-      <div style={{ color: '#8be9fd', fontSize: 16, marginTop: 20 }}>Static Files (fetched)</div>
-      <div style={{ display: 'flex', gap: 30 }}>
-        <FetchedLottieTest path="lotties/success-checkmark.json" label="checkmark" />
-        <FetchedLottieTest path="lotties/celebration-stars.json" label="celebration" />
-        <FetchedLottieTest path="lotties/loading-spinner.json" label="loading" />
+      {/* Test 2: Registry inline animations (direct import) */}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#8be9fd', fontSize: 14, marginBottom: 5 }}>
+          Test 2: Registry Inline Data (direct import)
+        </div>
+        <div style={{ display: 'flex', gap: 15 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 10, marginBottom: 3 }}>lightbulb</div>
+            <div style={{ width: 80, height: 80, border: '2px solid #8be9fd' }}>
+              <Lottie 
+                animationData={lightbulbAnimation} 
+                loop={true}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 10, marginBottom: 3 }}>checkmark</div>
+            <div style={{ width: 80, height: 80, border: '2px solid #8be9fd' }}>
+              <Lottie 
+                animationData={checkmarkAnimation} 
+                loop={true}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 10, marginBottom: 3 }}>sparkle</div>
+            <div style={{ width: 80, height: 80, border: '2px solid #8be9fd' }}>
+              <Lottie 
+                animationData={sparkleAnimation} 
+                loop={true}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Test 3: Remote URL (LottieFiles - known working) */}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#f1fa8c', fontSize: 14, marginBottom: 5 }}>
+          Test 3: Remote URL (LottieFiles)
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ color: 'white', fontSize: 10, marginBottom: 3 }}>lottiefiles.com</div>
+          <FetchedLottieTest url={LOTTIE_FILES_URL} label="lottiefiles" />
+        </div>
+      </div>
+
+      {/* Test 4: Fetched from static file URL */}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#ff79c6', fontSize: 14, marginBottom: 5 }}>
+          Test 4: Local Static Files
+        </div>
+        <div style={{ display: 'flex', gap: 15 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 10, marginBottom: 3 }}>staticFile()</div>
+            <FetchedLottieTest url={staticFileResult} label="staticFile" />
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 10, marginBottom: 3 }}>direct /path</div>
+            <FetchedLottieTest url="/lotties/success-checkmark.json" label="direct" />
+          </div>
+        </div>
+      </div>
+
+      {/* Instructions */}
+      <div style={{ 
+        color: '#6272a4', 
+        fontSize: 11, 
+        marginTop: 10,
+        maxWidth: 700,
+        textAlign: 'center',
+        lineHeight: 1.5,
+      }}>
+        <strong>Expected Results:</strong><br/>
+        - Test 1: Green pulsing circle (raw hardcoded)<br/>
+        - Test 2: Lightbulb, checkmark, sparkle (inline registry data)<br/>
+        - Test 3: Balloon animation (remote LottieFiles URL)<br/>
+        - Test 4: Checkmark (local static file)<br/>
+        <br/>
+        <strong>Diagnosis:</strong><br/>
+        If Test 1 works → @remotion/lottie is functional<br/>
+        If Test 2 fails → Issue with registry animation format<br/>
+        If Test 3 fails → Issue with fetch/delayRender pattern<br/>
+        If Test 4 fails → Issue with staticFile/Vite serving
       </div>
     </AbsoluteFill>
   );
