@@ -16,6 +16,8 @@ import { Text } from '../elements/atoms/Text';
 import { fadeIn, slideIn, scaleIn, fadeSlide, fadeOut, slideOut, scaleOut } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveBeats } from '../utils/beats';
 import { positionToCSS } from '../layout/layoutEngine';
 
 /**
@@ -65,7 +67,7 @@ const getAnimationStyle = (animationType, frame, startFrame, durationFrames, dir
  * @param {Object} props.config.position - Optional position override (uses layout engine)
  * @param {Object} props.config.style - Optional style overrides
  */
-export const HeroTextEntranceExit = ({ config }) => {
+export const HeroTextEntranceExit = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const {
@@ -85,9 +87,19 @@ export const HeroTextEntranceExit = ({ config }) => {
     return null;
   }
 
-  const { entrance = 1.0, exit = 5.0 } = beats;
-  const entranceFrame = toFrames(entrance, fps);
-  const exitFrame = toFrames(exit, fps);
+  const preset = resolveStylePreset(stylePreset);
+  const heroBeats = resolveBeats(
+    {
+      start: beats.entrance ?? beats.start,
+      exit: beats.exit,
+    },
+    {
+      start: 1.0,
+      holdDuration: (beats.exit ?? 4) - ((beats.entrance ?? beats.start) ?? 1),
+    },
+  );
+  const entranceFrame = toFrames(heroBeats.start, fps);
+  const exitFrame = toFrames(heroBeats.exit, fps);
   const animationDuration = 0.8; // Default animation duration in seconds
   const durationFrames = toFrames(animationDuration, fps);
 
@@ -136,13 +148,11 @@ export const HeroTextEntranceExit = ({ config }) => {
   };
 
   // Hero animation (using heroRegistry's animation system)
-  const heroBeats = {
-    mapReveal: entrance,
-  };
+  const heroTimelineBeats = { mapReveal: heroBeats.start };
   const heroAnimation = calculateHeroAnimation(
     frame,
     { animation: { entrance: animationEntrance, entranceBeat: 'mapReveal', entranceDuration: animationDuration } },
-    heroBeats,
+    heroTimelineBeats,
     null,
     fps
   );
@@ -195,23 +205,16 @@ export const HeroTextEntranceExit = ({ config }) => {
             ...style.heroContainer,
           }}
         >
-          {renderHero(
-            heroConfig,
-            frame,
-            heroBeats,
-            KNODE_THEME.colors,
-            null,
-            fps
-          )}
+          {renderHero(heroConfig, frame, heroTimelineBeats, KNODE_THEME.colors, null, fps)}
         </div>
 
         {/* Text */}
         <Text
           text={text}
-          variant="title"
+          variant={preset.textVariant}
           size="xl"
           weight="bold"
-          color="primary"
+          color={preset.textColor}
           style={{
             textAlign: 'center',
             ...style.text,

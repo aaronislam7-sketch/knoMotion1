@@ -18,6 +18,9 @@ import { positionToCSS as positionToCSSWithTransform } from '../layout/positionS
 import { fadeIn, slideIn, typewriter, getMaskReveal } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveEmphasisEffect } from '../theme/emphasisEffects';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Get line spacing value from theme based on spacing type
@@ -35,34 +38,51 @@ const getLineSpacing = (spacingType = 'normal') => {
   return spacingMap[spacingType] || spacingMap.normal;
 };
 
-/**
- * Get emphasis style based on emphasis level
- * 
- * @param {string} emphasis - Emphasis level: 'normal' | 'high' | 'low'
- * @returns {Object} Style object with weight, color, and optional highlight
- */
-const getEmphasisStyle = (emphasis = 'normal') => {
-  switch (emphasis) {
-    case 'high':
+const getDecorationStyle = (decoration, color) => {
+  switch (decoration) {
+    case 'underline':
       return {
-        fontWeight: 700,
-        color: KNODE_THEME.colors.primary,
-        backgroundColor: `${KNODE_THEME.colors.primary}15`, // Light highlight
-        padding: '4px 8px',
-        borderRadius: 4,
+        borderBottom: `3px solid ${color || KNODE_THEME.colors.doodle}`,
+        paddingBottom: 6,
       };
-    case 'low':
+    case 'highlight':
       return {
-        fontWeight: 400,
-        color: KNODE_THEME.colors.textSoft,
+        boxShadow: `inset 0 -14px 0 ${color ? `${color}33` : `${KNODE_THEME.colors.doodle}33`}`,
       };
-    case 'normal':
+    case 'circle':
+      return {
+        padding: '6px 12px',
+        border: `2px solid ${color || KNODE_THEME.colors.doodle}`,
+        borderRadius: 40,
+      };
     default:
-      return {
-        fontWeight: 600,
-        color: KNODE_THEME.colors.textMain,
-      };
+      return {};
   }
+};
+
+const getEmphasisStyle = (emphasis = 'normal') => resolveEmphasisEffect(emphasis);
+
+const getEmphasisMotion = (effect, frame, beats, fps) => {
+  if (!effect.animation) {
+    return {};
+  }
+  const emphasisStart = beats?.emphasis ?? beats?.start ?? 0;
+  const emphasisFrame = toFrames(emphasisStart, fps);
+  if (frame < emphasisFrame) {
+    return {};
+  }
+  const elapsed = frame - emphasisFrame;
+  if (effect.animation.type === 'pulse') {
+    const cycle = Math.sin(elapsed / 6);
+    const scale = 1 + (effect.animation.amount || 0.04) * Math.max(0, cycle);
+    return { transform: `scale(${scale})` };
+  }
+  if (effect.animation.type === 'breathe') {
+    const amount = effect.animation.amount || 0.01;
+    const scale = 1 + amount * Math.sin(elapsed / 12);
+    return { transform: `scale(${scale})` };
+  }
+  return {};
 };
 
 /**
@@ -126,12 +146,13 @@ const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, 
  * @param {number} props.config.staggerDelay - Delay between lines in seconds (default: 0.2)
  * @param {number} props.config.animationDuration - Animation duration per line in seconds (default: 0.8)
  * @param {string} props.config.lineSpacing - Line spacing: 'tight' | 'normal' | 'relaxed' | 'loose' (default: 'normal')
+ * @param {string} [props.stylePreset] - Optional style preset name
  * @param {Object} props.config.beats - Beat timings
  * @param {number} props.config.beats.start - Start beat in seconds (required)
  * @param {Object} props.config.position - Optional position override
  * @param {Object} props.config.style - Optional style overrides
  */
-export const TextRevealSequence = ({ config }) => {
+export const TextRevealSequence = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
@@ -147,15 +168,24 @@ export const TextRevealSequence = ({ config }) => {
     style = {},
   } = config;
 
+  const preset = resolveStylePreset(stylePreset);
+  const presetDecorationStyle = getDecorationStyle(
+    preset.decoration,
+    KNODE_THEME.colors[preset.textColor],
+  );
+
   // Validate required fields
   if (!lines || lines.length === 0) {
     console.warn('TextRevealSequence: No lines provided');
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
-  const staggerFrames = toFrames(staggerDelay, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 1.0,
+    holdDuration: animationDuration,
+    exitOffset: 0.25,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const durationFrames = toFrames(animationDuration, fps);
   const lineSpacingValue = getLineSpacing(lineSpacing);
   const viewport = { width, height };
@@ -181,7 +211,11 @@ export const TextRevealSequence = ({ config }) => {
         const line = lines[index];
         if (!line || !line.text) return null;
 
-        const lineStartFrame = startFrame + index * staggerFrames;
+        const itemBeats = resolveBeats(line.beats, {
+          start: sequenceBeats.start + index * staggerDelay,
+          holdDuration: animationDuration,
+        });
+        const lineStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getRevealAnimationStyle(
           revealType,
           frame,
@@ -191,7 +225,8 @@ export const TextRevealSequence = ({ config }) => {
           line.text
         );
 
-        const emphasisStyle = getEmphasisStyle(line.emphasis);
+        const emphasisEffect = getEmphasisStyle(line.emphasis);
+        const emphasisMotion = getEmphasisMotion(emphasisEffect, frame, itemBeats, fps);
         // Use positionSystem's positionToCSS which uses transforms for center coords
         const linePosition = positionToCSSWithTransform(pos, 'center');
 
@@ -201,9 +236,18 @@ export const TextRevealSequence = ({ config }) => {
         // Combine centering transform with animation transform properly
         // The linePosition.transform handles centering (-50%, -50%)
         // The animStyle.transform handles animation (e.g., translateY for slide)
-        const combinedTransform = animStyle.transform && animStyle.transform !== 'none'
-          ? `${linePosition.transform} ${animStyle.transform}`
-          : linePosition.transform;
+        const transforms = [linePosition.transform];
+        if (animStyle.transform && animStyle.transform !== 'none') {
+          transforms.push(animStyle.transform);
+        }
+        if (emphasisMotion.transform) {
+          transforms.push(emphasisMotion.transform);
+        }
+        const combinedTransform = transforms.filter(Boolean).join(' ');
+
+        const weightValue = emphasisEffect.textStyle.fontWeight || 600;
+        const textWeight =
+          weightValue >= 700 ? 'bold' : weightValue <= 400 ? 'normal' : 'medium';
 
         return (
           <div
@@ -214,21 +258,23 @@ export const TextRevealSequence = ({ config }) => {
               transform: combinedTransform,
               opacity: animStyle.opacity,
               clipPath: animStyle.clipPath || 'none',
+              ...('opacity' in emphasisMotion ? { opacity: emphasisMotion.opacity } : {}),
               ...style.lineContainer,
             }}
           >
             <Text
               text={displayText}
-              variant="body"
+              variant={preset.textVariant}
               size="xl"
-              weight={emphasisStyle.fontWeight}
-              color="textMain"
+              weight={textWeight}
+              color={preset.textColor}
               style={{
                 fontSize: baseFontSize,
                 lineHeight: `${lineHeight}px`,
                 textAlign: 'center',
                 whiteSpace: 'nowrap',
-                ...emphasisStyle,
+                ...presetDecorationStyle,
+                ...emphasisEffect.textStyle,
                 ...style.text,
               }}
             />

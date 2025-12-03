@@ -11,40 +11,8 @@
 
 import React from 'react';
 import { Lottie, LottieAnimationData } from '@remotion/lottie';
-import { useCurrentFrame, useVideoConfig, interpolate, staticFile } from 'remotion';
-
-// ==================== LOCAL LOTTIE IMPORTS ====================
-
-// Import local Lottie JSON files
-// Note: Using staticFile() for proper bundling
-const successCheckmark = staticFile('lotties/success-checkmark.json');
-const loadingSpinner = staticFile('lotties/loading-spinner.json');
-const particleBurst = staticFile('lotties/particle-burst.json');
-const celebrationStars = staticFile('lotties/celebration-stars.json');
-
-/**
- * Lottie animation registry (local files)
- * Maps animation names to file paths
- */
-export const lottieAnimations = {
-  // Celebration & Success
-  success: successCheckmark,
-  celebration: celebrationStars,
-  checkmark: successCheckmark,
-  stars: celebrationStars,
-  
-  // Loading & Progress
-  loading: loadingSpinner,
-  spinner: loadingSpinner,
-  
-  // Effects & Particles
-  particles: particleBurst,
-  burst: particleBurst,
-  
-  // Add more animations as needed...
-};
-
-export type LottieAnimationType = keyof typeof lottieAnimations;
+import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+import { resolveLottieSource } from './lottieRegistry';
 
 // ==================== HELPER: FETCH LOTTIE DATA ====================
 
@@ -95,15 +63,43 @@ export const RemotionLottie: React.FC<RemotionLottieProps> = ({
   const { fps } = useVideoConfig();
   const [animationData, setAnimationData] = React.useState<LottieAnimationData | null>(null);
 
-  // Get animation source
-  const animationSrc = lottieRef in lottieAnimations
-    ? lottieAnimations[lottieRef as LottieAnimationType]
-    : lottieRef;
+  const registrySource = resolveLottieSource(lottieRef);
+  const resolvedSource = React.useMemo(() => {
+    if (registrySource) {
+      return registrySource;
+    }
+    if (!lottieRef) {
+      return null;
+    }
+    return { kind: 'static', src: lottieRef } as const;
+  }, [registrySource, lottieRef]);
 
-  // Fetch animation data
   React.useEffect(() => {
-    fetchLottieData(animationSrc).then(setAnimationData);
-  }, [animationSrc]);
+    let cancelled = false;
+
+    const hydrate = async () => {
+      if (!resolvedSource) {
+        setAnimationData(null);
+        return;
+      }
+
+      if (resolvedSource.kind === 'inline') {
+        setAnimationData(resolvedSource.data);
+        return;
+      }
+
+      const data = await fetchLottieData(resolvedSource.src);
+      if (!cancelled) {
+        setAnimationData(data);
+      }
+    };
+
+    hydrate();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedSource]);
 
   // Only render if we're in the valid frame range
   if (frame < startFrame || (endFrame && frame > endFrame)) {

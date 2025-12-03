@@ -21,7 +21,7 @@
 export const QUIZ_PRESETS = {
   // Correct answer celebration
   correctAnswer: {
-    lottieRef: 'celebration', // STANDARDIZED
+    lottieRef: 'core/celebration', // STANDARDIZED
     loop: false,
     playbackRate: 1.2, // Updated from speed
     style: {
@@ -40,7 +40,7 @@ export const QUIZ_PRESETS = {
   
   // Checkmark for correct answer
   checkmark: {
-    lottieRef: 'checkmark', // STANDARDIZED
+    lottieRef: 'core/checkmark', // STANDARDIZED
     loop: false,
     playbackRate: 1.0, // Updated from speed
     style: {
@@ -51,7 +51,7 @@ export const QUIZ_PRESETS = {
   
   // Loading indicator (replaces thinking)
   loading: {
-    lottieRef: 'loading', // STANDARDIZED
+    lottieRef: 'core/loading', // STANDARDIZED
     loop: true,
     playbackRate: 0.8, // Updated from speed
     style: {
@@ -68,7 +68,7 @@ export const QUIZ_PRESETS = {
 export const CONCEPT_PRESETS = {
   // Stars for insights
   insight: {
-    lottieRef: 'stars', // STANDARDIZED
+    lottieRef: 'education/stars-burst', // STANDARDIZED
     loop: false,
     playbackRate: 1.0, // Updated from speed
     style: {
@@ -81,7 +81,7 @@ export const CONCEPT_PRESETS = {
   
   // Burst for emphasis
   sparkle: {
-    lottieRef: 'burst', // STANDARDIZED
+    lottieRef: 'education/stars-burst', // STANDARDIZED
     loop: false,
     playbackRate: 1.0, // Updated from speed
     style: {
@@ -94,7 +94,7 @@ export const CONCEPT_PRESETS = {
   
   // Central hub glow/pulse
   centralGlow: {
-    lottieRef: 'stars', // STANDARDIZED
+    lottieRef: 'core/particles', // STANDARDIZED
     loop: true,
     playbackRate: 0.5, // Updated from speed
     style: {
@@ -114,7 +114,7 @@ export const CONCEPT_PRESETS = {
 export const PROGRESS_PRESETS = {
   // Step completion checkmark
   stepComplete: {
-    lottieRef: 'success', // STANDARDIZED
+    lottieRef: 'core/checkmark', // STANDARDIZED
     loop: false,
     playbackRate: 1.0, // Updated from speed
     style: {
@@ -125,7 +125,7 @@ export const PROGRESS_PRESETS = {
   
   // Loading/progress indicator
   loading: {
-    lottieRef: 'loading', // STANDARDIZED
+    lottieRef: 'core/loading', // STANDARDIZED
     loop: true,
     playbackRate: 1.0, // Updated from speed
     style: {
@@ -136,7 +136,7 @@ export const PROGRESS_PRESETS = {
   
   // Spinner for long processes
   spinner: {
-    lottieRef: 'spinner', // STANDARDIZED
+    lottieRef: 'core/loading', // STANDARDIZED
     loop: true,
     playbackRate: 1.2, // Updated from speed
     style: {
@@ -152,7 +152,7 @@ export const PROGRESS_PRESETS = {
 export const SPOTLIGHT_PRESETS = {
   // Stage transition sparkle
   stageTransition: {
-    lottieRef: 'burst', // STANDARDIZED
+    lottieRef: 'education/stars-burst', // STANDARDIZED
     loop: false,
     playbackRate: 1.5, // Updated from speed
     style: {
@@ -169,7 +169,7 @@ export const SPOTLIGHT_PRESETS = {
   
   // Reveal burst
   revealBurst: {
-    lottieRef: 'celebration', // STANDARDIZED
+    lottieRef: 'celebration/confetti', // STANDARDIZED
     loop: false,
     playbackRate: 1.0, // Updated from speed
     style: {
@@ -188,7 +188,7 @@ export const SPOTLIGHT_PRESETS = {
 export const AMBIENT_PRESETS = {
   // Subtle background particles
   backgroundParticles: {
-    lottieRef: 'particles', // STANDARDIZED
+    lottieRef: 'core/particles', // STANDARDIZED
     loop: true,
     playbackRate: 0.3, // Updated from speed
     style: {
@@ -203,7 +203,7 @@ export const AMBIENT_PRESETS = {
   
   // Corner accent
   cornerAccent: {
-    lottieRef: 'stars', // STANDARDIZED
+    lottieRef: 'education/stars-burst', // STANDARDIZED
     loop: true,
     playbackRate: 0.5, // Updated from speed
     style: {
@@ -239,7 +239,7 @@ export const getLottiePreset = (presetName, overrides = {}) => {
   if (!preset) {
     console.warn(`Lottie preset "${presetName}" not found, using default`);
     return {
-      lottieRef: 'burst', // STANDARDIZED (updated from animation)
+      lottieRef: 'education/stars-burst', // STANDARDIZED (updated from animation)
       loop: false,
       playbackRate: 1.0, // Updated from speed
       style: { width: 100, height: 100 },

@@ -21,6 +21,7 @@ export { Icon } from './atoms/Icon';
 export { Indicator } from './atoms/Indicator';
 export { Progress } from './atoms/Progress';
 export { Text } from './atoms/Text';
+export { ImageAtom } from './atoms/Image';
 
 // NEW Atoms - Batch 1 (6)
 export { Alert } from './atoms/Alert';

@@ -16,9 +16,13 @@ import { Text } from '../elements/atoms/Text';
 import { Icon } from '../elements/atoms/Icon';
 import { Badge } from '../elements/atoms/Badge';
 import { Divider } from '../elements/atoms/Divider';
+import { ImageAtom } from '../elements/atoms/Image';
+import { RemotionLottie } from '../lottie/lottieIntegration';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Get animation style for comparison sides
@@ -80,6 +84,7 @@ const ComparisonSide = ({
   baseFontSize,
   slotHeight,
   style = {},
+  textColorKey = 'textMain',
 }) => {
   const theme = KNODE_THEME;
   const { title, subtitle, icon, items = [], color, backgroundColor } = config;
@@ -87,7 +92,8 @@ const ComparisonSide = ({
   // Resolve colors
   const accentColor = color 
     ? (theme.colors[color] || color)
-    : theme.colors.primary;
+    : (theme.colors[textColorKey] || theme.colors.primary);
+  const resolvedTextColor = theme.colors[textColorKey] || theme.colors.textMain;
   
   const bgColor = backgroundColor
     ? (theme.colors[backgroundColor] || backgroundColor)
@@ -158,7 +164,7 @@ const ComparisonSide = ({
             text={subtitle}
             variant="body"
             size="md"
-            color="textSoft"
+            color={textColorKey}
             style={{
               fontSize: baseFontSize * 0.9,
               marginBottom: baseFontSize * 0.8,
@@ -199,7 +205,8 @@ const ComparisonSide = ({
                       text={itemText}
                       variant="body"
                       size="md"
-                      style={{ fontSize: baseFontSize, ...style.itemText }}
+                     color={textColorKey}
+                     style={{ fontSize: baseFontSize, color: resolvedTextColor, ...style.itemText }}
                     />
                   )}
                   {itemIcon && (
@@ -212,7 +219,8 @@ const ComparisonSide = ({
                       text={itemText}
                       variant="body"
                       size="md"
-                      style={{ fontSize: baseFontSize, ...style.itemText }}
+                    color={textColorKey}
+                    style={{ fontSize: baseFontSize, color: resolvedTextColor, ...style.itemText }}
                     />
                   )}
                 </div>
@@ -324,6 +332,133 @@ const VsDivider = ({
   );
 };
 
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+const MediaLayer = ({ media = {}, beats }) => {
+  if (media.lottie) {
+    return (
+      <RemotionLottie
+        lottieRef={media.lottie}
+        loop={media.loop ?? true}
+        playbackRate={media.playbackRate ?? 1}
+        style={{ width: '100%', height: '100%' }}
+      />
+    );
+  }
+
+  if (media.image) {
+    return (
+      <ImageAtom
+        src={media.image}
+        fit={media.fit || 'cover'}
+        beats={beats}
+        borderRadius={media.borderRadius ?? 24}
+        style={{ width: '100%', height: '100%' }}
+      />
+    );
+  }
+
+  return null;
+};
+
+const BeforeAfterCompare = ({
+  before,
+  after,
+  slider,
+  beats,
+  style,
+  slot,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const sliderBeats = resolveBeats(slider?.beats, {
+    start: beats?.start ?? 0.8,
+    holdDuration: slider?.duration ?? 2,
+  });
+  const startFrame = toFrames(sliderBeats.start, fps);
+  const exitFrame = toFrames(sliderBeats.exit, fps);
+  const progress = clamp((frame - startFrame) / Math.max(1, exitFrame - startFrame), 0, 1);
+  const from = slider?.from ?? 0.2;
+  const to = slider?.to ?? 0.8;
+  const autoAnimate = slider?.autoAnimate !== false;
+  const baseValue = autoAnimate ? from + (to - from) * progress : slider?.initial ?? 0.5;
+  const sliderValue = clamp(baseValue, 0.05, 0.95);
+  const sliderPercent = sliderValue * 100;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: slot.left,
+        top: slot.top,
+        width: slot.width,
+        height: slot.height,
+        overflow: 'hidden',
+        borderRadius: 28,
+        ...style.beforeAfterWrapper,
+      }}
+    >
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <MediaLayer media={before?.media} beats={beats} />
+        {before?.title && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 24,
+              bottom: 24,
+              background: 'rgba(0,0,0,0.45)',
+              color: '#fff',
+              padding: '8px 14px',
+              borderRadius: 999,
+              fontSize: 28,
+            }}
+          >
+            {before.title}
+          </div>
+        )}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          clipPath: `inset(0 0 0 ${sliderPercent}%)`,
+          transition: 'clip-path 0.2s linear',
+        }}
+      >
+        <MediaLayer media={after?.media} beats={beats} />
+        {after?.title && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 24,
+              bottom: 24,
+              background: 'rgba(0,0,0,0.45)',
+              color: '#fff',
+              padding: '8px 14px',
+              borderRadius: 999,
+              fontSize: 28,
+            }}
+          >
+            {after.title}
+          </div>
+        )}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: `${sliderPercent}%`,
+          width: 4,
+          background: '#fff',
+          boxShadow: '0 0 20px rgba(0,0,0,0.2)',
+          transform: 'translateX(-2px)',
+        }}
+      />
+    </div>
+  );
+};
+
 /**
  * SideBySideCompare Component
  * 
@@ -349,13 +484,17 @@ const VsDivider = ({
  * @param {Object} [props.config.position] - Slot position from layout resolver
  * @param {Object} [props.config.style] - Optional style overrides
  */
-export const SideBySideCompare = ({ config }) => {
+export const SideBySideCompare = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
   const {
     left = {},
     right = {},
+    before,
+    after,
+    mode = 'standard',
+    slider = {},
     animation = 'slide',
     staggerDelay = 0.3,
     animationDuration = 0.6,
@@ -367,6 +506,7 @@ export const SideBySideCompare = ({ config }) => {
     position,
     style = {},
   } = config;
+  const preset = resolveStylePreset(stylePreset);
 
   // Validate required fields
   if (!left.title && !right.title) {
@@ -374,8 +514,11 @@ export const SideBySideCompare = ({ config }) => {
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 0.8,
+    holdDuration: animationDuration,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   
@@ -386,6 +529,21 @@ export const SideBySideCompare = ({ config }) => {
     left: position?.left || 0,
     top: position?.top || 0,
   };
+
+  if (mode === 'beforeAfter' && before && after) {
+    return (
+      <AbsoluteFill>
+        <BeforeAfterCompare
+          before={before}
+          after={after}
+          slider={slider}
+          beats={beats}
+          slot={slot}
+          style={style}
+        />
+      </AbsoluteFill>
+    );
+  }
 
   // Resolve divider color
   const resolvedDividerColor = KNODE_THEME.colors[dividerColor] || dividerColor;
@@ -425,6 +583,7 @@ export const SideBySideCompare = ({ config }) => {
           baseFontSize={baseFontSize}
           slotHeight={slot.height}
           style={style}
+          textColorKey={preset.textColor}
         />
 
         {/* Right side */}
@@ -435,6 +594,7 @@ export const SideBySideCompare = ({ config }) => {
           baseFontSize={baseFontSize}
           slotHeight={slot.height}
           style={style}
+          textColorKey={preset.textColor}
         />
       </div>
 

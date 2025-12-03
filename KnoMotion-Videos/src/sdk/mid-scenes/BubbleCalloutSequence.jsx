@@ -16,6 +16,8 @@ import { CalloutBubble } from '../elements/compositions/CalloutBubble';
 import { fadeIn, slideIn, scaleIn, bounceIn, staggerIn } from '../animations/index';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
+import { resolveStylePreset } from '../theme/stylePresets';
+import { resolveBeats } from '../utils/beats';
 
 /**
  * Calculate bubble positions based on pattern (simplified to freeform patterns only)
@@ -124,7 +126,7 @@ const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrame
  * @param {Object} [props.config.position] - Slot position from layout resolver
  * @param {Object} [props.config.style] - Optional style overrides
  */
-export const BubbleCalloutSequence = ({ config }) => {
+export const BubbleCalloutSequence = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   
@@ -138,7 +140,9 @@ export const BubbleCalloutSequence = ({ config }) => {
     beats = {},
     position,
     style = {},
+    overlap = false,
   } = config;
+  const preset = resolveStylePreset(stylePreset);
 
   // Validate required fields
   if (!callouts || callouts.length === 0) {
@@ -146,8 +150,11 @@ export const BubbleCalloutSequence = ({ config }) => {
     return null;
   }
 
-  const { start = 1.0 } = beats;
-  const startFrame = toFrames(start, fps);
+  const sequenceBeats = resolveBeats(beats, {
+    start: 0.8,
+    holdDuration: animationDuration,
+  });
+  const startFrame = toFrames(sequenceBeats.start, fps);
   const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   
@@ -175,28 +182,38 @@ export const BubbleCalloutSequence = ({ config }) => {
           ? { text: callout } 
           : callout;
         
-        const calloutStartFrame = startFrame + index * staggerFrames;
+        const itemBeats = resolveBeats(calloutData.beats, {
+          start: sequenceBeats.start + index * staggerDelay,
+          holdDuration: animationDuration,
+        });
+        const calloutStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getBubbleAnimationStyle(
-          animation,
+          animation || preset.animationPreset || 'float',
           frame,
           calloutStartFrame,
           durationFrames,
           fps,
           index
         );
-        
+        const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitProgress =
+          frame > exitFrame
+            ? Math.min(1, (frame - exitFrame) / toFrames(0.3, fps))
+            : 0;
         const pos = bubblePositions[index];
+        const jitterX = overlap ? ((index % 3) - 1) * 25 : 0;
+        const jitterY = overlap ? (((index + 1) % 3) - 1) * 20 : 0;
 
         return (
           <div
             key={index}
             style={{
               position: 'absolute',
-              left: slot.left + pos.x,
-              top: slot.top + pos.y,
+              left: slot.left + pos.x + jitterX,
+              top: slot.top + pos.y + jitterY,
               transform: 'translate(-50%, -50%)',
               maxWidth: maxBubbleWidth,
-              opacity: animStyle.opacity,
+              opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
               ...style.bubbleWrapper,
             }}
           >
@@ -205,7 +222,7 @@ export const BubbleCalloutSequence = ({ config }) => {
                 text={calloutData.text}
                 iconRef={calloutData.icon}
                 shape={calloutData.shape || shape}
-                color={calloutData.color}
+                color={calloutData.color || preset.doodle?.color || 'cardBg'}
                 style={style}
               />
             </div>
