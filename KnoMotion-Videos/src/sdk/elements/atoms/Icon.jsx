@@ -1,5 +1,4 @@
 import React from 'react';
-import { AnimatedEmoji, getAvailableEmojis } from '@remotion/animated-emoji';
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 import { scaleIn, getContinuousRotation } from '../../animations';
@@ -7,10 +6,8 @@ import { scaleIn, getContinuousRotation } from '../../animations';
 /**
  * Icon - Atomic element for icons/emojis
  * 
- * Supports:
- * - Emoji characters (renders as AnimatedEmoji when available)
- * - React elements (renders as-is)
- * - Any other string (renders as text)
+ * Renders emoji characters and icons as static text.
+ * Note: AnimatedEmoji has been disabled due to video asset loading issues.
  * 
  * @param {object} props
  * @param {string} props.iconRef - Icon content (emoji, SVG, etc.) (STANDARDIZED)
@@ -20,76 +17,6 @@ import { scaleIn, getContinuousRotation } from '../../animations';
  * @param {boolean} props.spin - Whether icon should spin continuously
  * @param {object} props.style - Style overrides
  */
-
-// Regex to detect emoji characters
-const EMOJI_REGEX = /\p{Extended_Pictographic}/u;
-
-// Build a lookup map from available animated emojis
-const animatedEmojiData = getAvailableEmojis();
-const emojiAliasToName = new Map();
-
-animatedEmojiData.forEach((entry) => {
-  // Map by codepoint (lowercase)
-  emojiAliasToName.set(entry.codepoint.toLowerCase(), entry.name);
-  
-  // Map by actual emoji character
-  const char = entry.codepoint
-    .split('_')
-    .map((cp) => String.fromCodePoint(parseInt(cp, 16)))
-    .join('');
-  emojiAliasToName.set(char, entry.name);
-  
-  // Map by tags
-  entry.tags.forEach((tag) => {
-    emojiAliasToName.set(tag.toLowerCase(), entry.name);
-  });
-});
-
-/**
- * Export available animated emojis for discoverability
- */
-export const AVAILABLE_ANIMATED_EMOJIS = animatedEmojiData.map((e) => e.name);
-
-/**
- * Convert an emoji character to its codepoint key format
- */
-const toCodepointKey = (value) => {
-  if (typeof value !== 'string') return null;
-  const codepoints = Array.from(value)
-    .map((char) => {
-      const cp = char.codePointAt(0);
-      return cp !== undefined ? cp.toString(16) : null;
-    })
-    .filter(Boolean);
-  if (codepoints.length === 0) return null;
-  return codepoints.join('_').toLowerCase();
-};
-
-/**
- * Resolve an emoji character or tag to its AnimatedEmoji name
- */
-const resolveEmojiName = (value) => {
-  if (!value) return null;
-  const normalized = typeof value === 'string' ? value.trim() : '';
-  
-  // Direct lookup (by character or tag)
-  if (emojiAliasToName.has(normalized)) {
-    return emojiAliasToName.get(normalized);
-  }
-  
-  // Lowercase tag lookup
-  if (emojiAliasToName.has(normalized.toLowerCase())) {
-    return emojiAliasToName.get(normalized.toLowerCase());
-  }
-  
-  // Try by codepoint key
-  const codepointKey = toCodepointKey(normalized);
-  if (codepointKey && emojiAliasToName.has(codepointKey)) {
-    return emojiAliasToName.get(codepointKey);
-  }
-  
-  return null;
-};
 
 export const Icon = ({ 
   iconRef, 
@@ -144,26 +71,8 @@ export const Icon = ({
       return iconRef;
     }
 
+    // Render any string content (emoji or text) directly as static text
     if (typeof iconRef === 'string') {
-      // Check if the string contains an emoji
-      const containsEmoji = EMOJI_REGEX.test(iconRef);
-      
-      if (containsEmoji) {
-        // Try to resolve to an AnimatedEmoji name
-        const emojiName = resolveEmojiName(iconRef);
-        
-        if (emojiName) {
-          // Use AnimatedEmoji - the package handles asset loading and fallbacks
-          return (
-            <AnimatedEmoji
-              emoji={emojiName}
-              style={{ width: sizes[size], height: sizes[size] }}
-            />
-          );
-        }
-      }
-      
-      // Fallback: render the string as-is (static emoji or text)
       return iconRef;
     }
 

@@ -65,6 +65,30 @@ const animationCache = new Map<string, LottieAnimationData>();
 // ============================================================================
 
 /**
+ * Resolve animation data synchronously for initial state
+ * This handles inline animations immediately without waiting for useEffect
+ */
+const resolveInitialData = (
+  lottieRef: string,
+  providedData?: LottieAnimationData
+): LottieAnimationData | null => {
+  // Provided data takes priority
+  if (providedData) return providedData;
+  
+  // Check cache
+  if (animationCache.has(lottieRef)) return animationCache.get(lottieRef)!;
+  
+  // Try to resolve inline data immediately (no fetch needed)
+  const source = resolveLottieSource(lottieRef);
+  if (source?.kind === 'inline') {
+    animationCache.set(lottieRef, source.data);
+    return source.data;
+  }
+  
+  return null;
+};
+
+/**
  * Hook to load Lottie animation data with proper delayRender handling
  */
 export const useLottieData = (
@@ -72,10 +96,8 @@ export const useLottieData = (
   providedData?: LottieAnimationData
 ): LottieAnimationData | null => {
   const [animationData, setAnimationData] = useState<LottieAnimationData | null>(() => {
-    // Check if we have provided data or cached data
-    if (providedData) return providedData;
-    if (animationCache.has(lottieRef)) return animationCache.get(lottieRef)!;
-    return null;
+    // Resolve initial data synchronously (handles inline + cached)
+    return resolveInitialData(lottieRef, providedData);
   });
 
   const delayHandleRef = useRef<number | null>(null);
@@ -91,7 +113,7 @@ export const useLottieData = (
       return;
     }
 
-    // Handle inline data
+    // Inline data should already be resolved in initial state, but handle just in case
     if (source.kind === 'inline') {
       setAnimationData(source.data);
       animationCache.set(lottieRef, source.data);
