@@ -13,6 +13,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
+import { Icon } from '../elements/atoms/Icon';
 import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
 import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
@@ -364,7 +365,6 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
               }}
             >
               {isLottieIcon(itemIcon) ? (
-                // Lottie animated icon
                 <div
                   style={{
                     width: '100%',
@@ -389,8 +389,7 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                   />
                 </div>
               ) : (
-                // Static icon (emoji or character)
-                <span
+                <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -403,8 +402,13 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                     ...style.icon,
                   }}
                 >
-                  {itemIcon}
-                </span>
+                  <Icon
+                    iconRef={itemIcon}
+                    size="md"
+                    color={itemChecked ? 'textMain' : 'textSoft'}
+                    style={{ fontSize: baseFontSize * iconSize }}
+                  />
+                </div>
               )}
             </div>
 

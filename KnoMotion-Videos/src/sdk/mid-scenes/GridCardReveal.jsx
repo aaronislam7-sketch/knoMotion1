@@ -13,6 +13,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
 import { Text } from '../elements/atoms/Text';
+import { Icon } from '../elements/atoms/Icon';
 import { ImageAtom } from '../elements/atoms/Image';
 import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../layout/layoutEngine';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
@@ -202,16 +203,16 @@ const GridCard = ({
             />
           </div>
         ) : hasIcon ? (
-          <div
+          <Icon
+            iconRef={card.icon}
+            size="lg"
+            color={card.color || 'primary'}
             style={{
               fontSize: iconSize,
-              lineHeight: 1,
               color: iconColor,
               ...style.icon,
             }}
-          >
-            {card.icon}
-          </div>
+          />
         ) : null}
 
         {/* Label */}

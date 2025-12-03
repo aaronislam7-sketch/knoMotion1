@@ -185,7 +185,29 @@ const ComparisonSide = ({
             {items.map((item, index) => {
               const itemText = typeof item === 'string' ? item : item.text;
               const itemIcon = typeof item === 'object' ? item.icon : null;
-              
+
+              const iconElement = itemIcon ? (
+                <Icon
+                  iconRef={itemIcon}
+                  size="md"
+                  color={textColorKey}
+                  style={{ fontSize: baseFontSize * 1.1, color: accentColor }}
+                />
+              ) : null;
+
+              const textElement = (
+                <Text
+                  text={itemText}
+                  variant="body"
+                  size="md"
+                  color={textColorKey}
+                  style={{ fontSize: baseFontSize, color: resolvedTextColor, ...style.itemText }}
+                />
+              );
+
+              const iconBefore = iconElement && alignment === 'inner' && side === 'left';
+              const iconAfter = iconElement && !iconBefore;
+
               return (
                 <div
                   key={index}
@@ -200,29 +222,9 @@ const ComparisonSide = ({
                     ...style.item,
                   }}
                 >
-                  {itemIcon && side === 'left' && alignment === 'inner' && (
-                    <Text
-                      text={itemText}
-                      variant="body"
-                      size="md"
-                     color={textColorKey}
-                     style={{ fontSize: baseFontSize, color: resolvedTextColor, ...style.itemText }}
-                    />
-                  )}
-                  {itemIcon && (
-                    <span style={{ fontSize: baseFontSize * 1.1, color: accentColor }}>
-                      {itemIcon}
-                    </span>
-                  )}
-                  {(!itemIcon || side === 'right' || alignment !== 'inner') && (
-                    <Text
-                      text={itemText}
-                      variant="body"
-                      size="md"
-                    color={textColorKey}
-                    style={{ fontSize: baseFontSize, color: resolvedTextColor, ...style.itemText }}
-                    />
-                  )}
+                  {iconBefore && iconElement}
+                  {textElement}
+                  {iconAfter && iconElement}
                 </div>
               );
             })}
