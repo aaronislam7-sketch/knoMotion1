@@ -27,9 +27,20 @@ const video1Scenes = [
   {
     id: 'knodovia-cold-open',
     durationInFrames: 360,
-    transition: { type: 'doodle-wipe', direction: 'right' },
+    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
     config: {
-      background: { preset: 'sunriseGradient', layerNoise: true },
+      background: {
+        preset: 'sunriseGradient',
+        layerNoise: true,
+        particles: {
+          enabled: true,
+          style: 'sparkle',
+          count: 15,
+          color: '#FBBF24',
+          opacity: 0.25,
+          speed: 0.8,
+        },
+      },
       layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
       slots: {
         full: {
@@ -152,7 +163,8 @@ const video1Scenes = [
           stylePreset: 'playful',
           config: {
             pattern: 'scattered',
-            overlap: true,
+            collisionDetection: true,
+            jitter: { x: 15, y: 10 },
             animation: 'float',
             callouts: [
               { text: "Guide: \"You're really not cleared.\"", icon: '🚫' },

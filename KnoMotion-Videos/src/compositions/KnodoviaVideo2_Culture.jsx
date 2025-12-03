@@ -26,9 +26,20 @@ const video2Scenes = [
   {
     id: 'culture-cold-open',
     durationInFrames: 360,
-    transition: { type: 'slide', direction: 'down' },
+    transition: { type: 'slide', direction: 'down', animationPreset: 'educational' },
     config: {
-      background: { preset: 'chalkboardGradient', layerNoise: true },
+      background: {
+        preset: 'chalkboardGradient',
+        layerNoise: true,
+        particles: {
+          enabled: true,
+          style: 'chalk',
+          count: 12,
+          color: '#E8E4E0', // Soft neutral chalk color
+          opacity: 0.15,
+          speed: 0.5,
+        },
+      },
       layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
       slots: {
         full: {
@@ -132,7 +143,8 @@ const video2Scenes = [
           midScene: 'bubbleCallout',
           stylePreset: 'playful',
           config: {
-            overlap: true,
+            collisionDetection: true,
+            jitter: { x: 12, y: 8 },
             callouts: [
               { text: '“Ask questions loudly!”', icon: '📢' },
               { text: '“Think quietly.”', icon: '🤐' },
