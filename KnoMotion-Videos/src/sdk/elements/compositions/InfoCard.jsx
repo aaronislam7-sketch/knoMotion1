@@ -1,10 +1,71 @@
 import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring } from 'remotion';
-import { Card } from '../atoms/Card';
+import { useCurrentFrame, useVideoConfig, spring } from 'remotion';
 import { Icon } from '../atoms/Icon';
 import { Text } from '../atoms/Text';
 import { ImageAtom } from '../atoms/Image';
 import { KNODE_THEME } from '../../theme/knodeTheme';
+
+/**
+ * Calculate optimal content sizing to fit within available card space
+ * Uses layout engine principles for constraint-based sizing
+ * 
+ * @param {Object} params
+ * @param {number} params.cardWidth - Available card width
+ * @param {number} params.cardHeight - Available card height  
+ * @param {boolean} params.hasIcon - Whether card has icon/image
+ * @param {boolean} params.hasLabel - Whether card has label
+ * @param {boolean} params.hasSublabel - Whether card has sublabel
+ * @param {string} params.size - Size preset (sm, md, lg)
+ * @returns {Object} Calculated dimensions for icon, label, padding
+ */
+const calculateContentSizing = ({
+  cardWidth,
+  cardHeight,
+  hasIcon,
+  hasLabel,
+  hasSublabel,
+  size = 'md',
+}) => {
+  // Base ratios for content distribution
+  const paddingRatio = size === 'sm' ? 0.08 : size === 'lg' ? 0.1 : 0.09;
+  const accentHeightRatio = 0.02;
+  const gapRatio = 0.04;
+  
+  // Calculate padding based on smaller dimension for consistent look
+  const minDim = Math.min(cardWidth, cardHeight);
+  const padding = Math.max(8, Math.min(24, minDim * paddingRatio));
+  const accentHeight = Math.max(2, Math.min(5, minDim * accentHeightRatio));
+  const gap = Math.max(6, Math.min(16, minDim * gapRatio));
+  
+  // Available content area after padding
+  const contentWidth = cardWidth - padding * 2;
+  const contentHeight = cardHeight - padding * 2 - accentHeight;
+  
+  // Calculate label heights (estimate based on font sizing)
+  const baseFontSize = Math.max(12, Math.min(28, minDim * 0.12));
+  const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
+  const sublabelHeight = hasSublabel ? baseFontSize * 0.85 * 1.3 : 0;
+  const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
+  
+  // Calculate icon size - fill remaining space after labels
+  let iconSize = 0;
+  if (hasIcon) {
+    const availableForIcon = contentHeight - totalLabelHeight - (hasLabel ? gap : 0);
+    // Icon should be square and fit within content width too
+    iconSize = Math.max(24, Math.min(availableForIcon * 0.9, contentWidth * 0.6));
+  }
+  
+  return {
+    padding,
+    accentHeight,
+    gap,
+    iconSize,
+    labelFontSize: baseFontSize,
+    sublabelFontSize: baseFontSize * 0.75,
+    contentWidth,
+    contentHeight,
+  };
+};
 
 /**
  * InfoCard - Beautiful composition element for grid/info displays
@@ -14,7 +75,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * - Primary label with sublabel support
  * - Style preset integration for consistent theming
  * - Beautiful accent styling based on preset colors
- * - Subtle decorative elements (accent bar, glow effects)
+ * - Constraint-aware sizing that prevents clipping
  * 
  * @param {Object} props
  * @param {string} props.icon - Icon/emoji reference (use this OR image)
@@ -27,6 +88,8 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * @param {'vertical'|'horizontal'} props.layout - Card layout direction
  * @param {'default'|'bordered'|'glass'|'elevated'|'gradient'} props.variant - Card style variant
  * @param {'sm'|'md'|'lg'} props.size - Card size preset
+ * @param {number} props.cardWidth - Explicit card width for constraint calculations
+ * @param {number} props.cardHeight - Explicit card height for constraint calculations
  * @param {string} props.stylePreset - Style preset name for theming
  * @param {Object} props.animation - Animation config { type, startFrame, duration }
  * @param {Object} props.style - Additional style overrides
@@ -42,6 +105,8 @@ export const InfoCard = ({
   layout = 'vertical',
   variant = 'default',
   size = 'md',
+  cardWidth,
+  cardHeight,
   stylePreset,
   animation = null,
   style = {},
@@ -51,13 +116,30 @@ export const InfoCard = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Size presets
+  // Determine if we have content
+  const hasIcon = !!(icon || image);
+  const hasLabel = !!label;
+  const hasSublabel = !!sublabel;
+  
+  // Calculate constraint-aware sizing if dimensions provided
+  const sizing = (cardWidth && cardHeight) 
+    ? calculateContentSizing({
+        cardWidth,
+        cardHeight,
+        hasIcon,
+        hasLabel,
+        hasSublabel,
+        size,
+      })
+    : null;
+  
+  // Fallback size presets for when dimensions aren't provided
   const sizeStyles = {
     sm: {
       iconSize: 'md',
       iconFontSize: 36,
-      labelSize: 'sm',
-      sublabelSize: 'xs',
+      labelFontSize: 14,
+      sublabelFontSize: 11,
       padding: theme.spacing.cardPadding * 0.8,
       gap: 10,
       accentHeight: 3,
@@ -65,8 +147,8 @@ export const InfoCard = ({
     md: {
       iconSize: 'lg',
       iconFontSize: 48,
-      labelSize: 'md',
-      sublabelSize: 'sm',
+      labelFontSize: 18,
+      sublabelFontSize: 14,
       padding: theme.spacing.cardPadding,
       gap: 14,
       accentHeight: 4,
@@ -74,15 +156,25 @@ export const InfoCard = ({
     lg: {
       iconSize: 'xl',
       iconFontSize: 64,
-      labelSize: 'lg',
-      sublabelSize: 'md',
+      labelFontSize: 24,
+      sublabelFontSize: 18,
       padding: theme.spacing.cardPadding * 1.3,
       gap: 18,
       accentHeight: 5,
     },
   };
   
-  const sizeConfig = sizeStyles[size] || sizeStyles.md;
+  const fallbackConfig = sizeStyles[size] || sizeStyles.md;
+  
+  // Use calculated sizing if available, otherwise fallback
+  const sizeConfig = {
+    padding: sizing?.padding ?? fallbackConfig.padding,
+    accentHeight: sizing?.accentHeight ?? fallbackConfig.accentHeight,
+    gap: sizing?.gap ?? fallbackConfig.gap,
+    iconFontSize: sizing?.iconSize ?? fallbackConfig.iconFontSize,
+    labelFontSize: sizing?.labelFontSize ?? fallbackConfig.labelFontSize,
+    sublabelFontSize: sizing?.sublabelFontSize ?? fallbackConfig.sublabelFontSize,
+  };
   
   // Resolve accent color based on style preset
   const getPresetAccent = () => {
@@ -149,8 +241,7 @@ export const InfoCard = ({
   // Animation support
   let animStyle = {};
   if (animation) {
-    const { type = 'scaleIn', startFrame = 0, duration = 0.5 } = animation;
-    const durationFrames = Math.round(duration * fps);
+    const { type = 'scaleIn', startFrame = 0 } = animation;
     const progress = spring({
       frame: Math.max(0, frame - startFrame),
       fps,
@@ -175,12 +266,13 @@ export const InfoCard = ({
   }
   
   const isVertical = layout === 'vertical';
-  const hasIcon = icon && !image;
-  const hasImage = !!image;
   
   // Icon container with decorative background
   const renderIconContainer = () => {
-    if (!hasIcon && !hasImage) return null;
+    // Skip if no icon AND no image
+    if (!icon && !image) return null;
+    
+    const iconDisplaySize = sizeConfig.iconFontSize;
     
     const containerStyle = {
       position: 'relative',
@@ -189,21 +281,24 @@ export const InfoCard = ({
       justifyContent: 'center',
       width: isVertical ? '100%' : 'auto',
       flexShrink: 0,
+      // Constrain icon container to prevent overflow
+      maxHeight: iconDisplaySize * 1.1,
     };
     
-    // Decorative glow behind icon
+    // Decorative glow behind icon (subtle, scaled to icon size)
+    const glowSize = Math.min(iconDisplaySize * 1.3, 100);
     const glowStyle = {
       position: 'absolute',
-      width: sizeConfig.iconFontSize * 1.4,
-      height: sizeConfig.iconFontSize * 1.4,
+      width: glowSize,
+      height: glowSize,
       borderRadius: '50%',
-      background: `radial-gradient(circle, ${resolvedAccent}12 0%, transparent 70%)`,
-      filter: 'blur(8px)',
+      background: `radial-gradient(circle, ${resolvedAccent}10 0%, transparent 70%)`,
+      filter: 'blur(6px)',
       zIndex: 0,
     };
     
-    if (hasImage) {
-      const imageSize = sizeConfig.iconFontSize * 1.2;
+    if (image) {
+      const imageSize = iconDisplaySize;
       return (
         <div style={containerStyle}>
           <div style={glowStyle} />
@@ -211,7 +306,7 @@ export const InfoCard = ({
             <ImageAtom
               src={image}
               fit="cover"
-              borderRadius={imageRounded ? imageSize : 12}
+              borderRadius={imageRounded ? imageSize : Math.min(12, imageSize * 0.15)}
               style={{
                 width: imageSize,
                 height: imageSize,
@@ -227,10 +322,10 @@ export const InfoCard = ({
         <div style={glowStyle} />
         <Icon
           iconRef={icon}
-          size={sizeConfig.iconSize}
           animated={animated}
           style={{
-            fontSize: sizeConfig.iconFontSize,
+            fontSize: iconDisplaySize,
+            lineHeight: 1,
             position: 'relative',
             zIndex: 1,
           }}
@@ -239,9 +334,9 @@ export const InfoCard = ({
     );
   };
   
-  // Text content section
+  // Text content section with constraint-aware sizing
   const renderTextContent = () => {
-    if (!label && !sublabel) return null;
+    if (!hasLabel && !hasSublabel) return null;
     
     return (
       <div
@@ -250,37 +345,43 @@ export const InfoCard = ({
           flexDirection: 'column',
           alignItems: isVertical ? 'center' : 'flex-start',
           textAlign: isVertical ? 'center' : 'left',
-          gap: 4,
+          gap: 2,
           flex: isVertical ? undefined : 1,
-          minWidth: 0, // Allow text truncation
+          minWidth: 0,
+          maxWidth: '100%',
+          overflow: 'hidden',
         }}
       >
-        {label && (
+        {hasLabel && (
           <Text
             text={label}
             variant="title"
-            size={sizeConfig.labelSize}
             weight="bold"
             color="textMain"
             style={{
-              lineHeight: 1.25,
+              fontSize: sizeConfig.labelFontSize,
+              lineHeight: 1.2,
               maxWidth: '100%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           />
         )}
-        {sublabel && (
+        {hasSublabel && (
           <Text
             text={sublabel}
             variant="body"
-            size={sizeConfig.sublabelSize}
             weight="normal"
             color="textSoft"
             style={{
-              lineHeight: 1.35,
+              fontSize: sizeConfig.sublabelFontSize,
+              lineHeight: 1.25,
               maxWidth: '100%',
-              opacity: 0.85,
+              opacity: 0.8,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           />
         )}
@@ -303,7 +404,7 @@ export const InfoCard = ({
           height: sizeConfig.accentHeight,
           background: `linear-gradient(90deg, transparent, ${resolvedAccent}, transparent)`,
           borderRadius: `0 0 ${sizeConfig.accentHeight}px ${sizeConfig.accentHeight}px`,
-          opacity: 0.6,
+          opacity: 0.5,
         }}
       />
     );
@@ -322,6 +423,7 @@ export const InfoCard = ({
         paddingTop: sizeConfig.padding + sizeConfig.accentHeight,
         borderRadius: theme.radii.card,
         overflow: 'hidden',
+        boxSizing: 'border-box',
         ...variantStyle,
         ...animStyle,
         ...style,

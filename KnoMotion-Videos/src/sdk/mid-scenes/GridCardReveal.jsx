@@ -300,6 +300,8 @@ export const GridCardReveal = ({ config, stylePreset }) => {
                   layout="vertical"
                   variant={card.variant || resolvedCardVariant}
                   size={cardSize}
+                  cardWidth={currentCardWidth}
+                  cardHeight={currentCardHeight}
                   stylePreset={stylePreset}
                   style={{
                     width: '100%',
