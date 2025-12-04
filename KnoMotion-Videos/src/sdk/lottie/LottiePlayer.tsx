@@ -1,8 +1,17 @@
 /**
  * LottiePlayer - Deterministic Lottie Integration for Remotion
  * 
- * Follows Remotion's official pattern exactly:
- * https://www.remotion.dev/docs/lottie
+ * Fetches Lottie animations from URLs (via registry or direct) and renders
+ * them in sync with Remotion's deterministic timeline.
+ * 
+ * Usage:
+ * ```tsx
+ * // Via registry reference
+ * <LottiePlayer lottieRef="success" />
+ * 
+ * // Via direct URL
+ * <LottiePlayer lottieRef="https://assets.lottiefiles.com/..." />
+ * ```
  * 
  * @module lottie/LottiePlayer
  */
@@ -20,9 +29,10 @@ import {
   AbsoluteFill,
 } from 'remotion';
 import {
-  resolveLottieSource,
+  resolveLottieRef,
   getLottiePreset,
   type LottiePreset,
+  type LottieEntry,
 } from './registry';
 
 // ============================================================================
@@ -30,18 +40,16 @@ import {
 // ============================================================================
 
 export interface LottiePlayerProps {
-  /** Reference key from registry OR direct URL to Lottie JSON */
+  /** Reference key from registry ('success') OR direct URL to Lottie JSON */
   lottieRef: string;
-  /** Loop the animation */
+  /** Loop the animation (overrides registry default) */
   loop?: boolean;
-  /** Playback speed multiplier */
+  /** Playback speed multiplier (overrides registry default) */
   playbackRate?: number;
   /** CSS styles for the container */
   style?: React.CSSProperties;
   /** Class name for the container */
   className?: string;
-  /** Custom animation data (bypasses registry/fetch) */
-  animationData?: LottieAnimationData;
   /** Frame at which animation should start playing */
   startFrame?: number;
   /** Whether to animate entrance */
@@ -53,27 +61,27 @@ export interface LottiePlayerProps {
 }
 
 // ============================================================================
-// SIMPLE LOTTIE COMPONENT (follows Remotion docs exactly)
+// CORE LOTTIE FETCHER (follows Remotion docs exactly)
 // ============================================================================
 
 /**
- * SimpleLottie - Fetches and renders a Lottie from URL
- * Follows Remotion's exact pattern from docs
+ * Fetches and renders a Lottie animation from a URL.
+ * Uses Remotion's delayRender pattern for deterministic loading.
  */
-const SimpleLottieFromUrl: React.FC<{
-  src: string;
-  loop?: boolean;
-  playbackRate?: number;
+const LottieFetcher: React.FC<{
+  url: string;
+  loop: boolean;
+  playbackRate: number;
   style?: React.CSSProperties;
-}> = ({ src, loop = true, playbackRate = 1, style }) => {
+}> = ({ url, loop, playbackRate, style }) => {
   // Create delay handle ONCE using useState initializer (per Remotion docs)
-  const [handle] = useState(() => delayRender(`Loading Lottie: ${src}`));
+  const [handle] = useState(() => delayRender(`Loading Lottie: ${url}`));
   const [animationData, setAnimationData] = useState<LottieAnimationData | null>(null);
 
   useEffect(() => {
-    fetch(src)
+    fetch(url)
       .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch ${url}`);
         return res.json();
       })
       .then((json) => {
@@ -81,10 +89,10 @@ const SimpleLottieFromUrl: React.FC<{
         continueRender(handle);
       })
       .catch((err) => {
-        console.error(`[Lottie] Failed to load ${src}:`, err);
+        console.error(`[LottiePlayer] Failed to load ${url}:`, err);
         cancelRender(err);
       });
-  }, [handle, src]);
+  }, [handle, url]);
 
   if (!animationData) {
     return null;
@@ -100,36 +108,16 @@ const SimpleLottieFromUrl: React.FC<{
   );
 };
 
-/**
- * SimpleLottie - Renders inline Lottie data directly
- */
-const SimpleLottieFromData: React.FC<{
-  data: LottieAnimationData;
-  loop?: boolean;
-  playbackRate?: number;
-  style?: React.CSSProperties;
-}> = ({ data, loop = true, playbackRate = 1, style }) => {
-  return (
-    <Lottie
-      animationData={data}
-      loop={loop}
-      playbackRate={playbackRate}
-      style={style}
-    />
-  );
-};
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export const LottiePlayer: React.FC<LottiePlayerProps> = ({
   lottieRef,
-  loop = true,
-  playbackRate = 1,
+  loop,
+  playbackRate,
   style,
   className,
-  animationData: providedData,
   startFrame = 0,
   autoEntrance = false,
   entranceDirection = 'fade',
@@ -138,13 +126,20 @@ export const LottiePlayer: React.FC<LottiePlayerProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Resolve the lottie source from registry
-  const source = resolveLottieSource(lottieRef);
-  
-  // Debug logging (remove in production)
-  if (frame === 0) {
-    console.log(`[LottiePlayer] lottieRef="${lottieRef}" source.kind="${source?.kind}" hasProvidedData=${!!providedData}`);
+  // Resolve the lottie reference to an entry with URL
+  const entry = resolveLottieRef(lottieRef);
+
+  // If entry not found, show warning and render nothing
+  if (!entry) {
+    if (frame === 0) {
+      console.error(`[LottiePlayer] Could not resolve lottieRef: "${lottieRef}"`);
+    }
+    return null;
   }
+
+  // Merge props with registry defaults
+  const finalLoop = loop ?? entry.loop ?? true;
+  const finalPlaybackRate = playbackRate ?? entry.playbackRate ?? 1;
 
   // Calculate entrance animation if enabled
   const entranceProgress = autoEntrance
@@ -159,7 +154,7 @@ export const LottiePlayer: React.FC<LottiePlayerProps> = ({
   const entranceStyle: React.CSSProperties = {};
   if (autoEntrance && entranceProgress < 1) {
     entranceStyle.opacity = interpolate(entranceProgress, [0, 1], [0, 1]);
-    
+
     switch (entranceDirection) {
       case 'up':
         entranceStyle.transform = `translateY(${interpolate(entranceProgress, [0, 1], [30, 0])}px)`;
@@ -184,61 +179,6 @@ export const LottiePlayer: React.FC<LottiePlayerProps> = ({
     return null;
   }
 
-  // Render based on data source
-  const renderLottie = () => {
-    // If animation data is provided directly, use it
-    if (providedData) {
-      return (
-        <SimpleLottieFromData
-          data={providedData}
-          loop={loop}
-          playbackRate={playbackRate}
-          style={{ width: '100%', height: '100%' }}
-        />
-      );
-    }
-
-    // If source is inline data from registry
-    if (source?.kind === 'inline') {
-      return (
-        <SimpleLottieFromData
-          data={source.data}
-          loop={loop}
-          playbackRate={playbackRate}
-          style={{ width: '100%', height: '100%' }}
-        />
-      );
-    }
-
-    // If source is a static file URL
-    if (source?.kind === 'static') {
-      return (
-        <SimpleLottieFromUrl
-          src={source.src}
-          loop={loop}
-          playbackRate={playbackRate}
-          style={{ width: '100%', height: '100%' }}
-        />
-      );
-    }
-
-    // If lottieRef looks like a URL, fetch it directly
-    if (lottieRef.startsWith('http') || lottieRef.startsWith('/')) {
-      return (
-        <SimpleLottieFromUrl
-          src={lottieRef}
-          loop={loop}
-          playbackRate={playbackRate}
-          style={{ width: '100%', height: '100%' }}
-        />
-      );
-    }
-
-    // Fallback - source not found
-    console.warn(`[LottiePlayer] Could not resolve lottieRef: ${lottieRef}`);
-    return null;
-  };
-
   return (
     <div
       className={className}
@@ -246,11 +186,18 @@ export const LottiePlayer: React.FC<LottiePlayerProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        width: '100%',
+        height: '100%',
         ...style,
         ...entranceStyle,
       }}
     >
-      {renderLottie()}
+      <LottieFetcher
+        url={entry.url}
+        loop={finalLoop}
+        playbackRate={finalPlaybackRate}
+        style={{ width: '100%', height: '100%' }}
+      />
     </div>
   );
 };
@@ -263,10 +210,11 @@ export const LottiePlayer: React.FC<LottiePlayerProps> = ({
  * Icon-sized Lottie (40-80px)
  */
 export const LottieIcon: React.FC<
-  Omit<LottiePlayerProps, 'style'> & { size?: number }
-> = ({ size = 48, ...props }) => (
+  Omit<LottiePlayerProps, 'style'> & { size?: number; delay?: number }
+> = ({ size = 48, delay = 0, startFrame = 0, ...props }) => (
   <LottiePlayer
     {...props}
+    startFrame={startFrame + delay}
     style={{
       width: size,
       height: size,
@@ -276,23 +224,37 @@ export const LottieIcon: React.FC<
 );
 
 /**
- * Full-screen overlay Lottie
+ * Full-screen overlay Lottie (e.g., for celebrations)
  */
 export const LottieOverlay: React.FC<
-  Omit<LottiePlayerProps, 'style'> & { zIndex?: number }
-> = ({ zIndex = 100, ...props }) => (
-  <AbsoluteFill
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      pointerEvents: 'none',
-      zIndex,
-    }}
-  >
-    <LottiePlayer {...props} style={{ width: 300, height: 300 }} />
-  </AbsoluteFill>
-);
+  Omit<LottiePlayerProps, 'style'> & { 
+    zIndex?: number;
+    opacity?: number;
+    duration?: number;
+  }
+> = ({ zIndex = 100, opacity = 1, startFrame = 0, duration, ...props }) => {
+  const frame = useCurrentFrame();
+
+  // If duration specified, hide after that many frames
+  if (duration && frame > startFrame + duration) {
+    return null;
+  }
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'none',
+        zIndex,
+        opacity,
+      }}
+    >
+      <LottiePlayer {...props} startFrame={startFrame} style={{ width: 300, height: 300 }} />
+    </AbsoluteFill>
+  );
+};
 
 /**
  * Create a Lottie player from a preset
@@ -319,48 +281,15 @@ export const LottieFromPreset: React.FC<{
 };
 
 // ============================================================================
-// HOOK FOR CUSTOM USE CASES
+// HOOK FOR ADVANCED USE CASES
 // ============================================================================
 
 /**
- * Hook to load Lottie data following Remotion's pattern
- * Use this when you need the raw animation data
+ * Hook to get Lottie entry info without rendering
+ * Useful for checking if a lottieRef exists, getting metadata, etc.
  */
-export const useLottieData = (
-  lottieRef: string
-): { data: LottieAnimationData | null; error: Error | null } => {
-  const source = resolveLottieSource(lottieRef);
-  
-  // For inline data, return immediately
-  if (source?.kind === 'inline') {
-    return { data: source.data, error: null };
-  }
-
-  const [handle] = useState(() => 
-    source?.kind === 'static' ? delayRender(`Loading Lottie: ${lottieRef}`) : null
-  );
-  const [data, setData] = useState<LottieAnimationData | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (!source || source.kind !== 'static' || handle === null) return;
-
-    fetch(source.src)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => {
-        setData(json);
-        continueRender(handle);
-      })
-      .catch((err) => {
-        setError(err);
-        cancelRender(err);
-      });
-  }, [handle, source]);
-
-  return { data, error };
+export const useLottieEntry = (lottieRef: string): LottieEntry | null => {
+  return resolveLottieRef(lottieRef);
 };
 
 // ============================================================================
