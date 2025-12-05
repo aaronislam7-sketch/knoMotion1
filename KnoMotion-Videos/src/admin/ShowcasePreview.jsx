@@ -17,6 +17,10 @@ import {
   KNODOVIA_VIDEO1_DURATION,
 } from '../compositions/KnodoviaVideo1_AccidentalArrival';
 import {
+  KnodoviaAccidentalArrivalMobile,
+  KNODOVIA_VIDEO1_MOBILE_DURATION,
+} from '../compositions/KnodoviaVideo1_Mobile';
+import {
   KnodoviaCultureAnthro,
   KNODOVIA_VIDEO2_DURATION,
 } from '../compositions/KnodoviaVideo2_Culture';
@@ -54,6 +58,16 @@ export const ShowcasePreview = () => {
       fps: 30,
       name: `Knodovia 1: Accidental Arrival (~${Math.round(
         KNODOVIA_VIDEO1_DURATION / 30,
+      )}s)`,
+    },
+    knodovia1Mobile: {
+      component: KnodoviaAccidentalArrivalMobile,
+      duration: KNODOVIA_VIDEO1_MOBILE_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `📱 Knodovia 1: Mobile (${Math.round(
+        KNODOVIA_VIDEO1_MOBILE_DURATION / 30,
       )}s)`,
     },
     knodovia2: {

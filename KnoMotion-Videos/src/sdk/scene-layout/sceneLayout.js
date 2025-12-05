@@ -15,6 +15,7 @@
  * ✅ Reserves header/title strip at top
  * ✅ Supports multiple layout types (full, rowStack, columnSplit, etc.)
  * ✅ Pure, deterministic geometry calculations
+ * ✅ Format-aware (desktop/mobile) layout adjustments
  * 
  * THIS MODULE DOES NOT:
  * ❌ Import or reference layoutEngine.js
@@ -23,6 +24,15 @@
  * 
  * @module scene-layout/sceneLayout
  */
+
+import {
+  detectFormat,
+  isMobileFormat,
+  adjustLayoutForViewport,
+  getViewportPadding,
+  getViewportTitleHeight,
+  LAYOUT_RECOMMENDATIONS,
+} from '../layout/viewportPresets';
 
 // ============================================================================
 // TYPE DEFINITIONS (JSDoc)
@@ -453,8 +463,15 @@ function layoutGridSlots(viewport, options) {
  * named slots (LayoutArea objects) that mid-scenes can use to
  * position their content.
  * 
+ * NOW FORMAT-AWARE: Automatically adjusts layouts for mobile viewports.
+ * - columnSplit converts to rowStack on mobile
+ * - Grid columns are capped at 2 on mobile
+ * - Padding and title height adjust based on format
+ * 
  * @param {SceneLayoutConfig} layout - Layout configuration
  * @param {Viewport} viewport - Full viewport dimensions
+ * @param {Object} [options] - Additional options
+ * @param {boolean} [options.autoAdjust=true] - Auto-adjust layout for mobile
  * @returns {SlotMap} Map of slot names to LayoutArea objects
  * 
  * @example
@@ -474,14 +491,16 @@ function layoutGridSlots(viewport, options) {
  * // Returns: { header: {...}, row1: {...}, row2: {...}, row3: {...} }
  * 
  * @example
- * // Column split with aliases
+ * // Column split on mobile (auto-converts to rowStack)
  * const slots = resolveSceneSlots(
  *   { type: 'columnSplit', options: { columns: 2 } },
- *   { width: 1920, height: 1080 }
+ *   { width: 1080, height: 1920 }
  * );
- * // Returns: { header: {...}, col1: {...}, col2: {...}, left: {...}, right: {...} }
+ * // Returns: { header: {...}, row1: {...}, row2: {...} } (converted!)
  */
-export function resolveSceneSlots(layout, viewport) {
+export function resolveSceneSlots(layout, viewport, resolveOptions = {}) {
+  const { autoAdjust = true } = resolveOptions;
+  
   // Validate inputs
   if (!viewport || typeof viewport.width !== 'number' || typeof viewport.height !== 'number') {
     console.warn('[sceneLayout] Invalid viewport, using default 1920x1080');
@@ -493,9 +512,21 @@ export function resolveSceneSlots(layout, viewport) {
     return layoutFull(viewport, {});
   }
 
-  const options = layout.options || {};
+  // Auto-adjust layout for mobile if enabled
+  let adjustedLayout = layout;
+  if (autoAdjust && isMobileFormat(viewport)) {
+    adjustedLayout = adjustLayoutForViewport(layout, viewport);
+  }
 
-  switch (layout.type) {
+  // Merge format-aware defaults into options
+  const options = {
+    ...adjustedLayout.options,
+    // Use format-aware padding/title height if not explicitly set
+    padding: adjustedLayout.options?.padding ?? getViewportPadding(viewport),
+    titleHeight: adjustedLayout.options?.titleHeight ?? getViewportTitleHeight(viewport),
+  };
+
+  switch (adjustedLayout.type) {
     case 'full':
       return layoutFull(viewport, options);
 
@@ -512,7 +543,7 @@ export function resolveSceneSlots(layout, viewport) {
       return layoutGridSlots(viewport, options);
 
     default:
-      console.warn(`[sceneLayout] Unknown layout type: ${layout.type}, defaulting to full layout`);
+      console.warn(`[sceneLayout] Unknown layout type: ${adjustedLayout.type}, defaulting to full layout`);
       return layoutFull(viewport, options);
   }
 }
@@ -538,7 +569,7 @@ export const SCENE_LAYOUT_TYPES = Object.freeze([
  * @type {Object}
  */
 export const SCENE_LAYOUT_DEFAULTS = Object.freeze({
-  titleHeight: DEFAULT_TITLE_HEIGHT, // 100px
+  titleHeight: DEFAULT_TITLE_HEIGHT, // 100px (desktop default)
   padding: DEFAULT_PADDING,
   rows: DEFAULT_ROWS,
   columns: DEFAULT_COLUMNS,
@@ -549,3 +580,11 @@ export const SCENE_LAYOUT_DEFAULTS = Object.freeze({
 
 // Export helper functions for advanced use cases
 export { createArea, splitHorizontal, splitVertical, normalizeRatios, calculateBaseAreas };
+
+// Re-export format detection for convenience
+export {
+  detectFormat,
+  isMobileFormat,
+  adjustLayoutForViewport,
+  LAYOUT_RECOMMENDATIONS,
+} from '../layout/viewportPresets';

@@ -7,7 +7,7 @@ import {
   spring,
   Easing,
 } from 'remotion';
-import { resolveSceneSlots } from '../sdk/scene-layout/sceneLayout';
+import { resolveSceneSlots, detectFormat, isMobileFormat } from '../sdk/scene-layout/sceneLayout';
 import { KNODE_THEME } from '../sdk/theme/knodeTheme';
 import { resolveBackground } from '../sdk/effects/resolveBackground';
 import { resolveAnimationPreset, SPRING_CONFIGS } from '../sdk/theme/animationPresets';
@@ -35,8 +35,10 @@ const MID_SCENE_COMPONENTS = {
 
 /**
  * Renders a single midScene component within a slot
+ * 
+ * Now format-aware: passes viewport format to mid-scenes for adaptive rendering.
  */
-const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0 }) => {
+const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0, format = 'desktop', viewport }) => {
   const { midScene, config, stylePreset } = midSceneConfig;
   const Component = MID_SCENE_COMPONENTS[midScene];
 
@@ -53,9 +55,13 @@ const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0 }) => {
       width: slot.width,
       height: slot.height,
     },
+    // Pass format information to mid-scenes
+    _format: format,
+    _viewport: viewport,
   };
 
   const isHeader = slotName === 'header';
+  const isMobile = format === 'mobile';
 
   return (
     <div
@@ -68,7 +74,7 @@ const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0 }) => {
         display: 'flex',
         alignItems: isHeader ? 'flex-end' : 'center',
         justifyContent: 'center',
-        paddingBottom: isHeader ? 10 : 0,
+        paddingBottom: isHeader ? (isMobile ? 8 : 10) : 0,
         boxSizing: 'border-box',
       }}
     >
@@ -83,6 +89,8 @@ const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0 }) => {
  * Supports both single midScene config (object) and multiple midScenes (array).
  * When an array is provided, each midScene is rendered in the same slot,
  * layered on top of each other. Use beats to control timing/visibility.
+ * 
+ * Now format-aware: passes format context to all mid-scenes.
  * 
  * @example Single midScene (existing format):
  * slots: {
@@ -102,7 +110,7 @@ const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0 }) => {
  *   ]
  * }
  */
-const SlotRenderer = ({ slot, slotName, midSceneConfig }) => {
+const SlotRenderer = ({ slot, slotName, midSceneConfig, format, viewport }) => {
   if (!slot || !midSceneConfig) return null;
 
   // Support both single object and array of midScenes
@@ -126,16 +134,36 @@ const SlotRenderer = ({ slot, slotName, midSceneConfig }) => {
           slotName={slotName}
           midSceneConfig={config}
           index={index}
+          format={format}
+          viewport={viewport}
         />
       ))}
     </div>
   );
 };
 
+/**
+ * SceneFromConfig - Renders a complete scene from JSON configuration
+ * 
+ * Now format-aware: automatically detects desktop/mobile from viewport
+ * and adjusts layouts accordingly. Layouts like columnSplit automatically
+ * convert to rowStack on mobile viewports.
+ * 
+ * @param {Object} config - Scene configuration
+ * @param {Object} config.layout - Layout type and options
+ * @param {Object} config.slots - Slot configurations with mid-scenes
+ * @param {Object} [config.background] - Background preset
+ * @param {string} [config.format] - Explicit format override ('desktop' | 'mobile')
+ */
 export const SceneFromConfig = ({ config }) => {
   const { width, height } = useVideoConfig();
   const viewport = { width, height };
 
+  // Detect format from viewport or use explicit config
+  const format = config.format || detectFormat(viewport);
+  const isMobile = format === 'mobile';
+
+  // Resolve slots with format-aware adjustments
   const slots = resolveSceneSlots(config.layout, viewport);
   const configuredSlots = Object.keys(config.slots).filter(
     (slotName) => slots[slotName],
@@ -159,6 +187,8 @@ export const SceneFromConfig = ({ config }) => {
           slot={slots[slotName]}
           slotName={slotName}
           midSceneConfig={config.slots[slotName]}
+          format={format}
+          viewport={viewport}
         />
       ))}
     </AbsoluteFill>
