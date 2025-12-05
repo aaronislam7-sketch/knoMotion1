@@ -41,41 +41,75 @@ const video1Scenes = [
           speed: 0.8,
         },
       },
-      layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
+      layout: {
+        type: 'rowStack',
+        options: { rows: 2, padding: 50, titleHeight: 80 },
+      },
       slots: {
-        full: {
+               row1: [
+    { 
+      midScene: 'textReveal', 
+      stylePreset: 'playful',
+      config: { 
+        lines: [{ text: "First message" }],
+        beats: { start: 0.5, exit: 3.0 } 
+      } 
+    },
+    { 
+      midScene: 'textReveal', 
+      stylePreset: 'playful',
+      config: { 
+        lines:  [{text: "Then this appears!"}],
+        beats: { start: 4.0, exit: 6.0 } 
+      } 
+    },
+    {
+    midScene: 'heroText',
+          stylePreset: 'focus',
+          config: {
+            text: "——",
+            heroType: 'lottie',
+            heroRef: 'error',
+            beats: { entrance: 6.0, exit: 10.0 },
+          },
+        }
+    
+  ],
+        
+        row2: {
           midScene: 'textReveal',
           stylePreset: 'playful',
           config: {
             lines: [
               {
-                text: "You weren't meant to see this.",
-                emphasis: 'high',
-                beats: { start: 0.4, hold: 2.5, exit: 3.4, emphasis: 1.0 },
+                text: "Erm.. Hello.. Whos there?",
+                emphasis: 'normal',
+                beats: { start: 1.5, exit: 4.0, emphasis: 2.0 },
               },
               {
-                text: "Welcome to Knodovia — the tab you clicked by mistake.",
+                text: "Well.. welcome to Knodovia.. I'll show you around",
                 emphasis: 'normal',
-                beats: { start: 1.4, hold: 3.4, exit: 4.2, emphasis: 1.9 },
+                beats: { start: 4.0, exit: 6.5, emphasis: 5.0 },
               },
               {
                 text: "Please don't touch anything. Seriously.",
                 emphasis: 'high',
-                beats: { start: 2.6, hold: 4.5, exit: 5.6, emphasis: 3.2 },
+                beats: { start: 6.5, exit: 10.0, emphasis: 8.0 },
               },
             ],
             revealType: 'typewriter',
             staggerDelay: 0.4,
-            animationDuration: 0.8,
+            animationDuration: 1.5,
             lineSpacing: 'relaxed',
           },
         },
       },
     },
   },
+  
   {
     id: 'knodovia-comparison',
-    durationInFrames: 600,
+    durationInFrames: 300,
     transition: { type: 'slide', direction: 'up' },
     config: {
       background: { preset: 'cleanCard', layerNoise: true },
@@ -86,13 +120,13 @@ const video1Scenes = [
       slots: {
         header: {
           midScene: 'textReveal',
-          stylePreset: 'focus',
+          stylePreset: 'playful',
           config: {
             lines: [
               {
-                text: 'Normal tab vs. Knodovia',
-                emphasis: 'high',
-                beats: { start: 0.4, hold: 2.0, exit: 3.8, emphasis: 1.2 },
+                text: 'Earth v.s. Knodovia',
+                emphasis: 'low',
+                beats: { start: 0.4, emphasis: 1.2, exit: 10.0 },
               },
             ],
           },
@@ -103,20 +137,20 @@ const video1Scenes = [
           config: {
             mode: 'beforeAfter',
             before: {
-              title: 'Your Tuesday Tab',
+              title: 'Our world',
               media: {
                 image: {
-                  src: BLOB_SUNRISE,
+                  src: 'https://thumbs.dreamstime.com/b/world-knowledge-10286246.jpg',
                   fit: 'cover',
                   borderRadius: 28,
                 },
               },
             },
             after: {
-              title: 'Knodovia Window',
+              title: 'Your world',
               media: {
                 image: {
-                  src: BLOB_PLUM,
+                  src: 'https://cdn.vectorstock.com/i/1000v/18/25/doodle-earth-globe-hand-drawn-vector-50411825.jpg',
                   fit: 'cover',
                   borderRadius: 28,
                 },
@@ -124,11 +158,11 @@ const video1Scenes = [
             },
             slider: {
               autoAnimate: true,
-              from: 0.2,
-              to: 0.82,
-              beats: { start: 0.8, hold: 4.5, exit: 5.5 },
+              from: 0.05,//%ofimageframe
+              to: 1.0,
+              beats: { start: 1.5, exit: 7.0},
             },
-            beats: { start: 0.6, hold: 4.8, exit: 5.6 },
+            beats: { start: 0.5, hold: 4.8, exit: 10.0 },
           },
         },
       },
@@ -136,7 +170,7 @@ const video1Scenes = [
   },
   {
     id: 'knodovia-definition-grid',
-    durationInFrames: 780,
+    durationInFrames: 390,
     transition: { type: 'page-turn', direction: 'right' },
     config: {
       background: { preset: 'notebookSoft', layerNoise: true },
@@ -153,91 +187,92 @@ const video1Scenes = [
               {
                 text: 'So what is Knodovia anyway?',
                 emphasis: 'high',
-                beats: { start: 0.4, hold: 2.0, exit: 3.0, emphasis: 1.1 },
+                beats: { start: 0.4, emphasis: 1.1, exit: 10.0 },
               },
             ],
           },
         },
         row1: {
-          midScene: 'bubbleCallout',
-          stylePreset: 'playful',
+          midScene: 'heroText',
+          stylePreset: 'focus',
           config: {
-            pattern: 'scattered',
-            collisionDetection: true,
-            jitter: { x: 15, y: 10 },
-            animation: 'float',
-            callouts: [
-              { text: "Guide: \"You're really not cleared.\"", icon: '🚫' },
-              { text: 'Lever: *gets louder*', icon: '🤖' },
-              { text: '"Fine. Quick tour then."', icon: '🗺️' },
-            ],
-            beats: { start: 0.9, hold: 3.4, exit: 4.0 },
+            text: " ",
+            heroType: 'lottie',
+            heroRef: 'error',
+            beats: { entrance: 0.6, exit: 10.0 },
           },
         },
         row2: {
           midScene: 'gridCards',
-          stylePreset: 'focus',
+          stylePreset: 'playful',
           config: {
             cards: [
               {
                 icon: '💡',
                 label: 'Idea District',
-                sublabel: 'Visual metaphors queue here',
+               
                 animated: true, // Showcase animated emoji!
-                beats: { start: 1.2, hold: 3.8, exit: 4.8 },
+                beats: { start: 1.2, exit: 10.0},
               },
               {
                 icon: '🔥',
                 label: 'Reference Clouds',
-                sublabel: 'Pulls context in real time',
+              
                 animated: true, // Showcase animated emoji!
-                beats: { start: 1.4, hold: 4.0, exit: 4.9 },
+                beats: { start: 2.0, hold: 4.0, exit: 10.0 },
               },
               {
-                image: BLOB_MINT,
+                icon: '🤖',
                 label: 'Learning Rails',
-                sublabel: 'Layout engine + beats',
-                beats: { start: 1.6, hold: 4.2, exit: 5.0 },
+            
+                animated: true,
+                beats: { start: 2.8, hold: 4.2, exit: 10.0 },
               },
               {
                 icon: '🪄',
                 label: 'Mid-Scene Lab',
-                sublabel: 'Animations ready for JSON',
-                beats: { start: 1.8, hold: 4.4, exit: 5.1 },
+            
+                animated: true,
+                beats: { start: 3.6, hold: 4.4, exit: 10.0 },
               },
             ],
             columns: 2,
             animation: 'cascade',
             showLabels: true,
             labelPosition: 'bottom',
-            beats: { start: 1.0, hold: 4.5, exit: 5.3 },
+            beats: { start: 1.0, },
           },
         },
         row3: {
           midScene: 'gridCards',
-          stylePreset: 'playful',
+          stylePreset: 'focus',
           config: {
             cards: [
               {
-                icon: '🎛️',
+                icon: '💅',
                 label: 'Style Presets',
                 sublabel: 'Educational, playful, mentor',
+                animated: true,
+                beats: { start: 4.0, exit: 10.0 }
               },
               {
-                icon: '🎯',
+                icon: '🥁',
                 label: 'Beats',
                 sublabel: 'start / hold / exit per line',
+                animated: true,
+                 beats: { start: 4.5, exit: 10.0 }
               },
               {
                 icon: '✨',
                 label: 'Animated Emoji',
                 sublabel: 'No more static icons',
                 animated: true, // Showcase animated emoji!
+                 beats: { start: 5.0, exit: 10.0 }
               },
             ],
             columns: 3,
-            animation: 'scale',
-            beats: { start: 2.4, hold: 4.5, exit: 5.4 },
+            animation: 'bounce',
+            beats: { start: 3.6, exit: 10.0 },
           },
         },
       },
@@ -245,13 +280,13 @@ const video1Scenes = [
   },
   {
     id: 'knodovia-tour',
-    durationInFrames: 600,
+    durationInFrames: 300,
     transition: { type: 'slide', direction: 'left' },
     config: {
-      background: { preset: 'spotlight', spotlight: { x: 35, y: 45, intensity: 0.3 } },
+      background: { preset: 'playful', spotlight: { x: 35, y: 45, intensity: 0.3 } },
       layout: {
         type: 'columnSplit',
-        options: { columns: 2, ratios: [0.55, 0.45], padding: 60, titleHeight: 80 },
+        options: { columns: 2, ratios: [0.65, 0.35], padding: 60, titleHeight: 80 },
       },
       slots: {
         header: {
@@ -269,26 +304,26 @@ const video1Scenes = [
         },
         col1: {
           midScene: 'heroText',
-          stylePreset: 'focus',
+          stylePreset: 'mentor',
           config: {
             text: 'Watch the beats choreograph every visual.',
             heroType: 'lottie',
-            heroRef: 'education/lightbulb',
+            heroRef: 'error',
             beats: { entrance: 0.6, exit: 5.0 },
           },
         },
         col2: {
           midScene: 'checklist',
-          stylePreset: 'educational',
+          stylePreset: 'playful',
           config: {
             items: [
-              { text: 'Layouts resolve via JSON', checked: true },
-              { text: 'Mid-scenes drop into slots', checked: true },
-              { text: 'LLM-friendly config', checked: true },
-              { text: 'Tone + humour controlled by presets', checked: false },
+              { text: 'Layouts resolve via JSON', checked: true, beats:{start: 1.0} },
+              { text: 'Mid-scenes drop into slots', checked: true, beats:{start: 2.0} },
+              { text: 'Small man', checked: false, beats:{start: 3.0} },
+              { text: 'Tone + humour controlled by presets', checked: false, beats:{start: 4.0} },
             ],
             icon: 'lottieCheck',
-            beats: { start: 1.0, hold: 4.2, exit: 5.2 },
+            beats: { start: 1.0,  exit: 7.0},
           },
         },
       },
