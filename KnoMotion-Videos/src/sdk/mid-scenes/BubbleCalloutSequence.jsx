@@ -108,36 +108,74 @@ const calculateBubblePositions = (callouts, pattern, slot, enableCollisionDetect
 };
 
 /**
- * Get animation style for bubble entrance
+ * Get animation style for bubble entrance - smooth, gentle animations
  */
 const getBubbleAnimationStyle = (animationType, frame, startFrame, durationFrames, fps, index = 0) => {
+  // Smoother spring config for all animations
+  const smoothConfig = { damping: 22, mass: 1, stiffness: 80 };
+  
   switch (animationType) {
-    case 'pop':
-      return bounceIn(frame, startFrame, durationFrames);
+    case 'pop': {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 18, mass: 1, stiffness: 100 },
+      });
+      return {
+        opacity: progress,
+        transform: `scale(${0.9 + progress * 0.1})`,
+      };
+    }
     
     case 'float': {
       const progress = spring({
         frame: Math.max(0, frame - startFrame),
         fps,
-        config: { damping: 15, mass: 1, stiffness: 100 },
+        config: smoothConfig,
       });
       return {
         opacity: progress,
-        transform: `translateY(${(1 - progress) * 40}px) scale(${0.8 + progress * 0.2})`,
+        transform: `translateY(${(1 - progress) * 25}px) scale(${0.95 + progress * 0.05})`,
       };
     }
     
     case 'slide': {
-      const direction = index % 2 === 0 ? 'left' : 'right';
-      return slideIn(frame, startFrame, durationFrames, direction, 60);
+      const direction = index % 2 === 0 ? -1 : 1;
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: smoothConfig,
+      });
+      return {
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * 30 * direction}px)`,
+      };
     }
     
-    case 'scale':
-      return scaleIn(frame, startFrame, durationFrames, 0.3);
+    case 'scale': {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: smoothConfig,
+      });
+      return {
+        opacity: progress,
+        transform: `scale(${0.85 + progress * 0.15})`,
+      };
+    }
     
     case 'fade':
-    default:
-      return fadeIn(frame, startFrame, durationFrames);
+    default: {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 25, mass: 1, stiffness: 60 },
+      });
+      return {
+        opacity: progress,
+        transform: 'none',
+      };
+    }
   }
 };
 
@@ -238,10 +276,12 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
           fps,
           index
         );
+        // Slower, smoother exit animation (0.8 seconds)
         const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitDuration = toFrames(0.8, fps);
         const exitProgress =
           frame > exitFrame
-            ? Math.min(1, (frame - exitFrame) / toFrames(0.3, fps))
+            ? Math.min(1, (frame - exitFrame) / exitDuration)
             : 0;
         const pos = bubblePositions[index];
         

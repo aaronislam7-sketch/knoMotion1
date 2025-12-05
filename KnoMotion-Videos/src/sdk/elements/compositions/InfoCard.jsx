@@ -57,24 +57,24 @@ const calculateContentSizing = ({
   // Calculate label sizes - compact to give icons more room
   const baseFontSize = Math.max(16, Math.min(26, minDim * 0.11));
   
-  // Calculate icon size - MAXIMIZE IT
+  // Calculate icon size - prominent but balanced
   let iconSize = 0;
   if (hasIcon) {
     if (layout === 'horizontal') {
-      // For horizontal: icon takes ~45% of width, constrained by height
-      // NO HARD CAPS - let it fill the space!
-      const maxIconWidth = contentWidth * 0.45;
-      const maxIconHeight = contentHeight * 0.9;
-      iconSize = Math.max(40, Math.min(maxIconHeight, maxIconWidth));
+      // For horizontal: icon takes ~35% of width, constrained by height
+      // Cap at 80px for reasonable sizing
+      const maxIconWidth = contentWidth * 0.35;
+      const maxIconHeight = contentHeight * 0.8;
+      iconSize = Math.max(36, Math.min(maxIconHeight, maxIconWidth, 80));
     } else {
-      // For vertical: icon is the HERO - takes most of the space
-      // Reserve minimal space for labels
-      const labelHeight = hasLabel ? baseFontSize * 1.2 : 0;
-      const sublabelHeight = hasSublabel ? baseFontSize * 0.7 * 1.2 : 0;
-      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 2 : 0);
+      // For vertical: icon is prominent but not overwhelming
+      // Reserve space for labels
+      const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
+      const sublabelHeight = hasSublabel ? baseFontSize * 0.75 * 1.3 : 0;
+      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
       const availableForIcon = contentHeight - totalLabelHeight - (hasLabel ? gap : 0);
-      // Icon can take up to 90% of available height and 80% of width
-      iconSize = Math.max(48, Math.min(availableForIcon * 0.95, contentWidth * 0.8));
+      // Icon can take up to 75% of available height and 65% of width, max 100px
+      iconSize = Math.max(40, Math.min(availableForIcon * 0.75, contentWidth * 0.65, 100));
     }
   }
   
@@ -167,33 +167,33 @@ export const InfoCard = ({
     : null;
   
   // Fallback size presets for when dimensions aren't provided
-  // ICONS ARE THE STAR - make them big and prominent!
+  // Icons are prominent but balanced with text
   const sizeStyles = {
     sm: {
       iconSize: 'lg',
-      iconFontSize: isHorizontal ? 56 : 72,
-      labelFontSize: 18,
-      sublabelFontSize: 14,
-      padding: theme.spacing.cardPadding * 0.5,
-      gap: isHorizontal ? 12 : 8,
+      iconFontSize: isHorizontal ? 44 : 56,
+      labelFontSize: 20,
+      sublabelFontSize: 15,
+      padding: theme.spacing.cardPadding * 0.6,
+      gap: isHorizontal ? 14 : 10,
       accentHeight: 2,
     },
     md: {
       iconSize: 'xl',
-      iconFontSize: isHorizontal ? 72 : 96,
-      labelFontSize: 22,
-      sublabelFontSize: 16,
-      padding: theme.spacing.cardPadding * 0.6,
-      gap: isHorizontal ? 14 : 10,
+      iconFontSize: isHorizontal ? 56 : 72,
+      labelFontSize: 24,
+      sublabelFontSize: 17,
+      padding: theme.spacing.cardPadding * 0.7,
+      gap: isHorizontal ? 16 : 12,
       accentHeight: 3,
     },
     lg: {
       iconSize: 'xxl',
-      iconFontSize: isHorizontal ? 96 : 128,
-      labelFontSize: 26,
-      sublabelFontSize: 18,
-      padding: theme.spacing.cardPadding * 0.7,
-      gap: isHorizontal ? 16 : 12,
+      iconFontSize: isHorizontal ? 72 : 88,
+      labelFontSize: 28,
+      sublabelFontSize: 20,
+      padding: theme.spacing.cardPadding * 0.8,
+      gap: isHorizontal ? 18 : 14,
       accentHeight: 3,
     },
   };

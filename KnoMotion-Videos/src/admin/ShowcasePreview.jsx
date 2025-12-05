@@ -25,9 +25,17 @@ import {
   KNODOVIA_VIDEO2_DURATION,
 } from '../compositions/KnodoviaVideo2_Culture';
 import {
+  KnodoviaCultureMobile,
+  KNODOVIA_VIDEO2_MOBILE_DURATION,
+} from '../compositions/KnodoviaVideo2_Mobile';
+import {
   KnodoviaEconomics,
   KNODOVIA_VIDEO3_DURATION,
 } from '../compositions/KnodoviaVideo3_Economics';
+import {
+  KnodoviaEconomicsMobile,
+  KNODOVIA_VIDEO3_MOBILE_DURATION,
+} from '../compositions/KnodoviaVideo3_Mobile';
 import { LottieDebugTest } from '../compositions/LottieDebugTest';
 
 /**
@@ -76,8 +84,18 @@ export const ShowcasePreview = () => {
       width: 1920,
       height: 1080,
       fps: 30,
-      name: `Knodovia 2: Culture Audit (~${Math.round(
+      name: `Knodovia 2: Culture (~${Math.round(
         KNODOVIA_VIDEO2_DURATION / 30,
+      )}s)`,
+    },
+    knodovia2Mobile: {
+      component: KnodoviaCultureMobile,
+      duration: KNODOVIA_VIDEO2_MOBILE_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `📱 Knodovia 2: Culture Mobile (${Math.round(
+        KNODOVIA_VIDEO2_MOBILE_DURATION / 30,
       )}s)`,
     },
     knodovia3: {
@@ -88,6 +106,16 @@ export const ShowcasePreview = () => {
       fps: 30,
       name: `Knodovia 3: Economics (~${Math.round(
         KNODOVIA_VIDEO3_DURATION / 30,
+      )}s)`,
+    },
+    knodovia3Mobile: {
+      component: KnodoviaEconomicsMobile,
+      duration: KNODOVIA_VIDEO3_MOBILE_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `📱 Knodovia 3: Economics Mobile (${Math.round(
+        KNODOVIA_VIDEO3_MOBILE_DURATION / 30,
       )}s)`,
     },
     scene1: {

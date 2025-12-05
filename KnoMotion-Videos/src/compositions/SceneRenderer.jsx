@@ -197,16 +197,17 @@ export const SceneFromConfig = ({ config }) => {
 
 const DEFAULT_TRANSITION = {
   type: 'fade',
-  durationInFrames: 18,
+  durationInFrames: 30, // Slower, smoother transitions (was 18)
   direction: 'up',
   animationPreset: 'subtle', // Uses SDK animation presets
 };
 
+// Reduced slide distances for subtler movement
 const SLIDE_OFFSETS = {
-  left: { x: -120, y: 0 },
-  right: { x: 120, y: 0 },
-  up: { x: 0, y: -120 },
-  down: { x: 0, y: 120 },
+  left: { x: -60, y: 0 },
+  right: { x: 60, y: 0 },
+  up: { x: 0, y: -60 },
+  down: { x: 0, y: 60 },
 };
 
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
