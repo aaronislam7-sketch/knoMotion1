@@ -9,6 +9,14 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * Calculate optimal content sizing to fit within available card space
  * Uses layout engine principles for constraint-based sizing
  * 
+ * For HORIZONTAL layout (icon beside text):
+ * - Icon is smaller (fits beside text)
+ * - Text gets more space to breathe
+ * 
+ * For VERTICAL layout (icon above text):
+ * - Icon can be larger
+ * - Text stacks below
+ * 
  * @param {Object} params
  * @param {number} params.cardWidth - Available card width
  * @param {number} params.cardHeight - Available card height  
@@ -16,6 +24,7 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * @param {boolean} params.hasLabel - Whether card has label
  * @param {boolean} params.hasSublabel - Whether card has sublabel
  * @param {string} params.size - Size preset (sm, md, lg)
+ * @param {string} params.layout - 'horizontal' or 'vertical'
  * @returns {Object} Calculated dimensions for icon, label, padding
  */
 const calculateContentSizing = ({
@@ -25,34 +34,42 @@ const calculateContentSizing = ({
   hasLabel,
   hasSublabel,
   size = 'md',
+  layout = 'horizontal',
 }) => {
   // Base ratios for content distribution
-  const paddingRatio = size === 'sm' ? 0.08 : size === 'lg' ? 0.1 : 0.09;
-  const accentHeightRatio = 0.02;
-  const gapRatio = 0.04;
+  const paddingRatio = size === 'sm' ? 0.06 : size === 'lg' ? 0.08 : 0.07;
+  const accentHeightRatio = 0.015;
+  const gapRatio = layout === 'horizontal' ? 0.05 : 0.04;
   
   // Calculate padding based on smaller dimension for consistent look
   const minDim = Math.min(cardWidth, cardHeight);
-  const padding = Math.max(8, Math.min(24, minDim * paddingRatio));
-  const accentHeight = Math.max(2, Math.min(5, minDim * accentHeightRatio));
-  const gap = Math.max(6, Math.min(16, minDim * gapRatio));
+  const padding = Math.max(10, Math.min(20, minDim * paddingRatio));
+  const accentHeight = Math.max(2, Math.min(4, minDim * accentHeightRatio));
+  const gap = Math.max(10, Math.min(20, minDim * gapRatio));
   
   // Available content area after padding
   const contentWidth = cardWidth - padding * 2;
   const contentHeight = cardHeight - padding * 2 - accentHeight;
   
-  // Calculate label heights (estimate based on font sizing) - BOOSTED for visibility
-  const baseFontSize = Math.max(18, Math.min(36, minDim * 0.15));
-  const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
-  const sublabelHeight = hasSublabel ? baseFontSize * 0.8 * 1.3 : 0;
-  const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
+  // Calculate label sizes - BOOSTED for visibility
+  const baseFontSize = Math.max(20, Math.min(32, minDim * 0.14));
   
-  // Calculate icon size - fill remaining space after labels
+  // Calculate icon size based on layout
   let iconSize = 0;
   if (hasIcon) {
-    const availableForIcon = contentHeight - totalLabelHeight - (hasLabel ? gap : 0);
-    // Icon should be square and fit within content width too
-    iconSize = Math.max(24, Math.min(availableForIcon * 0.9, contentWidth * 0.6));
+    if (layout === 'horizontal') {
+      // For horizontal: icon is constrained to height, takes ~30% of width
+      const maxIconHeight = contentHeight * 0.85;
+      const maxIconWidth = contentWidth * 0.3;
+      iconSize = Math.max(32, Math.min(maxIconHeight, maxIconWidth, 56));
+    } else {
+      // For vertical: icon can be larger, takes remaining space
+      const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
+      const sublabelHeight = hasSublabel ? baseFontSize * 0.75 * 1.3 : 0;
+      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
+      const availableForIcon = contentHeight - totalLabelHeight - (hasLabel ? gap : 0);
+      iconSize = Math.max(32, Math.min(availableForIcon * 0.85, contentWidth * 0.5));
+    }
   }
   
   return {
@@ -61,9 +78,10 @@ const calculateContentSizing = ({
     gap,
     iconSize,
     labelFontSize: baseFontSize,
-    sublabelFontSize: baseFontSize * 0.75,
+    sublabelFontSize: baseFontSize * 0.7,
     contentWidth,
     contentHeight,
+    layout,
   };
 };
 
@@ -71,11 +89,12 @@ const calculateContentSizing = ({
  * InfoCard - Beautiful composition element for grid/info displays
  * 
  * A visually rich card designed for grid layouts, featuring:
- * - Icon/emoji OR image with animated support
+ * - Icon/emoji OR image with animated support (ALWAYS animated when icon present)
  * - Primary label with sublabel support
  * - Style preset integration for consistent theming
  * - Beautiful accent styling based on preset colors
  * - Constraint-aware sizing that prevents clipping
+ * - HORIZONTAL layout by default for icon cards (icon side-by-side with text)
  * 
  * @param {Object} props
  * @param {string} props.icon - Icon/emoji reference (use this OR image)
@@ -83,9 +102,9 @@ const calculateContentSizing = ({
  * @param {boolean} props.imageRounded - Make image circular
  * @param {string} props.label - Primary label text
  * @param {string} props.sublabel - Secondary description text
- * @param {boolean} props.animated - Whether to use animated emoji
+ * @param {boolean} props.animated - Whether to use animated emoji (defaults true for icons)
  * @param {string} props.accentColor - Custom accent color (defaults to preset)
- * @param {'vertical'|'horizontal'} props.layout - Card layout direction
+ * @param {'vertical'|'horizontal'} props.layout - Card layout direction (auto-detected based on content)
  * @param {'default'|'bordered'|'glass'|'elevated'|'gradient'} props.variant - Card style variant
  * @param {'sm'|'md'|'lg'} props.size - Card size preset
  * @param {number} props.cardWidth - Explicit card width for constraint calculations
@@ -100,9 +119,9 @@ export const InfoCard = ({
   imageRounded = false,
   label,
   sublabel,
-  animated = false,
+  animated: animatedProp,
   accentColor,
-  layout = 'vertical',
+  layout: layoutProp,
   variant = 'default',
   size = 'md',
   cardWidth,
@@ -112,6 +131,11 @@ export const InfoCard = ({
   style = {},
   ...props
 }) => {
+  // Icons should ALWAYS be animated (fallback to static if not in registry)
+  const animated = animatedProp !== false ? true : false;
+  
+  // Auto-detect layout: horizontal for icon cards (icon beside text), vertical for image cards
+  const layout = layoutProp || (icon && label ? 'horizontal' : 'vertical');
   const theme = KNODE_THEME;
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -120,6 +144,8 @@ export const InfoCard = ({
   const hasIcon = !!(icon || image);
   const hasLabel = !!label;
   const hasSublabel = !!sublabel;
+  
+  const isHorizontal = layout === 'horizontal';
   
   // Calculate constraint-aware sizing if dimensions provided
   const sizing = (cardWidth && cardHeight) 
@@ -130,37 +156,39 @@ export const InfoCard = ({
         hasLabel,
         hasSublabel,
         size,
+        layout,
       })
     : null;
   
-  // Fallback size presets for when dimensions aren't provided - BOOSTED for impact
+  // Fallback size presets for when dimensions aren't provided
+  // Horizontal layout uses smaller icons to give text more room
   const sizeStyles = {
     sm: {
       iconSize: 'md',
-      iconFontSize: 48,
-      labelFontSize: 20,
+      iconFontSize: isHorizontal ? 36 : 48,
+      labelFontSize: 22,
       sublabelFontSize: 16,
-      padding: theme.spacing.cardPadding * 0.8,
-      gap: 12,
+      padding: theme.spacing.cardPadding * 0.7,
+      gap: isHorizontal ? 14 : 10,
       accentHeight: 3,
     },
     md: {
       iconSize: 'lg',
-      iconFontSize: 64,
+      iconFontSize: isHorizontal ? 44 : 56,
       labelFontSize: 26,
-      sublabelFontSize: 20,
-      padding: theme.spacing.cardPadding,
-      gap: 16,
-      accentHeight: 4,
+      sublabelFontSize: 18,
+      padding: theme.spacing.cardPadding * 0.85,
+      gap: isHorizontal ? 16 : 12,
+      accentHeight: 3,
     },
     lg: {
       iconSize: 'xl',
-      iconFontSize: 80,
-      labelFontSize: 32,
-      sublabelFontSize: 24,
-      padding: theme.spacing.cardPadding * 1.3,
-      gap: 20,
-      accentHeight: 5,
+      iconFontSize: isHorizontal ? 52 : 64,
+      labelFontSize: 30,
+      sublabelFontSize: 22,
+      padding: theme.spacing.cardPadding,
+      gap: isHorizontal ? 20 : 14,
+      accentHeight: 4,
     },
   };
   
@@ -344,8 +372,9 @@ export const InfoCard = ({
           display: 'flex',
           flexDirection: 'column',
           alignItems: isVertical ? 'center' : 'flex-start',
+          justifyContent: 'center',
           textAlign: isVertical ? 'center' : 'left',
-          gap: 2,
+          gap: 3,
           flex: isVertical ? undefined : 1,
           minWidth: 0,
           maxWidth: '100%',
@@ -360,11 +389,15 @@ export const InfoCard = ({
             color="textMain"
             style={{
               fontSize: sizeConfig.labelFontSize,
-              lineHeight: 1.2,
+              lineHeight: 1.15,
               maxWidth: '100%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              // Allow 2 lines for horizontal layout
+              whiteSpace: isHorizontal ? 'normal' : 'nowrap',
+              display: isHorizontal ? '-webkit-box' : 'block',
+              WebkitLineClamp: isHorizontal ? 2 : undefined,
+              WebkitBoxOrient: isHorizontal ? 'vertical' : undefined,
             }}
           />
         )}
@@ -376,12 +409,16 @@ export const InfoCard = ({
             color="textSoft"
             style={{
               fontSize: sizeConfig.sublabelFontSize,
-              lineHeight: 1.25,
+              lineHeight: 1.2,
               maxWidth: '100%',
-              opacity: 0.8,
+              opacity: 0.75,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              // Allow 2 lines for horizontal layout
+              whiteSpace: isHorizontal ? 'normal' : 'nowrap',
+              display: isHorizontal ? '-webkit-box' : 'block',
+              WebkitLineClamp: isHorizontal ? 2 : undefined,
+              WebkitBoxOrient: isHorizontal ? 'vertical' : undefined,
             }}
           />
         )}

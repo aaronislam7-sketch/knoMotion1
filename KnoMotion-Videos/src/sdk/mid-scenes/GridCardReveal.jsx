@@ -313,9 +313,10 @@ export const GridCardReveal = ({ config, stylePreset }) => {
                   imageRounded={card.imageRounded}
                   label={showLabels ? card.label : undefined}
                   sublabel={showLabels ? card.sublabel : undefined}
-                  animated={card.animated}
+                  animated={card.animated !== false} // Always animate icons unless explicitly disabled
                   accentColor={card.color}
-                  layout="vertical"
+                  // Let InfoCard auto-detect layout: horizontal for icons (side-by-side), vertical for images
+                  layout={card.layout}
                   variant={card.variant || resolvedCardVariant}
                   size={cardSize}
                   cardWidth={currentCardWidth}

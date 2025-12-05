@@ -30,10 +30,11 @@ const scene1_ColdOpen = {
   transition: { type: 'slide', direction: 'down' },
   config: {
     background: {
-      preset: 'chalkboardGradient',
+      preset: 'notebookSoft',
       layerNoise: true,
+      particles: { enabled: true, style: 'sparkle', count: 8, color: '#F59E0B', opacity: 0.15, speed: 0.4 },
     },
-    layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 80 } },
+    layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 100 } },
     slots: {
       header: {
         midScene: 'heroText',
@@ -45,17 +46,17 @@ const scene1_ColdOpen = {
           beats: { entrance: 0.3, exit: 10.0 },
         },
       },
-      // Using array pattern: sequence mascot intro → main message
+      // Using array pattern: sequence intro → main message (fixed timing - no overlap)
       row1: [
         {
           midScene: 'textReveal',
           stylePreset: 'mentor',
           config: {
             lines: [
-              { text: 'Knodovia has culture.', emphasis: 'normal', beats: { start: 1.0, exit: 4.5 } },
+              { text: 'Knodovia has culture.', emphasis: 'normal', beats: { start: 1.0, exit: 4.0 } },
             ],
             revealType: 'typewriter',
-            animationDuration: 1.2,
+            animationDuration: 1.0,
           },
         },
         {
@@ -63,11 +64,11 @@ const scene1_ColdOpen = {
           stylePreset: 'playful',
           config: {
             lines: [
-              { text: 'Questionable culture...', emphasis: 'high', beats: { start: 4.0, exit: 7.0, emphasis: 4.5 } },
-              { text: 'but culture nonetheless.', emphasis: 'normal', beats: { start: 5.5, exit: 10.0 } },
+              { text: 'Questionable culture...', emphasis: 'high', beats: { start: 4.5, exit: 7.5, emphasis: 5.0 } },
+              { text: 'but culture nonetheless.', emphasis: 'normal', beats: { start: 6.0, exit: 10.0 } },
             ],
             revealType: 'fade',
-            staggerDelay: 0.6,
+            staggerDelay: 0.5,
           },
         },
       ],
@@ -76,7 +77,7 @@ const scene1_ColdOpen = {
         stylePreset: 'focus',
         config: {
           lines: [
-            { text: "Let's begin.", emphasis: 'high', beats: { start: 8.0, exit: 11.0, emphasis: 8.5 } },
+            { text: "Let's begin.", emphasis: 'high', beats: { start: 8.5, exit: 11.0, emphasis: 9.0 } },
           ],
           revealType: 'slide',
           direction: 'up',
@@ -398,7 +399,7 @@ const scene6_Close = {
   durationInFrames: 360,
   transition: { type: 'eraser' },
   config: {
-    background: { preset: 'chalkboardGradient' },
+    background: { preset: 'cleanCard', layerNoise: true },
     layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 0 } },
     slots: {
       row1: [
