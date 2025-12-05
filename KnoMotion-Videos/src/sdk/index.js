@@ -18,6 +18,8 @@
 // ==================== LAYOUT ====================
 export * from './layout/layoutEngine';
 export * from './layout/positionSystem';
+export * from './layout/viewportPresets';
+export * from './layout/mobileRenderingGuide';
 // Note: layout-resolver functions have been integrated into layoutEngine.js
 // Legacy template-specific functions still available via direct import if needed
 
