@@ -9,13 +9,16 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * Calculate optimal content sizing to fit within available card space
  * Uses layout engine principles for constraint-based sizing
  * 
+ * ICONS ARE THE STAR - they should be as large as possible while
+ * leaving just enough room for readable text.
+ * 
  * For HORIZONTAL layout (icon beside text):
- * - Icon is smaller (fits beside text)
- * - Text gets more space to breathe
+ * - Icon takes up to 45% of width, fills height
+ * - Text gets remaining space
  * 
  * For VERTICAL layout (icon above text):
- * - Icon can be larger
- * - Text stacks below
+ * - Icon is the HERO - fills as much space as possible
+ * - Text is compact below
  * 
  * @param {Object} params
  * @param {number} params.cardWidth - Available card width
@@ -36,39 +39,42 @@ const calculateContentSizing = ({
   size = 'md',
   layout = 'horizontal',
 }) => {
-  // Base ratios for content distribution
-  const paddingRatio = size === 'sm' ? 0.06 : size === 'lg' ? 0.08 : 0.07;
-  const accentHeightRatio = 0.015;
-  const gapRatio = layout === 'horizontal' ? 0.05 : 0.04;
+  // Minimal padding to maximize icon space
+  const paddingRatio = size === 'sm' ? 0.04 : size === 'lg' ? 0.06 : 0.05;
+  const accentHeightRatio = 0.012;
+  const gapRatio = layout === 'horizontal' ? 0.04 : 0.03;
   
-  // Calculate padding based on smaller dimension for consistent look
+  // Calculate padding based on smaller dimension
   const minDim = Math.min(cardWidth, cardHeight);
-  const padding = Math.max(10, Math.min(20, minDim * paddingRatio));
-  const accentHeight = Math.max(2, Math.min(4, minDim * accentHeightRatio));
-  const gap = Math.max(10, Math.min(20, minDim * gapRatio));
+  const padding = Math.max(8, Math.min(16, minDim * paddingRatio));
+  const accentHeight = Math.max(2, Math.min(3, minDim * accentHeightRatio));
+  const gap = Math.max(8, Math.min(16, minDim * gapRatio));
   
   // Available content area after padding
   const contentWidth = cardWidth - padding * 2;
   const contentHeight = cardHeight - padding * 2 - accentHeight;
   
-  // Calculate label sizes - BOOSTED for visibility
-  const baseFontSize = Math.max(20, Math.min(32, minDim * 0.14));
+  // Calculate label sizes - compact to give icons more room
+  const baseFontSize = Math.max(16, Math.min(26, minDim * 0.11));
   
-  // Calculate icon size based on layout
+  // Calculate icon size - MAXIMIZE IT
   let iconSize = 0;
   if (hasIcon) {
     if (layout === 'horizontal') {
-      // For horizontal: icon is constrained to height, takes ~30% of width
-      const maxIconHeight = contentHeight * 0.85;
-      const maxIconWidth = contentWidth * 0.3;
-      iconSize = Math.max(32, Math.min(maxIconHeight, maxIconWidth, 56));
+      // For horizontal: icon takes ~45% of width, constrained by height
+      // NO HARD CAPS - let it fill the space!
+      const maxIconWidth = contentWidth * 0.45;
+      const maxIconHeight = contentHeight * 0.9;
+      iconSize = Math.max(40, Math.min(maxIconHeight, maxIconWidth));
     } else {
-      // For vertical: icon can be larger, takes remaining space
-      const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
-      const sublabelHeight = hasSublabel ? baseFontSize * 0.75 * 1.3 : 0;
-      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
+      // For vertical: icon is the HERO - takes most of the space
+      // Reserve minimal space for labels
+      const labelHeight = hasLabel ? baseFontSize * 1.2 : 0;
+      const sublabelHeight = hasSublabel ? baseFontSize * 0.7 * 1.2 : 0;
+      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 2 : 0);
       const availableForIcon = contentHeight - totalLabelHeight - (hasLabel ? gap : 0);
-      iconSize = Math.max(32, Math.min(availableForIcon * 0.85, contentWidth * 0.5));
+      // Icon can take up to 90% of available height and 80% of width
+      iconSize = Math.max(48, Math.min(availableForIcon * 0.95, contentWidth * 0.8));
     }
   }
   
@@ -161,34 +167,34 @@ export const InfoCard = ({
     : null;
   
   // Fallback size presets for when dimensions aren't provided
-  // Horizontal layout uses smaller icons to give text more room
+  // ICONS ARE THE STAR - make them big and prominent!
   const sizeStyles = {
     sm: {
-      iconSize: 'md',
-      iconFontSize: isHorizontal ? 36 : 48,
+      iconSize: 'lg',
+      iconFontSize: isHorizontal ? 56 : 72,
+      labelFontSize: 18,
+      sublabelFontSize: 14,
+      padding: theme.spacing.cardPadding * 0.5,
+      gap: isHorizontal ? 12 : 8,
+      accentHeight: 2,
+    },
+    md: {
+      iconSize: 'xl',
+      iconFontSize: isHorizontal ? 72 : 96,
       labelFontSize: 22,
       sublabelFontSize: 16,
-      padding: theme.spacing.cardPadding * 0.7,
+      padding: theme.spacing.cardPadding * 0.6,
       gap: isHorizontal ? 14 : 10,
       accentHeight: 3,
     },
-    md: {
-      iconSize: 'lg',
-      iconFontSize: isHorizontal ? 44 : 56,
+    lg: {
+      iconSize: 'xxl',
+      iconFontSize: isHorizontal ? 96 : 128,
       labelFontSize: 26,
       sublabelFontSize: 18,
-      padding: theme.spacing.cardPadding * 0.85,
+      padding: theme.spacing.cardPadding * 0.7,
       gap: isHorizontal ? 16 : 12,
       accentHeight: 3,
-    },
-    lg: {
-      iconSize: 'xl',
-      iconFontSize: isHorizontal ? 52 : 64,
-      labelFontSize: 30,
-      sublabelFontSize: 22,
-      padding: theme.spacing.cardPadding,
-      gap: isHorizontal ? 20 : 14,
-      accentHeight: 4,
     },
   };
   
@@ -309,19 +315,18 @@ export const InfoCard = ({
       justifyContent: 'center',
       width: isVertical ? '100%' : 'auto',
       flexShrink: 0,
-      // Constrain icon container to prevent overflow
-      maxHeight: iconDisplaySize * 1.1,
+      // Let icon fill its space - no max constraints!
     };
     
-    // Decorative glow behind icon (subtle, scaled to icon size)
-    const glowSize = Math.min(iconDisplaySize * 1.3, 100);
+    // Decorative glow behind icon - scales with icon size (no cap!)
+    const glowSize = iconDisplaySize * 1.2;
     const glowStyle = {
       position: 'absolute',
       width: glowSize,
       height: glowSize,
       borderRadius: '50%',
-      background: `radial-gradient(circle, ${resolvedAccent}10 0%, transparent 70%)`,
-      filter: 'blur(6px)',
+      background: `radial-gradient(circle, ${resolvedAccent}12 0%, transparent 70%)`,
+      filter: `blur(${Math.max(6, iconDisplaySize * 0.08)}px)`,
       zIndex: 0,
     };
     
