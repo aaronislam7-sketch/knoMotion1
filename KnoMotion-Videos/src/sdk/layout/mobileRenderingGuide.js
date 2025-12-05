@@ -172,13 +172,16 @@ export const MOBILE_DOS = Object.freeze({
     },
 
     /**
-     * ✅ DO: Use larger font sizes
+     * ✅ DO: Use BOLD font sizes
      * 
-     * Scale up 10-15% from desktop sizes.
+     * Scale up 20%+ from desktop for maximum impact.
+     * Mobile viewers scroll fast - text needs to pop!
      */
     fontSize: {
-      scaleUp: 1.1, // 10% larger than desktop
-      minReadable: 24, // Pixels - never go smaller
+      scaleUp: 1.2, // 20% larger than desktop
+      minReadable: 28, // Pixels - never go smaller
+      headlines: { min: 56, ideal: 72 }, // Big, bold headlines
+      body: { min: 36, ideal: 42 }, // Readable body text
     },
 
     /**
@@ -374,13 +377,13 @@ export const MOBILE_DONTS = Object.freeze({
     },
 
     /**
-     * ❌ DON'T: Use font sizes below 24px
+     * ❌ DON'T: Use font sizes below 28px
      * 
-     * Anything smaller is hard to read on mobile.
+     * Anything smaller won't have impact - be bold!
      */
     avoidSmallFonts: {
-      minimum: 24, // Pixels
-      reason: 'Readability suffers on smaller screens',
+      minimum: 28, // Pixels - raised for impact
+      reason: 'Small text gets lost, lacks punch',
     },
 
     /**

@@ -245,11 +245,13 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
   const slotLeft = position?.left || 0;
   const slotTop = position?.top || 0;
 
-  // Calculate layout parameters
-  const baseFontSize = Math.min(36, slotHeight / (items.length * 2.5));
-  const lineHeight = baseFontSize * 1.8;
-  const iconWidth = baseFontSize * iconSize * 1.5;
-  const textWidth = slotWidth - iconWidth - 40; // Padding
+  // Calculate layout parameters - BOOSTED for visibility
+  const isMobile = slotHeight > slotWidth;
+  const baseMinSize = isMobile ? 42 : 36;
+  const baseFontSize = Math.max(baseMinSize, Math.min(52, slotHeight / (items.length * 2.2)));
+  const lineHeight = baseFontSize * 1.7;
+  const iconWidth = baseFontSize * iconSize * 1.6;
+  const textWidth = slotWidth - iconWidth - 50; // Padding
   
   // Auto-calculate spacing if not provided
   const spacing = customSpacing || Math.min(lineHeight, slotHeight / (items.length + 1));

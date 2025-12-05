@@ -69,7 +69,10 @@ const getAnimationStyle = (animationType, frame, startFrame, durationFrames, dir
  */
 export const HeroTextEntranceExit = ({ config, stylePreset }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
+  
+  // Responsive sizing for mobile
+  const isMobile = height > width;
   const {
     text,
     heroType = 'image',
@@ -192,11 +195,11 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
             transform: combinedStyle.transform || 'none',
           }}
         >
-        {/* Hero */}
+        {/* Hero - responsive sizing */}
         <div
           style={{
-            width: 300,
-            height: 300,
+            width: isMobile ? 350 : 300,
+            height: isMobile ? 350 : 300,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -208,7 +211,7 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
           {renderHero(heroConfig, frame, heroTimelineBeats, KNODE_THEME.colors, null, fps)}
         </div>
 
-        {/* Text */}
+        {/* Text - BOOSTED sizing */}
         <Text
           text={text}
           variant={preset.textVariant}
@@ -217,6 +220,7 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
           color={preset.textColor}
           style={{
             textAlign: 'center',
+            fontSize: isMobile ? 72 : 64, // Explicit larger size
             ...style.text,
           }}
         />

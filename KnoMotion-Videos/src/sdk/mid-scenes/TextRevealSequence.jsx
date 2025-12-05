@@ -203,8 +203,14 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
   const lineSpacingValue = getLineSpacing(lineSpacing);
   const viewport = { width, height };
 
-  // Calculate base font size and line height
-  const baseFontSize = 48;
+  // Calculate base font size - BOOSTED and viewport-aware
+  // Mobile (portrait): scale up for impact
+  // Desktop (landscape): generous sizing
+  const isMobile = height > width;
+  const baseDesktopSize = 64; // Up from 48
+  const baseFontSize = isMobile 
+    ? Math.round(baseDesktopSize * 1.15) // 15% larger on mobile
+    : baseDesktopSize;
   const lineHeight = baseFontSize * lineSpacingValue;
 
   // Calculate positions using layout engine (STACKED_VERTICAL)

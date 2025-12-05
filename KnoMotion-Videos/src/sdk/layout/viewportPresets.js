@@ -346,8 +346,8 @@ export function adjustLayoutForViewport(layout, viewport) {
 /**
  * Calculate responsive font size based on viewport
  * 
- * Mobile typically needs slightly larger relative font sizes
- * because the viewport is narrower.
+ * Mobile needs larger relative font sizes for impact and readability.
+ * Desktop also gets a boost for bolder visuals.
  * 
  * @param {number} baseSize - Base font size in pixels
  * @param {Viewport} viewport - Current viewport dimensions
@@ -357,11 +357,12 @@ export function getResponsiveFontSize(baseSize, viewport) {
   const format = detectFormat(viewport);
   
   if (format === 'mobile') {
-    // Scale up slightly for mobile (narrower viewport)
-    return Math.round(baseSize * 1.1);
+    // Scale up 20% for mobile - bolder, more impactful
+    return Math.round(baseSize * 1.2);
   }
   
-  return baseSize;
+  // Desktop also gets slight boost for punch
+  return Math.round(baseSize * 1.05);
 }
 
 /**

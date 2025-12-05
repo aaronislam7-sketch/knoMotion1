@@ -41,10 +41,10 @@ const calculateContentSizing = ({
   const contentWidth = cardWidth - padding * 2;
   const contentHeight = cardHeight - padding * 2 - accentHeight;
   
-  // Calculate label heights (estimate based on font sizing)
-  const baseFontSize = Math.max(12, Math.min(28, minDim * 0.12));
+  // Calculate label heights (estimate based on font sizing) - BOOSTED for visibility
+  const baseFontSize = Math.max(18, Math.min(36, minDim * 0.15));
   const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
-  const sublabelHeight = hasSublabel ? baseFontSize * 0.85 * 1.3 : 0;
+  const sublabelHeight = hasSublabel ? baseFontSize * 0.8 * 1.3 : 0;
   const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
   
   // Calculate icon size - fill remaining space after labels
@@ -133,33 +133,33 @@ export const InfoCard = ({
       })
     : null;
   
-  // Fallback size presets for when dimensions aren't provided
+  // Fallback size presets for when dimensions aren't provided - BOOSTED for impact
   const sizeStyles = {
     sm: {
       iconSize: 'md',
-      iconFontSize: 36,
-      labelFontSize: 14,
-      sublabelFontSize: 11,
+      iconFontSize: 48,
+      labelFontSize: 20,
+      sublabelFontSize: 16,
       padding: theme.spacing.cardPadding * 0.8,
-      gap: 10,
+      gap: 12,
       accentHeight: 3,
     },
     md: {
       iconSize: 'lg',
-      iconFontSize: 48,
-      labelFontSize: 18,
-      sublabelFontSize: 14,
+      iconFontSize: 64,
+      labelFontSize: 26,
+      sublabelFontSize: 20,
       padding: theme.spacing.cardPadding,
-      gap: 14,
+      gap: 16,
       accentHeight: 4,
     },
     lg: {
       iconSize: 'xl',
-      iconFontSize: 64,
-      labelFontSize: 24,
-      sublabelFontSize: 18,
+      iconFontSize: 80,
+      labelFontSize: 32,
+      sublabelFontSize: 24,
       padding: theme.spacing.cardPadding * 1.3,
-      gap: 18,
+      gap: 20,
       accentHeight: 5,
     },
   };

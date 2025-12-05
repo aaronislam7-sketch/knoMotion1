@@ -55,13 +55,13 @@ export const Text = ({
     utility: 'Inter, sans-serif',
   };
   
-  // Sizes
+  // Sizes - BOOSTED for better visibility
   const sizes = {
-    xs: 16,
-    sm: 20,
-    md: 24,
-    lg: 32,
-    xl: 48,
+    xs: 20,
+    sm: 28,
+    md: 36,
+    lg: 48,
+    xl: 64,
   };
   
   // Weights
