@@ -10,16 +10,12 @@
  * @subcategory Mid-Scenes
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
-import { Text } from '../elements/atoms/Text';
-import { Icon } from '../elements/atoms/Icon';
-import { ImageAtom } from '../elements/atoms/Image';
+import { InfoCard } from '../elements/compositions/InfoCard';
 import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../layout/layoutEngine';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
 import { toFrames } from '../core/time';
-import { KNODE_THEME } from '../theme/knodeTheme';
-import { resolveStylePreset } from '../theme/stylePresets';
 import { resolveBeats } from '../utils/beats';
 
 /**
@@ -90,179 +86,37 @@ const getCardAnimationStyle = (animationType, frame, startFrame, durationFrames,
 };
 
 /**
- * Individual Grid Card Component
+ * Map card size based on dimensions
  */
-const GridCard = ({
-  card,
-  cardPosition,
-  cardWidth,
-  cardHeight,
-  animStyle,
-  baseFontSize,
-  cardStyle,
-  showLabels,
-  labelPosition,
-  cardVariant,
-  resolveColor,
-  style = {},
-  beats,
-  textColor = 'textMain',
-}) => {
-  const hasIcon = card.icon && !card.image;
-  const hasImage = card.image;
-  const hasLabel = showLabels && card.label;
+const getCardSize = (cardWidth, cardHeight) => {
+  const minDim = Math.min(cardWidth, cardHeight);
+  if (minDim < 120) return 'sm';
+  if (minDim < 200) return 'md';
+  return 'lg';
+};
+
+/**
+ * Map card variant based on style preset
+ */
+const getVariantForPreset = (stylePreset, cardVariant) => {
+  // If explicit variant is provided, use it
+  if (cardVariant && cardVariant !== 'default') return cardVariant;
   
-  const iconSize = Math.min(cardWidth, cardHeight) * 0.5;
-  const imageSize = hasLabel 
-    ? Math.min(cardWidth, cardHeight) * 0.65 
-    : Math.min(cardWidth, cardHeight) * 0.85;
-
-  // Card background color
-  const cardBg = resolveColor(card.backgroundColor || 'cardBg', KNODE_THEME.colors.cardBg);
-  const cardBorder = resolveColor(card.borderColor, null);
-  const iconColor = resolveColor(card.color || 'primary', KNODE_THEME.colors.primary);
-
-  // Card variant styles
-  const variantStyles = {
-    default: {
-      backgroundColor: cardBg,
-      boxShadow: KNODE_THEME.shadows.soft,
-      border: 'none',
-    },
-    bordered: {
-      backgroundColor: cardBg,
-      boxShadow: 'none',
-      border: `2px solid ${cardBorder || KNODE_THEME.colors.ruleLine}`,
-    },
-    glass: {
-      backgroundColor: `${cardBg}CC`,
-      boxShadow: KNODE_THEME.shadows.card,
-      backdropFilter: 'blur(10px)',
-      border: `1px solid ${KNODE_THEME.colors.cardBg}40`,
-    },
-    flat: {
-      backgroundColor: cardBg,
-      boxShadow: 'none',
-      border: 'none',
-    },
-    elevated: {
-      backgroundColor: cardBg,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-      border: 'none',
-    },
-  };
-
-  const currentVariant = variantStyles[card.variant || cardVariant] || variantStyles.default;
-
-  return (
-    <div
-      style={{
-        ...cardPosition,
-        ...style.cardWrapper,
-      }}
-    >
-      <div
-        style={{
-          opacity: animStyle.opacity,
-          transform: animStyle.transform,
-          clipPath: animStyle.clipPath || 'none',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: labelPosition === 'bottom' ? 'column' : 'column-reverse',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: baseFontSize * 0.4,
-          padding: baseFontSize * 0.5,
-          boxSizing: 'border-box',
-          borderRadius: KNODE_THEME.radii.card,
-          ...currentVariant,
-          ...cardStyle,
-          ...style.card,
-        }}
-      >
-        {/* Image or Icon */}
-        {hasImage ? (
-          <div
-            style={{
-              width: imageSize,
-              height: imageSize,
-              flexShrink: 0,
-              ...style.imageWrapper,
-            }}
-          >
-            <ImageAtom
-              src={card.image}
-              fit={card.imageFit || 'cover'}
-              borderRadius={card.imageRounded ? imageSize : 12}
-              beats={card.imageBeats || beats}
-              animation={card.imageAnimation || { type: 'fade', duration: 0.5 }}
-              style={{
-                width: '100%',
-                height: '100%',
-                ...style.image,
-              }}
-            />
-          </div>
-        ) : hasIcon ? (
-          <Icon
-            iconRef={card.icon}
-            size="lg"
-            color={card.color || 'primary'}
-            animated={card.animated}
-            style={{
-              fontSize: iconSize,
-              color: iconColor,
-              ...style.icon,
-            }}
-          />
-        ) : null}
-
-        {/* Label */}
-        {hasLabel && (
-          <div style={{ textAlign: 'center', maxWidth: '90%' }}>
-            <Text
-              text={card.label}
-              variant="body"
-              size="sm"
-              weight={600}
-              color={textColor}
-              style={{
-                fontSize: baseFontSize * 0.7,
-                textAlign: 'center',
-                lineHeight: 1.2,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: card.wrapLabel ? 'normal' : 'nowrap',
-                ...style.label,
-              }}
-            />
-            {/* Sublabel */}
-            {card.sublabel && (
-              <Text
-                text={card.sublabel}
-                variant="body"
-                size="sm"
-                weight={400}
-                color="textSoft"
-                style={{
-                  fontSize: baseFontSize * 0.55,
-                  textAlign: 'center',
-                  lineHeight: 1.3,
-                  marginTop: 4,
-                  opacity: 0.8,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: card.wrapLabel ? 'normal' : 'nowrap',
-                  ...style.sublabel,
-                }}
-              />
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  // Otherwise, map based on preset
+  switch (stylePreset) {
+    case 'playful':
+      return 'gradient';
+    case 'educational':
+      return 'bordered';
+    case 'mentor':
+      return 'elevated';
+    case 'focus':
+      return 'glass';
+    case 'minimal':
+      return 'default';
+    default:
+      return 'elevated';
+  }
 };
 
 /**
@@ -308,14 +162,12 @@ export const GridCardReveal = ({ config, stylePreset }) => {
     staggerDelay = 0.1,
     animationDuration = 0.4,
     showLabels = true,
-    labelPosition = 'bottom',
     cardVariant = 'default',
     gap: customGap,
     beats = {},
     position,
     style = {},
   } = config;
-  const preset = resolveStylePreset(stylePreset);
 
   // Validate required fields
   if (!cards || cards.length === 0) {
@@ -327,8 +179,6 @@ export const GridCardReveal = ({ config, stylePreset }) => {
     start: 0.9,
     holdDuration: animationDuration,
   });
-  const startFrame = toFrames(sequenceBeats.start, fps);
-  const staggerFrames = toFrames(staggerDelay, fps);
   const durationFrames = toFrames(animationDuration, fps);
   
   // Calculate dimensions from position or viewport
@@ -351,16 +201,6 @@ export const GridCardReveal = ({ config, stylePreset }) => {
   const cardWidth = (slot.width - gap * (columns + 1)) / columns;
   const cardHeight = (slot.height - gap * (rows + 1)) / rows;
 
-  // Calculate base font size
-  const baseFontSize = Math.min(24, Math.max(12, Math.min(cardWidth, cardHeight) / 5));
-
-  // Resolve colors from theme
-  const resolveColor = (colorKey, fallback = null) => {
-    if (!colorKey) return fallback;
-    if (colorKey.startsWith('#') || colorKey.startsWith('rgb')) return colorKey;
-    return KNODE_THEME.colors[colorKey] || fallback;
-  };
-
   // Calculate positions using layout engine
   const layoutConfig = {
     arrangement: ARRANGEMENT_TYPES.GRID,
@@ -373,6 +213,9 @@ export const GridCardReveal = ({ config, stylePreset }) => {
   };
 
   const positions = calculateItemPositions(cards, layoutConfig);
+
+  // Map the cardVariant to the InfoCard-compatible variant
+  const resolvedCardVariant = getVariantForPreset(stylePreset, cardVariant);
 
   return (
     <AbsoluteFill>
@@ -422,27 +265,52 @@ export const GridCardReveal = ({ config, stylePreset }) => {
             ...animStyle,
             opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
           };
+          
           // Convert position to CSS (layout engine returns center coordinates)
           const cardPosition = positionToCSS(pos);
+          const currentCardWidth = pos.width || cardWidth;
+          const currentCardHeight = pos.height || cardHeight;
+          const cardSize = getCardSize(currentCardWidth, currentCardHeight);
 
           return (
-            <GridCard
+            <div
               key={index}
-              card={card}
-              cardPosition={cardPosition}
-              cardWidth={pos.width || cardWidth}
-              cardHeight={pos.height || cardHeight}
-              animStyle={mergedAnimStyle}
-              baseFontSize={baseFontSize}
-              cardStyle={style.cardStyle}
-              showLabels={showLabels}
-              labelPosition={labelPosition}
-              cardVariant={cardVariant}
-              resolveColor={resolveColor}
-              style={style}
-              beats={card.imageBeats || itemBeats}
-              textColor={preset.textColor}
-            />
+              style={{
+                ...cardPosition,
+                ...style.cardWrapper,
+              }}
+            >
+              <div
+                style={{
+                  opacity: mergedAnimStyle.opacity,
+                  transform: mergedAnimStyle.transform,
+                  clipPath: mergedAnimStyle.clipPath || 'none',
+                  width: '100%',
+                  height: '100%',
+                }}
+              >
+                <InfoCard
+                  icon={card.icon}
+                  image={card.image}
+                  imageRounded={card.imageRounded}
+                  label={showLabels ? card.label : undefined}
+                  sublabel={showLabels ? card.sublabel : undefined}
+                  animated={card.animated}
+                  accentColor={card.color}
+                  layout="vertical"
+                  variant={card.variant || resolvedCardVariant}
+                  size={cardSize}
+                  cardWidth={currentCardWidth}
+                  cardHeight={currentCardHeight}
+                  stylePreset={stylePreset}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    ...style.card,
+                  }}
+                />
+              </div>
+            </div>
           );
         })}
       </div>

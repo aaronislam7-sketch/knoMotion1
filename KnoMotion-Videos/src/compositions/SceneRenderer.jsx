@@ -33,14 +33,15 @@ const MID_SCENE_COMPONENTS = {
   heroText: HeroTextEntranceExit,
 };
 
-const SlotRenderer = ({ slot, slotName, midSceneConfig }) => {
-  if (!slot || !midSceneConfig) return null;
-
+/**
+ * Renders a single midScene component within a slot
+ */
+const MidSceneRenderer = ({ slot, slotName, midSceneConfig, index = 0 }) => {
   const { midScene, config, stylePreset } = midSceneConfig;
   const Component = MID_SCENE_COMPONENTS[midScene];
 
   if (!Component) {
-    console.warn(`Unknown midScene "${midScene}" in slot "${slotName}"`);
+    console.warn(`Unknown midScene "${midScene}" in slot "${slotName}"${index > 0 ? ` (item ${index})` : ''}`);
     return null;
   }
 
@@ -60,6 +61,57 @@ const SlotRenderer = ({ slot, slotName, midSceneConfig }) => {
     <div
       style={{
         position: 'absolute',
+        left: 0,
+        right: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: isHeader ? 'flex-end' : 'center',
+        justifyContent: 'center',
+        paddingBottom: isHeader ? 10 : 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <Component config={enhancedConfig} stylePreset={stylePreset} />
+    </div>
+  );
+};
+
+/**
+ * SlotRenderer - Renders midScene(s) within a layout slot
+ * 
+ * Supports both single midScene config (object) and multiple midScenes (array).
+ * When an array is provided, each midScene is rendered in the same slot,
+ * layered on top of each other. Use beats to control timing/visibility.
+ * 
+ * @example Single midScene (existing format):
+ * slots: {
+ *   row1: {
+ *     midScene: 'textReveal',
+ *     stylePreset: 'focus',
+ *     config: { ... }
+ *   }
+ * }
+ * 
+ * @example Multiple midScenes (new array format):
+ * slots: {
+ *   row1: [
+ *     { midScene: 'textReveal', config: { beats: { start: 0, exit: 3 } } },
+ *     { midScene: 'heroText', config: { beats: { start: 3, exit: 6 } } },
+ *     { midScene: 'gridCards', config: { beats: { start: 6, exit: 10 } } }
+ *   ]
+ * }
+ */
+const SlotRenderer = ({ slot, slotName, midSceneConfig }) => {
+  if (!slot || !midSceneConfig) return null;
+
+  // Support both single object and array of midScenes
+  const midSceneConfigs = Array.isArray(midSceneConfig) ? midSceneConfig : [midSceneConfig];
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
         left: slot.left,
         top: slot.top,
         width: slot.width,
@@ -67,22 +119,15 @@ const SlotRenderer = ({ slot, slotName, midSceneConfig }) => {
         overflow: 'visible',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: isHeader ? 'flex-end' : 'center',
-          justifyContent: 'center',
-          paddingBottom: isHeader ? 10 : 0,
-          boxSizing: 'border-box',
-        }}
-      >
-        <Component config={enhancedConfig} stylePreset={stylePreset} />
-      </div>
+      {midSceneConfigs.map((config, index) => (
+        <MidSceneRenderer
+          key={`${slotName}-midscene-${index}`}
+          slot={slot}
+          slotName={slotName}
+          midSceneConfig={config}
+          index={index}
+        />
+      ))}
     </div>
   );
 };
