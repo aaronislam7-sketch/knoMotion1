@@ -116,7 +116,7 @@ const calculateAutoFitFontSize = (text, availableWidth, baseFontSize = 36) => {
 };
 
 /**
- * Get animation style with pop effect for checklist items
+ * Get animation style with smooth easing for checklist items
  * 
  * @param {string} revealType - Type of reveal animation
  * @param {number} frame - Current frame
@@ -127,56 +127,98 @@ const calculateAutoFitFontSize = (text, availableWidth, baseFontSize = 36) => {
  * @returns {Object} Style object with opacity, transform, and scale
  */
 const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, fps, enablePop = true) => {
-  const baseDelay = 0;
+  // Use gentler, smoother spring configs throughout
+  const smoothSpringConfig = { damping: 20, mass: 1, stiffness: 80 };
   
   switch (revealType) {
     case 'pop':
-    case 'bounceIn':
-      return bounceIn(frame, startFrame, durationFrames);
+    case 'bounceIn': {
+      // Gentler bounce - less jarring
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 15, mass: 1, stiffness: 100 },
+      });
+      return {
+        opacity: progress,
+        transform: `scale(${0.9 + progress * 0.1})`,
+      };
+    }
     
     case 'slide':
-    case 'slideIn':
-      return slideIn(frame, startFrame, durationFrames, 'left', 40);
+    case 'slideIn': {
+      // Smooth slide with spring physics
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: smoothSpringConfig,
+      });
+      return {
+        opacity: progress,
+        transform: `translateX(${(1 - progress) * -30}px)`,
+      };
+    }
     
     case 'scale':
-    case 'scaleIn':
-      return scaleIn(frame, startFrame, durationFrames, 0);
+    case 'scaleIn': {
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: smoothSpringConfig,
+      });
+      return {
+        opacity: progress,
+        transform: `scale(${0.85 + progress * 0.15})`,
+      };
+    }
     
     case 'spring': {
       const progress = spring({
         frame: Math.max(0, frame - startFrame),
         fps,
-        config: { damping: 12, mass: 1, stiffness: 150 },
+        config: smoothSpringConfig,
       });
       return {
         opacity: progress,
-        transform: `scale(${0.5 + progress * 0.5}) translateX(${(1 - progress) * -30}px)`,
+        transform: `scale(${0.9 + progress * 0.1}) translateX(${(1 - progress) * -20}px)`,
       };
     }
     
     case 'fade':
     case 'fadeIn':
-    default:
-      return fadeIn(frame, startFrame, durationFrames);
+    default: {
+      // Smooth fade with spring
+      const progress = spring({
+        frame: Math.max(0, frame - startFrame),
+        fps,
+        config: { damping: 25, mass: 1, stiffness: 60 },
+      });
+      return {
+        opacity: progress,
+        transform: 'none',
+      };
+    }
   }
 };
 
 /**
- * Get icon animation style (separate from text for pop effect)
+ * Get icon animation style (separate from text for subtle pop effect)
+ * Uses smoother, gentler animation for cohesive feel
  */
 const getIconAnimationStyle = (frame, startFrame, durationFrames, fps) => {
-  const iconDelay = Math.round(durationFrames * 0.3);
+  const iconDelay = Math.round(durationFrames * 0.2);
   const iconStartFrame = startFrame + iconDelay;
   
+  // Gentler spring for smooth icon reveal
   const progress = spring({
     frame: Math.max(0, frame - iconStartFrame),
     fps,
-    config: { damping: 8, mass: 0.8, stiffness: 200 },
+    config: { damping: 18, mass: 1, stiffness: 100 },
   });
   
   return {
     opacity: progress,
-    transform: `scale(${progress})`,
+    transform: `scale(${0.8 + progress * 0.2})`,
   };
 };
 
@@ -245,11 +287,13 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
   const slotLeft = position?.left || 0;
   const slotTop = position?.top || 0;
 
-  // Calculate layout parameters
-  const baseFontSize = Math.min(36, slotHeight / (items.length * 2.5));
-  const lineHeight = baseFontSize * 1.8;
-  const iconWidth = baseFontSize * iconSize * 1.5;
-  const textWidth = slotWidth - iconWidth - 40; // Padding
+  // Calculate layout parameters - BOOSTED for visibility
+  const isMobile = slotHeight > slotWidth;
+  const baseMinSize = isMobile ? 42 : 36;
+  const baseFontSize = Math.max(baseMinSize, Math.min(52, slotHeight / (items.length * 2.2)));
+  const lineHeight = baseFontSize * 1.7;
+  const iconWidth = baseFontSize * iconSize * 1.6;
+  const textWidth = slotWidth - iconWidth - 50; // Padding
   
   // Auto-calculate spacing if not provided
   const spacing = customSpacing || Math.min(lineHeight, slotHeight / (items.length + 1));
@@ -313,10 +357,12 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
           fps,
           true
         );
+        // Exit animation - much slower for smooth fade out (0.8 seconds)
         const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitDuration = toFrames(0.8, fps);
         const exitProgress =
           frame > exitFrame
-            ? Math.min(1, (frame - exitFrame) / toFrames(0.25, fps))
+            ? Math.min(1, (frame - exitFrame) / exitDuration)
             : 0;
 
         // Separate icon animation with pop effect

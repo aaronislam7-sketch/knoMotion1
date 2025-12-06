@@ -40,15 +40,18 @@ export const Icon = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Sizes
+  // Sizes - default presets
   const sizes = {
     sm: 24,
     md: 40,
     lg: 60,
     xl: 80,
+    xxl: 120,
   };
   
-  const pixelSize = sizes[size] || sizes.md;
+  // If fontSize is passed via style, use that (allows dynamic sizing from parent)
+  // Otherwise fall back to size preset
+  const pixelSize = style.fontSize || sizes[size] || sizes.md;
   
   // Animation support
   let animStyle = {};

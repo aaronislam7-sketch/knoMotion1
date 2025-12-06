@@ -5,13 +5,22 @@
  * - Layout arrangement types (stack, grid, circular, etc.)
  * - Canvas / area helpers (title safe-area, content area)
  * - Position calculations that scenes + mid-level components can reuse
+ * - Format-aware layout adjustments for mobile/desktop
  */
 
-import { resolvePosition, getCenteredStackBase, getStackedPosition } from './positionSystem';
+import { resolvePosition, getCenteredStackBase, getStackedPosition, DEFAULT_VIEWPORT } from './positionSystem';
 import {
   detectCollisions,
   autoResolveCollisions,
 } from '../validation/collision-detection';
+import {
+  detectFormat,
+  isMobileFormat,
+  isDesktopFormat,
+  getLayoutRecommendations,
+  VIEWPORT_PRESETS,
+  getResponsiveSpacing,
+} from './viewportPresets';
 
 /**
  * Layout arrangement types
@@ -962,3 +971,110 @@ export const validateLayout = (positions, canvas, options = {}) => {
     warnings,
   };
 };
+
+// ============================================================================
+// FORMAT-AWARE LAYOUT HELPERS
+// ============================================================================
+
+/**
+ * Get recommended grid columns for viewport
+ * 
+ * Mobile viewports should use fewer columns to avoid cramped layouts.
+ * 
+ * @param {Object} viewport - Viewport dimensions
+ * @param {number} [desiredColumns=3] - Desired column count
+ * @returns {number} Recommended column count
+ */
+export const getRecommendedGridColumns = (viewport, desiredColumns = 3) => {
+  const recommendations = getLayoutRecommendations(viewport);
+  return Math.min(desiredColumns, recommendations.maxGridColumns);
+};
+
+/**
+ * Get recommended row count for viewport
+ * 
+ * @param {Object} viewport - Viewport dimensions
+ * @param {number} [desiredRows=3] - Desired row count
+ * @returns {number} Recommended row count
+ */
+export const getRecommendedGridRows = (viewport, desiredRows = 3) => {
+  const recommendations = getLayoutRecommendations(viewport);
+  return Math.min(desiredRows, recommendations.maxGridRows);
+};
+
+/**
+ * Calculate format-aware grid positions
+ * 
+ * Automatically adjusts columns and gap for mobile viewports.
+ * 
+ * @param {any[]} items - Items to position
+ * @param {Object} config - Configuration
+ * @returns {Array} Calculated positions
+ */
+export const calculateFormatAwareGridPositions = (items, config = {}) => {
+  const {
+    viewport = DEFAULT_VIEWPORT,
+    columns: desiredColumns = 3,
+    gap: desiredGap = 40,
+    ...restConfig
+  } = config;
+  
+  // Adjust for mobile
+  const actualColumns = getRecommendedGridColumns(viewport, desiredColumns);
+  const actualGap = getResponsiveSpacing(desiredGap, viewport);
+  
+  return calculateItemPositions(items, {
+    ...restConfig,
+    arrangement: ARRANGEMENT_TYPES.GRID,
+    viewport,
+    columns: actualColumns,
+    gap: actualGap,
+  });
+};
+
+/**
+ * Check if side-by-side layout is allowed for viewport
+ * 
+ * @param {Object} viewport - Viewport dimensions
+ * @returns {boolean} True if side-by-side is allowed
+ */
+export const isSideBySideAllowed = (viewport) => {
+  const recommendations = getLayoutRecommendations(viewport);
+  return recommendations.sideBySideAllowed !== false;
+};
+
+/**
+ * Get optimal arrangement type for viewport
+ * 
+ * Returns the best arrangement type based on viewport format
+ * and the intended content type.
+ * 
+ * @param {string} intendedArrangement - What the config requests
+ * @param {Object} viewport - Viewport dimensions
+ * @returns {string} Optimal arrangement type
+ */
+export const getOptimalArrangement = (intendedArrangement, viewport) => {
+  if (isDesktopFormat(viewport)) {
+    return intendedArrangement;
+  }
+  
+  // Mobile adjustments
+  const mobileMap = {
+    [ARRANGEMENT_TYPES.STACKED_HORIZONTAL]: ARRANGEMENT_TYPES.STACKED_VERTICAL,
+    // Other arrangements mostly work on mobile
+  };
+  
+  return mobileMap[intendedArrangement] || intendedArrangement;
+};
+
+// ============================================================================
+// RE-EXPORTS FOR CONVENIENCE
+// ============================================================================
+
+// Re-export format detection utilities
+export {
+  detectFormat,
+  isMobileFormat,
+  isDesktopFormat,
+  VIEWPORT_PRESETS,
+} from './viewportPresets';

@@ -1,256 +1,457 @@
+/**
+ * Knodovia Video 2: The Culture Engine Room
+ * 
+ * NARRATIVE ARC:
+ * This video teaches viewers about Knodovian society, values, and daily life.
+ * By the end, viewers should understand:
+ * - The 3 Core Values that drive Knodovian behavior
+ * - Daily rituals and their (strange) purpose
+ * - Social norms and communication styles
+ * - Major holidays and traditions
+ * 
+ * MASCOT: The 'error' lottie represents our quirky guide through Knodovia
+ */
+
 import React from 'react';
 import { AbsoluteFill, Series } from 'remotion';
 import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
 
+const FPS = 30;
 const TRANSITION_FRAMES = 18;
 
-const createBlob = (fillA, fillB) => {
-  const svg = `
-  <svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="grad" cx="50%" cy="50%" r="75%">
-        <stop offset="0%" stop-color="${fillA}" />
-        <stop offset="100%" stop-color="${fillB}" />
-      </radialGradient>
-    </defs>
-    <circle cx="300" cy="300" r="280" fill="url(#grad)" opacity="0.85"/>
-  </svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-};
-
-const BLOB_GOLD = createBlob('#FDE68A', '#F59E0B');
-const BLOB_VIOLET = createBlob('#DDD6FE', '#7C3AED');
-const BLOB_NAVY = createBlob('#BFDBFE', '#2563EB');
-
-const video2Scenes = [
-  {
-    id: 'culture-cold-open',
-    durationInFrames: 360,
-    transition: { type: 'slide', direction: 'down', animationPreset: 'educational' },
-    config: {
-      background: {
-        preset: 'chalkboardGradient',
-        layerNoise: true,
-        particles: {
-          enabled: true,
-          style: 'chalk',
-          count: 12,
-          color: '#E8E4E0', // Soft neutral chalk color
-          opacity: 0.15,
-          speed: 0.5,
+/**
+ * SCENE 1: Cold Open - "Welcome to Culture Class"
+ * INTENTION: Hook the viewer, set the tone (quirky but informative)
+ * DURATION: 12 seconds
+ */
+const scene1_ColdOpen = {
+  id: 'culture-cold-open',
+  durationInFrames: 360,
+  transition: { type: 'slide', direction: 'down' },
+  config: {
+    background: {
+      preset: 'notebookSoft',
+      layerNoise: true,
+      particles: { enabled: true, style: 'sparkle', count: 8, color: '#F59E0B', opacity: 0.15, speed: 0.4 },
+    },
+    layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 100 } },
+    slots: {
+      header: {
+        midScene: 'heroText',
+        stylePreset: 'mentor',
+        config: {
+          text: 'Culture Class',
+          heroType: 'lottie',
+          heroRef: 'error', // Our mascot welcomes you
+          beats: { entrance: 0.3, exit: 10.0 },
         },
       },
-      layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
-      slots: {
-        full: {
+      // Using array pattern: sequence intro → main message (fixed timing - no overlap)
+      row1: [
+        {
           midScene: 'textReveal',
           stylePreset: 'mentor',
           config: {
             lines: [
-              {
-                text: 'Knodovia has culture.',
-                emphasis: 'normal',
-                beats: { start: 0.4, hold: 2.0, exit: 3.0 },
-              },
-              {
-                text: 'Questionable culture, but culture.',
-                emphasis: 'high',
-                beats: { start: 1.2, hold: 3.2, exit: 4.2, emphasis: 1.8 },
-              },
-            ],
-            revealType: 'fade',
-            lineSpacing: 'normal',
-          },
-        },
-      },
-    },
-  },
-  {
-    id: 'culture-daily-rituals',
-    durationInFrames: 660,
-    transition: { type: 'doodle-wipe', direction: 'right' },
-    config: {
-      background: { preset: 'notebookSoft', layerNoise: true },
-      layout: {
-        type: 'rowStack',
-        options: { rows: 2, padding: 60, titleHeight: 80 },
-      },
-      slots: {
-        header: {
-          midScene: 'textReveal',
-          stylePreset: 'playful',
-          config: {
-            lines: [
-              {
-                text: 'Daily rituals (do not skip)',
-                emphasis: 'high',
-                beats: { start: 0.4, hold: 2.2, exit: 3.0 },
-              },
-            ],
-          },
-        },
-        row1: {
-          midScene: 'checklist',
-          stylePreset: 'educational',
-          config: {
-            items: [
-              { text: 'Morning doodle meditation', icon: '🌀', checked: true },
-              { text: 'The Great Idea Swap', icon: '💡', checked: true, animated: true },
-              { text: '3pm Confusion Break', icon: '😵‍💫', checked: false },
-            ],
-            staggerDelay: 0.4,
-            beats: { start: 0.8, hold: 3.8, exit: 4.6 },
-          },
-        },
-        row2: {
-          midScene: 'gridCards',
-          stylePreset: 'focus',
-          config: {
-            cards: [
-              { icon: '📣', label: 'Ask loudly', sublabel: 'Questions have decibels' },
-              { icon: '🤫', label: 'Think quietly', sublabel: 'Echoes disturb the timeline' },
-              { icon: '🌀', label: 'Pretend charts make sense', sublabel: 'They rarely do' },
-            ],
-            columns: 3,
-            animation: 'cascade',
-            beats: { start: 1.6, hold: 4.2, exit: 5.1 },
-          },
-        },
-      },
-    },
-  },
-  {
-    id: 'culture-social-norms',
-    durationInFrames: 660,
-    transition: { type: 'page-turn', direction: 'left' },
-    config: {
-      background: { preset: 'spotlight', spotlight: { x: 60, y: 35, intensity: 0.25 } },
-      layout: {
-        type: 'rowStack',
-        options: { rows: 2, padding: 60, titleHeight: 80 },
-      },
-      slots: {
-        header: {
-          midScene: 'textReveal',
-          stylePreset: 'focus',
-          config: {
-            lines: [
-              { text: 'Social Norms (yes, plural)', emphasis: 'normal', beats: { start: 0.4, hold: 2.5, exit: 3.4 } },
-            ],
-          },
-        },
-        row1: {
-          midScene: 'bubbleCallout',
-          stylePreset: 'playful',
-          config: {
-            collisionDetection: true,
-            jitter: { x: 12, y: 8 },
-            callouts: [
-              { text: '“Ask questions loudly!”', icon: '📢' },
-              { text: '“Think quietly.”', icon: '🤐' },
-              { text: '“Pretend you understand the diagram.”', icon: '📈' },
-            ],
-            beats: { start: 0.9, hold: 4.0, exit: 4.8 },
-          },
-        },
-        row2: {
-          midScene: 'gridCards',
-          stylePreset: 'mentor',
-          config: {
-            cards: [
-              { image: BLOB_GOLD, label: 'Annual Sync Day', sublabel: 'Everyone nods in unison' },
-              { image: BLOB_VIOLET, label: 'Unplug Hour', sublabel: 'Analog doodles only' },
-              { image: BLOB_NAVY, label: 'Week of Mild Productivity', sublabel: 'Metrics drop, morale soars' },
-            ],
-            columns: 3,
-            animation: 'scale',
-            beats: { start: 1.4, hold: 4.2, exit: 5.2 },
-          },
-        },
-      },
-    },
-  },
-  {
-    id: 'culture-holidays',
-    durationInFrames: 600,
-    transition: { type: 'slide', direction: 'right' },
-    config: {
-      background: { preset: 'cleanCard' },
-      layout: {
-        type: 'headerRowColumns',
-        options: { columns: 2, rowHeightRatio: 0.3, padding: 50, titleHeight: 80 },
-      },
-      slots: {
-        header: {
-          midScene: 'textReveal',
-          stylePreset: 'educational',
-          config: {
-            lines: [{ text: 'Holidays (attendance optional, stories mandatory)', emphasis: 'high', beats: { start: 0.4, hold: 2.0, exit: 3.0 } }],
-          },
-        },
-        row: {
-          midScene: 'textReveal',
-          stylePreset: 'playful',
-          config: {
-            lines: [
-              { text: 'Annual Sync Day • Unplug Hour • Mild Productivity Week', emphasis: 'normal', beats: { start: 0.8, hold: 3.0, exit: 4.0 } },
+              { text: 'Knodovia has culture.', emphasis: 'normal', beats: { start: 1.0, exit: 4.0 } },
             ],
             revealType: 'typewriter',
+            animationDuration: 1.0,
           },
         },
-        col1: {
-          midScene: 'gridCards',
-          stylePreset: 'mentor',
+        {
+          midScene: 'textReveal',
+          stylePreset: 'playful',
           config: {
-            cards: [
-              { icon: '📆', label: 'Annual Sync Day', sublabel: 'Entire city exclaims “aligned!”' },
-              { icon: '🔌', label: 'Unplug Hour', sublabel: 'Draw conclusions by hand' },
+            lines: [
+              { text: 'Questionable culture...', emphasis: 'high', beats: { start: 4.5, exit: 7.5, emphasis: 5.0 } },
+              { text: 'but culture nonetheless.', emphasis: 'normal', beats: { start: 6.0, exit: 10.0 } },
             ],
-            columns: 1,
-            animation: 'cascade',
-            beats: { start: 1.2, hold: 3.6, exit: 4.6 },
+            revealType: 'fade',
+            staggerDelay: 0.5,
           },
         },
-        col2: {
-          midScene: 'checklist',
-          stylePreset: 'focus',
-          config: {
-            items: [
-              { text: 'Mild Productivity Week', checked: true },
-              { text: 'Bring your own doodles', checked: false },
-              { text: 'Complimentary animated confetti', checked: true },
-            ],
-            beats: { start: 1.4, hold: 3.8, exit: 4.8 },
-          },
+      ],
+      row2: {
+        midScene: 'textReveal',
+        stylePreset: 'focus',
+        config: {
+          lines: [
+            { text: "Let's begin.", emphasis: 'high', beats: { start: 8.5, exit: 11.0, emphasis: 9.0 } },
+          ],
+          revealType: 'slide',
+          direction: 'up',
         },
       },
     },
   },
-  {
-    id: 'culture-close',
-    durationInFrames: 420,
-    transition: { type: 'eraser' },
-    config: {
-      background: { preset: 'chalkboardGradient' },
-      layout: { type: 'full', options: { padding: 80, titleHeight: 0 } },
-      slots: {
-        full: {
+};
+
+/**
+ * SCENE 2: The Three Core Values
+ * INTENTION: Establish the foundational principles of Knodovian society
+ * LEARNING: Viewers understand what Knodovians prioritize
+ * DURATION: 14 seconds
+ */
+const scene2_CoreValues = {
+  id: 'culture-core-values',
+  durationInFrames: 420,
+  transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+  config: {
+    background: { preset: 'notebookSoft', layerNoise: true },
+    layout: {
+      type: 'rowStack',
+      options: { rows: 2, padding: 50, titleHeight: 90 },
+    },
+    slots: {
+      header: {
+        midScene: 'textReveal',
+        stylePreset: 'educational',
+        config: {
+          lines: [
+            { text: 'The 3 Core Values', emphasis: 'high', beats: { start: 0.3, exit: 12.0, emphasis: 0.8 } },
+          ],
+        },
+      },
+      row1: {
+        midScene: 'gridCards',
+        stylePreset: 'playful',
+        config: {
+          cards: [
+            {
+              icon: '🧠',
+              label: 'Curiosity First',
+              sublabel: 'Questions > Answers',
+              animated: true,
+              beats: { start: 1.0, exit: 12.0 },
+            },
+            {
+              icon: '🤝',
+              label: 'Share Freely',
+              sublabel: 'Knowledge multiplies when given',
+              animated: true,
+              beats: { start: 1.8, exit: 12.0 },
+            },
+            {
+              icon: '🎨',
+              label: 'Embrace Chaos',
+              sublabel: 'Confusion is just pre-learning',
+              animated: true,
+              beats: { start: 2.6, exit: 12.0 },
+            },
+          ],
+          columns: 3,
+          animation: 'cascade',
+          showLabels: true,
+        },
+      },
+      // Slot array: mascot appears to comment on values
+      row2: [
+        {
+          midScene: 'heroText',
+          stylePreset: 'focus',
+          config: {
+            text: 'Simple, right?',
+            heroType: 'lottie',
+            heroRef: 'error',
+            beats: { entrance: 4.5, exit: 8.0 },
+          },
+        },
+        {
           midScene: 'textReveal',
           stylePreset: 'mentor',
           config: {
             lines: [
-              { text: 'Culture is what you tolerate.', emphasis: 'normal', beats: { start: 0.5, hold: 2.0, exit: 3.0 } },
-              { text: "You'll fit right in.", emphasis: 'high', beats: { start: 1.5, hold: 3.2, exit: 4.0, emphasis: 2.2 } },
-              { text: 'Next episode: Knodovian Economics.', emphasis: 'normal', beats: { start: 2.2, hold: 3.5, exit: 4.5 } },
+              { text: 'Now for the weird part...', emphasis: 'high', beats: { start: 9.0, exit: 13.0, emphasis: 9.5 } },
+            ],
+            revealType: 'fade',
+          },
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * SCENE 3: Daily Rituals
+ * INTENTION: Show how values translate into daily practice
+ * LEARNING: Understand the rhythm of Knodovian life
+ * DURATION: 16 seconds
+ */
+const scene3_DailyRituals = {
+  id: 'culture-daily-rituals',
+  durationInFrames: 480,
+  transition: { type: 'page-turn', direction: 'right' },
+  config: {
+    background: { preset: 'cleanCard', layerNoise: true },
+    layout: {
+      type: 'rowStack',
+      options: { rows: 2, padding: 50, titleHeight: 80 },
+    },
+    slots: {
+      header: {
+        midScene: 'textReveal',
+        stylePreset: 'playful',
+        config: {
+          lines: [
+            { text: 'A Day in Knodovia', emphasis: 'high', beats: { start: 0.3, exit: 14.0, emphasis: 0.8 } },
+          ],
+        },
+      },
+      row1: {
+        midScene: 'checklist',
+        stylePreset: 'educational',
+        config: {
+          items: [
+            { text: '🌅 Morning: "The Idea Dump" — write 3 random thoughts', checked: true, beats: { start: 1.2 } },
+            { text: '☕ Midday: "The Great Question" — ask something you don\'t know', checked: true, beats: { start: 2.4 } },
+            { text: '🌀 3pm: "Confusion Break" — intentionally get confused about something', checked: false, beats: { start: 3.6 } },
+            { text: '🌙 Evening: "The Knowledge Gift" — teach someone one thing', checked: true, beats: { start: 4.8 } },
+          ],
+          icon: 'lottieCheck',
+          staggerDelay: 0.5,
+          beats: { start: 1.0, exit: 14.0 },
+        },
+      },
+      row2: [
+        {
+          midScene: 'heroText',
+          stylePreset: 'mentor',
+          config: {
+            text: 'Yes, confusion is scheduled.',
+            heroType: 'lottie',
+            heroRef: 'error',
+            beats: { entrance: 7.0, exit: 11.0 },
+          },
+        },
+        {
+          midScene: 'textReveal',
+          stylePreset: 'focus',
+          config: {
+            lines: [
+              { text: "It's called growth.", emphasis: 'high', beats: { start: 11.5, exit: 15.0, emphasis: 12.0 } },
             ],
             revealType: 'slide',
             direction: 'up',
-            staggerDelay: 0.4,
           },
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * SCENE 4: Social Norms & Communication
+ * INTENTION: Teach the unwritten rules of Knodovian interaction
+ * LEARNING: How to "speak Knodovian"
+ * DURATION: 14 seconds
+ */
+const scene4_SocialNorms = {
+  id: 'culture-social-norms',
+  durationInFrames: 420,
+  transition: { type: 'slide', direction: 'left' },
+  config: {
+    background: { preset: 'spotlight', spotlight: { x: 50, y: 45, intensity: 0.3 } },
+    layout: {
+      type: 'rowStack',
+      options: { rows: 3, padding: 50, titleHeight: 80 },
+    },
+    slots: {
+      header: {
+        midScene: 'textReveal',
+        stylePreset: 'focus',
+        config: {
+          lines: [
+            { text: 'How to Speak Knodovian', emphasis: 'high', beats: { start: 0.3, exit: 12.0 } },
+          ],
+        },
+      },
+      row1: {
+        midScene: 'gridCards',
+        stylePreset: 'playful',
+        config: {
+          cards: [
+            { icon: '📣', label: 'ASK LOUDLY', sublabel: 'Questions have decibels', beats: { start: 1.0, exit: 12.0 } },
+            { icon: '🤫', label: 'Think quietly', sublabel: 'Ideas need silence', beats: { start: 1.6, exit: 12.0 } },
+          ],
+          columns: 2,
+          animation: 'bounce',
+        },
+      },
+      row2: {
+        midScene: 'bubbleCallout',
+        stylePreset: 'educational',
+        config: {
+          callouts: [
+            { text: '"Wait, can you explain that differently?"', icon: '🙋', beats: { start: 3.0, exit: 7.0 } },
+            { text: '"I understood nothing and I\'m okay with that."', icon: '😌', beats: { start: 5.0, exit: 9.0 } },
+            { text: '"Let me draw you a confusing diagram."', icon: '📊', beats: { start: 7.0, exit: 11.0 } },
+          ],
+          jitter: { x: 10, y: 6 },
+          beats: { start: 2.8, exit: 12.0 },
+        },
+      },
+      row3: {
+        midScene: 'textReveal',
+        stylePreset: 'mentor',
+        config: {
+          lines: [
+            { text: 'Common phrases in Knodovia ☝️', emphasis: 'normal', beats: { start: 2.5, exit: 12.0 } },
+          ],
+          revealType: 'fade',
         },
       },
     },
   },
+};
+
+/**
+ * SCENE 5: Holidays & Celebrations
+ * INTENTION: Show the fun side of Knodovian culture
+ * LEARNING: Major events that bring Knodovians together
+ * DURATION: 14 seconds
+ */
+const scene5_Holidays = {
+  id: 'culture-holidays',
+  durationInFrames: 420,
+  transition: { type: 'doodle-wipe', direction: 'right' },
+  config: {
+    background: { preset: 'sunriseGradient', layerNoise: true },
+    layout: {
+      type: 'rowStack',
+      options: { rows: 2, padding: 50, titleHeight: 90 },
+    },
+    slots: {
+      header: {
+        midScene: 'textReveal',
+        stylePreset: 'playful',
+        config: {
+          lines: [
+            { text: 'Knodovian Holidays 🎉', emphasis: 'high', beats: { start: 0.3, exit: 12.0, emphasis: 0.8 } },
+          ],
+        },
+      },
+      row1: {
+        midScene: 'gridCards',
+        stylePreset: 'educational',
+        config: {
+          cards: [
+            {
+              icon: '🔄',
+              label: 'Sync Day',
+              sublabel: 'Everyone shouts "ALIGNED!" at noon',
+              animated: true,
+              beats: { start: 1.2, exit: 12.0 },
+            },
+            {
+              icon: '🔌',
+              label: 'Unplug Hour',
+              sublabel: 'Draw conclusions by hand (literally)',
+              animated: true,
+              beats: { start: 2.0, exit: 12.0 },
+            },
+            {
+              icon: '📉',
+              label: 'Productivity Week',
+              sublabel: 'Do less, learn more. Metrics hate it.',
+              animated: true,
+              beats: { start: 2.8, exit: 12.0 },
+            },
+          ],
+          columns: 3,
+          animation: 'cascade',
+        },
+      },
+      row2: [
+        {
+          midScene: 'heroText',
+          stylePreset: 'focus',
+          config: {
+            text: 'Attendance optional.',
+            heroType: 'lottie',
+            heroRef: 'error',
+            beats: { entrance: 5.0, exit: 9.0 },
+          },
+        },
+        {
+          midScene: 'textReveal',
+          stylePreset: 'mentor',
+          config: {
+            lines: [
+              { text: 'Stories mandatory.', emphasis: 'high', beats: { start: 9.5, exit: 13.0, emphasis: 10.0 } },
+            ],
+            revealType: 'slide',
+            direction: 'up',
+          },
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * SCENE 6: Closing & Teaser
+ * INTENTION: Summarize learnings, tease next video
+ * DURATION: 12 seconds
+ */
+const scene6_Close = {
+  id: 'culture-close',
+  durationInFrames: 360,
+  transition: { type: 'eraser' },
+  config: {
+    background: { preset: 'cleanCard', layerNoise: true },
+    layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 0 } },
+    slots: {
+      row1: [
+        {
+          midScene: 'textReveal',
+          stylePreset: 'mentor',
+          config: {
+            lines: [
+              { text: 'Culture is what you tolerate.', emphasis: 'normal', beats: { start: 0.5, exit: 4.5 } },
+              { text: "In Knodovia, we tolerate a lot.", emphasis: 'high', beats: { start: 2.0, exit: 6.0, emphasis: 2.5 } },
+            ],
+            revealType: 'fade',
+            staggerDelay: 0.6,
+            lineSpacing: 'relaxed',
+          },
+        },
+        {
+          midScene: 'heroText',
+          stylePreset: 'focus',
+          config: {
+            text: "You'll fit right in.",
+            heroType: 'lottie',
+            heroRef: 'error',
+            beats: { entrance: 5.5, exit: 10.0 },
+          },
+        },
+      ],
+      row2: {
+        midScene: 'textReveal',
+        stylePreset: 'playful',
+        config: {
+          lines: [
+            { text: 'NEXT: The Knodovian Economy 💰', emphasis: 'high', beats: { start: 8.0, exit: 11.0, emphasis: 8.5 } },
+            { text: "(It's bonkers.)", emphasis: 'normal', beats: { start: 9.5, exit: 11.5 } },
+          ],
+          revealType: 'slide',
+          direction: 'up',
+          staggerDelay: 0.4,
+        },
+      },
+    },
+  },
+};
+
+// Assemble all scenes
+const video2Scenes = [
+  scene1_ColdOpen,
+  scene2_CoreValues,
+  scene3_DailyRituals,
+  scene4_SocialNorms,
+  scene5_Holidays,
+  scene6_Close,
 ];
 
 export const KNODOVIA_VIDEO2_DURATION = video2Scenes.reduce(

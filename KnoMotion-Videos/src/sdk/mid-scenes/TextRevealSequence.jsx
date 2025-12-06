@@ -38,22 +38,31 @@ const getLineSpacing = (spacingType = 'normal') => {
   return spacingMap[spacingType] || spacingMap.normal;
 };
 
+/**
+ * Get decoration style for text emphasis
+ * NOTE: Borders removed as they cause visual collisions and don't fit the aesthetic.
+ * Using subtle shadows and highlights instead.
+ */
 const getDecorationStyle = (decoration, color) => {
+  const accentColor = color || KNODE_THEME.colors.doodle;
   switch (decoration) {
     case 'underline':
+      // Soft glow underline effect instead of hard border
       return {
-        borderBottom: `3px solid ${color || KNODE_THEME.colors.doodle}`,
-        paddingBottom: 6,
+        textShadow: `0 2px 8px ${accentColor}40`,
+        paddingBottom: 4,
       };
     case 'highlight':
       return {
-        boxShadow: `inset 0 -14px 0 ${color ? `${color}33` : `${KNODE_THEME.colors.doodle}33`}`,
+        boxShadow: `inset 0 -14px 0 ${accentColor}25`,
       };
     case 'circle':
+      // Soft glow circle effect instead of hard border
       return {
-        padding: '6px 12px',
-        border: `2px solid ${color || KNODE_THEME.colors.doodle}`,
+        padding: '6px 16px',
+        background: `${accentColor}12`,
         borderRadius: 40,
+        boxShadow: `0 0 20px ${accentColor}20`,
       };
     default:
       return {};
@@ -203,8 +212,14 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
   const lineSpacingValue = getLineSpacing(lineSpacing);
   const viewport = { width, height };
 
-  // Calculate base font size and line height
-  const baseFontSize = 48;
+  // Calculate base font size - BOOSTED and viewport-aware
+  // Mobile (portrait): scale up for impact
+  // Desktop (landscape): generous sizing
+  const isMobile = height > width;
+  const baseDesktopSize = 64; // Up from 48
+  const baseFontSize = isMobile 
+    ? Math.round(baseDesktopSize * 1.15) // 15% larger on mobile
+    : baseDesktopSize;
   const lineHeight = baseFontSize * lineSpacingValue;
 
   // Calculate positions using layout engine (STACKED_VERTICAL)

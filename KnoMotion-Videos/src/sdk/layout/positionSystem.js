@@ -4,16 +4,39 @@
  * Provides a declarative positioning system based on semantic tokens.
  * Supports multiple precision levels: grid tokens → offsets → percentages → absolute pixels.
  * 
+ * UPDATED: Now supports dynamic viewport-aware positioning for mobile/desktop formats.
+ * 
  * @module positionSystem
  * @category SDK
  * @subcategory Agnostic Template System
  */
 
+import {
+  calculatePositionGrid,
+  VIEWPORT_PRESETS,
+  DEFAULT_FORMAT,
+  detectFormat,
+  isMobileFormat,
+} from './viewportPresets';
+
+/**
+ * Viewport configuration
+ * Default 16:9 HD resolution (desktop)
+ * 
+ * For mobile, use { width: 1080, height: 1920 } or import from viewportPresets
+ */
+export const DEFAULT_VIEWPORT = {
+  width: VIEWPORT_PRESETS.desktop.width,
+  height: VIEWPORT_PRESETS.desktop.height,
+};
+
 /**
  * 9-Point Grid Reference System
- * Standard positions for 16:9 aspect ratio (1920x1080)
  * 
- * Layout:
+ * LEGACY: Static grid for 16:9 aspect ratio (1920x1080)
+ * For dynamic viewport-aware positioning, use getPositionGrid(viewport) instead.
+ * 
+ * Layout (desktop 1920x1080):
  * ```
  * top-left        top-center        top-right
  * (320, 180)      (960, 180)        (1600, 180)
@@ -24,41 +47,53 @@
  * bottom-left     bottom-center     bottom-right
  * (320, 900)      (960, 900)        (1600, 900)
  * ```
+ * 
+ * @deprecated Use getPositionGrid(viewport) for format-aware positioning
  */
-export const POSITION_GRID = {
-  'top-left': { x: 320, y: 180 },
-  'top-center': { x: 960, y: 180 },
-  'top-right': { x: 1600, y: 180 },
-  'center-left': { x: 320, y: 540 },
-  'center': { x: 960, y: 540 },
-  'center-right': { x: 1600, y: 540 },
-  'bottom-left': { x: 320, y: 900 },
-  'bottom-center': { x: 960, y: 900 },
-  'bottom-right': { x: 1600, y: 900 },
-};
+export const POSITION_GRID = calculatePositionGrid(DEFAULT_VIEWPORT);
 
 /**
- * Viewport configuration
- * Default 16:9 HD resolution
+ * Get dynamic position grid for a specific viewport
+ * 
+ * This is the recommended way to get grid positions as it adapts
+ * to both desktop (1920x1080) and mobile (1080x1920) formats.
+ * 
+ * @param {Object} viewport - Viewport dimensions { width, height }
+ * @returns {Object} Map of grid position names to {x, y} coordinates
+ * 
+ * @example
+ * // Desktop
+ * const desktopGrid = getPositionGrid({ width: 1920, height: 1080 });
+ * desktopGrid.center // → { x: 960, y: 540 }
+ * 
+ * // Mobile
+ * const mobileGrid = getPositionGrid({ width: 1080, height: 1920 });
+ * mobileGrid.center // → { x: 540, y: 960 }
  */
-export const DEFAULT_VIEWPORT = {
-  width: 1920,
-  height: 1080
+export const getPositionGrid = (viewport = DEFAULT_VIEWPORT) => {
+  return calculatePositionGrid(viewport);
 };
 
 /**
  * Resolve position token to absolute coordinates
  * Supports multiple input formats for progressive configuration
  * 
+ * NOW VIEWPORT-AWARE: Uses dynamic grid positions based on viewport dimensions.
+ * 
  * @param {string|Object} token - Position specification
  * @param {Object} offset - Optional offset from grid position
- * @param {Object} viewport - Viewport dimensions
+ * @param {Object} viewport - Viewport dimensions { width, height }
  * @returns {Object} Absolute position {x, y}
  * 
  * @example
- * // Simple grid token
- * resolvePosition('center') 
+ * // Simple grid token (desktop)
+ * resolvePosition('center', {}, { width: 1920, height: 1080 }) 
  * // => { x: 960, y: 540 }
+ * 
+ * @example
+ * // Simple grid token (mobile)
+ * resolvePosition('center', {}, { width: 1080, height: 1920 }) 
+ * // => { x: 540, y: 960 }
  * 
  * @example
  * // Grid with offset
@@ -76,15 +111,18 @@ export const DEFAULT_VIEWPORT = {
  * // => { x: 800, y: 400 }
  */
 export const resolvePosition = (token, offset = { x: 0, y: 0 }, viewport = DEFAULT_VIEWPORT) => {
+  // Get dynamic position grid for this viewport
+  const positionGrid = getPositionGrid(viewport);
+  
   // Format 1: Simple grid token string
   if (typeof token === 'string') {
-    const gridPos = POSITION_GRID[token];
+    const gridPos = positionGrid[token];
     
     if (!gridPos) {
       console.warn(`Unknown position token: "${token}". Using center.`);
       return {
-        x: POSITION_GRID['center'].x + offset.x,
-        y: POSITION_GRID['center'].y + offset.y
+        x: positionGrid['center'].x + offset.x,
+        y: positionGrid['center'].y + offset.y
       };
     }
     
@@ -96,13 +134,13 @@ export const resolvePosition = (token, offset = { x: 0, y: 0 }, viewport = DEFAU
   
   // Format 2: Grid + offset object
   if (token.grid) {
-    const gridPos = POSITION_GRID[token.grid];
+    const gridPos = positionGrid[token.grid];
     
     if (!gridPos) {
       console.warn(`Unknown position grid: "${token.grid}". Using center.`);
       return {
-        x: POSITION_GRID['center'].x + (token.offset?.x || 0),
-        y: POSITION_GRID['center'].y + (token.offset?.y || 0)
+        x: positionGrid['center'].x + (token.offset?.x || 0),
+        y: positionGrid['center'].y + (token.offset?.y || 0)
       };
     }
     
@@ -130,7 +168,7 @@ export const resolvePosition = (token, offset = { x: 0, y: 0 }, viewport = DEFAU
   
   // Fallback to center
   console.warn('Invalid position token format. Using center.', token);
-  return POSITION_GRID['center'];
+  return positionGrid['center'];
 };
 
 /**
@@ -311,10 +349,12 @@ export const clampPosition = (position, viewport = DEFAULT_VIEWPORT) => {
  * Get all available grid token names
  * Useful for UI builders and validation
  * 
+ * @param {Object} viewport - Optional viewport for format-specific tokens
  * @returns {Array<string>} Array of grid token names
  */
-export const getGridTokens = () => {
-  return Object.keys(POSITION_GRID);
+export const getGridTokens = (viewport = DEFAULT_VIEWPORT) => {
+  const grid = getPositionGrid(viewport);
+  return Object.keys(grid);
 };
 
 /**
@@ -322,16 +362,19 @@ export const getGridTokens = () => {
  * Checks if a position token is valid
  * 
  * @param {string|Object} token - Position token to validate
+ * @param {Object} viewport - Optional viewport for format-specific validation
  * @returns {boolean} True if valid
  */
-export const isValidPositionToken = (token) => {
+export const isValidPositionToken = (token, viewport = DEFAULT_VIEWPORT) => {
+  const grid = getPositionGrid(viewport);
+  
   if (typeof token === 'string') {
-    return token in POSITION_GRID;
+    return token in grid;
   }
   
   if (token && typeof token === 'object') {
     if (token.grid) {
-      return token.grid in POSITION_GRID;
+      return token.grid in grid;
     }
     
     if (token.x !== undefined && token.y !== undefined) {
@@ -390,3 +433,15 @@ export const POSITION_PRESETS = {
   contentCenter: 'center',
   contentBottom: { grid: 'bottom-center', offset: { x: 0, y: -100 } }
 };
+
+// ============================================================================
+// RE-EXPORTS FROM VIEWPORT PRESETS
+// ============================================================================
+
+// Re-export viewport preset utilities for convenience
+export {
+  detectFormat,
+  isMobileFormat,
+  VIEWPORT_PRESETS,
+  DEFAULT_FORMAT,
+} from './viewportPresets';

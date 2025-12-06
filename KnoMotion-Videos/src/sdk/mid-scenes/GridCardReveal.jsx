@@ -86,13 +86,14 @@ const getCardAnimationStyle = (animationType, frame, startFrame, durationFrames,
 };
 
 /**
- * Map card size based on dimensions
+ * Map card size based on dimensions - BOOSTED for bolder text
+ * Never returns 'sm' to ensure readable labels
  */
 const getCardSize = (cardWidth, cardHeight) => {
   const minDim = Math.min(cardWidth, cardHeight);
-  if (minDim < 120) return 'sm';
-  if (minDim < 200) return 'md';
-  return 'lg';
+  // Raised thresholds - prefer 'lg' for impact, never go below 'md'
+  if (minDim < 180) return 'md'; // Was 'sm' - now minimum is 'md'
+  return 'lg'; // Everything else gets 'lg' for max impact
 };
 
 /**
@@ -189,17 +190,34 @@ export const GridCardReveal = ({ config, stylePreset }) => {
     top: position?.top || 0,
   };
 
+  // Detect mobile format for responsive adjustments
+  const isMobile = height > width;
+
   // Auto-calculate columns based on card count and slot dimensions
-  const columns = customColumns || Math.min(
+  // Mobile: limit to 2 columns max for readability
+  const autoColumns = Math.min(
     Math.ceil(Math.sqrt(cards.length)),
     Math.max(2, Math.floor(slot.width / 150))
   );
+  const columns = customColumns 
+    ? (isMobile ? Math.min(customColumns, 2) : customColumns)
+    : (isMobile ? Math.min(autoColumns, 2) : autoColumns);
   const rows = Math.ceil(cards.length / columns);
 
-  // Calculate gap and card dimensions
-  const gap = customGap || Math.min(20, slot.width * 0.02);
+  // Calculate gap and card dimensions - BOOSTED gaps for mobile
+  const baseGap = customGap || Math.min(24, slot.width * 0.025);
+  const gap = isMobile ? Math.max(baseGap, 16) : baseGap;
   const cardWidth = (slot.width - gap * (columns + 1)) / columns;
   const cardHeight = (slot.height - gap * (rows + 1)) / rows;
+  
+  // Determine card size preset based on dimensions - bias toward larger
+  const getCardSizePreset = () => {
+    const minDim = Math.min(cardWidth, cardHeight);
+    if (minDim >= 250) return 'lg';
+    if (minDim >= 150) return 'md';
+    return 'md'; // Never go to 'sm' - keep text readable
+  };
+  const cardSizePreset = getCardSizePreset();
 
   // Calculate positions using layout engine
   const layoutConfig = {
@@ -295,9 +313,10 @@ export const GridCardReveal = ({ config, stylePreset }) => {
                   imageRounded={card.imageRounded}
                   label={showLabels ? card.label : undefined}
                   sublabel={showLabels ? card.sublabel : undefined}
-                  animated={card.animated}
+                  animated={card.animated !== false} // Always animate icons unless explicitly disabled
                   accentColor={card.color}
-                  layout="vertical"
+                  // Let InfoCard auto-detect layout: horizontal for icons (side-by-side), vertical for images
+                  layout={card.layout}
                   variant={card.variant || resolvedCardVariant}
                   size={cardSize}
                   cardWidth={currentCardWidth}
