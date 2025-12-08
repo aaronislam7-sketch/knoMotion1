@@ -188,6 +188,61 @@ Document personalised choices in your scene JSON so future agents can follow the
 - `TEMPLATES.md` – survey of legacy and V6 templates
 - `CONFIGURATION.md` – JSON schema and validation notes
 
+## 🎬 Rendering MP4 Videos Locally
+
+Export compositions to MP4 files using the Remotion CLI.
+
+### Prerequisites
+1. **System dependencies** (Ubuntu/Debian) – Chrome Headless Shell requires:
+   ```bash
+   sudo apt-get install -y \
+     libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libxcomposite1 \
+     libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 \
+     libpango-1.0-0 libcairo2 libasound2t64 libnspr4 libnss3
+   ```
+   *(On older Ubuntu versions, drop the `t64` suffix from package names)*
+
+2. **Install dependencies** – Ensure all npm packages are installed:
+   ```bash
+   npm install
+   ```
+
+### Render a Video
+Use the Remotion CLI with the entry point and composition ID:
+
+```bash
+npx remotion render KnoMotion-Videos/src/remotion/index.ts <CompositionId> out/<filename>.mp4
+```
+
+**Available Composition IDs:**
+| Composition ID | Description |
+|----------------|-------------|
+| `TikTokBrainLies` | Your Brain Lies to You Every Day (mobile) |
+| `TikTokADHD` | Why ADHD Brains Are Actually Overpowered (mobile) |
+| `TikTok80msDelay` | You're Not in the Present (mobile) |
+| `KnodoviaAccidentalArrival` | Knodovia Intro (desktop) |
+| `KnodoviaAccidentalArrivalMobile` | Knodovia Intro (mobile) |
+| `KnodoviaCulture` | Knodovia Culture (desktop) |
+| `KnodoviaCultureMobile` | Knodovia Culture (mobile) |
+| `KnodoviaEconomics` | Knodovia Economics (desktop) |
+| `KnodoviaEconomicsMobile` | Knodovia Economics (mobile) |
+
+**Example:**
+```bash
+npx remotion render KnoMotion-Videos/src/remotion/index.ts TikTokBrainLies out/brain-lies.mp4
+```
+
+### NPM Scripts
+Convenience scripts are available in `package.json`:
+```bash
+npm run render:tiktok-brain   # Renders TikTokBrainLies
+npm run render:tiktok-adhd    # Renders TikTokADHD
+npm run render:tiktok-80ms    # Renders TikTok80msDelay
+```
+
+### Output
+Rendered videos are saved to the `out/` directory (git-ignored).
+
 ## 🛠️ Troubleshooting Cheatsheet
 - **Multiple Remotion versions** – ensure `@remotion/*` dependencies share the same version
 - **Missing Lottie** – check the key exists in `LOTTIE_REGISTRY`. Dev mode logs warnings.
