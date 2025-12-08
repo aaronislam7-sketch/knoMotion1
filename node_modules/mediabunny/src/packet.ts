@@ -8,7 +8,7 @@
 
 import { SECOND_TO_MICROSECOND_FACTOR } from './misc';
 
-export const PLACEHOLDER_DATA = new Uint8Array(0);
+export const PLACEHOLDER_DATA = /* #__PURE__ */ new Uint8Array(0);
 
 /**
  * The type of a packet. Key packets can be decoded without previous packets, while delta packets depend on previous
@@ -126,7 +126,10 @@ export class EncodedPacket {
 		}
 	}
 
-	/** If this packet is a metadata-only packet. Metadata-only packets don't contain their packet data. */
+	/**
+	 * If this packet is a metadata-only packet. Metadata-only packets don't contain their packet data. They are the
+	 * result of retrieving packets with {@link PacketRetrievalOptions.metadataOnly} set to `true`.
+	 */
 	get isMetadataOnly() {
 		return this.data === PLACEHOLDER_DATA;
 	}

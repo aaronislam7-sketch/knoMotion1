@@ -8,17 +8,15 @@ export default defineConfig({
   },
   optimizeDeps: {
     // Include remotion packages explicitly to avoid stale cache issues
-    // This ensures Vite properly detects and pre-bundles remotion dependencies
     include: [
       'remotion',
-      '@remotion/google-fonts',
       '@remotion/fonts',
       '@remotion/player',
       '@remotion/tailwind',
       '@remotion/transitions',
     ],
-    // Exclude problematic packages from pre-bundling if needed
-    exclude: [],
+    // Exclude google-fonts from pre-bundling due to dynamic imports with missing files
+    exclude: ['@remotion/google-fonts'],
     // Use esbuild options for better compatibility
     esbuildOptions: {
       target: 'es2020',

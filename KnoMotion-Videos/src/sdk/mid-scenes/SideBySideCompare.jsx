@@ -516,8 +516,13 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
     beats = {},
     position,
     style = {},
+    // Format can be explicitly set or auto-detected from viewport
+    _format,
   } = config;
   const preset = resolveStylePreset(stylePreset);
+  
+  // Auto-detect mobile format from viewport or explicit config
+  const isMobile = _format === 'mobile' || height > width;
 
   // Validate required fields
   if (mode !== 'beforeAfter' && !left.title && !right.title) {
@@ -582,54 +587,74 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
           width: slot.width,
           height: slot.height,
           display: 'flex',
-          flexDirection: 'row',
+          // Mobile: stack vertically (top/bottom), Desktop: side by side (left/right)
+          flexDirection: isMobile ? 'column' : 'row',
           ...style.container,
         }}
       >
-        {/* Left side */}
+        {/* Left side (or Top on mobile) */}
         <ComparisonSide
-          config={{ ...left, alignment }}
-          side="left"
+          config={{ ...left, alignment: isMobile ? 'center' : alignment }}
+          side={isMobile ? 'top' : 'left'}
           animStyle={leftAnimStyle}
           baseFontSize={baseFontSize}
-          slotHeight={slot.height}
+          slotHeight={isMobile ? slot.height / 2 : slot.height}
           style={style}
           textColorKey={preset.textColor}
         />
 
-        {/* Right side */}
+        {/* Right side (or Bottom on mobile) */}
         <ComparisonSide
-          config={{ ...right, alignment }}
-          side="right"
+          config={{ ...right, alignment: isMobile ? 'center' : alignment }}
+          side={isMobile ? 'bottom' : 'right'}
           animStyle={rightAnimStyle}
           baseFontSize={baseFontSize}
-          slotHeight={slot.height}
+          slotHeight={isMobile ? slot.height / 2 : slot.height}
           style={style}
           textColorKey={preset.textColor}
         />
       </div>
 
       {/* Divider (positioned absolutely over the container) */}
-      <div
-        style={{
-          position: 'absolute',
-          left: slot.left,
-          top: slot.top,
-          width: slot.width,
-          height: slot.height,
-          pointerEvents: 'none',
-        }}
-      >
-        <VsDivider
-          type={dividerType}
-          label={dividerLabel}
-          color={resolvedDividerColor}
-          animStyle={dividerAnimStyle}
-          slotHeight={slot.height}
-          baseFontSize={baseFontSize}
-          style={style}
+      {!isMobile && (
+        <div
+          style={{
+            position: 'absolute',
+            left: slot.left,
+            top: slot.top,
+            width: slot.width,
+            height: slot.height,
+            pointerEvents: 'none',
+          }}
+        >
+          <VsDivider
+            type={dividerType}
+            label={dividerLabel}
+            color={resolvedDividerColor}
+            animStyle={dividerAnimStyle}
+            slotHeight={slot.height}
+            baseFontSize={baseFontSize}
+            style={style}
+          />
+        </div>
+      )}
+      
+      {/* Horizontal divider for mobile */}
+      {isMobile && dividerType !== 'none' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: slot.left + slot.width * 0.1,
+            top: slot.top + slot.height / 2,
+            width: slot.width * 0.8,
+            height: 3,
+            backgroundColor: `${resolvedDividerColor}40`,
+            transform: 'translateY(-50%)',
+            opacity: dividerAnimStyle.opacity,
+            pointerEvents: 'none',
+          }}
         />
-      </div>
+      )}
     </AbsoluteFill>
   );
 };

@@ -8,10 +8,12 @@
 
 import { parsePcmCodec, PCM_AUDIO_CODECS, PcmAudioCodec, VideoCodec, AudioCodec } from './codec';
 import {
+	deserializeAvcDecoderConfigurationRecord,
 	determineVideoPacketType,
 	extractHevcNalUnits,
 	extractNalUnitTypeForHevc,
 	HevcNalUnitType,
+	parseAvcSps,
 } from './codec-data';
 import { CustomVideoDecoder, customVideoDecoders, CustomAudioDecoder, customAudioDecoders } from './custom-coder';
 import { InputDisposedError } from './input';
@@ -24,15 +26,17 @@ import {
 	getInt24,
 	getUint24,
 	insertSorted,
+	isChromium,
 	isFirefox,
 	isNumber,
-	isSafari,
+	isWebKit,
 	last,
 	mapAsyncGenerator,
 	promiseWithResolvers,
 	Rotation,
 	toAsyncIterator,
 	toDataView,
+	toUint8Array,
 	validateAnyIterable,
 } from './misc';
 import { EncodedPacket } from './packet';
@@ -872,6 +876,22 @@ class VideoDecoderWrapper extends DecoderWrapper<VideoSample> {
 				}
 			};
 
+			if (codec === 'avc' && this.decoderConfig.description && isChromium()) {
+				// Chromium has/had a bug with playing interlaced AVC (https://issues.chromium.org/issues/456919096)
+				// which can be worked around by requesting that software decoding be used. So, here we peek into the
+				// AVC description, if present, and switch to software decoding if we find interlaced content.
+				const record = deserializeAvcDecoderConfigurationRecord(toUint8Array(this.decoderConfig.description));
+				if (record && record.sequenceParameterSets.length > 0) {
+					const sps = parseAvcSps(record.sequenceParameterSets[0]!);
+					if (sps && sps.frameMbsOnlyFlag === 0) {
+						this.decoderConfig = {
+							...this.decoderConfig,
+							hardwareAcceleration: 'prefer-software',
+						};
+					}
+				}
+			}
+
 			this.decoder = new VideoDecoder({
 				output: (frame) => {
 					try {
@@ -882,7 +902,7 @@ class VideoDecoderWrapper extends DecoderWrapper<VideoSample> {
 				},
 				error: onError,
 			});
-			this.decoder.configure(decoderConfig);
+			this.decoder.configure(this.decoderConfig);
 		}
 	}
 
@@ -918,7 +938,7 @@ class VideoDecoderWrapper extends DecoderWrapper<VideoSample> {
 		} else {
 			assert(this.decoder);
 
-			if (!isSafari()) {
+			if (!isWebKit()) {
 				insertSorted(this.inputTimestamps, packet.timestamp, x => x);
 			}
 
@@ -1049,7 +1069,7 @@ class VideoDecoderWrapper extends DecoderWrapper<VideoSample> {
 
 	/** Handler for the WebCodecs VideoDecoder for ironing out browser differences. */
 	sampleHandler(sample: VideoSample) {
-		if (isSafari()) {
+		if (isWebKit()) {
 			// For correct B-frame handling, we don't just hand over the frames directly but instead add them to
 			// a queue, because we want to ensure frames are emitted in presentation order. We flush the queue
 			// each time we receive a frame with a timestamp larger than the highest we've seen so far, as we
@@ -1137,7 +1157,7 @@ class VideoDecoderWrapper extends DecoderWrapper<VideoSample> {
 			this.alphaRaslSkipped = false;
 		}
 
-		if (isSafari()) {
+		if (isWebKit()) {
 			for (const sample of this.sampleQueue) {
 				this.finalizeAndEmitSample(sample);
 			}

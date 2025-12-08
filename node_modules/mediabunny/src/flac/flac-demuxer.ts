@@ -28,7 +28,7 @@ import {
 	readU32Be,
 	readU8,
 } from '../reader';
-import { MetadataTags } from '../tags';
+import { DEFAULT_TRACK_DISPOSITION, MetadataTags } from '../metadata';
 import {
 	calculateCrc8,
 	readBlockSize,
@@ -328,25 +328,45 @@ export class FlacDemuxer extends Demuxer {
 
 			const nextByte = readU8(slice);
 			if (nextByte === 0xff) {
+				const positionBeforeReading = slice.filePos;
+
 				const byteAfterNextByte = readU8(slice);
 
 				const expected = this.blockingBit === 1 ? 0b1111_1001 : 0b1111_1000;
 				if (byteAfterNextByte !== expected) {
-					slice.skip(-1);
+					slice.filePos = positionBeforeReading;
 					continue;
 				}
 
 				slice.skip(-2);
 				const lengthIfNextFlacFrameHeaderIsLegit = slice.filePos - startPos;
 
-				const nextIsLegit = this.readFlacFrameHeader({
+				const nextFrameHeader = this.readFlacFrameHeader({
 					slice,
 					isFirstPacket: false,
 				});
 
-				if (!nextIsLegit) {
-					slice.skip(-1);
+				if (!nextFrameHeader) {
+					slice.filePos = positionBeforeReading;
 					continue;
+				}
+
+				// Ensure the frameOrSampleNum is consecutive.
+				// https://github.com/Vanilagy/mediabunny/issues/194
+
+				if (this.blockingBit === 0) {
+					// Case A: If the stream is fixed block size, this is the frame number, which increments by 1
+					if (nextFrameHeader.num - frameHeader.num !== 1) {
+						slice.filePos = positionBeforeReading;
+						continue;
+					}
+				} else {
+					// Case B: If the stream is variable block size, this is the sample number, which increments by
+					// amount of samples in a frame.
+					if (nextFrameHeader.num - frameHeader.num !== frameHeader.blockSize) {
+						slice.filePos = positionBeforeReading;
+						continue;
+					}
 				}
 
 				return {
@@ -439,6 +459,11 @@ export class FlacDemuxer extends Demuxer {
 		const sampleRate = readSampleRate(slice, sampleRateOrUncommon);
 		if (sampleRate === null) {
 			// This cannot be a valid FLAC frame, the syncword was just coincidental
+			return null;
+		}
+
+		if (sampleRate !== this.audioInfo.sampleRate) {
+			// This cannot be a valid FLAC frame, the sample rate is not the same as in the stream info
 			return null;
 		}
 
@@ -538,6 +563,12 @@ class FlacAudioTrackBacking implements InputAudioTrackBacking {
 	getTimeResolution() {
 		assert(this.demuxer.audioInfo);
 		return this.demuxer.audioInfo.sampleRate;
+	}
+
+	getDisposition() {
+		return {
+			...DEFAULT_TRACK_DISPOSITION,
+		};
 	}
 
 	async getFirstTimestamp() {

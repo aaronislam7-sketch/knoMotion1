@@ -1,3 +1,14 @@
+/**
+ * @deprecated This file is DEPRECATED. Use './registry.ts' instead.
+ * 
+ * The new registry uses URL-based Lottie animations from LottieFiles CDN,
+ * which is simpler and more flexible than static file imports.
+ * 
+ * Migration:
+ * - import { resolveLottieRef, LOTTIE_REGISTRY } from './registry';
+ * - Use lottieRef strings like 'success', 'brain', 'lightning-bolt'
+ */
+
 import type { LottieAnimationData } from '@remotion/lottie';
 import { staticFile } from 'remotion';
 import {

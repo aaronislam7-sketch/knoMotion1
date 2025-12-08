@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '@remotion/player';
 import { ShowcaseMain } from '../compositions/ShowcaseMain';
-import { ShowcaseScene1_IntroValueProp } from '../compositions/ShowcaseScene1_IntroValueProp';
-import { ShowcaseScene2_ArchitectureDeepDive } from '../compositions/ShowcaseScene2_ArchitectureDeepDive';
-import { ShowcaseScene3_LayoutShowcase } from '../compositions/ShowcaseScene3_LayoutShowcase';
-import { ShowcaseScene4_FeatureShowcaseCTA } from '../compositions/ShowcaseScene4_FeatureShowcaseCTA';
-import { ShowcaseScene5_LayoutEngineTest } from '../compositions/ShowcaseScene5_LayoutEngineTest';
-import { ShowcaseScene6_MidSceneHeroText } from '../compositions/ShowcaseScene6_MidSceneHeroText';
-import { ShowcaseScene7_MidSceneCardSequence } from '../compositions/ShowcaseScene7_MidSceneCardSequence';
-import { ShowcaseScene9_MidSceneIconGrid } from '../compositions/ShowcaseScene9_MidSceneIconGrid';
-import { ShowcaseScene10_SceneLayout } from '../compositions/ShowcaseScene10_SceneLayout';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 import { CanonShowerVideo } from '../compositions/CanonShowerVideo';
 import {
@@ -37,6 +28,113 @@ import {
   KNODOVIA_VIDEO3_MOBILE_DURATION,
 } from '../compositions/KnodoviaVideo3_Mobile';
 import { LottieDebugTest } from '../compositions/LottieDebugTest';
+// TikTok Viral Videos
+import {
+  TikTok_BrainLies,
+  TIKTOK_BRAINLIES_DURATION,
+} from '../compositions/TikTok_BrainLies';
+import {
+  TikTok_ADHDOverpowered,
+  TIKTOK_ADHDOVERPOWERED_DURATION,
+} from '../compositions/TikTok_ADHDOverpowered';
+import {
+  TikTok_80msDelay,
+  TIKTOK_80MSDELAY_DURATION,
+} from '../compositions/TikTok_80msDelay';
+
+// Mapping from ShowcasePreview keys to Remotion composition IDs
+const COMPOSITION_ID_MAP = {
+  tiktokBrainLies: 'TikTokBrainLies',
+  tiktokADHD: 'TikTokADHDOverpowered',
+  tiktok80ms: 'TikTok80msDelay',
+  knodovia1: 'KnodoviaAccidentalArrival',
+  knodovia2: 'KnodoviaCulture',
+  knodovia3: 'KnodoviaEconomics',
+  knodovia1Mobile: 'KnodoviaAccidentalArrivalMobile',
+  knodovia2Mobile: 'KnodoviaCultureMobile',
+  knodovia3Mobile: 'KnodoviaEconomicsMobile',
+};
+
+/**
+ * Render Command Box Component
+ * Shows the CLI command to render the current composition
+ */
+const RenderCommandBox = ({ compositionKey, compositions }) => {
+  const [copied, setCopied] = React.useState(false);
+  
+  const compositionId = COMPOSITION_ID_MAP[compositionKey];
+  const comp = compositions[compositionKey];
+  
+  if (!compositionId) {
+    return (
+      <div style={{
+        background: '#333',
+        padding: 12,
+        borderRadius: 6,
+        fontFamily: 'monospace',
+        fontSize: 13,
+        color: '#888',
+      }}>
+        Rendering not available for this composition
+      </div>
+    );
+  }
+  
+  const outputFile = `out/${compositionId.toLowerCase().replace(/([A-Z])/g, '-$1').replace(/^-/, '')}.mp4`;
+  const command = `npx remotion render KnoMotion-Videos/src/remotion/index.ts ${compositionId} ${outputFile}`;
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(command);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{
+        background: '#1e1e1e',
+        padding: 14,
+        borderRadius: 6,
+        fontFamily: 'ui-monospace, monospace',
+        fontSize: 13,
+        color: '#4ade80',
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+      }}>
+        <span style={{ color: '#888' }}>$</span> {command}
+      </div>
+      <button
+        onClick={handleCopy}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          padding: '6px 12px',
+          background: copied ? '#22c55e' : '#444',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 4,
+          cursor: 'pointer',
+          fontSize: 12,
+          transition: 'background 0.2s',
+        }}
+      >
+        {copied ? '✓ Copied!' : 'Copy'}
+      </button>
+      <div style={{ 
+        marginTop: 10, 
+        fontSize: 12, 
+        color: '#666',
+        display: 'flex',
+        gap: 20,
+      }}>
+        <span>📐 {comp.width}×{comp.height}</span>
+        <span>⏱️ {Math.round(comp.duration / comp.fps)}s</span>
+        <span>📁 {outputFile}</span>
+      </div>
+    </div>
+  );
+};
 
 /**
  * Showcase Preview Tool
@@ -118,78 +216,6 @@ export const ShowcasePreview = () => {
         KNODOVIA_VIDEO3_MOBILE_DURATION / 30,
       )}s)`,
     },
-    scene1: {
-      component: ShowcaseScene1_IntroValueProp,
-      duration: 1350, // 45 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 1: Intro + Value Prop (45s)',
-    },
-    scene2: {
-      component: ShowcaseScene2_ArchitectureDeepDive,
-      duration: 1800, // 60 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 2: Architecture Deep Dive (60s)',
-    },
-    scene3: {
-      component: ShowcaseScene3_LayoutShowcase,
-      duration: 1350, // 45 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 3: Layout Showcase (45s)',
-    },
-    scene4: {
-      component: ShowcaseScene4_FeatureShowcaseCTA,
-      duration: 1800, // 60 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 4: Feature Showcase + CTA (60s)',
-    },
-    scene5: {
-      component: ShowcaseScene5_LayoutEngineTest,
-      duration: 900, // 30 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 5: Layout Engine Test (30s)',
-    },
-    scene6: {
-      component: ShowcaseScene6_MidSceneHeroText,
-      duration: 300, // 10 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 6: Mid-Scene HeroTextEntranceExit (10s)',
-    },
-    scene7: {
-      component: ShowcaseScene7_MidSceneCardSequence,
-      duration: 450, // 15 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 7: Mid-Scene Tests (TextReveal) (15s)',
-    },
-    scene9: {
-      component: ShowcaseScene9_MidSceneIconGrid,
-      duration: 450, // 15 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 9: Mid-Scene IconGrid (15s)',
-    },
-    scene10: {
-      component: ShowcaseScene10_SceneLayout,
-      duration: 450, // 15 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 10: Macro Scene Layout (15s)',
-    },
     animations: {
       component: ContinuousAnimationShowcase,
       duration: 900, // 30 seconds
@@ -213,6 +239,33 @@ export const ShowcasePreview = () => {
       height: 1080,
       fps: 30,
       name: '🔧 Lottie Debug Test',
+    },
+    // =========================================================================
+    // TIKTOK VIRAL VIDEOS
+    // =========================================================================
+    tiktokBrainLies: {
+      component: TikTok_BrainLies,
+      duration: TIKTOK_BRAINLIES_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `🎬 TikTok: Brain Lies (~${Math.round(TIKTOK_BRAINLIES_DURATION / 30)}s)`,
+    },
+    tiktokADHD: {
+      component: TikTok_ADHDOverpowered,
+      duration: TIKTOK_ADHDOVERPOWERED_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `🎬 TikTok: ADHD Overpowered (~${Math.round(TIKTOK_ADHDOVERPOWERED_DURATION / 30)}s)`,
+    },
+    tiktok80ms: {
+      component: TikTok_80msDelay,
+      duration: TIKTOK_80MSDELAY_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `🎬 TikTok: 80ms Delay (~${Math.round(TIKTOK_80MSDELAY_DURATION / 30)}s)`,
     },
   };
 
@@ -321,9 +374,29 @@ export const ShowcasePreview = () => {
           />
         </div>
 
-        {/* Footer */}
+        {/* Download Panel */}
         <div style={{
           marginTop: 40,
+          padding: 20,
+          backgroundColor: '#1a3a1a',
+          borderRadius: 8,
+          border: '1px solid #2d5a2d',
+        }}>
+          <h3 style={{ fontSize: 18, marginBottom: 15, color: '#4ade80' }}>
+            📥 Download as MP4
+          </h3>
+          <p style={{ color: '#aaa', marginBottom: 15, fontSize: 14 }}>
+            Render the current composition locally (no cloud costs). Run in terminal:
+          </p>
+          <RenderCommandBox compositionKey={selectedComp} compositions={compositions} />
+          <p style={{ color: '#666', marginTop: 15, fontSize: 12 }}>
+            First time? Run <code style={{ background: '#333', padding: '2px 6px', borderRadius: 4 }}>npm install</code> to install render dependencies.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          marginTop: 20,
           padding: 20,
           backgroundColor: '#2a2a2a',
           borderRadius: 8,
