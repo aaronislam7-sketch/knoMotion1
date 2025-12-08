@@ -229,6 +229,52 @@ export const LOTTIE_REGISTRY: Record<string, LottieEntry> = {
   },
 
   // =========================================================================
+  // TIKTOK / VIRAL CONTENT
+  // =========================================================================
+  'brain-active': {
+    url: 'https://lottie.host/87d3f5af-3fef-46e2-993b-601088d2a909/GG4mRTZpRV.json',
+    description: 'Active brain with neurons firing and pulsing regions',
+    loop: true,
+    tags: ['brain', 'thinking', 'neurons', 'cognitive', 'viral'],
+    source: 'LottieFiles',
+  },
+  'funnel-filter': {
+    url: 'https://lottie.host/21e7db3c-1488-43df-82c0-c652cd156822/083T2A6Sco.json',
+    description: 'Data filtering through funnel - many in, few out',
+    loop: true,
+    tags: ['filter', 'funnel', 'data', 'processing', 'viral'],
+    source: 'LottieFiles',
+  },
+  'lightning-bolt': {
+    url: 'https://lottie.host/66838e13-ce11-4c24-b43d-813c729fc53f/R3SeA2WpkC.json',
+    description: 'Electric bolt with crackling energy',
+    loop: true,
+    tags: ['energy', 'lightning', 'power', 'electric', 'adhd', 'viral'],
+    source: 'LottieFiles',
+  },
+  'target-focus': {
+    url: 'https://lottie.host/ff86a794-6f48-4ddf-ac5c-59cac4d95a38/VOmlzFVK2T.json',
+    description: 'Zooming in and locking onto a target',
+    loop: false,
+    tags: ['focus', 'target', 'zoom', 'lock', 'hyperfocus', 'viral'],
+    source: 'LottieFiles',
+  },
+  'clock-delay': {
+    url: 'https://lottie.host/3bb5beb3-f569-4fcd-a539-5c5988a4870c/EwUDyr2Ig8.json',
+    description: 'Clock with warped/distorted time effect',
+    loop: true,
+    tags: ['time', 'clock', 'delay', 'perception', 'warp', 'viral'],
+    source: 'LottieFiles',
+  },
+  'signal-buffer': {
+    url: 'https://lottie.host/50ccd194-c5c7-491d-a43e-b54efa2d94f6/cHwmkgxTbZ.json',
+    description: 'Streaming signal with buffering/lag indicator',
+    loop: true,
+    tags: ['buffer', 'loading', 'signal', 'stream', 'lag', 'viral'],
+    source: 'LottieFiles',
+  },
+
+  // =========================================================================
   // SCIENCE & NATURE
   // =========================================================================
   'atom': {

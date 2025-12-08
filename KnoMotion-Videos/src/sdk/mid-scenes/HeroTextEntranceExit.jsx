@@ -84,9 +84,9 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
     style = {},
   } = config;
 
-  // Validate required fields
-  if (!text || !heroRef) {
-    console.warn('HeroTextEntranceExit: Missing required fields (text, heroRef)');
+  // Validate required fields - heroRef required, text optional if lottie provided
+  if (!heroRef) {
+    console.warn('HeroTextEntranceExit: Missing required field (heroRef)');
     return null;
   }
 
@@ -211,19 +211,21 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
           {renderHero(heroConfig, frame, heroTimelineBeats, KNODE_THEME.colors, null, fps)}
         </div>
 
-        {/* Text - BOOSTED sizing */}
-        <Text
-          text={text}
-          variant={preset.textVariant}
-          size="xl"
-          weight="bold"
-          color={preset.textColor}
-          style={{
-            textAlign: 'center',
-            fontSize: isMobile ? 72 : 64, // Explicit larger size
-            ...style.text,
-          }}
-        />
+        {/* Text - BOOSTED sizing (only render if text provided) */}
+        {text && (
+          <Text
+            text={text}
+            variant={preset.textVariant}
+            size="xl"
+            weight="bold"
+            color={preset.textColor}
+            style={{
+              textAlign: 'center',
+              fontSize: isMobile ? 72 : 64, // Explicit larger size
+              ...style.text,
+            }}
+          />
+        )}
         </div>
       </div>
     </AbsoluteFill>

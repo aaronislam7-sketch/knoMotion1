@@ -21,6 +21,7 @@ import { SideBySideCompare } from '../sdk/mid-scenes/SideBySideCompare';
 import { GridCardReveal } from '../sdk/mid-scenes/GridCardReveal';
 import { CardSequence } from '../sdk/mid-scenes/CardSequence';
 import { HeroTextEntranceExit } from '../sdk/mid-scenes/HeroTextEntranceExit';
+import { BigNumberReveal } from '../sdk/mid-scenes/BigNumberReveal';
 
 const MID_SCENE_COMPONENTS = {
   textReveal: TextRevealSequence,
@@ -31,6 +32,7 @@ const MID_SCENE_COMPONENTS = {
   gridCards: GridCardReveal,
   cardSequence: CardSequence,
   heroText: HeroTextEntranceExit,
+  bigNumber: BigNumberReveal,
 };
 
 /**
