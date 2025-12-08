@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '@remotion/player';
 import { ShowcaseMain } from '../compositions/ShowcaseMain';
-import { ShowcaseScene1_IntroValueProp } from '../compositions/ShowcaseScene1_IntroValueProp';
-import { ShowcaseScene2_ArchitectureDeepDive } from '../compositions/ShowcaseScene2_ArchitectureDeepDive';
-import { ShowcaseScene3_LayoutShowcase } from '../compositions/ShowcaseScene3_LayoutShowcase';
-import { ShowcaseScene4_FeatureShowcaseCTA } from '../compositions/ShowcaseScene4_FeatureShowcaseCTA';
-import { ShowcaseScene5_LayoutEngineTest } from '../compositions/ShowcaseScene5_LayoutEngineTest';
-import { ShowcaseScene6_MidSceneHeroText } from '../compositions/ShowcaseScene6_MidSceneHeroText';
-import { ShowcaseScene7_MidSceneCardSequence } from '../compositions/ShowcaseScene7_MidSceneCardSequence';
-import { ShowcaseScene9_MidSceneIconGrid } from '../compositions/ShowcaseScene9_MidSceneIconGrid';
-import { ShowcaseScene10_SceneLayout } from '../compositions/ShowcaseScene10_SceneLayout';
 import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 import { CanonShowerVideo } from '../compositions/CanonShowerVideo';
 import {
@@ -117,78 +108,6 @@ export const ShowcasePreview = () => {
       name: `📱 Knodovia 3: Economics Mobile (${Math.round(
         KNODOVIA_VIDEO3_MOBILE_DURATION / 30,
       )}s)`,
-    },
-    scene1: {
-      component: ShowcaseScene1_IntroValueProp,
-      duration: 1350, // 45 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 1: Intro + Value Prop (45s)',
-    },
-    scene2: {
-      component: ShowcaseScene2_ArchitectureDeepDive,
-      duration: 1800, // 60 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 2: Architecture Deep Dive (60s)',
-    },
-    scene3: {
-      component: ShowcaseScene3_LayoutShowcase,
-      duration: 1350, // 45 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 3: Layout Showcase (45s)',
-    },
-    scene4: {
-      component: ShowcaseScene4_FeatureShowcaseCTA,
-      duration: 1800, // 60 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 4: Feature Showcase + CTA (60s)',
-    },
-    scene5: {
-      component: ShowcaseScene5_LayoutEngineTest,
-      duration: 900, // 30 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 5: Layout Engine Test (30s)',
-    },
-    scene6: {
-      component: ShowcaseScene6_MidSceneHeroText,
-      duration: 300, // 10 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 6: Mid-Scene HeroTextEntranceExit (10s)',
-    },
-    scene7: {
-      component: ShowcaseScene7_MidSceneCardSequence,
-      duration: 450, // 15 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 7: Mid-Scene Tests (TextReveal) (15s)',
-    },
-    scene9: {
-      component: ShowcaseScene9_MidSceneIconGrid,
-      duration: 450, // 15 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 9: Mid-Scene IconGrid (15s)',
-    },
-    scene10: {
-      component: ShowcaseScene10_SceneLayout,
-      duration: 450, // 15 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Scene 10: Macro Scene Layout (15s)',
     },
     animations: {
       component: ContinuousAnimationShowcase,
