@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AnimatedEmojiLottie } from './AnimatedEmojiLottie';
-import { Icon } from './Icon';
 
 /**
  * SafeIcon - Resilient icon component that gracefully falls back
@@ -8,35 +7,30 @@ import { Icon } from './Icon';
  * Strategy:
  * 1. Try to render AnimatedEmojiLottie (if it's an emoji)
  * 2. If it fails (404/network), fall back to static text/span
- * 3. Supports pre-downloaded local Lotties as primary option
+ * 
+ * NOTE: Does NOT import Icon to avoid circular dependencies.
+ * This component is intended to be used BY Icon.jsx.
  * 
  * @param {Object} props - All Icon props
  */
 export const SafeIcon = ({ iconRef, ...props }) => {
   const [hasError, setHasError] = useState(false);
-  const [isEmoji, setIsEmoji] = useState(false);
 
-  useEffect(() => {
-    // Reset error state when iconRef changes
-    setHasError(false);
-    
-    // Check if it's potentially an emoji
-    if (typeof iconRef === 'string') {
-      const emojiRegex = /\p{Extended_Pictographic}/u;
-      setIsEmoji(emojiRegex.test(iconRef));
-    } else {
-      setIsEmoji(false);
-    }
-  }, [iconRef]);
+  // Synchronous check for emoji (no useEffect to avoid initial render flicker/loop)
+  const isEmoji = typeof iconRef === 'string' && /\p{Extended_Pictographic}/u.test(iconRef);
 
   // If we already know it failed, render static fallback immediately
-  if (hasError) {
+  if (hasError || !isEmoji) {
     return (
       <span
         style={{
           fontSize: props.size === 'xl' ? 80 : props.size === 'lg' ? 60 : 40,
           lineHeight: 1,
-          display: 'inline-block',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
           ...props.style
         }}
       >
@@ -45,25 +39,14 @@ export const SafeIcon = ({ iconRef, ...props }) => {
     );
   }
 
-  // If it's an emoji and we want animation, try the Lottie wrapper
-  // But wrap it to catch the 404s that might bubble up
-  if (isEmoji && props.animated !== false) {
-    // We can't easily catch async 404s from the Lottie component here 
-    // without it notifying us. 
-    // The AnimatedEmojiLottie component needs to accept an onError callback.
-    // Since we are replacing the internal usage, let's use a modified version or prop.
-    
-    return (
-      <SafeAnimatedEmoji 
-        emoji={iconRef} 
-        {...props} 
-        onError={() => setHasError(true)} 
-      />
-    );
-  }
-
-  // Default behavior
-  return <Icon iconRef={iconRef} {...props} />;
+  // Try the Lottie wrapper
+  return (
+    <SafeAnimatedEmoji 
+      emoji={iconRef} 
+      {...props} 
+      onError={() => setHasError(true)} 
+    />
+  );
 };
 
 /**
