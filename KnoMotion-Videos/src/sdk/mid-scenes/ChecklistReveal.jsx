@@ -29,9 +29,9 @@ import { resolveBeats } from '../utils/beats';
  */
 const ICON_PRESETS = {
   // Static icons
-  check: '✓',
-  checkmark: '✓',
-  tick: '✓',
+  check: 'check', // Will be rendered as SVG path
+  checkmark: 'check',
+  tick: 'check',
   bullet: '•',
   dot: '●',
   arrow: '→',
@@ -47,6 +47,25 @@ const ICON_PRESETS = {
   lottieSuccess: { type: 'lottie', ref: 'success', loop: false },
   lottieStar: { type: 'lottie', ref: 'stars', loop: false },
 };
+
+/**
+ * Render a rough checkmark SVG
+ */
+const RoughCheckmark = ({ size = 24, color = '#000', style = {} }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="3" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    style={style}
+  >
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
 
 /**
  * Get icon based on configuration
@@ -443,7 +462,7 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                   }}
                 >
                   <Icon
-                    iconRef={itemIcon}
+                    iconRef={itemIcon === 'check' ? <RoughCheckmark size={baseFontSize * iconSize} color={itemIconColor} /> : itemIcon}
                     size="md"
                     color={itemChecked ? 'textMain' : 'textSoft'}
                     animated={typeof item === 'object' ? item.animated : false}

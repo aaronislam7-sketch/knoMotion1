@@ -39,7 +39,7 @@ const scenes = [
         spotlight: { x: 50, y: 40, intensity: 0.25 },
         particles: { enabled: true, style: 'sparkle', count: 10, color: '#60A5FA', opacity: 0.2, speed: 0.4 },
       },
-      layout: { type: 'rowStack', options: { rows: 2, padding: 50, titleHeight: 200 } },
+      layout: { type: 'rowStack', options: { rows: 2, rowRatios: [1.5, 1], padding: 50, titleHeight: 200 } },
       slots: {
         header: {
           midScene: 'heroText',
@@ -114,13 +114,16 @@ const scenes = [
           },
         },
         row2: {
-          midScene: 'bigNumber',
+          midScene: 'animatedCounter',
           stylePreset: 'playful',
           config: {
-            number: '~80ms',
+            startValue: 0,
+            endValue: 80,
+            duration: 2,
+            prefix: '~',
+            suffix: 'ms',
             label: 'later',
             emphasis: 'high',
-            animation: 'pop',
             beats: { start: 8.0, exit: 12.0 },
           },
         },
@@ -166,7 +169,7 @@ const scenes = [
             text: '',
             heroType: 'lottie',
             heroRef: 'signal-buffer',
-            beats: { entrance: 1.0, exit: 7.0 },
+            beats: { entrance: 1.0, exit: 12.0 },
           },
         },
         row2: {

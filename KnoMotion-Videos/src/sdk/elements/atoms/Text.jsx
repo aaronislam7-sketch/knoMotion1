@@ -56,12 +56,13 @@ export const Text = ({
   };
   
   // Sizes - BOOSTED for better visibility
+  // Reduced by 10% per request for better margins
   const sizes = {
-    xs: 20,
-    sm: 28,
-    md: 36,
-    lg: 48,
-    xl: 64,
+    xs: 18, // was 20
+    sm: 25, // was 28
+    md: 32, // was 36
+    lg: 43, // was 48
+    xl: 57, // was 64
   };
   
   // Weights

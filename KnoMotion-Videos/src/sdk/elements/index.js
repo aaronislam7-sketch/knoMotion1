@@ -30,6 +30,7 @@ export { Loading } from './atoms/Loading';
 export { Skeleton } from './atoms/Skeleton';
 export { Rating } from './atoms/Rating';
 export { RadialProgress } from './atoms/RadialProgress';
+export { DoodleArrow } from './atoms/DoodleArrow';
 
 // ========================================
 // COMPOSITION ELEMENTS (9)

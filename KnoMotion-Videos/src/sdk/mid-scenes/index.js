@@ -19,6 +19,7 @@ export { ChecklistReveal } from './ChecklistReveal';
 export { BubbleCalloutSequence } from './BubbleCalloutSequence';
 export { SideBySideCompare } from './SideBySideCompare';
 export { GridCardReveal } from './GridCardReveal';
+export { AnimatedCounter } from './AnimatedCounter';
 
 /**
  * Mid-Scene Registry for dynamic rendering
@@ -44,4 +45,5 @@ export const MID_SCENE_REGISTRY = {
   gridCardReveal: 'GridCardReveal',
   gridCards: 'GridCardReveal',
   cardGrid: 'GridCardReveal',
+  animatedCounter: 'AnimatedCounter',
 };
