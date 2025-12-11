@@ -198,8 +198,11 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
         {/* Hero - responsive sizing */}
         <div
           style={{
-            width: isMobile ? 350 : 300,
-            height: isMobile ? 350 : 300,
+            width: '100%',
+            height: 'auto',
+            minHeight: isMobile ? 400 : 300,
+            maxHeight: isMobile ? 800 : 500,
+            aspectRatio: '1 / 1',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
