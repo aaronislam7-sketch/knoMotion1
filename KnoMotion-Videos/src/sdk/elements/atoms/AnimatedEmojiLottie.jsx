@@ -98,7 +98,6 @@ export const AnimatedEmojiLottie = ({
       .catch((err) => {
         console.warn(`[AnimatedEmojiLottie] Failed to load ${emoji}:`, err);
         setError(true);
-        if (props.onError) props.onError(err);
         if (delayHandleRef.current !== null) {
           continueRender(delayHandleRef.current);
           delayHandleRef.current = null;
