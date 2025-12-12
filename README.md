@@ -3,12 +3,30 @@
 Modernised Remotion workspace that proves the JSON-first KnoMotion engine can deliver multi-scene, on-brand stories end-to-end. This refresh focuses on a cohesive "Knodovia" trilogy, a reusable style/beat/asset system, and the docs future agents need to spin up new personalised videos fast.
 
 ## ⚡ Quick Start
+
+### GitHub Codespaces (Recommended)
+Simply open this repo in Codespaces - everything is automatically configured! The devcontainer will:
+- Install all npm dependencies (clean install)
+- Install system dependencies for video rendering (ffmpeg, Chrome libs)
+
+Once the container is ready:
 ```bash
-cd /workspace/KnoMotion-Videos
-npm install
 npm run dev
 ```
-Open `http://localhost:5173`, click **Showcase Preview**, and pick any Knodovia video.
+Open the forwarded port (3000), click **Showcase Preview**, and pick any Knodovia video.
+
+### Local Development
+```bash
+# 1. Install npm dependencies (clean install recommended)
+rm -rf node_modules package-lock.json
+npm install
+
+# 2. Start development server
+npm run dev
+```
+Open `http://localhost:3000`, click **Showcase Preview**, and pick any Knodovia video.
+
+> **Note**: For local video rendering, you'll also need to install system dependencies. See [Rendering MP4 Videos](#-rendering-mp4-videos-locally) below.
 
 ## ✅ What Shipped in This POC
 
@@ -193,19 +211,34 @@ Document personalised choices in your scene JSON so future agents can follow the
 Export compositions to MP4 files using the Remotion CLI.
 
 ### Prerequisites
-1. **System dependencies** (Ubuntu/Debian) – Chrome Headless Shell requires:
-   ```bash
-   sudo apt-get install -y \
-     libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libxcomposite1 \
-     libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 \
-     libpango-1.0-0 libcairo2 libasound2t64 libnspr4 libnss3
-   ```
-   *(On older Ubuntu versions, drop the `t64` suffix from package names)*
 
-2. **Install dependencies** – Ensure all npm packages are installed:
-   ```bash
-   npm install
-   ```
+**Option A: Codespaces (Zero Setup)**
+If using GitHub Codespaces, all dependencies are pre-installed automatically. Skip to [Render a Video](#render-a-video).
+
+**Option B: Local Development**
+Run the setup script to install ffmpeg and Chrome dependencies:
+```bash
+./scripts/install-render-deps.sh
+```
+
+<details>
+<summary>Manual installation (if script doesn't work)</summary>
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg \
+  libatk1.0-0 libatk-bridge2.0-0 libcups2 libxcomposite1 \
+  libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 \
+  libpango-1.0-0 libcairo2 libasound2 libnspr4 libnss3
+```
+*(On newer Ubuntu 24.04+, some packages have `t64` suffix: `libatk1.0-0t64`, etc.)*
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+</details>
 
 ### Render a Video
 Use the Remotion CLI with the entry point and composition ID:

@@ -44,11 +44,14 @@ const lottieCache = new Map();
  */
 export const AnimatedEmojiLottie = ({
   emoji,
-  size = 48,
+  size: sizeProp = 48,
   loop = true,
   playbackRate = 1,
   style = {},
+  onError,
 }) => {
+  // Use fontSize from style if provided, otherwise fall back to size prop
+  const size = style.fontSize || sizeProp;
   const [animationData, setAnimationData] = useState(() => {
     const codepoint = emojiToCodepoint(emoji);
     if (codepoint && lottieCache.has(codepoint)) {
@@ -65,7 +68,7 @@ export const AnimatedEmojiLottie = ({
     const codepoint = emojiToCodepoint(emoji);
     if (!codepoint) {
       setError(true);
-      if (props.onError) props.onError(new Error('Invalid emoji'));
+      if (onError) onError(new Error('Invalid emoji'));
       return;
     }
 
@@ -98,7 +101,6 @@ export const AnimatedEmojiLottie = ({
       .catch((err) => {
         console.warn(`[AnimatedEmojiLottie] Failed to load ${emoji}:`, err);
         setError(true);
-        if (props.onError) props.onError(err);
         if (delayHandleRef.current !== null) {
           continueRender(delayHandleRef.current);
           delayHandleRef.current = null;

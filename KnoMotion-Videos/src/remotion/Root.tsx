@@ -6,7 +6,16 @@
 
 import React from 'react';
 import { Composition } from 'remotion';
-import { GoogleFonts } from '@remotion/google-fonts';
+
+// Load Google Fonts using the correct Remotion v4 API
+import { loadFont as loadCabinSketch } from '@remotion/google-fonts/CabinSketch';
+import { loadFont as loadPermanentMarker } from '@remotion/google-fonts/PermanentMarker';
+import { loadFont as loadInter } from '@remotion/google-fonts/Inter';
+
+// Initialize fonts at module level (required for Remotion rendering)
+loadCabinSketch();
+loadPermanentMarker();
+loadInter();
 
 // TikTok Viral Videos
 import { TikTok_BrainLies, TIKTOK_BRAINLIES_DURATION } from '../compositions/TikTok_BrainLies';
@@ -28,11 +37,6 @@ const FPS = 30;
 export const Root: React.FC = () => {
   return (
     <>
-      <GoogleFonts families={[
-        { fontFamily: 'Cabin Sketch', weights: ['400', '700'] },
-        { fontFamily: 'Permanent Marker', weights: ['400'] },
-        { fontFamily: 'Inter', weights: ['400', '600', '700'] },
-      ]} />
       {/* ================================================================= */}
       {/* TIKTOK VIRAL VIDEOS (1080x1920 Mobile) */}
       {/* ================================================================= */}

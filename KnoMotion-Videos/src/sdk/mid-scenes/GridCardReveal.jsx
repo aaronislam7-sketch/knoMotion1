@@ -208,7 +208,21 @@ export const GridCardReveal = ({ config, stylePreset }) => {
   const baseGap = customGap || Math.min(24, slot.width * 0.025);
   const gap = isMobile ? Math.max(baseGap, 16) : baseGap;
   const cardWidth = (slot.width - gap * (columns + 1)) / columns;
-  const cardHeight = (slot.height - gap * (rows + 1)) / rows;
+  
+  // Calculate content-aware card height instead of filling the slot
+  // Cards should wrap their content, not stretch to fill available space
+  const maxCardHeightFromSlot = (slot.height - gap * (rows + 1)) / rows;
+  
+  // Estimate content height based on icon + label
+  // Icon: typically 48-80px, Label: ~30-40px with padding
+  const estimatedIconHeight = Math.min(80, cardWidth * 0.4);
+  const estimatedLabelHeight = showLabels ? 45 : 0;
+  const estimatedPadding = 32;
+  const estimatedContentHeight = estimatedIconHeight + estimatedLabelHeight + estimatedPadding;
+  
+  // Use the smaller of content-based height or slot-based height
+  // This prevents cards from being oversized while still allowing them to fill smaller slots
+  const cardHeight = Math.min(maxCardHeightFromSlot, Math.max(estimatedContentHeight, 120));
   
   // Determine card size preset based on dimensions - bias toward larger
   const getCardSizePreset = () => {
@@ -235,15 +249,19 @@ export const GridCardReveal = ({ config, stylePreset }) => {
   // Map the cardVariant to the InfoCard-compatible variant
   const resolvedCardVariant = getVariantForPreset(stylePreset, cardVariant);
 
+  // Calculate total grid height for centering
+  const totalGridHeight = rows * cardHeight + (rows - 1) * gap;
+  const verticalOffset = Math.max(0, (slot.height - totalGridHeight) / 2);
+
   return (
     <AbsoluteFill>
       <div
         style={{
           position: 'absolute',
           left: slot.left,
-          top: slot.top,
+          top: slot.top + verticalOffset,
           width: slot.width,
-          height: slot.height,
+          height: totalGridHeight,
           ...style.container,
         }}
       >
@@ -274,15 +292,23 @@ export const GridCardReveal = ({ config, stylePreset }) => {
             direction,
             { row, col }
           );
-          const exitFrame = toFrames(itemBeats.exit, fps);
-          const exitProgress =
-            frame > exitFrame
-              ? Math.min(1, (frame - exitFrame) / toFrames(0.25, fps))
-              : 0;
-          const mergedAnimStyle = {
-            ...animStyle,
-            opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
-          };
+          
+          // Only apply exit animation if explicitly configured with an exit beat
+          // Cards should persist by default (stay visible after appearing)
+          const hasExplicitExit = card.beats?.exit !== undefined || beats?.exit !== undefined;
+          let mergedAnimStyle = animStyle;
+          
+          if (hasExplicitExit) {
+            const exitFrame = toFrames(itemBeats.exit, fps);
+            const exitProgress =
+              frame > exitFrame
+                ? Math.min(1, (frame - exitFrame) / toFrames(0.8, fps)) // Slower exit (0.8s)
+                : 0;
+            mergedAnimStyle = {
+              ...animStyle,
+              opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
+            };
+          }
           
           // Convert position to CSS (layout engine returns center coordinates)
           const cardPosition = positionToCSS(pos);
