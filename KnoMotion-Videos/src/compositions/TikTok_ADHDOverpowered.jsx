@@ -37,7 +37,7 @@ const scenes = [
         layerNoise: true,
         particles: { enabled: true, style: 'sparkle', count: 12, color: '#A78BFA', opacity: 0.2, speed: 0.6 },
       },
-      layout: { type: 'rowStack', options: { rows: 2, padding: 50, titleHeight: 200 } },
+      layout: { type: 'rowStack', options: { rows: 2, rowRatios: [1.5, 1], padding: 50, titleHeight: 200 } },
       slots: {
         header: {
           midScene: 'heroText',
@@ -213,6 +213,12 @@ const scenes = [
               revealType: 'fade',
               staggerDelay: 0.4,
               lineSpacing: 'relaxed',
+              style: { 
+                text: { 
+                  textDecoration: 'line-through',
+                  opacity: 0.7 
+                } 
+              }
             },
           },
           {

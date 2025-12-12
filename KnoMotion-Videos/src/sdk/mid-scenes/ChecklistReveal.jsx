@@ -29,9 +29,9 @@ import { resolveBeats } from '../utils/beats';
  */
 const ICON_PRESETS = {
   // Static icons
-  check: '✓',
-  checkmark: '✓',
-  tick: '✓',
+  check: 'check', // Will be rendered as SVG path
+  checkmark: 'check',
+  tick: 'check',
   bullet: '•',
   dot: '●',
   arrow: '→',
@@ -47,6 +47,25 @@ const ICON_PRESETS = {
   lottieSuccess: { type: 'lottie', ref: 'success', loop: false },
   lottieStar: { type: 'lottie', ref: 'stars', loop: false },
 };
+
+/**
+ * Render a rough checkmark SVG
+ */
+const RoughCheckmark = ({ size = 24, color = '#000', style = {} }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="3" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    style={style}
+  >
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
 
 /**
  * Get icon based on configuration
@@ -223,6 +242,29 @@ const getIconAnimationStyle = (frame, startFrame, durationFrames, fps) => {
 };
 
 /**
+ * Render a rough box SVG for the icon container
+ */
+const RoughBox = ({ size, color, style }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    style={style}
+  >
+    <path
+      d="M2 2h20v20H2z"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+      vectorEffect="non-scaling-stroke"
+    />
+  </svg>
+);
+
+/**
  * ChecklistReveal Component
  * 
  * @param {Object} props
@@ -347,6 +389,7 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
         const itemBeats = resolveBeats(item.beats, {
           start: sequenceBeats.start + index * staggerDelay,
           holdDuration: animationDuration,
+          exit: sequenceBeats.exit, // Ensure items persist until scene exit
         });
         const itemStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getRevealAnimationStyle(
@@ -436,18 +479,23 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                     justifyContent: 'center',
                     width: '100%',
                     height: '100%',
-                    backgroundColor: itemChecked ? `${itemIconColor}15` : 'transparent',
-                    borderRadius: '50%',
-                    border: itemChecked ? 'none' : `2px solid ${KNODE_THEME.colors.textMuted}`,
+                    position: 'relative',
                     ...style.icon,
                   }}
                 >
+                  {/* Rough box background */}
+                  <RoughBox 
+                    size={iconWidth} 
+                    color={itemIconColor} 
+                    style={{ position: 'absolute', inset: 0, opacity: 0.5 }} 
+                  />
+                  
                   <Icon
-                    iconRef={itemIcon}
+                    iconRef={itemIcon === 'check' ? <RoughCheckmark size={baseFontSize * iconSize * 0.6} color={itemIconColor} /> : itemIcon}
                     size="md"
                     color={itemChecked ? 'textMain' : 'textSoft'}
                     animated={typeof item === 'object' ? item.animated : false}
-                    style={{ fontSize: baseFontSize * iconSize }}
+                    style={{ fontSize: baseFontSize * iconSize * 0.7, position: 'relative', zIndex: 1 }}
                   />
                 </div>
               )}
@@ -460,12 +508,15 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
                 transform: animStyle.transform,
                 flex: 1,
                 maxWidth: textWidth,
+                borderBottom: `2px dashed ${KNODE_THEME.colors.ruleLine}`,
+                paddingBottom: 8,
+                marginBottom: 8,
                 ...style.textContainer,
               }}
             >
               <Text
                 text={itemText}
-                variant="body"
+                variant="title" // Force title variant for Cabin Sketch font
                 size="lg"
                 weight={itemChecked ? 600 : 400}
                 color={preset.textColor}

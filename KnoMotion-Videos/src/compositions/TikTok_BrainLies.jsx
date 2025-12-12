@@ -37,7 +37,7 @@ const scenes = [
         layerNoise: true,
         particles: { enabled: true, style: 'sparkle', count: 12, color: '#FBBF24', opacity: 0.2, speed: 0.5 },
       },
-      layout: { type: 'rowStack', options: { rows: 2, padding: 50, titleHeight: 200 } },
+      layout: { type: 'rowStack', options: { rows: 2, rowRatios: [1.5, 1], padding: 50, titleHeight: 200 } },
       slots: {
         header: {
           midScene: 'heroText',
@@ -154,8 +154,8 @@ const scenes = [
           stylePreset: 'playful',
           config: {
             lines: [
-              { text: 'The Baader-Meinhof', emphasis: 'high', beats: { start: 1.5, exit: 11.0, emphasis: 2.0 } },
-              { text: 'Phenomenon', emphasis: 'high', beats: { start: 2.5, exit: 11.0, emphasis: 3.0 } },
+              { text: 'The *Baader-Meinhof*', emphasis: 'high', beats: { start: 1.5, exit: 11.0, emphasis: 2.0 } },
+              { text: '*Phenomenon*', emphasis: 'high', beats: { start: 2.5, exit: 11.0, emphasis: 3.0 } },
             ],
             revealType: 'typewriter',
             staggerDelay: 0.4,
@@ -213,14 +213,14 @@ const scenes = [
           },
         },
         row1: {
-          midScene: 'bigNumber',
+          midScene: 'animatedCounter',
           stylePreset: 'playful',
           config: {
-            number: '11,000,000',
+            startValue: 0,
+            endValue: 11000000,
+            duration: 3,
             label: 'bits hitting your senses every second',
             emphasis: 'high',
-            animation: 'countUp',
-            countFrom: 0,
             beats: { start: 1.5, exit: 7.0 },
           },
         },
@@ -235,13 +235,14 @@ const scenes = [
           },
         },
         row3: {
-          midScene: 'bigNumber',
+          midScene: 'animatedCounter',
           stylePreset: 'mentor',
           config: {
-            number: '40',
+            startValue: 11000000,
+            endValue: 40,
+            duration: 1.5,
             label: 'bits your brain actually processes',
             emphasis: 'high',
-            animation: 'pop',
             beats: { start: 8.5, exit: 13.0 },
           },
         },

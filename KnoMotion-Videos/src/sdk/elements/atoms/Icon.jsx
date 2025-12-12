@@ -2,13 +2,13 @@ import React from 'react';
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { KNODE_THEME } from '../../theme/knodeTheme';
 import { scaleIn, getContinuousRotation } from '../../animations';
-import { AnimatedEmojiLottie } from './AnimatedEmojiLottie';
+import { SafeIcon } from './SafeIcon';
 
 /**
  * Icon - Atomic element for icons/emojis
  * 
  * Supports:
- * - Emoji characters (renders as AnimatedEmojiLottie when animated=true)
+ * - Emoji characters (renders as SafeIcon -> AnimatedEmojiLottie)
  * - React elements (renders as-is)
  * - Any other string (renders as text)
  * 
@@ -89,13 +89,13 @@ export const Icon = ({
       const containsEmoji = EMOJI_REGEX.test(iconRef);
       
       if (containsEmoji && animated) {
-        // Use Lottie-based animated emoji from Google's CDN
+        // Use SafeIcon to handle 404s gracefully
         return (
-          <AnimatedEmojiLottie
-            emoji={iconRef}
-            size={pixelSize}
-            loop={true}
-            playbackRate={1}
+          <SafeIcon
+            iconRef={iconRef}
+            size={size}
+            animated={true}
+            style={{ fontSize: pixelSize, color: iconColor }}
           />
         );
       }

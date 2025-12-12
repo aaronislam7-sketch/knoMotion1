@@ -156,6 +156,29 @@ const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, 
 };
 
 /**
+ * Parse text for emphasis syntax *emphasis* or __emphasis__
+ * Returns array of { text, emphasis: boolean }
+ */
+const parseEmphasizedText = (text) => {
+  if (!text) return [{ text: '', emphasis: false }];
+  
+  // Split by * or __ markers
+  // Matches: *word* or __word__
+  const regex = /(\*[^*]+\*|__[a-zA-Z0-9 ]+__)/g;
+  const parts = text.split(regex);
+  
+  return parts.map(part => {
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return { text: part.slice(1, -1), emphasis: true };
+    }
+    if (part.startsWith('__') && part.endsWith('__')) {
+      return { text: part.slice(2, -2), emphasis: true };
+    }
+    return { text: part, emphasis: false };
+  }).filter(p => p.text);
+};
+
+/**
  * TextRevealSequence Component
  * 
  * @param {Object} props
@@ -291,6 +314,9 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
         const exitOpacity = 1 - exitProgress;
         const finalOpacity = entranceOpacity * exitOpacity;
 
+        // Parse for inline emphasis
+        const textParts = parseEmphasizedText(displayText);
+
         return (
           <div
             key={index}
@@ -305,22 +331,25 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <Text
-                text={displayText}
-                variant={preset.textVariant}
-                size="xl"
-                weight={textWeight}
-                color={preset.textColor}
-                style={{
-                  fontSize: baseFontSize,
-                  lineHeight: `${lineHeight}px`,
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  ...presetDecorationStyle,
-                  ...emphasisEffect.textStyle,
-                  ...style.text,
-                }}
-              />
+              {textParts.map((part, i) => (
+                <Text
+                  key={i}
+                  text={part.text}
+                  variant={preset.textVariant}
+                  size="xl"
+                  weight={part.emphasis ? 'bold' : textWeight}
+                  color={part.emphasis ? 'primary' : preset.textColor}
+                  style={{
+                    fontSize: baseFontSize,
+                    lineHeight: `${lineHeight}px`,
+                    textAlign: 'center',
+                    whiteSpace: 'pre', // Preserve spaces
+                    ...(part.emphasis ? emphasisEffect.textStyle : {}),
+                    ...(part.emphasis ? presetDecorationStyle : {}),
+                    ...style.text,
+                  }}
+                />
+              ))}
               {cursorVisible && (
                 <span
                   style={{
