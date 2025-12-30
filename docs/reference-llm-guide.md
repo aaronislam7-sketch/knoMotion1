@@ -4,6 +4,34 @@
 
 ---
 
+## Critical Rules
+
+⚠️ **OUTPUT JSON ONLY** — Never output React/JSX code. Only valid JSON scene configurations.
+
+⚠️ **DO NOT INVENT KEYS** — Only use documented keys. Unknown keys will cause render failure. If unsure, omit the property rather than guess.
+
+⚠️ **DO NOT DEFINE `animationPreset`** — Animation presets are implied by `stylePreset`. Do not add `animationPreset` to scene JSON. Use explicit `animation` fields on mid-scenes only if overriding defaults.
+
+---
+
+## Mental Model
+
+```
+Scene = Background + Layout + Slots
+  └── Slot = Timeline container + Position (receives a region of the viewport)
+        └── MidScene = Content renderer (what appears in that slot)
+```
+
+**Think of it as a storyboard**: Before writing JSON, mentally plan the scene timeline:
+1. What appears first? (text hook?)
+2. What comes next? (visual? lottie?)
+3. What's the climax? (big reveal?)
+4. How does it end? (CTA? transition?)
+
+Then translate to mid-scenes with appropriate beats.
+
+---
+
 ## Quick Reference
 
 ### Video Structure
@@ -174,6 +202,42 @@ transition: {
 | `cardSequence` | CardSequence | Card stack/grid |
 | `bigNumber` | BigNumberReveal | Large stat display |
 | `animatedCounter` | AnimatedCounter | Counting animation |
+
+### Beats Rules
+
+**Rule**: If a mid-scene has child elements (`lines`, `cards`, `items`), beats may exist at **child level**, **container level**, or **both**. Container `beats.start` acts as a default offset for children without explicit beats.
+
+### Beats Requirements by Mid-Scene
+
+| Mid-Scene | Beats Required | Notes |
+|-----------|----------------|-------|
+| `textReveal` | ✅ Yes (per line) | Each line needs `beats.start` and `beats.exit` |
+| `heroText` | ✅ Yes (entrance/exit) | Requires `beats.entrance` and `beats.exit` |
+| `checklist` | ✅ Yes | Container-level or per-item |
+| `gridCards` | ⚠️ Grid OR container | Can use grid-level `beats.start` or per-card beats |
+| `bubbleCallout` | ✅ Yes | Container-level `beats.start` |
+| `sideBySide` | ✅ Yes | Container-level `beats.start` |
+| `iconGrid` | ⚠️ Container level | Uses container `beats.start` for stagger |
+| `cardSequence` | ⚠️ Container level | Uses container `beats.start` for stagger |
+| `bigNumber` | ✅ Yes | `beats.start` and optionally `beats.exit` |
+| `animatedCounter` | ✅ Yes | `beats.start` required |
+
+### Recommended vs Avoid
+
+| Mid-Scene | Recommendation |
+|-----------|----------------|
+| `textReveal` | ✅ Primary choice for text |
+| `heroText` | ✅ Primary choice for visuals |
+| `gridCards` | ✅ Primary choice for icon grids |
+| `checklist` | ✅ Primary choice for lists |
+| `sideBySide` | ✅ Primary choice for comparisons |
+| `bubbleCallout` | ✅ Good for annotations |
+| `bigNumber` | ✅ Good for statistics |
+| `animatedCounter` | ✅ Good for counting effects |
+| `iconGrid` | ⚠️ Prefer `gridCards` instead |
+| `cardSequence` | ⚠️ Prefer `gridCards` instead |
+
+> **Note**: `iconGrid` and `cardSequence` are lower-level components. Prefer `gridCards` which offers more features and better defaults. Use the simpler components only when you specifically need their behavior.
 
 ---
 
@@ -507,23 +571,28 @@ Animated number counting up/down.
 
 ## 6. Slot Arrays (Sequenced Content)
 
-Multiple mid-scenes in one slot using beats for timing:
+**KEY PATTERN**: A slot can be an **array of mid-scenes** instead of a single mid-scene. This creates natural-feeling sequences where content flows within the same visual space.
+
+**Why use slot arrays?**
+- Avoids needing separate scenes for small content changes
+- Creates smooth "in-place" transitions
+- Feels more dynamic and engaging
 
 ```javascript
 slots: {
-  row1: [
+  row1: [  // ← ARRAY syntax
     { 
       midScene: 'textReveal', 
       config: { 
         lines: [{ text: 'First message' }],
-        beats: { start: 0.5, exit: 3.0 }
+        beats: { start: 0.5, exit: 3.0 }  // exits at 3s
       }
     },
     { 
       midScene: 'textReveal', 
       config: { 
         lines: [{ text: 'Then this appears!' }],
-        beats: { start: 4.0, exit: 6.0 }
+        beats: { start: 4.0, exit: 6.0 }  // enters at 4s (1s gap)
       }
     },
     {
@@ -532,11 +601,21 @@ slots: {
         text: 'Final hero',
         heroType: 'lottie',
         heroRef: 'success',
-        beats: { entrance: 6.5, exit: 10.0 }
+        beats: { entrance: 6.5, exit: 10.0 }  // enters at 6.5s
       }
     }
   ]
 }
+```
+
+**Timeline visualization:**
+```
+0s    1s    2s    3s    4s    5s    6s    7s    8s    9s    10s
+|─────────────────|     |─────────────|     |─────────────────────|
+  "First message"         "Then this!"         Hero + Lottie
+```
+
+Each mid-scene in the array renders in the **same physical space**; beats control when each appears/disappears.
 ```
 
 ---
