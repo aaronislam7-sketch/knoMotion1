@@ -2,6 +2,12 @@
 
 **Complete SDK framework reference for KnoMotion video templates**
 
+> **Note**: This is a **developer reference** for building custom mid-scenes and React components.
+> 
+> For **LLM video generation**, see:
+> - [docs/reference-llm-guide.md](./docs/reference-llm-guide.md) — JSON schemas and validation
+> - [docs/instructions-llm-guide.md](./docs/instructions-llm-guide.md) — LLM system prompt
+
 ---
 
 ## 📚 Table of Contents
@@ -692,21 +698,31 @@ import { getLottiePreset } from '../sdk/lottiePresets';
 
 ---
 
-### Module: `lottie/lottieRegistry.ts`
+### Module: `lottie/registry.ts`
 
-Single source of truth for all inline + static Lottie assets.
+URL-based Lottie animation registry—single source of truth for all animations.
 
 ```javascript
-import { resolveLottieSource } from '../sdk/lottie/lottieRegistry';
+import { resolveLottieRef, getAvailableLottieKeys, searchLottieByTag } from '../sdk/lottie/registry';
 
-const source = resolveLottieSource('core/celebration');
-// { kind: 'static', src: staticFile('lotties/celebration-stars.json') }
+// Resolve a registry key to URL
+const entry = resolveLottieRef('lightbulb');
+// { url: 'https://...', description: 'Idea lightbulb turning on', loop: false, tags: [...] }
+
+// Get all available keys
+const keys = getAvailableLottieKeys();
+// ['success', 'checkmark', 'loading', 'confetti', 'lightbulb', ...]
+
+// Search by tag
+const educationLotties = searchLottieByTag('education');
+// ['lightbulb', 'thinking', 'question', 'brain', 'book']
 ```
 
 Features:
-- Canonical keys grouped by domain (`core/*`, `education/*`, `nature/*`, etc.)
-- Aliases for legacy/JSON-friendly names (`success`, `arrowFlow`, `loading-spinner`, etc.)
-- Dev-only warning (`[LottieRegistry] Unknown lottieRef "..."`) when a key is missing
+- URL-based registry (no bundled JSON files)
+- ~40 curated animations across categories: UI, celebrations, education, characters, science, etc.
+- Tag-based search for discovery
+- Dev-only warning when a key is missing
 
 ### Module: `lottie/lottiePresets.js`
 
