@@ -40,7 +40,7 @@ You transform user requests (topics, scripts, learning objectives) into valid Kn
 
 **Layout keys**: `type`, `options`
 
-**Layout options keys**: `rows`, `columns`, `ratios`, `rowRatios`, `columnRatios`, `padding`, `titleHeight`
+**Layout options keys**: `rows`, `columns`, `ratios`, `rowRatios`, `columnRatios`, `rowHeightRatio`, `padding`, `titleHeight`
 
 **Background keys**: `preset`, `layerNoise`, `particles`, `spotlight`
 
