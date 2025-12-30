@@ -403,6 +403,8 @@ Floating speech-bubble callouts.
 
 Left vs right comparison.
 
+⚠️ **Always use `layout: { type: "full" }`** — this mid-scene creates its own internal left/right columns. Never put it inside a `columnSplit` layout.
+
 ```javascript
 {
   midScene: 'sideBySide',
@@ -800,12 +802,15 @@ Before outputting JSON, verify:
 - [ ] `beats.start` < `beats.exit` (when both present)
 - [ ] `layout.type` is valid: `full`, `rowStack`, `columnSplit`, `gridSlots`
 - [ ] Slot names match layout type (e.g., `row1` for `rowStack`, `col1` for `columnSplit`)
+- [ ] **ALL declared slots are filled** (don't leave `col2` empty when using 2-column layout)
+- [ ] **`sideBySide` uses `layout: full`** (it creates its own internal columns)
 - [ ] `midScene` is valid: `textReveal`, `heroText`, `gridCards`, `checklist`, `bubbleCallout`, `sideBySide`, `iconGrid`, `cardSequence`, `bigNumber`, `animatedCounter`
 - [ ] `heroRef` uses valid Lottie registry key or URL
 - [ ] `transition.type` is valid: `fade`, `slide`, `page-turn`, `doodle-wipe`, `eraser`
 - [ ] `background.preset` is valid: `notebookSoft`, `sunriseGradient`, `cleanCard`, `chalkboardGradient`, `spotlight`
 - [ ] Content arrays (`lines`, `cards`, `items`, `callouts`) have at least 1 item
 - [ ] Exit beats don't exceed scene duration in seconds
+- [ ] For scenes >10s, consider exit beats to avoid content persisting too long
 
 ---
 
@@ -883,9 +888,9 @@ Before outputting JSON, verify:
   "durationInFrames": 360,
   "config": {
     "background": { "preset": "cleanCard" },
-    "layout": { "type": "columnSplit", "options": { "columns": 1 } },
+    "layout": { "type": "full", "options": { "padding": 60 } },
     "slots": {
-      "col1": {
+      "full": {
         "midScene": "sideBySide",
         "config": {
           "left": { "title": "Myth", "icon": "❌", "items": ["Common belief"] },
@@ -961,3 +966,33 @@ const scenes = [{ id: 'test' }];  // WRONG
 "myAnimation": "bounce"
 ```
 ✅ **Correct:** Only use documented keys
+
+❌ **`sideBySide` inside multi-column layout (redundant)**
+```json
+"layout": { "type": "columnSplit", "options": { "columns": 2 } },
+"slots": {
+  "col1": { "midScene": "sideBySide", ... }
+}
+```
+✅ **Correct:** `sideBySide` creates its own internal left/right split
+```json
+"layout": { "type": "full" },
+"slots": {
+  "full": { "midScene": "sideBySide", ... }
+}
+```
+
+❌ **Declaring layout slots you don't fill**
+```json
+"layout": { "type": "columnSplit", "options": { "columns": 2 } },
+"slots": {
+  "col1": { ... }
+}
+```
+✅ **Correct:** Fill ALL declared slots or reduce layout
+```json
+"layout": { "type": "full" },
+"slots": {
+  "full": { ... }
+}
+```

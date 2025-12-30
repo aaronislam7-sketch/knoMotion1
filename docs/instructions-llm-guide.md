@@ -228,6 +228,8 @@ What's the scene relationship?
 ### 3. Structure Validation
 - [ ] Scene IDs are unique
 - [ ] Slot names match layout type (e.g., `row1` for `rowStack`, `col1` for `columnSplit`)
+- [ ] **ALL declared slots are filled** (if layout has 2 columns, both `col1` and `col2` must exist)
+- [ ] **`sideBySide` uses `layout: full`** (never inside `columnSplit`)
 - [ ] `textReveal` lines have per-line beats
 - [ ] Lottie refs exist in registry
 
