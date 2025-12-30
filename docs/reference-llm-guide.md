@@ -36,23 +36,25 @@ Then translate to mid-scenes with appropriate beats.
 
 ### Video Structure
 
-```javascript
-const scenes = [
+**Output format: Pure JSON array (no `const`, no comments, no markdown)**
+
+```json
+[
   {
-    id: 'unique-scene-id',
-    durationInFrames: 300,  // 30fps = 10 seconds
-    transition: { type: 'slide', direction: 'up' },
-    config: {
-      background: { preset: 'sunriseGradient', layerNoise: true },
-      layout: { type: 'rowStack', options: { rows: 2, padding: 50 } },
-      slots: {
-        header: { midScene: 'textReveal', stylePreset: 'playful', config: {...} },
-        row1: { midScene: 'gridCards', config: {...} },
-        row2: { midScene: 'checklist', config: {...} },
+    "id": "unique-scene-id",
+    "durationInFrames": 300,
+    "transition": { "type": "slide", "direction": "up" },
+    "config": {
+      "background": { "preset": "sunriseGradient", "layerNoise": true },
+      "layout": { "type": "rowStack", "options": { "rows": 2, "padding": 50 } },
+      "slots": {
+        "header": { "midScene": "textReveal", "stylePreset": "playful", "config": {} },
+        "row1": { "midScene": "gridCards", "config": {} },
+        "row2": { "midScene": "checklist", "config": {} }
       }
     }
   }
-];
+]
 ```
 
 ### Time Calculation
@@ -211,9 +213,9 @@ transition: {
 
 | Mid-Scene | Beats Required | Notes |
 |-----------|----------------|-------|
-| `textReveal` | ✅ Yes (per line) | Each line needs `beats.start` and `beats.exit` |
+| `textReveal` | ✅ **Per-line preferred** | Each line should have `beats.start` and `beats.exit`. Container beats only as fallback. |
 | `heroText` | ✅ Yes (entrance/exit) | Requires `beats.entrance` and `beats.exit` |
-| `checklist` | ✅ Yes | Container-level or per-item |
+| `checklist` | ✅ Yes | Per-item preferred, container as fallback |
 | `gridCards` | ⚠️ Grid OR container | Can use grid-level `beats.start` or per-card beats |
 | `bubbleCallout` | ✅ Yes | Container-level `beats.start` |
 | `sideBySide` | ✅ Yes | Container-level `beats.start` |
@@ -221,6 +223,8 @@ transition: {
 | `cardSequence` | ⚠️ Container level | Uses container `beats.start` for stagger |
 | `bigNumber` | ✅ Yes | `beats.start` and optionally `beats.exit` |
 | `animatedCounter` | ✅ Yes | `beats.start` required |
+
+**`textReveal` Beats Rule**: Always define beats per-line for precise timing control. Container-level beats should only be used as a default offset when all lines share the same timing pattern.
 
 ### Recommended vs Avoid
 
@@ -720,66 +724,68 @@ For advanced animation control:
 
 ## 10. Complete Scene Example
 
-```javascript
-{
-  id: 'learning-tips',
-  durationInFrames: 450,  // 15 seconds
-  transition: { type: 'page-turn', direction: 'right' },
-  config: {
-    background: { 
-      preset: 'notebookSoft', 
-      layerNoise: true,
-      particles: { enabled: true, style: 'chalk', count: 10, opacity: 0.15 }
-    },
-    layout: {
-      type: 'rowStack',
-      options: { rows: 2, padding: 50, titleHeight: 80 }
-    },
-    slots: {
-      header: {
-        midScene: 'textReveal',
-        stylePreset: 'educational',
-        config: {
-          lines: [
-            { 
-              text: '5 Learning Tips', 
-              emphasis: 'high',
-              beats: { start: 0.3, emphasis: 0.8, exit: 12.0 }
-            }
-          ]
-        }
+```json
+[
+  {
+    "id": "learning-tips",
+    "durationInFrames": 450,
+    "transition": { "type": "page-turn", "direction": "right" },
+    "config": {
+      "background": { 
+        "preset": "notebookSoft", 
+        "layerNoise": true,
+        "particles": { "enabled": true, "style": "chalk", "count": 10, "opacity": 0.15 }
       },
-      row1: {
-        midScene: 'heroText',
-        stylePreset: 'focus',
-        config: {
-          text: 'Active recall beats passive reading',
-          heroType: 'lottie',
-          heroRef: 'brain',
-          beats: { entrance: 0.8, exit: 6.0 }
-        }
+      "layout": {
+        "type": "rowStack",
+        "options": { "rows": 2, "padding": 50, "titleHeight": 80 }
       },
-      row2: {
-        midScene: 'checklist',
-        stylePreset: 'playful',
-        config: {
-          items: [
-            { text: 'Test yourself often', checked: true, beats: { start: 2.0 } },
-            { text: 'Space your practice', checked: true, beats: { start: 3.0 } },
-            { text: 'Teach what you learn', checked: true, beats: { start: 4.0 } },
-            { text: 'Sleep on it', checked: true, beats: { start: 5.0 } },
-            { text: 'Stay curious', checked: true, beats: { start: 6.0 } }
-          ],
-          icon: 'lottieCheck',
-          iconColor: 'accentGreen',
-          revealType: 'spring',
-          staggerDelay: 0.3,
-          beats: { start: 1.5, exit: 12.0 }
+      "slots": {
+        "header": {
+          "midScene": "textReveal",
+          "stylePreset": "educational",
+          "config": {
+            "lines": [
+              { 
+                "text": "5 Learning Tips", 
+                "emphasis": "high",
+                "beats": { "start": 0.3, "emphasis": 0.8, "exit": 12.0 }
+              }
+            ]
+          }
+        },
+        "row1": {
+          "midScene": "heroText",
+          "stylePreset": "focus",
+          "config": {
+            "text": "Active recall beats passive reading",
+            "heroType": "lottie",
+            "heroRef": "brain",
+            "beats": { "entrance": 0.8, "exit": 6.0 }
+          }
+        },
+        "row2": {
+          "midScene": "checklist",
+          "stylePreset": "playful",
+          "config": {
+            "items": [
+              { "text": "Test yourself often", "checked": true, "beats": { "start": 2.0 } },
+              { "text": "Space your practice", "checked": true, "beats": { "start": 3.0 } },
+              { "text": "Teach what you learn", "checked": true, "beats": { "start": 4.0 } },
+              { "text": "Sleep on it", "checked": true, "beats": { "start": 5.0 } },
+              { "text": "Stay curious", "checked": true, "beats": { "start": 6.0 } }
+            ],
+            "icon": "lottieCheck",
+            "iconColor": "accentGreen",
+            "revealType": "spring",
+            "staggerDelay": 0.3,
+            "beats": { "start": 1.5, "exit": 12.0 }
+          }
         }
       }
     }
   }
-}
+]
 ```
 
 ---
@@ -807,24 +813,24 @@ Before outputting JSON, verify:
 
 ### Hook Scene (TikTok/Reels)
 
-```javascript
+```json
 {
-  id: 'hook',
-  durationInFrames: 150,  // 5 seconds
-  transition: { type: 'slide', direction: 'up' },
-  config: {
-    background: { preset: 'sunriseGradient', layerNoise: true },
-    layout: { type: 'full', options: { padding: 80 } },
-    slots: {
-      full: {
-        midScene: 'textReveal',
-        stylePreset: 'playful',
-        config: {
-          lines: [
-            { text: 'Your brain is lying to you.', emphasis: 'high', beats: { start: 0.3, exit: 4.5 } }
+  "id": "hook",
+  "durationInFrames": 150,
+  "transition": { "type": "slide", "direction": "up" },
+  "config": {
+    "background": { "preset": "sunriseGradient", "layerNoise": true },
+    "layout": { "type": "full", "options": { "padding": 80 } },
+    "slots": {
+      "full": {
+        "midScene": "textReveal",
+        "stylePreset": "playful",
+        "config": {
+          "lines": [
+            { "text": "Your brain is lying to you.", "emphasis": "high", "beats": { "start": 0.3, "exit": 4.5 } }
           ],
-          revealType: 'typewriter',
-          animationDuration: 1.2
+          "revealType": "typewriter",
+          "animationDuration": 1.2
         }
       }
     }
@@ -834,34 +840,34 @@ Before outputting JSON, verify:
 
 ### Educational Explainer
 
-```javascript
+```json
 {
-  id: 'explain',
-  durationInFrames: 300,
-  config: {
-    background: { preset: 'notebookSoft' },
-    layout: { type: 'rowStack', options: { rows: 2 } },
-    slots: {
-      row1: {
-        midScene: 'heroText',
-        config: {
-          text: 'Key Concept',
-          heroType: 'lottie',
-          heroRef: 'lightbulb',
-          beats: { entrance: 0.5, exit: 8.0 }
+  "id": "explain",
+  "durationInFrames": 300,
+  "config": {
+    "background": { "preset": "notebookSoft" },
+    "layout": { "type": "rowStack", "options": { "rows": 2 } },
+    "slots": {
+      "row1": {
+        "midScene": "heroText",
+        "config": {
+          "text": "Key Concept",
+          "heroType": "lottie",
+          "heroRef": "lightbulb",
+          "beats": { "entrance": 0.5, "exit": 8.0 }
         }
       },
-      row2: {
-        midScene: 'gridCards',
-        config: {
-          cards: [
-            { icon: '1️⃣', label: 'Step One' },
-            { icon: '2️⃣', label: 'Step Two' },
-            { icon: '3️⃣', label: 'Step Three' }
+      "row2": {
+        "midScene": "gridCards",
+        "config": {
+          "cards": [
+            { "icon": "1️⃣", "label": "Step One" },
+            { "icon": "2️⃣", "label": "Step Two" },
+            { "icon": "3️⃣", "label": "Step Three" }
           ],
-          columns: 3,
-          animation: 'cascade',
-          beats: { start: 1.5 }
+          "columns": 3,
+          "animation": "cascade",
+          "beats": { "start": 1.5 }
         }
       }
     }
@@ -871,21 +877,21 @@ Before outputting JSON, verify:
 
 ### Comparison Scene
 
-```javascript
+```json
 {
-  id: 'compare',
-  durationInFrames: 360,
-  config: {
-    background: { preset: 'cleanCard' },
-    layout: { type: 'columnSplit', options: { columns: 1 } },
-    slots: {
-      col1: {
-        midScene: 'sideBySide',
-        config: {
-          left: { title: 'Myth', icon: '❌', items: ['Common belief'] },
-          right: { title: 'Reality', icon: '✅', items: ['Actual truth'] },
-          dividerType: 'vs',
-          beats: { start: 0.5 }
+  "id": "compare",
+  "durationInFrames": 360,
+  "config": {
+    "background": { "preset": "cleanCard" },
+    "layout": { "type": "columnSplit", "options": { "columns": 1 } },
+    "slots": {
+      "col1": {
+        "midScene": "sideBySide",
+        "config": {
+          "left": { "title": "Myth", "icon": "❌", "items": ["Common belief"] },
+          "right": { "title": "Reality", "icon": "✅", "items": ["Actual truth"] },
+          "dividerType": "vs",
+          "beats": { "start": 0.5 }
         }
       }
     }
@@ -898,38 +904,60 @@ Before outputting JSON, verify:
 ## 13. Anti-Patterns (Avoid)
 
 ❌ **Beats in frames instead of seconds**
-```javascript
-// WRONG
-beats: { start: 30, exit: 90 }
-
-// CORRECT
-beats: { start: 1.0, exit: 3.0 }
+```json
+"beats": { "start": 30, "exit": 90 }
+```
+✅ **Correct:**
+```json
+"beats": { "start": 1.0, "exit": 3.0 }
 ```
 
-❌ **Missing required beats**
-```javascript
-// WRONG - textReveal needs beats
-config: { lines: [{ text: 'Hello' }] }
-
-// CORRECT
-config: { lines: [{ text: 'Hello', beats: { start: 0.5, exit: 3.0 } }] }
+❌ **Missing required beats on textReveal lines**
+```json
+"lines": [{ "text": "Hello" }]
+```
+✅ **Correct:**
+```json
+"lines": [{ "text": "Hello", "beats": { "start": 0.5, "exit": 3.0 } }]
 ```
 
 ❌ **Invalid slot names**
-```javascript
-// WRONG - rowStack doesn't have 'content' slot
-layout: { type: 'rowStack', options: { rows: 2 } },
-slots: { content: {...} }
-
-// CORRECT
-slots: { row1: {...}, row2: {...} }
+```json
+"layout": { "type": "rowStack", "options": { "rows": 2 } },
+"slots": { "content": {} }
+```
+✅ **Correct:**
+```json
+"slots": { "row1": {}, "row2": {} }
 ```
 
 ❌ **Exit before start**
-```javascript
-// WRONG
-beats: { start: 5.0, exit: 2.0 }
-
-// CORRECT
-beats: { start: 2.0, exit: 5.0 }
+```json
+"beats": { "start": 5.0, "exit": 2.0 }
 ```
+✅ **Correct:**
+```json
+"beats": { "start": 2.0, "exit": 5.0 }
+```
+
+❌ **Using `animationPreset` (will be ignored)**
+```json
+"animationPreset": "bouncy"
+```
+✅ **Correct:** Use `stylePreset` or explicit `animation` on mid-scene config
+
+❌ **JavaScript syntax in output**
+```javascript
+const scenes = [{ id: 'test' }];  // WRONG
+```
+✅ **Correct:** Pure JSON array
+```json
+[{ "id": "test" }]
+```
+
+❌ **Inventing keys**
+```json
+"customField": "value",
+"myAnimation": "bounce"
+```
+✅ **Correct:** Only use documented keys
