@@ -160,7 +160,22 @@ transition: {
 
 ---
 
-## 5. Mid-Scene Components
+## 5. Mid-Scene Components (10 Available)
+
+| Key | Component | Purpose |
+|-----|-----------|---------|
+| `textReveal` | TextRevealSequence | Animated text lines |
+| `heroText` | HeroTextEntranceExit | Hero visual + text |
+| `gridCards` | GridCardReveal | Icon/image card grid |
+| `checklist` | ChecklistReveal | Bullet points |
+| `bubbleCallout` | BubbleCalloutSequence | Floating callouts |
+| `sideBySide` | SideBySideCompare | Left vs right compare |
+| `iconGrid` | IconGrid | Icon-only grid |
+| `cardSequence` | CardSequence | Card stack/grid |
+| `bigNumber` | BigNumberReveal | Large stat display |
+| `animatedCounter` | AnimatedCounter | Counting animation |
+
+---
 
 ### 5.1 `textReveal`
 
@@ -382,6 +397,114 @@ Left vs right comparison.
 
 ---
 
+### 5.7 `iconGrid`
+
+Pure icon grid without card styling.
+
+```javascript
+{
+  midScene: 'iconGrid',
+  config: {
+    icons: [
+      { iconRef: '🎯', label: 'Focus', color: 'primary' },
+      { iconRef: '🚀', label: 'Launch', color: 'accentBlue' },
+      { iconRef: '💡', label: 'Ideas', color: 'doodle' },
+      { iconRef: '✨', label: 'Magic', color: 'secondary' }
+    ],
+    columns: 4,  // 1-8
+    animation: 'cascade',  // 'fadeIn' | 'slideIn' | 'scaleIn' | 'bounceIn' | 'cascade'
+    direction: 'up',  // for slideIn
+    staggerDelay: 0.1,
+    animationDuration: 0.5,
+    iconSize: 'lg',  // 'sm' | 'md' | 'lg' | 'xl'
+    gap: 40,  // pixels between icons
+    showLabels: true,  // show labels below icons
+    beats: { start: 1.0 }
+  }
+}
+```
+
+**Icon sizes**: sm (80px), md (100px), lg (120px), xl (150px)
+
+---
+
+### 5.8 `cardSequence`
+
+Multiple cards in stacked or grid layout.
+
+```javascript
+{
+  midScene: 'cardSequence',
+  config: {
+    cards: [
+      { title: 'Step 1', content: 'Understand the problem', variant: 'default' },
+      { title: 'Step 2', content: 'Break it into parts', variant: 'bordered' },
+      { title: 'Step 3', content: 'Solve each part', variant: 'glass' }
+    ],
+    layout: 'stacked',  // 'stacked' | 'grid'
+    columns: 3,  // for grid layout (1-6)
+    animation: 'fadeSlide',  // 'fadeIn' | 'slideIn' | 'scaleIn' | 'fadeSlide'
+    staggerDelay: 0.15,
+    animationDuration: 0.6,
+    beats: { start: 1.0 }
+  }
+}
+```
+
+**Card variants**: `default`, `bordered`, `glass`
+**Card sizes**: `sm`, `md`, `lg`
+
+---
+
+### 5.9 `bigNumber`
+
+Dramatic reveal of large statistics.
+
+```javascript
+{
+  midScene: 'bigNumber',
+  config: {
+    number: '11,000,000',  // display value (with formatting)
+    label: 'bits per second',  // optional label below
+    emphasis: 'high',  // 'high' | 'normal' | 'low'
+    animation: 'countUp',  // 'pop' | 'countUp' | 'typewriter' | 'fade'
+    countFrom: 0,  // starting value for countUp
+    color: 'primary',  // optional color override
+    beats: { start: 0.5, exit: 5.0 }
+  }
+}
+```
+
+**Animations**:
+- `pop`: Scale up from small
+- `countUp`: Animate from `countFrom` to `number`
+- `typewriter`: Characters appear one by one
+- `fade`: Simple fade in
+
+---
+
+### 5.10 `animatedCounter`
+
+Animated number counting up/down.
+
+```javascript
+{
+  midScene: 'animatedCounter',
+  config: {
+    startValue: 0,
+    endValue: 100,
+    duration: 2,  // count duration in seconds
+    prefix: '$',  // e.g., "$100"
+    suffix: '%',  // e.g., "100%"
+    label: 'completion rate',  // label below number
+    color: 'primary',  // optional color
+    beats: { start: 0.5 }
+  }
+}
+```
+
+---
+
 ## 6. Slot Arrays (Sequenced Content)
 
 Multiple mid-scenes in one slot using beats for timing:
@@ -450,23 +573,73 @@ heroRef: 'https://assets.lottiefiles.com/...'
 
 ## 8. Theme Colors
 
-Available color keys for `color`, `iconColor`, etc:
+Available color keys for `color`, `iconColor`, `dividerColor`, etc:
 
-| Key | Usage |
-|-----|-------|
-| `primary` | Brand coral (#FF6B6B) |
-| `secondary` | Brand soft blue (#4B89DC) |
-| `accentGreen` | Success/positive (#27AE60) |
-| `accentBlue` | Info/highlight (#2980B9) |
-| `doodle` | Hand-drawn style (#FF8A65) |
-| `textMain` | Primary text (#2C3E50) |
-| `textSoft` | Secondary text (#7F8C8D) |
-| `pageBg` | Page background (#FAF9F6) |
-| `cardBg` | Card background (#FFFFFF) |
+### Brand & Accents
+| Key | Hex | Usage |
+|-----|-----|-------|
+| `primary` | #FF6B35 | Warm coral - main brand color |
+| `secondary` | #9B59B6 | Notebook purple |
+| `accentGreen` | #27AE60 | Success, positive, checkmarks |
+| `accentBlue` | #3498DB | Info, highlights |
+| `doodle` | #F39C12 | Hand-drawn elements, scribbles |
+
+### Text
+| Key | Hex | Usage |
+|-----|-----|-------|
+| `textMain` | #2C3E50 | Primary text |
+| `textSoft` | #5D6D7E | Secondary text |
+| `textMuted` | #95A5A6 | Tertiary/disabled text |
+
+### Backgrounds
+| Key | Hex | Usage |
+|-----|-----|-------|
+| `pageBg` | #FFF9F0 | Warm off-white page background |
+| `pageEdge` | #F3E2C8 | Subtle edge/margin color |
+| `cardBg` | #FFFFFF | Card surface |
+| `ruleLine` | #F0D9B5 | Notebook lines |
+
+### Usage in Config
+
+```javascript
+// In mid-scene config
+color: 'primary'        // Use theme key
+color: '#FF6B35'        // Or direct hex
+
+// In emphasis/icon configs
+iconColor: 'accentGreen'
+dividerColor: 'secondary'
+```
 
 ---
 
-## 9. Complete Scene Example
+## 9. Animation Presets
+
+Style presets include animation defaults. Available animation presets:
+
+| Preset | Entrance | Stagger | Best For |
+|--------|----------|---------|----------|
+| `subtle` | fadeIn (0.5s) | 0.15s | Professional, minimal |
+| `bouncy` | bounceIn (0.6s) | 0.2s | Playful, fun content |
+| `dramatic` | fadeSlide (0.8s) | 0.3s | Emphasis moments |
+| `minimal` | fadeIn (0.4s) | 0.1s | Dense content |
+| `educational` | slideIn (0.5s) | 0.25s | Instructional |
+
+### Spring Configurations
+
+For advanced animation control:
+
+| Config | Feel |
+|--------|------|
+| `gentle` | Slow, smooth |
+| `smooth` | Natural motion |
+| `bouncy` | Playful overshoot |
+| `snappy` | Quick, responsive |
+| `wobbly` | Loose, organic |
+
+---
+
+## 10. Complete Scene Example
 
 ```javascript
 {
@@ -532,7 +705,7 @@ Available color keys for `color`, `iconColor`, etc:
 
 ---
 
-## 10. Validation Checklist
+## 11. Validation Checklist
 
 Before outputting JSON, verify:
 
@@ -542,7 +715,7 @@ Before outputting JSON, verify:
 - [ ] `beats.start` < `beats.exit` (when both present)
 - [ ] `layout.type` is valid: `full`, `rowStack`, `columnSplit`, `gridSlots`
 - [ ] Slot names match layout type (e.g., `row1` for `rowStack`, `col1` for `columnSplit`)
-- [ ] `midScene` is valid: `textReveal`, `heroText`, `gridCards`, `checklist`, `bubbleCallout`, `sideBySide`
+- [ ] `midScene` is valid: `textReveal`, `heroText`, `gridCards`, `checklist`, `bubbleCallout`, `sideBySide`, `iconGrid`, `cardSequence`, `bigNumber`, `animatedCounter`
 - [ ] `heroRef` uses valid Lottie registry key or URL
 - [ ] `transition.type` is valid: `fade`, `slide`, `page-turn`, `doodle-wipe`, `eraser`
 - [ ] `background.preset` is valid: `notebookSoft`, `sunriseGradient`, `cleanCard`, `chalkboardGradient`, `spotlight`
@@ -551,7 +724,7 @@ Before outputting JSON, verify:
 
 ---
 
-## 11. Common Patterns
+## 12. Common Patterns
 
 ### Hook Scene (TikTok/Reels)
 
@@ -643,7 +816,7 @@ Before outputting JSON, verify:
 
 ---
 
-## 12. Anti-Patterns (Avoid)
+## 13. Anti-Patterns (Avoid)
 
 ❌ **Beats in frames instead of seconds**
 ```javascript

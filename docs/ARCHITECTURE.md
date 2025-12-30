@@ -64,6 +64,9 @@ Mid-scenes are **composed components** that render specific content patterns:
 | `checklist` | Bullet point list | `items`, `icon`, `revealType` |
 | `bubbleCallout` | Floating callouts | `callouts`, `shape`, `pattern` |
 | `sideBySide` | Left vs right compare | `left`, `right`, `dividerType` |
+| `iconGrid` | Icon-only grid | `icons`, `columns`, `iconSize` |
+| `cardSequence` | Card stack/grid | `cards`, `layout`, `animation` |
+| `bigNumber` | Large stat display | `number`, `label`, `animation` |
 | `animatedCounter` | Number animation | `startValue`, `endValue`, `duration` |
 
 Each mid-scene:

@@ -86,15 +86,37 @@ Is the content...
 ├── A concept with a visual representation?
 │   └── Use: heroText (with lottie)
 ├── A list of items/steps?
-│   ├── Sequential steps? → checklist
-│   └── Parallel options? → gridCards
+│   ├── Sequential steps with checkmarks? → checklist
+│   └── Parallel options with icons? → gridCards
 ├── A comparison of two things?
 │   └── Use: sideBySide
 ├── Scattered tips or annotations?
 │   └── Use: bubbleCallout
-└── Multiple related facts?
+├── Multiple related facts with icons?
+│   ├── Need labels? → gridCards
+│   └── Icons only? → iconGrid
+├── Cards with titles and descriptions?
+│   └── Use: cardSequence
+├── A big statistic or number?
+│   ├── Single dramatic number? → bigNumber
+│   └── Counting animation? → animatedCounter
+└── Multiple related items?
     └── Use: gridCards
 ```
+
+**All 10 Mid-Scenes:**
+| Key | Best For |
+|-----|----------|
+| `textReveal` | Statements, quotes, explanations |
+| `heroText` | Visual + text concepts |
+| `gridCards` | Icon/image cards with labels |
+| `checklist` | Step lists, requirements |
+| `bubbleCallout` | Tips, annotations, thoughts |
+| `sideBySide` | Before/after, A vs B |
+| `iconGrid` | Pure icon displays |
+| `cardSequence` | Titled content cards |
+| `bigNumber` | Impressive statistics |
+| `animatedCounter` | Counting animations |
 
 ### Choosing Background
 
@@ -411,8 +433,10 @@ If validation fails, check these common issues:
 
 This guide is for **KnoMotion v1.0** (post-consolidation).
 
-- Mid-scenes: 6 available types
+- Mid-scenes: **10 available types**
 - Lottie: URL-based registry with 40+ animations
 - Layouts: 4 types (full, rowStack, columnSplit, gridSlots)
 - Backgrounds: 5 presets + particles
 - Transitions: 5 types
+- Style presets: 5 (educational, playful, minimal, mentor, focus)
+- Animation presets: 5 (subtle, bouncy, dramatic, minimal, educational)
