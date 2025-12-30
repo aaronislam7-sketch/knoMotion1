@@ -73,6 +73,11 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
   
   // Responsive sizing for mobile
   const isMobile = height > width;
+  
+  // Calculate slot dimensions from position or viewport
+  const slotWidth = config.position?.width || width;
+  const slotHeight = config.position?.height || height;
+  
   const {
     text,
     heroType = 'image',
@@ -171,16 +176,19 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)',
-        width: '80%',
-        maxWidth: 800,
+        width: isMobile ? '90%' : '80%',
+        maxWidth: Math.min(700, slotWidth * 0.85),
       };
+
+  // Dynamic gap based on available space
+  const contentGap = Math.max(24, Math.min(40, slotHeight * 0.04));
 
   const containerStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 40,
+    gap: contentGap,
     width: '100%',
     ...style.container,
   };
@@ -195,13 +203,14 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
             transform: combinedStyle.transform || 'none',
           }}
         >
-        {/* Hero - responsive sizing */}
+        {/* Hero - dynamic responsive sizing based on slot/viewport */}
         <div
           style={{
             width: '100%',
             height: 'auto',
-            minHeight: isMobile ? 400 : 300,
-            maxHeight: isMobile ? 800 : 500,
+            // Dynamic sizing: 35-45% of slot height, with sensible min/max
+            minHeight: Math.max(180, Math.min(slotHeight * 0.25, isMobile ? 300 : 220)),
+            maxHeight: Math.min(slotHeight * 0.45, isMobile ? 500 : 380),
             aspectRatio: '1 / 1',
             display: 'flex',
             alignItems: 'center',
@@ -214,7 +223,7 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
           {renderHero(heroConfig, frame, heroTimelineBeats, KNODE_THEME.colors, null, fps)}
         </div>
 
-        {/* Text - BOOSTED sizing (only render if text provided) */}
+        {/* Text - Dynamic sizing based on available space */}
         {text && (
           <Text
             text={text}
@@ -224,7 +233,8 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
             color={preset.textColor}
             style={{
               textAlign: 'center',
-              fontSize: isMobile ? 72 : 64, // Explicit larger size
+              // Dynamic font size: scales with slot but with sensible bounds
+              fontSize: Math.max(48, Math.min(isMobile ? 72 : 64, slotWidth * 0.055)),
               ...style.text,
             }}
           />
