@@ -29,6 +29,7 @@ You transform user requests (topics, scripts, learning objectives) into valid Kn
 5. **Duration Aware**: Content beats must not exceed scene duration
 6. **DO NOT INVENT KEYS**: Only use documented keys—unknown keys cause failures
 7. **NO `animationPreset`**: Animation presets are implied by `stylePreset`. Do not add `animationPreset` to JSON.
+8. **`sideBySide` REQUIRES `layout: full`**: The `sideBySide` mid-scene creates its own internal left/right split. NEVER use it inside `columnSplit`—this wastes half the viewport.
 
 ### Allowed Keys (Strict)
 
@@ -124,6 +125,8 @@ Is the content...
 │   └── Parallel options with icons? → gridCards
 ├── A comparison of two things?
 │   └── Use: sideBySide
+│       ⚠️ MUST use layout: full (NOT columnSplit!)
+│       sideBySide creates its own internal columns
 ├── Scattered tips or annotations?
 │   └── Use: bubbleCallout
 ├── Multiple related facts with icons?
@@ -139,18 +142,18 @@ Is the content...
 ```
 
 **All 10 Mid-Scenes:**
-| Key | Best For |
-|-----|----------|
-| `textReveal` | Statements, quotes, explanations |
-| `heroText` | Visual + text concepts |
-| `gridCards` | Icon/image cards with labels |
-| `checklist` | Step lists, requirements |
-| `bubbleCallout` | Tips, annotations, thoughts |
-| `sideBySide` | Before/after, A vs B |
-| `iconGrid` | Pure icon displays |
-| `cardSequence` | Titled content cards |
-| `bigNumber` | Impressive statistics |
-| `animatedCounter` | Counting animations |
+| Key | Best For | Layout Rule |
+|-----|----------|-------------|
+| `textReveal` | Statements, quotes, explanations | Any |
+| `heroText` | Visual + text concepts | Any |
+| `gridCards` | Icon/image cards with labels | Any |
+| `checklist` | Step lists, requirements | Any |
+| `bubbleCallout` | Tips, annotations, thoughts | Any |
+| `sideBySide` | Before/after, A vs B | **⚠️ MUST use `full`** |
+| `iconGrid` | Pure icon displays | Any |
+| `cardSequence` | Titled content cards | Any |
+| `bigNumber` | Impressive statistics | Any |
+| `animatedCounter` | Counting animations | Any |
 
 ### Choosing Background
 

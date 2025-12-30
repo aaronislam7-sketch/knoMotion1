@@ -12,6 +12,18 @@
 
 ⚠️ **DO NOT DEFINE `animationPreset`** — Animation presets are implied by `stylePreset`. Do not add `animationPreset` to scene JSON. Use explicit `animation` fields on mid-scenes only if overriding defaults.
 
+⚠️ **`sideBySide` MUST USE `layout: full`** — The `sideBySide` mid-scene creates its own internal left/right columns. NEVER put it inside `columnSplit`. This is a common mistake that wastes half the viewport.
+
+```json
+// ❌ WRONG - sideBySide squished into half the screen
+"layout": { "type": "columnSplit", "options": { "columns": 2 } },
+"slots": { "col1": { "midScene": "sideBySide" } }
+
+// ✅ CORRECT - sideBySide fills the viewport
+"layout": { "type": "full" },
+"slots": { "full": { "midScene": "sideBySide" } }
+```
+
 ---
 
 ## Mental Model
