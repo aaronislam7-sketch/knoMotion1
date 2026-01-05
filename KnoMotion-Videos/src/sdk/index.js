@@ -53,8 +53,9 @@ export * from './effects/broadcastEffects';
 // ==================== LOTTIE ====================
 export * from './lottie/lottie-helpers';
 export * from './lottie/lottieIntegration';
-export * from './lottie/lottieLibrary';
 export * from './lottie/lottiePresets';
+// Lottie registry (URL-based)
+export * from './lottie/registry';
 
 // (Layout exports moved above)
 

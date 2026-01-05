@@ -9,16 +9,16 @@ import { KNODE_THEME } from '../../theme/knodeTheme';
  * Calculate optimal content sizing to fit within available card space
  * Uses layout engine principles for constraint-based sizing
  * 
- * ICONS ARE THE STAR - they should be as large as possible while
- * leaving just enough room for readable text.
+ * TEXT IS PROMINENT - should scale with card size and be easily readable.
+ * Icons complement the text but shouldn't overwhelm.
  * 
  * For HORIZONTAL layout (icon beside text):
- * - Icon takes up to 45% of width, fills height
- * - Text gets remaining space
+ * - Icon takes up to 35% of width
+ * - Text gets remaining space with prominent sizing
  * 
  * For VERTICAL layout (icon above text):
- * - Icon is the HERO - fills as much space as possible
- * - Text is compact below
+ * - Icon is balanced with text
+ * - Text scales proportionally with card
  * 
  * @param {Object} params
  * @param {number} params.cardWidth - Available card width
@@ -39,42 +39,45 @@ const calculateContentSizing = ({
   size = 'md',
   layout = 'horizontal',
 }) => {
-  // Minimal padding to maximize icon space
-  const paddingRatio = size === 'sm' ? 0.04 : size === 'lg' ? 0.06 : 0.05;
+  // Padding scales with card size
+  const paddingRatio = size === 'sm' ? 0.05 : size === 'lg' ? 0.07 : 0.06;
   const accentHeightRatio = 0.012;
-  const gapRatio = layout === 'horizontal' ? 0.04 : 0.03;
+  const gapRatio = layout === 'horizontal' ? 0.05 : 0.04;
   
   // Calculate padding based on smaller dimension
   const minDim = Math.min(cardWidth, cardHeight);
-  const padding = Math.max(8, Math.min(16, minDim * paddingRatio));
-  const accentHeight = Math.max(2, Math.min(3, minDim * accentHeightRatio));
-  const gap = Math.max(8, Math.min(16, minDim * gapRatio));
+  const padding = Math.max(10, Math.min(24, minDim * paddingRatio));
+  const accentHeight = Math.max(2, Math.min(4, minDim * accentHeightRatio));
+  const gap = Math.max(10, Math.min(20, minDim * gapRatio));
   
   // Available content area after padding
   const contentWidth = cardWidth - padding * 2;
   const contentHeight = cardHeight - padding * 2 - accentHeight;
   
-  // Calculate label sizes - compact to give icons more room
-  const baseFontSize = Math.max(16, Math.min(26, minDim * 0.11));
+  // Calculate label sizes - MAXIMUM PROMINENCE
+  // Font scales very aggressively with card size for poppy, readable text
+  // Target: 150px card → 32px font, 300px card → 60px font
+  const baseFontSize = Math.max(28, Math.min(72, minDim * 0.22));
+  const sublabelSize = Math.max(18, Math.min(42, minDim * 0.14));
   
-  // Calculate icon size - constrained to prevent overflow
+  // Calculate icon size - smaller to give text prominence
   let iconSize = 0;
   if (hasIcon) {
     if (layout === 'horizontal') {
-      // For horizontal: icon takes ~30% of width, constrained by height
-      // Cap at 56px for clean appearance in grid cards
-      const maxIconWidth = contentWidth * 0.3;
-      const maxIconHeight = contentHeight * 0.7;
-      iconSize = Math.max(32, Math.min(maxIconHeight, maxIconWidth, 56));
+      // For horizontal: icon is compact, text is the star
+      const maxIconWidth = contentWidth * 0.25; // Reduced from 0.35
+      const maxIconHeight = contentHeight * 0.6; // Reduced from 0.75
+      // Icon sized relative to text - approximately 1.2x the font size (reduced from 1.8)
+      const textRelativeSize = baseFontSize * 1.2;
+      iconSize = Math.max(32, Math.min(maxIconHeight, maxIconWidth, textRelativeSize, 64));
     } else {
-      // For vertical: icon is prominent but controlled
-      // Reserve space for labels
+      // For vertical: icon above text, compact
       const labelHeight = hasLabel ? baseFontSize * 1.3 : 0;
-      const sublabelHeight = hasSublabel ? baseFontSize * 0.75 * 1.3 : 0;
-      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 4 : 0);
+      const sublabelHeight = hasSublabel ? sublabelSize * 1.3 : 0;
+      const totalLabelHeight = labelHeight + sublabelHeight + (hasSublabel ? 6 : 0);
       const availableForIcon = contentHeight - totalLabelHeight - (hasLabel ? gap : 0);
-      // Icon can take up to 60% of available height and 50% of width, max 64px
-      iconSize = Math.max(36, Math.min(availableForIcon * 0.6, contentWidth * 0.5, 64));
+      // Icon can take up to 40% of available height (reduced from 55%)
+      iconSize = Math.max(36, Math.min(availableForIcon * 0.4, contentWidth * 0.4, 72));
     }
   }
   
@@ -84,7 +87,7 @@ const calculateContentSizing = ({
     gap,
     iconSize,
     labelFontSize: baseFontSize,
-    sublabelFontSize: baseFontSize * 0.7,
+    sublabelFontSize: sublabelSize,
     contentWidth,
     contentHeight,
     layout,
@@ -167,34 +170,34 @@ export const InfoCard = ({
     : null;
   
   // Fallback size presets for when dimensions aren't provided
-  // Icons are balanced with text - not too large
+  // Text is MAXIMUM prominence - big, bold, poppy
   const sizeStyles = {
     sm: {
       iconSize: 'md',
-      iconFontSize: isHorizontal ? 32 : 40,
-      labelFontSize: 18,
-      sublabelFontSize: 14,
+      iconFontSize: isHorizontal ? 40 : 48,
+      labelFontSize: 32,
+      sublabelFontSize: 20,
       padding: theme.spacing.cardPadding * 0.5,
       gap: isHorizontal ? 12 : 8,
       accentHeight: 2,
     },
     md: {
       iconSize: 'lg',
-      iconFontSize: isHorizontal ? 40 : 48,
-      labelFontSize: 22,
-      sublabelFontSize: 16,
+      iconFontSize: isHorizontal ? 48 : 56,
+      labelFontSize: 42,
+      sublabelFontSize: 26,
       padding: theme.spacing.cardPadding * 0.6,
       gap: isHorizontal ? 14 : 10,
-      accentHeight: 2,
+      accentHeight: 3,
     },
     lg: {
       iconSize: 'xl',
-      iconFontSize: isHorizontal ? 48 : 56,
-      labelFontSize: 26,
-      sublabelFontSize: 18,
+      iconFontSize: isHorizontal ? 56 : 64,
+      labelFontSize: 54,
+      sublabelFontSize: 32,
       padding: theme.spacing.cardPadding * 0.7,
       gap: isHorizontal ? 16 : 12,
-      accentHeight: 3,
+      accentHeight: 4,
     },
   };
   
@@ -367,7 +370,7 @@ export const InfoCard = ({
     );
   };
   
-  // Text content section with constraint-aware sizing
+  // Text content section with constraint-aware sizing - POPPY and prominent
   const renderTextContent = () => {
     if (!hasLabel && !hasSublabel) return null;
     
@@ -379,7 +382,7 @@ export const InfoCard = ({
           alignItems: isVertical ? 'center' : 'flex-start',
           justifyContent: 'center',
           textAlign: isVertical ? 'center' : 'left',
-          gap: 3,
+          gap: 4,
           flex: isVertical ? undefined : 1,
           minWidth: 0,
           maxWidth: '100%',
@@ -394,15 +397,17 @@ export const InfoCard = ({
             color="textMain"
             style={{
               fontSize: sizeConfig.labelFontSize,
-              lineHeight: 1.15,
+              fontWeight: 700, // Explicit bold
+              lineHeight: 1.15, // Tighter for impact
+              letterSpacing: '-0.02em', // Even tighter letter spacing
               maxWidth: '100%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              // Allow 2 lines for horizontal layout
-              whiteSpace: isHorizontal ? 'normal' : 'nowrap',
-              display: isHorizontal ? '-webkit-box' : 'block',
-              WebkitLineClamp: isHorizontal ? 2 : undefined,
-              WebkitBoxOrient: isHorizontal ? 'vertical' : undefined,
+              // Allow 2 lines for horizontal layout, 3 for vertical
+              whiteSpace: 'normal',
+              display: '-webkit-box',
+              WebkitLineClamp: isHorizontal ? 2 : 3,
+              WebkitBoxOrient: 'vertical',
             }}
           />
         )}
@@ -410,20 +415,22 @@ export const InfoCard = ({
           <Text
             text={sublabel}
             variant="body"
-            weight="normal"
+            weight="medium"
             color="textSoft"
             style={{
               fontSize: sizeConfig.sublabelFontSize,
-              lineHeight: 1.2,
+              fontWeight: 500, // Medium weight for readability
+              lineHeight: 1.25,
+              letterSpacing: '-0.01em',
               maxWidth: '100%',
-              opacity: 0.75,
+              opacity: 0.9, // More visible
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              // Allow 2 lines for horizontal layout
-              whiteSpace: isHorizontal ? 'normal' : 'nowrap',
-              display: isHorizontal ? '-webkit-box' : 'block',
-              WebkitLineClamp: isHorizontal ? 2 : undefined,
-              WebkitBoxOrient: isHorizontal ? 'vertical' : undefined,
+              // Allow 2 lines
+              whiteSpace: 'normal',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
             }}
           />
         )}

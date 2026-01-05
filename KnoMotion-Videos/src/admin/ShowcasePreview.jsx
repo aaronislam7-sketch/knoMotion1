@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Player } from '@remotion/player';
-import { ShowcaseMain } from '../compositions/ShowcaseMain';
-import { ContinuousAnimationShowcase } from '../compositions/ContinuousAnimationShowcase';
 import { CanonShowerVideo } from '../compositions/CanonShowerVideo';
 import {
   KnodoviaAccidentalArrival,
@@ -27,7 +25,6 @@ import {
   KnodoviaEconomicsMobile,
   KNODOVIA_VIDEO3_MOBILE_DURATION,
 } from '../compositions/KnodoviaVideo3_Mobile';
-import { LottieDebugTest } from '../compositions/LottieDebugTest';
 // TikTok Viral Videos
 import {
   TikTok_BrainLies,
@@ -53,6 +50,7 @@ const COMPOSITION_ID_MAP = {
   knodovia1Mobile: 'KnodoviaAccidentalArrivalMobile',
   knodovia2Mobile: 'KnodoviaCultureMobile',
   knodovia3Mobile: 'KnodoviaEconomicsMobile',
+  canonShower: 'CanonShowerVideo',
 };
 
 /**
@@ -139,23 +137,18 @@ const RenderCommandBox = ({ compositionKey, compositions }) => {
 /**
  * Showcase Preview Tool
  * 
- * Preview all showcase compositions:
- * - Individual scenes (for review/QA)
- * - Full showcase (master composition)
- * - Continuous animations showcase
+ * Preview all canon video compositions:
+ * - Knodovia trilogy (desktop + mobile)
+ * - TikTok viral videos
+ * - Canon Shower Video
  */
 export const ShowcasePreview = () => {
-  const [selectedComp, setSelectedComp] = useState('full');
+  const [selectedComp, setSelectedComp] = useState('knodovia1');
 
   const compositions = {
-    full: {
-      component: ShowcaseMain,
-      duration: 6300, // 210 seconds @ 30fps
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Full Showcase (3.5 minutes)',
-    },
+    // =========================================================================
+    // KNODOVIA TRILOGY - DESKTOP
+    // =========================================================================
     knodovia1: {
       component: KnodoviaAccidentalArrival,
       duration: KNODOVIA_VIDEO1_DURATION,
@@ -164,16 +157,6 @@ export const ShowcasePreview = () => {
       fps: 30,
       name: `Knodovia 1: Accidental Arrival (~${Math.round(
         KNODOVIA_VIDEO1_DURATION / 30,
-      )}s)`,
-    },
-    knodovia1Mobile: {
-      component: KnodoviaAccidentalArrivalMobile,
-      duration: KNODOVIA_VIDEO1_MOBILE_DURATION,
-      width: 1080,
-      height: 1920,
-      fps: 30,
-      name: `📱 Knodovia 1: Mobile (${Math.round(
-        KNODOVIA_VIDEO1_MOBILE_DURATION / 30,
       )}s)`,
     },
     knodovia2: {
@@ -186,16 +169,6 @@ export const ShowcasePreview = () => {
         KNODOVIA_VIDEO2_DURATION / 30,
       )}s)`,
     },
-    knodovia2Mobile: {
-      component: KnodoviaCultureMobile,
-      duration: KNODOVIA_VIDEO2_MOBILE_DURATION,
-      width: 1080,
-      height: 1920,
-      fps: 30,
-      name: `📱 Knodovia 2: Culture Mobile (${Math.round(
-        KNODOVIA_VIDEO2_MOBILE_DURATION / 30,
-      )}s)`,
-    },
     knodovia3: {
       component: KnodoviaEconomics,
       duration: KNODOVIA_VIDEO3_DURATION,
@@ -204,6 +177,29 @@ export const ShowcasePreview = () => {
       fps: 30,
       name: `Knodovia 3: Economics (~${Math.round(
         KNODOVIA_VIDEO3_DURATION / 30,
+      )}s)`,
+    },
+    // =========================================================================
+    // KNODOVIA TRILOGY - MOBILE
+    // =========================================================================
+    knodovia1Mobile: {
+      component: KnodoviaAccidentalArrivalMobile,
+      duration: KNODOVIA_VIDEO1_MOBILE_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `📱 Knodovia 1: Mobile (${Math.round(
+        KNODOVIA_VIDEO1_MOBILE_DURATION / 30,
+      )}s)`,
+    },
+    knodovia2Mobile: {
+      component: KnodoviaCultureMobile,
+      duration: KNODOVIA_VIDEO2_MOBILE_DURATION,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      name: `📱 Knodovia 2: Culture Mobile (${Math.round(
+        KNODOVIA_VIDEO2_MOBILE_DURATION / 30,
       )}s)`,
     },
     knodovia3Mobile: {
@@ -215,30 +211,6 @@ export const ShowcasePreview = () => {
       name: `📱 Knodovia 3: Economics Mobile (${Math.round(
         KNODOVIA_VIDEO3_MOBILE_DURATION / 30,
       )}s)`,
-    },
-    animations: {
-      component: ContinuousAnimationShowcase,
-      duration: 900, // 30 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: 'Continuous Animation Showcase (30s)',
-    },
-    canonShower: {
-      component: CanonShowerVideo,
-      duration: 3600, // 120 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: '🚿 Canon: Shower Video (2 min)',
-    },
-    lottieDebug: {
-      component: LottieDebugTest,
-      duration: 300, // 10 seconds
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      name: '🔧 Lottie Debug Test',
     },
     // =========================================================================
     // TIKTOK VIRAL VIDEOS
@@ -267,6 +239,17 @@ export const ShowcasePreview = () => {
       fps: 30,
       name: `🎬 TikTok: 80ms Delay (~${Math.round(TIKTOK_80MSDELAY_DURATION / 30)}s)`,
     },
+    // =========================================================================
+    // OTHER CANON VIDEOS
+    // =========================================================================
+    canonShower: {
+      component: CanonShowerVideo,
+      duration: 3600, // 120 seconds
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      name: '🚿 Canon: Shower Video (2 min)',
+    },
   };
 
   const current = compositions[selectedComp];
@@ -283,10 +266,10 @@ export const ShowcasePreview = () => {
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
           <h1 style={{ fontSize: 48, fontWeight: 700, marginBottom: 10 }}>
-            🎬 KnoMotion Showcase Preview
+            🎬 KnoMotion Canon Videos
           </h1>
           <p style={{ fontSize: 18, color: '#999' }}>
-            Preview and QA all showcase compositions
+            Preview and QA all canon video compositions
           </p>
         </div>
 
@@ -411,7 +394,6 @@ export const ShowcasePreview = () => {
             <li>✅ No visual glitches or stutters</li>
             <li>✅ Transitions smooth between scenes</li>
             <li>✅ Typography and spacing clean</li>
-            <li>✅ Full showcase duration: 3.5 minutes</li>
           </ul>
         </div>
       </div>
