@@ -569,10 +569,28 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
   const dividerStartFrame = startFrame + staggerFrames * 0.5;
   const rightStartFrame = startFrame + staggerFrames;
 
-  // Get animation styles
+  // Get entrance animation styles
   const leftAnimStyle = getSideAnimationStyle(animation, frame, leftStartFrame, durationFrames, fps, 'left');
   const rightAnimStyle = getSideAnimationStyle(animation, frame, rightStartFrame, durationFrames, fps, 'right');
   const dividerAnimStyle = getDividerAnimationStyle(frame, dividerStartFrame, durationFrames, fps);
+  
+  // Calculate exit animation if exit beat is explicitly provided
+  const hasExplicitExit = beats?.exit !== undefined;
+  const exitFrame = hasExplicitExit ? toFrames(sequenceBeats.exit, fps) : Infinity;
+  const exitDuration = toFrames(0.6, fps);
+  const exitProgress = hasExplicitExit && frame > exitFrame
+    ? Math.min(1, (frame - exitFrame) / exitDuration)
+    : 0;
+  
+  // Apply exit to animation styles
+  const applyExit = (style) => ({
+    ...style,
+    opacity: (style.opacity ?? 1) * (1 - exitProgress),
+  });
+  
+  const leftAnimStyleWithExit = applyExit(leftAnimStyle);
+  const rightAnimStyleWithExit = applyExit(rightAnimStyle);
+  const dividerAnimStyleWithExit = applyExit(dividerAnimStyle);
 
   // Calculate font size based on slot
   const baseFontSize = Math.min(28, Math.max(16, slot.height / 20));
@@ -596,7 +614,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
         <ComparisonSide
           config={{ ...left, alignment: isMobile ? 'center' : alignment }}
           side={isMobile ? 'top' : 'left'}
-          animStyle={leftAnimStyle}
+          animStyle={leftAnimStyleWithExit}
           baseFontSize={baseFontSize}
           slotHeight={isMobile ? slot.height / 2 : slot.height}
           style={style}
@@ -607,7 +625,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
         <ComparisonSide
           config={{ ...right, alignment: isMobile ? 'center' : alignment }}
           side={isMobile ? 'bottom' : 'right'}
-          animStyle={rightAnimStyle}
+          animStyle={rightAnimStyleWithExit}
           baseFontSize={baseFontSize}
           slotHeight={isMobile ? slot.height / 2 : slot.height}
           style={style}
@@ -631,7 +649,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
             type={dividerType}
             label={dividerLabel}
             color={resolvedDividerColor}
-            animStyle={dividerAnimStyle}
+            animStyle={dividerAnimStyleWithExit}
             slotHeight={slot.height}
             baseFontSize={baseFontSize}
             style={style}
@@ -650,7 +668,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
             height: 3,
             backgroundColor: `${resolvedDividerColor}40`,
             transform: 'translateY(-50%)',
-            opacity: dividerAnimStyle.opacity,
+            opacity: dividerAnimStyleWithExit.opacity,
             pointerEvents: 'none',
           }}
         />
