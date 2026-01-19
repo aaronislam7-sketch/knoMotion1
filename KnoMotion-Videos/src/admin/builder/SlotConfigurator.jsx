@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { MidSceneEditor } from './MidSceneEditor';
 import { StylePresetDropdown } from './StylePresetPicker';
+import { MidScenePreview } from './MidScenePreview';
 
 // Available mid-scene types with descriptions
 const MID_SCENE_TYPES = [
@@ -210,8 +211,14 @@ const SlotEditor = ({ slotName, slotConfig, onChange, format }) => {
                 </div>
               )}
               
-              {/* Mid-scene Type Selector */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              {/* Mid-scene Type Selector with Preview */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                {/* Preview */}
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Preview</label>
+                  <MidScenePreview type={config.midScene} mode={config.config?.mode} />
+                </div>
+                
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Mid-scene Type</label>
                   <select

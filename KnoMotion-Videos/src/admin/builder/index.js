@@ -13,4 +13,5 @@ export { LottiePicker, LottiePickerInline } from './LottiePicker';
 export { StylePresetPicker, StylePresetDropdown } from './StylePresetPicker';
 export { SlotConfigurator } from './SlotConfigurator';
 export { MidSceneEditor } from './MidSceneEditor';
+export { MidScenePreview, MidScenePreviewCompact } from './MidScenePreview';
 export { JsonOutput } from './JsonOutput';
