@@ -14,6 +14,7 @@
     "studio": "npx remotion studio src/remotion/index.ts"
   },
   "dependencies": {
+    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@remotion/animated-emoji": "4.0.382",
     "@remotion/fonts": "4.0.382",
     "@remotion/google-fonts": "4.0.382",
