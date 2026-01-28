@@ -2,335 +2,249 @@
  * Anatomy Explorer Template
  * 
  * Understand complex systems by exploring their component parts.
- * Based on part-whole learning and systems thinking.
- * 
- * Features:
- * - Interactive diagram with clickable parts
- * - Multiple layout options (hierarchical, radial, grid, linear)
- * - Connection lines between related parts
- * - Detail panel showing purpose, how it works, and key insights
- * - Progress tracking for parts explored
- * - Completion message when all parts visited
- * - Responsive design with mobile-friendly view
+ * Notion + Brilliant.org inspired - clean, professional, with alive connections.
  */
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  AnatomyExplorerProps, 
-  AnatomyPart, 
-  AnatomyConnection 
-} from '../../types';
-import { Card, Text, Icon, LottiePlayer, ProgressIndicator } from '../../components';
-import { 
-  fadeInUp, 
-  fadeInScale,
-  staggerContainer, 
-  selectedState,
-  drawLine,
-  SPRING_CONFIGS,
-} from '../../animations';
-import { useResponsive, useScrollReveal } from '../../hooks';
+import { AnatomyExplorerProps, AnatomyPart } from '../../types';
+import { SPRING_CONFIGS } from '../../animations';
+
+// =============================================================================
+// FLOWING LINE ANIMATION STYLES
+// =============================================================================
+
+const flowingLineStyle = `
+  @keyframes flowDash {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+  .flowing-line {
+    stroke-dasharray: 10 5;
+    animation: flowDash 1s linear infinite;
+  }
+  .flowing-line-slow {
+    stroke-dasharray: 8 4;
+    animation: flowDash 2s linear infinite;
+  }
+`;
 
 // =============================================================================
 // LAYOUT CALCULATIONS
 // =============================================================================
 
-interface PartPosition {
+interface NodePosition {
   x: number;
   y: number;
   part: AnatomyPart;
 }
 
-const calculatePositions = (
+const calculateHierarchicalPositions = (
   parts: AnatomyPart[],
-  layout: 'hierarchical' | 'radial' | 'linear' | 'grid',
-  containerWidth: number,
-  containerHeight: number
-): PartPosition[] => {
+  width: number,
+  height: number
+): NodePosition[] => {
   const corePart = parts.find(p => p.isCore);
-  const nonCoreParts = parts.filter(p => !p.isCore);
-  const padding = 60;
-  const nodeSize = 80;
-
-  switch (layout) {
-    case 'radial': {
-      const centerX = containerWidth / 2;
-      const centerY = containerHeight / 2;
-      const radius = Math.min(containerWidth, containerHeight) / 2 - padding - nodeSize;
-      
-      const positions: PartPosition[] = [];
-      
-      // Core in center
-      if (corePart) {
-        positions.push({ x: centerX, y: centerY, part: corePart });
-      }
-      
-      // Others in circle
-      nonCoreParts.forEach((part, i) => {
-        const angle = (i / nonCoreParts.length) * 2 * Math.PI - Math.PI / 2;
-        positions.push({
-          x: centerX + Math.cos(angle) * radius,
-          y: centerY + Math.sin(angle) * radius,
-          part,
-        });
-      });
-      
-      return positions;
-    }
-
-    case 'hierarchical': {
-      const levels: AnatomyPart[][] = [];
-      
-      // Level 0: core
-      if (corePart) levels.push([corePart]);
-      
-      // Level 1: all non-core parts (simple hierarchy for now)
-      if (nonCoreParts.length > 0) levels.push(nonCoreParts);
-      
-      const positions: PartPosition[] = [];
-      const levelHeight = containerHeight / (levels.length + 1);
-      
-      levels.forEach((levelParts, levelIndex) => {
-        const y = (levelIndex + 1) * levelHeight;
-        const partWidth = containerWidth / (levelParts.length + 1);
-        
-        levelParts.forEach((part, partIndex) => {
-          positions.push({
-            x: (partIndex + 1) * partWidth,
-            y,
-            part,
-          });
-        });
-      });
-      
-      return positions;
-    }
-
-    case 'linear': {
-      const positions: PartPosition[] = [];
-      const allParts = corePart ? [corePart, ...nonCoreParts] : nonCoreParts;
-      const partWidth = containerWidth / (allParts.length + 1);
-      const y = containerHeight / 2;
-      
-      allParts.forEach((part, i) => {
-        positions.push({
-          x: (i + 1) * partWidth,
-          y,
-          part,
-        });
-      });
-      
-      return positions;
-    }
-
-    case 'grid':
-    default: {
-      const allParts = corePart ? [corePart, ...nonCoreParts] : nonCoreParts;
-      const cols = Math.ceil(Math.sqrt(allParts.length));
-      const rows = Math.ceil(allParts.length / cols);
-      const cellWidth = containerWidth / (cols + 1);
-      const cellHeight = containerHeight / (rows + 1);
-      
-      return allParts.map((part, i) => ({
-        x: ((i % cols) + 1) * cellWidth,
-        y: (Math.floor(i / cols) + 1) * cellHeight,
-        part,
-      }));
-    }
+  const childParts = parts.filter(p => !p.isCore);
+  
+  const positions: NodePosition[] = [];
+  
+  // Core at top center
+  if (corePart) {
+    positions.push({
+      x: width / 2,
+      y: 100,
+      part: corePart,
+    });
   }
+  
+  // Children spread below in a row
+  const childY = height - 120;
+  const childSpacing = width / (childParts.length + 1);
+  
+  childParts.forEach((part, i) => {
+    positions.push({
+      x: childSpacing * (i + 1),
+      y: childY,
+      part,
+    });
+  });
+  
+  return positions;
 };
 
 // =============================================================================
-// SUB-COMPONENTS
+// CONNECTION LINES WITH FLOW ANIMATION
+// =============================================================================
+
+interface ConnectionLinesProps {
+  positions: NodePosition[];
+  selectedId: string | null;
+  width: number;
+  height: number;
+}
+
+const ConnectionLines: React.FC<ConnectionLinesProps> = ({
+  positions,
+  selectedId,
+  width,
+  height,
+}) => {
+  const corePos = positions.find(p => p.part.isCore);
+  const childPositions = positions.filter(p => !p.part.isCore);
+  
+  if (!corePos) return null;
+
+  return (
+    <>
+      <style>{flowingLineStyle}</style>
+      <svg 
+        className="absolute inset-0 pointer-events-none"
+        width={width}
+        height={height}
+        style={{ overflow: 'visible' }}
+      >
+        {/* Lines from core to ALL children */}
+        {childPositions.map((childPos, i) => {
+          const isConnected = selectedId === corePos.part.id || selectedId === childPos.part.id;
+          
+          return (
+            <motion.line
+              key={`core-${childPos.part.id}`}
+              x1={corePos.x}
+              y1={corePos.y + 40}
+              x2={childPos.x}
+              y2={childPos.y - 40}
+              className={isConnected ? 'flowing-line' : 'flowing-line-slow'}
+              stroke={isConnected ? '#6366f1' : '#d1d5db'}
+              strokeWidth={isConnected ? 2.5 : 1.5}
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+            />
+          );
+        })}
+        
+        {/* Cross-connections between children */}
+        {childPositions.map((fromPos, i) => {
+          const connectedIds = fromPos.part.detail?.connectedParts || [];
+          return connectedIds.map(toId => {
+            const toPos = childPositions.find(p => p.part.id === toId);
+            if (!toPos) return null;
+            
+            // Avoid duplicate lines
+            const toIndex = childPositions.findIndex(p => p.part.id === toId);
+            if (toIndex < i) return null;
+            
+            const isActive = selectedId === fromPos.part.id || selectedId === toId;
+            
+            return (
+              <motion.line
+                key={`${fromPos.part.id}-${toId}`}
+                x1={fromPos.x}
+                y1={fromPos.y - 40}
+                x2={toPos.x}
+                y2={toPos.y - 40}
+                className={isActive ? 'flowing-line' : ''}
+                stroke={isActive ? '#8b5cf6' : '#e5e7eb'}
+                strokeWidth={isActive ? 2 : 1}
+                strokeDasharray={isActive ? undefined : '4 4'}
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: isActive ? 0.8 : 0.4 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              />
+            );
+          });
+        })}
+      </svg>
+    </>
+  );
+};
+
+// =============================================================================
+// NODE COMPONENT
 // =============================================================================
 
 interface PartNodeProps {
-  position: PartPosition;
+  position: NodePosition;
   isSelected: boolean;
   isVisited: boolean;
-  isCore: boolean;
   onClick: () => void;
-  dimmed: boolean;
 }
 
 const PartNode: React.FC<PartNodeProps> = ({
   position,
   isSelected,
   isVisited,
-  isCore,
   onClick,
-  dimmed,
 }) => {
   const { part } = position;
+  const isCore = part.isCore;
+  const nodeSize = isCore ? 100 : 80;
   
   return (
     <motion.button
-      className={`
-        absolute transform -translate-x-1/2 -translate-y-1/2
-        flex flex-col items-center justify-center
-        rounded-2xl p-3 min-w-[80px] transition-colors
-        ${isCore ? 'min-w-[100px]' : ''}
-        ${isSelected 
-          ? 'bg-kno-primary text-white shadow-lg z-20' 
-          : isVisited 
-            ? 'bg-kno-primary/10 text-kno-ink border-2 border-kno-primary/30'
-            : 'bg-kno-board text-kno-ink border-2 border-kno-rule hover:border-kno-primary/50'
-        }
-        ${dimmed ? 'opacity-40' : ''}
-      `}
-      style={{ 
-        left: position.x, 
-        top: position.y,
-      }}
+      className="absolute transform -translate-x-1/2 -translate-y-1/2 focus:outline-none"
+      style={{ left: position.x, top: position.y }}
       onClick={onClick}
       initial={{ scale: 0, opacity: 0 }}
-      animate={{ 
-        scale: isSelected ? 1.1 : 1, 
-        opacity: dimmed ? 0.4 : 1,
-      }}
-      whileHover={{ scale: isSelected ? 1.1 : 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      animate={{ scale: 1, opacity: 1 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.98 }}
       transition={SPRING_CONFIGS.smooth}
     >
-      {part.icon && (
-        <span className={`text-2xl mb-1 ${isCore ? 'text-3xl' : ''}`}>
-          {part.icon}
+      <div 
+        className={`
+          rounded-full flex flex-col items-center justify-center p-4 transition-all duration-200
+          ${isCore 
+            ? isSelected 
+              ? 'bg-indigo-600 text-white shadow-xl ring-4 ring-indigo-200' 
+              : 'bg-indigo-100 text-indigo-700 shadow-lg hover:bg-indigo-200'
+            : isSelected 
+              ? 'bg-gray-900 text-white shadow-xl ring-4 ring-gray-300'
+              : isVisited 
+                ? 'bg-gray-100 text-gray-700 shadow-md hover:bg-gray-200 ring-2 ring-gray-300'
+                : 'bg-white text-gray-700 shadow-md hover:bg-gray-50 border-2 border-gray-200'
+          }
+        `}
+        style={{ width: nodeSize, height: nodeSize }}
+      >
+        <span className={`font-semibold text-center leading-tight ${isCore ? 'text-sm' : 'text-xs'}`}>
+          {part.shortLabel || part.label}
         </span>
-      )}
-      <span className={`
-        text-xs font-medium text-center leading-tight
-        ${isCore ? 'text-sm font-semibold' : ''}
-      `}>
-        {part.shortLabel || part.label}
-      </span>
+      </div>
       
       {/* Unvisited indicator */}
-      {!isVisited && !isSelected && (
+      {!isVisited && !isSelected && !isCore && (
         <motion.div
-          className="absolute -top-1 -right-1 w-3 h-3 bg-kno-primary rounded-full"
+          className="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full"
           animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          transition={{ duration: 2, repeat: Infinity }}
         />
       )}
     </motion.button>
   );
 };
 
-interface ConnectionLinesProps {
-  positions: PartPosition[];
-  connections: AnatomyConnection[];
-  selectedId: string | null;
-  containerWidth: number;
-  containerHeight: number;
-}
+// =============================================================================
+// DETAIL ACCORDION
+// =============================================================================
 
-const ConnectionLines: React.FC<ConnectionLinesProps> = ({
-  positions,
-  connections,
-  selectedId,
-  containerWidth,
-  containerHeight,
-}) => {
-  const getPosition = (id: string) => positions.find(p => p.part.id === id);
-
-  return (
-    <svg 
-      className="absolute inset-0 pointer-events-none"
-      width={containerWidth}
-      height={containerHeight}
-    >
-      <defs>
-        <marker
-          id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="10"
-          refY="3.5"
-          orient="auto"
-        >
-          <polygon
-            points="0 0, 10 3.5, 0 7"
-            fill="currentColor"
-            className="text-kno-rule"
-          />
-        </marker>
-        <marker
-          id="arrowhead-active"
-          markerWidth="10"
-          markerHeight="7"
-          refX="10"
-          refY="3.5"
-          orient="auto"
-        >
-          <polygon
-            points="0 0, 10 3.5, 0 7"
-            fill="currentColor"
-            className="text-kno-primary"
-          />
-        </marker>
-      </defs>
-      
-      {connections.map((conn, i) => {
-        const from = getPosition(conn.from);
-        const to = getPosition(conn.to);
-        
-        if (!from || !to) return null;
-        
-        const isActive = selectedId === conn.from || selectedId === conn.to;
-        const isConnectedToSelected = 
-          selectedId && 
-          (positions.find(p => p.part.id === selectedId)?.part.detail?.connectedParts?.includes(conn.from) ||
-           positions.find(p => p.part.id === selectedId)?.part.detail?.connectedParts?.includes(conn.to));
-        
-        const strokeColor = isActive || isConnectedToSelected 
-          ? 'stroke-kno-primary' 
-          : 'stroke-kno-rule';
-        const strokeWidth = isActive ? 2.5 : 1.5;
-        const strokeDash = conn.style === 'dashed' 
-          ? '8 4' 
-          : conn.style === 'dotted' 
-            ? '2 4' 
-            : 'none';
-
-        return (
-          <motion.line
-            key={`${conn.from}-${conn.to}-${i}`}
-            x1={from.x}
-            y1={from.y}
-            x2={to.x}
-            y2={to.y}
-            className={strokeColor}
-            strokeWidth={strokeWidth}
-            strokeDasharray={strokeDash}
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ 
-              pathLength: 1, 
-              opacity: isActive || isConnectedToSelected ? 1 : 0.5 
-            }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-          />
-        );
-      })}
-    </svg>
-  );
-};
-
-interface DetailPanelProps {
+interface DetailAccordionProps {
   part: AnatomyPart;
-  onClose: () => void;
   allParts: AnatomyPart[];
   onNavigate: (id: string) => void;
+  onClose: () => void;
 }
 
-const DetailPanel: React.FC<DetailPanelProps> = ({ 
+const DetailAccordion: React.FC<DetailAccordionProps> = ({ 
   part, 
-  onClose, 
-  allParts,
-  onNavigate 
+  allParts, 
+  onNavigate,
+  onClose,
 }) => {
   const detail = part.detail;
-  
   const connectedParts = detail?.connectedParts
     ?.map(id => allParts.find(p => p.id === id))
     .filter(Boolean) as AnatomyPart[] || [];
@@ -340,256 +254,100 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      transition={SPRING_CONFIGS.smooth}
-      className="bg-kno-board rounded-card shadow-card p-6"
+      className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden"
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          {part.icon && (
-            <span className="text-3xl">{part.icon}</span>
-          )}
+      <div className={`px-6 py-4 ${part.isCore ? 'bg-indigo-50' : 'bg-gray-50'} border-b border-gray-200`}>
+        <div className="flex items-center justify-between">
           <div>
-            <Text variant="title" size="xl" weight="bold" color="ink">
-              {part.label}
-            </Text>
+            <h3 className="text-xl font-semibold text-gray-900">{part.label}</h3>
             {part.isCore && (
-              <span className="inline-block px-2 py-0.5 bg-kno-primary/10 text-kno-primary text-xs font-medium rounded-full mt-1">
+              <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
                 Core Element
               </span>
             )}
           </div>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-kno-surface rounded-lg transition-colors"
-        >
-          <svg className="w-5 h-5 text-kno-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
 
-      {/* Content sections */}
-      <motion.div 
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="space-y-4"
-      >
+      {/* Content */}
+      <div className="p-6 space-y-5">
         {detail?.purpose && (
-          <motion.div variants={fadeInUp}>
-            <Text variant="body" size="sm" weight="semibold" color="primary" className="mb-1">
-              Purpose
-            </Text>
-            <Text variant="body" size="md" color="ink">
-              {detail.purpose}
-            </Text>
-          </motion.div>
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Purpose</h4>
+            <p className="text-gray-700 leading-relaxed">{detail.purpose}</p>
+          </div>
         )}
 
         {detail?.howItWorks && (
-          <motion.div variants={fadeInUp}>
-            <Text variant="body" size="sm" weight="semibold" color="secondary" className="mb-1">
-              How It Works
-            </Text>
-            <Text variant="body" size="md" color="ink">
-              {detail.howItWorks}
-            </Text>
-          </motion.div>
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">How It Works</h4>
+            <p className="text-gray-700 leading-relaxed">{detail.howItWorks}</p>
+          </div>
         )}
 
         {detail?.keyInsight && (
-          <motion.div 
-            variants={fadeInUp}
-            className="p-4 bg-kno-highlight/10 rounded-lg border-l-4 border-kno-highlight"
-          >
-            <Text variant="body" size="sm" weight="semibold" color="ink" className="mb-1">
-              💡 Key Insight
-            </Text>
-            <Text variant="body" size="md" color="ink">
-              {detail.keyInsight}
-            </Text>
-          </motion.div>
+          <div className="p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <h4 className="text-sm font-semibold text-amber-800 mb-1">Key Insight</h4>
+            <p className="text-amber-900">{detail.keyInsight}</p>
+          </div>
         )}
 
         {connectedParts.length > 0 && (
-          <motion.div variants={fadeInUp}>
-            <Text variant="body" size="sm" weight="semibold" color="ink-soft" className="mb-2">
-              Connected To
-            </Text>
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Connected To</h4>
             <div className="flex flex-wrap gap-2">
               {connectedParts.map(connected => (
                 <button
                   key={connected.id}
                   onClick={() => onNavigate(connected.id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-kno-surface hover:bg-kno-primary/10 rounded-full text-sm transition-colors"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
                 >
-                  {connected.icon && <span>{connected.icon}</span>}
-                  <span>{connected.shortLabel || connected.label}</span>
+                  {connected.label}
                 </button>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
 
 // =============================================================================
-// MOBILE VIEW COMPONENT
+// PROGRESS INDICATOR
 // =============================================================================
 
-interface MobileViewProps {
-  parts: AnatomyPart[];
-  selectedId: string | null;
-  visitedIds: Set<string>;
-  onSelect: (id: string | null) => void;
+interface ProgressProps {
+  total: number;
+  visited: number;
 }
 
-const MobileView: React.FC<MobileViewProps> = ({
-  parts,
-  selectedId,
-  visitedIds,
-  onSelect,
-}) => {
-  const corePart = parts.find(p => p.isCore);
-  const otherParts = parts.filter(p => !p.isCore);
-
+const Progress: React.FC<ProgressProps> = ({ total, visited }) => {
   return (
-    <div className="space-y-3">
-      {/* Core part first */}
-      {corePart && (
-        <PartCard 
-          part={corePart} 
-          isSelected={selectedId === corePart.id}
-          isVisited={visitedIds.has(corePart.id)}
-          onClick={() => onSelect(selectedId === corePart.id ? null : corePart.id)}
-          allParts={parts}
-          onNavigate={onSelect}
-        />
-      )}
-      
-      {/* Other parts */}
-      {otherParts.map(part => (
-        <PartCard
-          key={part.id}
-          part={part}
-          isSelected={selectedId === part.id}
-          isVisited={visitedIds.has(part.id)}
-          onClick={() => onSelect(selectedId === part.id ? null : part.id)}
-          allParts={parts}
-          onNavigate={onSelect}
-        />
-      ))}
-    </div>
-  );
-};
-
-interface PartCardProps {
-  part: AnatomyPart;
-  isSelected: boolean;
-  isVisited: boolean;
-  onClick: () => void;
-  allParts: AnatomyPart[];
-  onNavigate: (id: string) => void;
-}
-
-const PartCard: React.FC<PartCardProps> = ({
-  part,
-  isSelected,
-  isVisited,
-  onClick,
-  allParts,
-  onNavigate,
-}) => {
-  return (
-    <motion.div
-      layout
-      className={`
-        rounded-card overflow-hidden border-2 transition-colors
-        ${isSelected 
-          ? 'border-kno-primary bg-kno-board shadow-card' 
-          : isVisited
-            ? 'border-kno-primary/30 bg-kno-board'
-            : 'border-kno-rule bg-kno-board hover:border-kno-primary/50'
-        }
-      `}
-    >
-      {/* Header - always visible */}
-      <button
-        onClick={onClick}
-        className="w-full p-4 flex items-center gap-3 text-left"
-      >
-        <div className={`
-          w-12 h-12 rounded-xl flex items-center justify-center text-2xl
-          ${isSelected ? 'bg-kno-primary text-white' : 'bg-kno-surface'}
-          ${part.isCore ? 'ring-2 ring-kno-primary/30' : ''}
-        `}>
-          {part.icon || '📦'}
-        </div>
-        <div className="flex-1 min-w-0">
-          <Text variant="title" size="md" weight="semibold" color={isSelected ? 'primary' : 'ink'}>
-            {part.label}
-          </Text>
-          {part.isCore && (
-            <span className="text-xs text-kno-primary">Core Element</span>
-          )}
-        </div>
-        <motion.div
-          animate={{ rotate: isSelected ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <svg className="w-5 h-5 text-kno-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </motion.div>
-        
-        {/* Unvisited dot */}
-        {!isVisited && !isSelected && (
-          <motion.div
-            className="w-2.5 h-2.5 bg-kno-primary rounded-full"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+    <div className="flex items-center gap-3">
+      <div className="flex gap-1">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`w-2 h-2 rounded-full transition-colors ${
+              i < visited ? 'bg-indigo-500' : 'bg-gray-200'
+            }`}
           />
-        )}
-      </button>
-
-      {/* Expandable detail */}
-      <AnimatePresence>
-        {isSelected && part.detail && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 pt-0 space-y-3 border-t border-kno-rule">
-              {part.detail.purpose && (
-                <div className="pt-3">
-                  <Text variant="body" size="xs" weight="semibold" color="primary">Purpose</Text>
-                  <Text variant="body" size="sm" color="ink">{part.detail.purpose}</Text>
-                </div>
-              )}
-              {part.detail.howItWorks && (
-                <div>
-                  <Text variant="body" size="xs" weight="semibold" color="secondary">How It Works</Text>
-                  <Text variant="body" size="sm" color="ink">{part.detail.howItWorks}</Text>
-                </div>
-              )}
-              {part.detail.keyInsight && (
-                <div className="p-3 bg-kno-highlight/10 rounded-lg">
-                  <Text variant="body" size="xs" weight="semibold" color="ink">💡 Key Insight</Text>
-                  <Text variant="body" size="sm" color="ink">{part.detail.keyInsight}</Text>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        ))}
+      </div>
+      <span className="text-sm text-gray-500">
+        {visited} of {total} explored
+      </span>
+    </div>
   );
 };
 
@@ -600,184 +358,105 @@ const PartCard: React.FC<PartCardProps> = ({
 export const AnatomyExplorer: React.FC<AnatomyExplorerProps> = ({ 
   data, 
   className = '',
-  id,
 }) => {
-  const { 
-    title, 
-    subtitle, 
-    diagramLayout = 'hierarchical', 
-    parts, 
-    connections = [],
-    completionMessage 
-  } = data;
-  
-  const responsive = useResponsive();
-  const { ref, isInView } = useScrollReveal({ threshold: 0.1 });
+  const { title, subtitle, parts, completionMessage } = data;
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [visitedIds, setVisitedIds] = useState<Set<string>>(new Set());
 
-  // Mark part as visited when selected
-  const handleSelect = (partId: string | null) => {
-    setSelectedId(partId);
-    if (partId) {
+  // Diagram dimensions - use more space
+  const diagramWidth = 900;
+  const diagramHeight = 400;
+
+  const positions = useMemo(() => 
+    calculateHierarchicalPositions(parts, diagramWidth, diagramHeight),
+    [parts, diagramWidth, diagramHeight]
+  );
+
+  const handleSelect = (partId: string) => {
+    if (selectedId === partId) {
+      setSelectedId(null);
+    } else {
+      setSelectedId(partId);
       setVisitedIds(prev => new Set([...prev, partId]));
     }
   };
 
-  // Diagram dimensions
-  const diagramWidth = responsive.isMobile ? 350 : responsive.isTablet ? 600 : 800;
-  const diagramHeight = responsive.isMobile ? 350 : responsive.isTablet ? 400 : 450;
-
-  // Calculate positions
-  const positions = useMemo(() => 
-    calculatePositions(parts, diagramLayout, diagramWidth, diagramHeight),
-    [parts, diagramLayout, diagramWidth, diagramHeight]
-  );
-
   const selectedPart = parts.find(p => p.id === selectedId);
-  const progressPercent = (visitedIds.size / parts.length) * 100;
   const allVisited = visitedIds.size === parts.length;
 
   return (
-    <motion.div
-      ref={ref}
-      id={id}
-      className={`w-full max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12 ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-    >
+    <div className={`w-full ${className}`}>
       {/* Header */}
-      <header className="mb-6 md:mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.1 }}
-        >
-          <Text 
-            as="h1" 
-            variant="display" 
-            size="3xl" 
-            weight="bold" 
-            color="ink"
-            className="mb-2"
-          >
-            {title}
-          </Text>
-          {subtitle && (
-            <Text variant="body" size="lg" color="ink-soft">
-              {subtitle}
-            </Text>
-          )}
-        </motion.div>
-
-        {/* Progress */}
-        <motion.div 
-          className="mt-4"
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.2 }}
-        >
-          <ProgressIndicator
-            value={visitedIds.size}
-            max={parts.length}
-            variant="dots"
-            label="Parts explored"
-            showText
-          />
-        </motion.div>
+      <header className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-3">{title}</h1>
+        {subtitle && (
+          <p className="text-xl text-gray-500">{subtitle}</p>
+        )}
+        <div className="mt-4">
+          <Progress total={parts.length} visited={visitedIds.size} />
+        </div>
       </header>
 
-      {/* Main Content */}
-      <div className="grid lg:grid-cols-[1fr,350px] gap-6">
-        {/* Diagram Area */}
-        <Card variant="default" className="overflow-hidden">
-          {responsive.isMobile ? (
-            <MobileView
-              parts={parts}
-              selectedId={selectedId}
-              visitedIds={visitedIds}
-              onSelect={handleSelect}
-            />
-          ) : (
-            <div 
-              className="relative"
-              style={{ width: diagramWidth, height: diagramHeight, margin: '0 auto' }}
-            >
-              {/* Connection Lines */}
-              <ConnectionLines
-                positions={positions}
-                connections={connections}
-                selectedId={selectedId}
-                containerWidth={diagramWidth}
-                containerHeight={diagramHeight}
-              />
-
-              {/* Part Nodes */}
-              {positions.map(pos => (
-                <PartNode
-                  key={pos.part.id}
-                  position={pos}
-                  isSelected={selectedId === pos.part.id}
-                  isVisited={visitedIds.has(pos.part.id)}
-                  isCore={pos.part.isCore || false}
-                  onClick={() => handleSelect(selectedId === pos.part.id ? null : pos.part.id)}
-                  dimmed={selectedId !== null && selectedId !== pos.part.id}
-                />
-              ))}
+      {/* Diagram */}
+      <div className="flex justify-center mb-8">
+        <div 
+          className="relative bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-200"
+          style={{ width: diagramWidth, height: diagramHeight }}
+        >
+          {/* Instruction */}
+          {!selectedId && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-sm text-gray-400">
+              Click any element to explore
             </div>
           )}
-        </Card>
 
-        {/* Detail Panel (desktop/tablet only) */}
-        {!responsive.isMobile && (
-          <div className="lg:sticky lg:top-6 self-start">
-            <AnimatePresence mode="wait">
-              {selectedPart ? (
-                <DetailPanel
-                  key={selectedPart.id}
-                  part={selectedPart}
-                  onClose={() => setSelectedId(null)}
-                  allParts={parts}
-                  onNavigate={handleSelect}
-                />
-              ) : (
-                <motion.div
-                  key="prompt"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="bg-kno-surface rounded-card p-6 text-center"
-                >
-                  <div className="text-4xl mb-3">👆</div>
-                  <Text variant="body" size="md" color="ink-soft">
-                    Click on any part to explore what it does and how it connects to others.
-                  </Text>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
+          {/* Connection Lines */}
+          <ConnectionLines
+            positions={positions}
+            selectedId={selectedId}
+            width={diagramWidth}
+            height={diagramHeight}
+          />
+
+          {/* Nodes */}
+          {positions.map(pos => (
+            <PartNode
+              key={pos.part.id}
+              position={pos}
+              isSelected={selectedId === pos.part.id}
+              isVisited={visitedIds.has(pos.part.id)}
+              onClick={() => handleSelect(pos.part.id)}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Completion Message */}
+      {/* Detail Panel (below diagram) */}
+      <AnimatePresence mode="wait">
+        {selectedPart && (
+          <div className="max-w-2xl mx-auto">
+            <DetailAccordion
+              part={selectedPart}
+              allParts={parts}
+              onNavigate={handleSelect}
+              onClose={() => setSelectedId(null)}
+            />
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Completion */}
       {allVisited && completionMessage && (
         <motion.div
-          className="mt-6 p-4 bg-kno-accent-green/10 rounded-lg text-center"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          className="mt-8 p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-center max-w-2xl mx-auto"
         >
-          <div className="flex items-center justify-center gap-2 text-kno-accent-green">
-            <LottiePlayer lottieRef="success" width={40} height={40} loop={false} />
-            <Text variant="body" size="md" weight="medium" color="accent-green">
-              {completionMessage}
-            </Text>
-          </div>
+          <p className="text-emerald-700 font-medium">{completionMessage}</p>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,65 +1,95 @@
 {
-  "title": "Understanding Cognitive Load",
-  "subtitle": "Why your brain gets tired when learning",
+  "title": "Understanding Compound Interest",
+  "subtitle": "Choose how deep you want to go - from basic concept to advanced applications",
+  "initiallyExpanded": 1,
   "layers": [
     {
       "id": "layer-1",
-      "label": "The Headline",
-      "depthLabel": "Surface",
-      "content": "Your brain has limited mental energy for learning - when you exceed it, learning stops.",
-      "icon": "🧠"
+      "label": "The Core Concept",
+      "depthLabel": "Beginner",
+      "content": {
+        "summary": "Compound interest is earning interest on your interest. Unlike simple interest which only calculates on the principal, compound interest grows exponentially because each period's interest is added to the base for the next calculation.",
+        "points": [
+          {
+            "text": "Your money earns interest, then that interest earns its own interest",
+            "tooltip": "This creates a snowball effect over time"
+          },
+          {
+            "text": "The longer you leave money invested, the more powerful the effect becomes",
+            "tooltip": "Time is the most important factor in compound growth"
+          },
+          {
+            "text": "Even small regular contributions can grow to significant amounts",
+            "tooltip": "Consistency beats timing in most cases"
+          }
+        ]
+      }
     },
     {
       "id": "layer-2",
-      "label": "The Explanation",
-      "depthLabel": "Detail",
+      "label": "How the Math Works",
+      "depthLabel": "Intermediate",
       "content": {
-        "summary": "Cognitive load theory explains why we can only process so much at once.",
+        "summary": "The compound interest formula is A = P(1 + r/n)^(nt), where P is principal, r is annual rate, n is compounding frequency, and t is time in years.",
         "points": [
           {
-            "text": "Working memory can only hold 4-7 items at a time",
-            "tooltip": "Miller's Law - the 'magical number seven, plus or minus two'"
+            "text": "More frequent compounding means slightly higher returns",
+            "tooltip": "Daily compounding beats monthly, which beats yearly - but the differences are small"
           },
           {
-            "text": "New information competes for the same limited resources",
-            "tooltip": "This is why multitasking while learning is ineffective"
+            "text": "The Rule of 72: divide 72 by your interest rate to estimate doubling time",
+            "tooltip": "At 6% interest, money doubles roughly every 12 years (72/6=12)"
           },
           {
-            "text": "Well-designed learning breaks information into manageable chunks",
-            "tooltip": "Called 'chunking' - a key instructional design principle"
+            "text": "Small rate differences matter enormously over long periods",
+            "tooltip": "1% extra over 30 years can mean 30%+ more money"
           }
         ]
-      },
-      "icon": "📚"
+      }
     },
     {
       "id": "layer-3",
-      "label": "The Nuance",
-      "depthLabel": "Expert",
+      "label": "Practical Applications",
+      "depthLabel": "Advanced",
       "content": {
-        "summary": "There are three types of cognitive load, and only one is 'good' for learning.",
+        "summary": "Understanding compound interest transforms how you approach saving, investing, and debt. It explains why starting early matters so much and why high-interest debt is so dangerous.",
         "points": [
           {
-            "text": "Intrinsic load: The inherent difficulty of the material itself",
-            "tooltip": "Can't be reduced - some things are just complex"
+            "text": "A 25-year-old investing $200/month will beat a 35-year-old investing $400/month at retirement",
+            "tooltip": "Those extra 10 years of compounding outweigh doubling the contribution"
           },
           {
-            "text": "Extraneous load: Unnecessary mental effort from poor design",
-            "tooltip": "THIS is what instructional designers try to minimize"
+            "text": "Credit card debt compounds against you - 20% APR doubles debt in under 4 years",
+            "tooltip": "Pay off high-interest debt before investing"
           },
           {
-            "text": "Germane load: Mental effort that builds lasting understanding",
-            "tooltip": "The 'good' cognitive load - actual learning happening"
-          },
-          {
-            "text": "Research by Sweller (1988) established these categories",
-            "tooltip": "Cognitive Load Theory is one of the most validated theories in educational psychology"
+            "text": "Tax-advantaged accounts amplify compound growth by not reducing the base",
+            "tooltip": "Taxes on gains reduce your compounding base - deferring them lets more compound"
           }
         ]
-      },
-      "icon": "🔬",
-      "lottieOnReveal": "lightbulb"
+      }
+    },
+    {
+      "id": "layer-4",
+      "label": "Strategic Mastery",
+      "depthLabel": "Expert",
+      "content": {
+        "summary": "True mastery means optimizing every lever: contribution amounts, timing, tax efficiency, fee minimization, and reinvestment strategy. Small optimizations compound dramatically over decades.",
+        "points": [
+          {
+            "text": "Fee drag: a 1% annual fee can cost you 25% of your final balance over 30 years",
+            "tooltip": "Choose low-cost index funds - fees compound negatively"
+          },
+          {
+            "text": "Dollar-cost averaging reduces timing risk while maintaining compound benefits",
+            "tooltip": "Regular investing beats trying to time the market"
+          },
+          {
+            "text": "Dividend reinvestment accelerates compounding without additional contributions",
+            "tooltip": "DRIP programs automatically reinvest dividends for you"
+          }
+        ]
+      }
     }
-  ],
-  "initiallyExpanded": 1
+  ]
 }

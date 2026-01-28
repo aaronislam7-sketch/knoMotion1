@@ -1,30 +1,28 @@
 {
-  "title": "Inside a Learning Experience",
-  "subtitle": "The components that make learning stick",
-  "diagramLayout": "hierarchical",
+  "title": "The Anatomy of a Great Learning Experience",
+  "subtitle": "Explore how different components work together to create memorable learning",
   "parts": [
     {
       "id": "core",
       "label": "Learning Experience",
-      "shortLabel": "LX",
-      "icon": "🎯",
+      "shortLabel": "Experience",
       "isCore": true,
       "detail": {
-        "purpose": "The complete journey a learner takes from not-knowing to understanding and application.",
-        "howItWorks": "Combines multiple elements in a sequence designed to build understanding progressively.",
-        "keyInsight": "Great learning experiences feel effortless - the complexity is hidden from the learner."
+        "purpose": "A great learning experience combines multiple elements to help learners understand, retain, and apply new knowledge effectively.",
+        "howItWorks": "Each component serves a specific role - engagement captures attention, content delivers value, practice builds skills, and feedback closes the loop.",
+        "keyInsight": "The whole is greater than the sum of its parts. When all components work together, learning becomes transformative.",
+        "connectedParts": ["engagement", "content", "practice", "feedback"]
       }
     },
     {
-      "id": "hook",
-      "label": "Hook / Activation",
-      "shortLabel": "Hook",
-      "icon": "🪝",
-      "color": "primary",
+      "id": "engagement",
+      "label": "Engagement",
+      "shortLabel": "Engage",
+      "isCore": false,
       "detail": {
-        "purpose": "Capture attention and activate prior knowledge before introducing new content.",
-        "howItWorks": "Uses questions, surprising facts, or relatable scenarios to create curiosity.",
-        "keyInsight": "Without activation, new information has nothing to 'stick' to in memory.",
+        "purpose": "Captures and maintains the learner's attention throughout the experience.",
+        "howItWorks": "Uses curiosity gaps, relevance to personal goals, and appropriate challenge levels to keep learners invested.",
+        "keyInsight": "Without engagement, even the best content goes unnoticed. It's the gateway to learning.",
         "connectedParts": ["core", "content"]
       }
     },
@@ -32,61 +30,38 @@
       "id": "content",
       "label": "Content Delivery",
       "shortLabel": "Content",
-      "icon": "📦",
-      "color": "secondary",
+      "isCore": false,
       "detail": {
-        "purpose": "Present new information in a clear, structured, and engaging way.",
-        "howItWorks": "Uses multiple modalities (visual, auditory, text) with careful pacing.",
-        "keyInsight": "Less is more - focus on essential concepts, not comprehensive coverage.",
-        "connectedParts": ["hook", "practice"]
+        "purpose": "Presents new information in a clear, structured, and memorable way.",
+        "howItWorks": "Breaks complex topics into digestible chunks, uses multiple modalities, and builds from known to unknown concepts.",
+        "keyInsight": "Good content doesn't just inform - it transforms how learners think about a topic.",
+        "connectedParts": ["core", "engagement", "practice"]
       }
     },
     {
       "id": "practice",
-      "label": "Practice / Application",
+      "label": "Active Practice",
       "shortLabel": "Practice",
-      "icon": "🎮",
-      "color": "accent-green",
+      "isCore": false,
       "detail": {
-        "purpose": "Give learners opportunities to use what they've learned in meaningful ways.",
-        "howItWorks": "Includes exercises, scenarios, and problems that require applying concepts.",
-        "keyInsight": "Retrieval practice is more effective than re-reading or re-watching.",
-        "connectedParts": ["content", "feedback"]
+        "purpose": "Provides opportunities to apply knowledge and build procedural skills.",
+        "howItWorks": "Offers varied exercises that gradually increase in complexity, with appropriate scaffolding and support.",
+        "keyInsight": "Learning is not a spectator sport. True understanding comes through doing.",
+        "connectedParts": ["core", "content", "feedback"]
       }
     },
     {
       "id": "feedback",
       "label": "Feedback Loop",
       "shortLabel": "Feedback",
-      "icon": "🔄",
-      "color": "accent-blue",
+      "isCore": false,
       "detail": {
-        "purpose": "Help learners understand what they got right, wrong, and why.",
-        "howItWorks": "Provides immediate, specific feedback that guides improvement.",
-        "keyInsight": "Effective feedback explains the 'why' - not just right/wrong.",
-        "connectedParts": ["practice", "reflection"]
-      }
-    },
-    {
-      "id": "reflection",
-      "label": "Reflection / Transfer",
-      "shortLabel": "Reflect",
-      "icon": "💭",
-      "detail": {
-        "purpose": "Help learners connect new knowledge to their own context and goals.",
-        "howItWorks": "Prompts self-reflection and planning for real-world application.",
-        "keyInsight": "Learning without reflection is just information - reflection creates transformation.",
-        "connectedParts": ["feedback", "core"]
+        "purpose": "Provides learners with information about their performance to guide improvement.",
+        "howItWorks": "Delivers timely, specific, and actionable information that helps learners understand gaps and next steps.",
+        "keyInsight": "Feedback isn't about judgment - it's about creating a clear path forward.",
+        "connectedParts": ["core", "practice"]
       }
     }
   ],
-  "connections": [
-    { "from": "core", "to": "hook" },
-    { "from": "hook", "to": "content" },
-    { "from": "content", "to": "practice" },
-    { "from": "practice", "to": "feedback" },
-    { "from": "feedback", "to": "reflection" },
-    { "from": "reflection", "to": "core", "style": "dashed" }
-  ],
-  "completionMessage": "You've explored all the components! Notice how they form a cycle - great learning experiences are iterative."
+  "completionMessage": "You've explored all the components of a great learning experience. Notice how each part connects to and supports the others."
 }

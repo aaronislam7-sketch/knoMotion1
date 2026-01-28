@@ -1,104 +1,64 @@
 {
-  "title": "The Feedback Decision",
-  "situation": {
-    "description": "You're a team lead and just reviewed work from a team member. The deliverable has some significant issues that need to be addressed, but the person worked hard on it and seems proud of their effort.",
-    "context": "This is a relatively new team member who you want to develop. They've shown potential but still have skill gaps.",
-    "highlights": ["significant issues", "worked hard", "proud of their effort", "new team member", "skill gaps"]
-  },
-  "variables": [
+  "title": "The Product Launch Decision",
+  "subtitle": "Navigate critical decisions as a product manager launching a new feature",
+  "context": "You're a product manager at a growing SaaS company. After months of development, your team is ready to launch a major new feature. The stakes are high - this feature could significantly impact customer retention and revenue. Several decisions need to be made in the coming days.",
+  "decisions": [
     {
-      "id": "timing",
-      "label": "When do you give feedback?",
-      "description": "Choose when to deliver the feedback",
-      "type": "select",
+      "id": "decision-1",
+      "prompt": "How will you approach the initial launch?",
+      "context": "Your team has completed development, but there are still some edge cases that haven't been fully tested.",
       "options": [
-        { "value": "immediate", "label": "Immediately - address it now" },
-        { "value": "scheduled", "label": "Schedule a 1:1 meeting" },
-        { "value": "delay", "label": "Wait for a better moment" }
-      ],
-      "default": "scheduled"
-    },
-    {
-      "id": "approach",
-      "label": "How do you frame it?",
-      "description": "Choose your feedback approach",
-      "type": "select",
-      "options": [
-        { "value": "direct", "label": "Direct and specific about issues" },
-        { "value": "sandwich", "label": "Positive-negative-positive sandwich" },
-        { "value": "questions", "label": "Ask questions to guide self-discovery" }
-      ],
-      "default": "direct"
-    },
-    {
-      "id": "focus",
-      "label": "What's your main focus?",
-      "description": "Choose what to emphasize",
-      "type": "toggle",
-      "options": [
-        { "value": "task", "label": "The task/deliverable" },
-        { "value": "growth", "label": "Their development" }
-      ],
-      "default": "growth"
+        {
+          "id": "option-1a",
+          "label": "Ship to everyone immediately",
+          "description": "Launch the feature to all customers at once. Move fast and fix issues as they arise."
+        },
+        {
+          "id": "option-1b",
+          "label": "Staged rollout with beta testers",
+          "description": "Start with a small group of engaged users who've agreed to test new features, then gradually expand."
+        },
+        {
+          "id": "option-1c",
+          "label": "Wait for comprehensive testing",
+          "description": "Hold the launch until all edge cases are thoroughly tested and documented. Quality over speed."
+        }
+      ]
     }
   ],
   "outcomes": [
     {
-      "condition": { "timing": "immediate", "approach": "direct", "focus": "task" },
-      "result": {
-        "title": "Quick Fix, Potential Damage",
-        "description": "The issues get addressed quickly, but the team member feels caught off-guard and defensive.",
-        "consequences": [
-          "Issues are corrected promptly",
-          "Team member feels embarrassed in front of others",
-          "They may become hesitant to share work early in the future",
-          "Trust may be slightly damaged"
-        ],
-        "insight": "Immediate, direct, task-focused feedback is efficient but can feel harsh. It works best when there's already high trust and psychological safety.",
-        "tone": "warning"
-      }
+      "triggeredBy": "option-1a",
+      "title": "Launch Day Chaos",
+      "impact": "negative",
+      "description": "The feature launches to all customers. By midday, support tickets are flooding in - an edge case you hadn't fully tested is affecting about 15% of users. The team scrambles to fix it while managing customer complaints. The fix takes 3 days, and some customers have churned.",
+      "learnings": [
+        "Speed without testing can create more work than it saves",
+        "Customer trust is hard to rebuild once damaged",
+        "Edge cases often affect more users than initial estimates suggest"
+      ]
     },
     {
-      "condition": { "timing": "scheduled", "approach": "questions", "focus": "growth" },
-      "result": {
-        "title": "Development-Focused Conversation",
-        "description": "The meeting becomes a coaching conversation where the team member discovers the issues themselves.",
-        "consequences": [
-          "Takes more time than a quick correction",
-          "Team member develops critical thinking skills",
-          "They feel respected and invested in",
-          "Learning is more likely to transfer to future work",
-          "Builds trust and psychological safety"
-        ],
-        "insight": "This approach is ideal for developing team members. The time investment pays off in long-term capability building and engagement.",
-        "tone": "positive"
-      }
+      "triggeredBy": "option-1b",
+      "title": "Controlled Success",
+      "impact": "positive",
+      "description": "Beta testers catch a significant bug in the first week. Your team fixes it before the wider rollout. When the feature goes live to all customers, it works smoothly. Beta testers feel valued and become advocates for the new feature.",
+      "learnings": [
+        "Engaged early users become product champions",
+        "Staged rollouts de-risk launches without excessive delays",
+        "Finding issues early is far cheaper than finding them late"
+      ]
     },
     {
-      "condition": { "timing": "delay", "approach": "sandwich", "focus": "task" },
-      "result": {
-        "title": "Mixed Signals",
-        "description": "The delayed feedback feels disconnected from the work, and the sandwich approach obscures the key message.",
-        "consequences": [
-          "Team member may not fully understand the issues",
-          "The 'sandwich' can feel inauthentic",
-          "Issues may persist or recur",
-          "Opportunity for timely learning is lost"
-        ],
-        "insight": "Delayed feedback with softened delivery can seem kind but often fails to drive improvement. Be timely and clear, while still being respectful.",
-        "tone": "negative"
-      }
+      "triggeredBy": "option-1c",
+      "title": "Missed Window",
+      "impact": "neutral",
+      "description": "Two weeks into comprehensive testing, a competitor launches a similar feature. While your feature eventually launches bug-free, you've lost the first-mover advantage. Customer perception is that you're playing catch-up rather than leading.",
+      "learnings": [
+        "Perfect can be the enemy of good in competitive markets",
+        "Testing has diminishing returns - at some point, real-world feedback is more valuable",
+        "Market timing matters alongside product quality"
+      ]
     }
-  ],
-  "defaultOutcome": {
-    "title": "A Reasonable Approach",
-    "description": "Your combination of choices represents a thoughtful approach to giving feedback.",
-    "consequences": [
-      "Consider how timing affects receptiveness",
-      "Think about whether the person needs direction or discovery",
-      "Balance the immediate task needs with long-term development"
-    ],
-    "insight": "There's rarely one 'right' way to give feedback. The best approach depends on the person, the context, and the relationship.",
-    "tone": "neutral"
-  }
+  ]
 }

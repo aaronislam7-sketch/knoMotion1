@@ -1,70 +1,47 @@
 {
-  "title": "The Learning Ecosystem",
+  "title": "The Growth Mindset",
   "centralNode": {
-    "id": "learner",
-    "label": "The Learner",
-    "description": "At the center of everything - the person doing the learning.",
-    "icon": "👤",
-    "color": "primary"
+    "id": "growth-mindset",
+    "label": "Growth Mindset",
+    "description": "The belief that abilities and intelligence can be developed through dedication, hard work, and learning from feedback.",
+    "detail": "Coined by psychologist Carol Dweck, growth mindset has transformed how we think about learning and achievement. People with this mindset embrace challenges, persist through obstacles, and see effort as the path to mastery.",
+    "connectsTo": ["challenges", "effort", "feedback", "persistence", "learning"]
   },
   "connectedNodes": [
     {
-      "id": "motivation",
-      "label": "Motivation",
-      "description": "Why they want to learn",
-      "detail": "Motivation can be intrinsic (curiosity, mastery) or extrinsic (rewards, requirements). Intrinsic motivation leads to deeper learning and better retention. Understanding a learner's 'why' is crucial for designing effective experiences.",
-      "icon": "🔥",
-      "connectsTo": ["learner", "goals", "engagement"]
+      "id": "challenges",
+      "label": "Embrace Challenges",
+      "description": "Viewing challenges as opportunities to grow rather than threats to avoid.",
+      "detail": "When you embrace challenges, you step outside your comfort zone. This is where real growth happens. Each challenge overcome builds confidence and expands your capabilities.",
+      "connectsTo": ["growth-mindset", "persistence"]
     },
     {
-      "id": "prior-knowledge",
-      "label": "Prior Knowledge",
-      "description": "What they already know",
-      "detail": "New learning builds on existing mental models. When prior knowledge is activated and connected to new information, learning is faster and more durable. Misconceptions in prior knowledge can block new learning.",
-      "icon": "📚",
-      "connectsTo": ["learner", "content"]
+      "id": "effort",
+      "label": "Value Effort",
+      "description": "Understanding that effort is the path to mastery, not a sign of inability.",
+      "detail": "Fixed mindset sees effort as evidence you're not smart enough. Growth mindset sees effort as the essential ingredient for achievement. The more you put in, the more you develop.",
+      "connectsTo": ["growth-mindset", "persistence", "learning"]
     },
     {
-      "id": "goals",
-      "label": "Learning Goals",
-      "description": "What they're trying to achieve",
-      "detail": "Clear, specific goals help learners focus attention and measure progress. Goals should be challenging but achievable. They work best when learners help set them.",
-      "icon": "🎯",
-      "connectsTo": ["learner", "motivation", "assessment"]
+      "id": "feedback",
+      "label": "Learn from Feedback",
+      "description": "Using criticism and feedback as valuable information for improvement.",
+      "detail": "Feedback - even negative feedback - is a gift. It shows you exactly where to focus your efforts. Growth mindset transforms criticism from a personal attack into a roadmap for getting better.",
+      "connectsTo": ["growth-mindset", "learning"]
     },
     {
-      "id": "content",
-      "label": "Content",
-      "description": "The material being learned",
-      "detail": "Content should be relevant, well-organized, and appropriately challenging. The best content anticipates learner questions and addresses common misconceptions.",
-      "icon": "📦",
-      "connectsTo": ["learner", "prior-knowledge", "methods"]
+      "id": "persistence",
+      "label": "Persist Through Setbacks",
+      "description": "Maintaining effort and engagement even when facing obstacles.",
+      "detail": "Setbacks are not evidence of fixed limitations - they're part of the learning process. Every master was once a disaster. Persistence bridges the gap between where you are and where you want to be.",
+      "connectsTo": ["growth-mindset", "challenges", "effort"]
     },
     {
-      "id": "methods",
-      "label": "Methods",
-      "description": "How learning happens",
-      "detail": "Different methods work for different goals: active learning for application, spaced practice for retention, worked examples for building skills. No single method is best for everything.",
-      "icon": "🛠️",
-      "connectsTo": ["content", "engagement", "assessment"]
-    },
-    {
-      "id": "engagement",
-      "label": "Engagement",
-      "description": "Attention and involvement",
-      "detail": "Engagement is necessary but not sufficient for learning. High engagement without cognitive effort ('fun but not learning') is common. True engagement involves mental effort and curiosity.",
-      "icon": "✨",
-      "connectsTo": ["motivation", "methods", "learner"]
-    },
-    {
-      "id": "assessment",
-      "label": "Assessment",
-      "description": "Measuring understanding",
-      "detail": "Assessment should be aligned with goals and methods. Formative assessment (during learning) is more valuable than summative (end-of-learning). Self-assessment builds metacognition.",
-      "icon": "📊",
-      "connectsTo": ["goals", "methods", "learner"]
+      "id": "learning",
+      "label": "Lifelong Learning",
+      "description": "Seeing learning as a continuous journey, not a destination.",
+      "detail": "With growth mindset, you never 'arrive.' There's always more to learn, more ways to improve. This creates a love of learning that makes the journey itself rewarding.",
+      "connectsTo": ["growth-mindset", "effort", "feedback"]
     }
-  ],
-  "layout": "radial",
-  "showLabelsOnLoad": true
+  ]
 }
