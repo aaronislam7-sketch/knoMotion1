@@ -1,0 +1,70 @@
+{
+  "title": "The Learning Ecosystem",
+  "centralNode": {
+    "id": "learner",
+    "label": "The Learner",
+    "description": "At the center of everything - the person doing the learning.",
+    "icon": "👤",
+    "color": "primary"
+  },
+  "connectedNodes": [
+    {
+      "id": "motivation",
+      "label": "Motivation",
+      "description": "Why they want to learn",
+      "detail": "Motivation can be intrinsic (curiosity, mastery) or extrinsic (rewards, requirements). Intrinsic motivation leads to deeper learning and better retention. Understanding a learner's 'why' is crucial for designing effective experiences.",
+      "icon": "🔥",
+      "connectsTo": ["learner", "goals", "engagement"]
+    },
+    {
+      "id": "prior-knowledge",
+      "label": "Prior Knowledge",
+      "description": "What they already know",
+      "detail": "New learning builds on existing mental models. When prior knowledge is activated and connected to new information, learning is faster and more durable. Misconceptions in prior knowledge can block new learning.",
+      "icon": "📚",
+      "connectsTo": ["learner", "content"]
+    },
+    {
+      "id": "goals",
+      "label": "Learning Goals",
+      "description": "What they're trying to achieve",
+      "detail": "Clear, specific goals help learners focus attention and measure progress. Goals should be challenging but achievable. They work best when learners help set them.",
+      "icon": "🎯",
+      "connectsTo": ["learner", "motivation", "assessment"]
+    },
+    {
+      "id": "content",
+      "label": "Content",
+      "description": "The material being learned",
+      "detail": "Content should be relevant, well-organized, and appropriately challenging. The best content anticipates learner questions and addresses common misconceptions.",
+      "icon": "📦",
+      "connectsTo": ["learner", "prior-knowledge", "methods"]
+    },
+    {
+      "id": "methods",
+      "label": "Methods",
+      "description": "How learning happens",
+      "detail": "Different methods work for different goals: active learning for application, spaced practice for retention, worked examples for building skills. No single method is best for everything.",
+      "icon": "🛠️",
+      "connectsTo": ["content", "engagement", "assessment"]
+    },
+    {
+      "id": "engagement",
+      "label": "Engagement",
+      "description": "Attention and involvement",
+      "detail": "Engagement is necessary but not sufficient for learning. High engagement without cognitive effort ('fun but not learning') is common. True engagement involves mental effort and curiosity.",
+      "icon": "✨",
+      "connectsTo": ["motivation", "methods", "learner"]
+    },
+    {
+      "id": "assessment",
+      "label": "Assessment",
+      "description": "Measuring understanding",
+      "detail": "Assessment should be aligned with goals and methods. Formative assessment (during learning) is more valuable than summative (end-of-learning). Self-assessment builds metacognition.",
+      "icon": "📊",
+      "connectsTo": ["goals", "methods", "learner"]
+    }
+  ],
+  "layout": "radial",
+  "showLabelsOnLoad": true
+}

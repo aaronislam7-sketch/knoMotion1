@@ -1,0 +1,65 @@
+{
+  "title": "Understanding Cognitive Load",
+  "subtitle": "Why your brain gets tired when learning",
+  "layers": [
+    {
+      "id": "layer-1",
+      "label": "The Headline",
+      "depthLabel": "Surface",
+      "content": "Your brain has limited mental energy for learning - when you exceed it, learning stops.",
+      "icon": "🧠"
+    },
+    {
+      "id": "layer-2",
+      "label": "The Explanation",
+      "depthLabel": "Detail",
+      "content": {
+        "summary": "Cognitive load theory explains why we can only process so much at once.",
+        "points": [
+          {
+            "text": "Working memory can only hold 4-7 items at a time",
+            "tooltip": "Miller's Law - the 'magical number seven, plus or minus two'"
+          },
+          {
+            "text": "New information competes for the same limited resources",
+            "tooltip": "This is why multitasking while learning is ineffective"
+          },
+          {
+            "text": "Well-designed learning breaks information into manageable chunks",
+            "tooltip": "Called 'chunking' - a key instructional design principle"
+          }
+        ]
+      },
+      "icon": "📚"
+    },
+    {
+      "id": "layer-3",
+      "label": "The Nuance",
+      "depthLabel": "Expert",
+      "content": {
+        "summary": "There are three types of cognitive load, and only one is 'good' for learning.",
+        "points": [
+          {
+            "text": "Intrinsic load: The inherent difficulty of the material itself",
+            "tooltip": "Can't be reduced - some things are just complex"
+          },
+          {
+            "text": "Extraneous load: Unnecessary mental effort from poor design",
+            "tooltip": "THIS is what instructional designers try to minimize"
+          },
+          {
+            "text": "Germane load: Mental effort that builds lasting understanding",
+            "tooltip": "The 'good' cognitive load - actual learning happening"
+          },
+          {
+            "text": "Research by Sweller (1988) established these categories",
+            "tooltip": "Cognitive Load Theory is one of the most validated theories in educational psychology"
+          }
+        ]
+      },
+      "icon": "🔬",
+      "lottieOnReveal": "lightbulb"
+    }
+  ],
+  "initiallyExpanded": 1
+}
