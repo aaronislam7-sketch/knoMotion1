@@ -8,17 +8,17 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from './hooks';
 
-// Template imports (will be uncommented as templates are built)
-// import { LayeredDeepDive } from './templates/LayeredDeepDive';
+// Template imports
+import { LayeredDeepDive } from './templates/LayeredDeepDive';
 // import { AnatomyExplorer } from './templates/AnatomyExplorer';
 // import { RelationshipMap } from './templates/RelationshipMap';
 // import { ScenarioSandbox } from './templates/ScenarioSandbox';
 
 // Example data imports
 import layeredDeepDiveExample from '../preview/layered-deep-dive-example.json';
-// import anatomyExplorerExample from '../preview/anatomy-explorer-example.json';
-// import relationshipMapExample from '../preview/relationship-map-example.json';
-// import scenarioSandboxExample from '../preview/scenario-sandbox-example.json';
+import anatomyExplorerExample from '../preview/anatomy-explorer-example.json';
+import relationshipMapExample from '../preview/relationship-map-example.json';
+import scenarioSandboxExample from '../preview/scenario-sandbox-example.json';
 
 type TemplateName = 'layered-deep-dive' | 'anatomy-explorer' | 'relationship-map' | 'scenario-sandbox';
 type ViewportPreset = 'desktop' | 'tablet' | 'mobile' | 'responsive';
@@ -33,7 +33,7 @@ const TEMPLATE_INFO: Record<TemplateName, { name: string; description: string; a
   'layered-deep-dive': {
     name: 'Layered Deep Dive',
     description: 'Progressive depth exploration - learners choose how deep to go',
-    available: false, // Will be true once built
+    available: true,
   },
   'anatomy-explorer': {
     name: 'Anatomy Explorer',
@@ -60,37 +60,34 @@ export default function App() {
   const templateInfo = TEMPLATE_INFO[activeTemplate];
 
   const renderTemplate = () => {
-    // Placeholder until templates are built
-    return (
-      <div className="flex items-center justify-center h-full min-h-[400px] bg-kno-surface">
-        <div className="text-center p-8">
-          <div className="text-6xl mb-4">🚧</div>
-          <h2 className="text-2xl font-header text-kno-ink mb-2">
-            {templateInfo.name}
-          </h2>
-          <p className="text-kno-ink-soft mb-4">
-            {templateInfo.description}
-          </p>
-          <p className="text-sm text-kno-ink-muted">
-            Template coming soon...
-          </p>
-        </div>
-      </div>
-    );
-
-    // Uncomment as templates are built:
-    // switch (activeTemplate) {
-    //   case 'layered-deep-dive':
-    //     return <LayeredDeepDive data={layeredDeepDiveExample} />;
-    //   case 'anatomy-explorer':
-    //     return <AnatomyExplorer data={anatomyExplorerExample} />;
-    //   case 'relationship-map':
-    //     return <RelationshipMap data={relationshipMapExample} />;
-    //   case 'scenario-sandbox':
-    //     return <ScenarioSandbox data={scenarioSandboxExample} />;
-    //   default:
-    //     return null;
-    // }
+    switch (activeTemplate) {
+      case 'layered-deep-dive':
+        return <LayeredDeepDive data={layeredDeepDiveExample as any} />;
+      // case 'anatomy-explorer':
+      //   return <AnatomyExplorer data={anatomyExplorerExample as any} />;
+      // case 'relationship-map':
+      //   return <RelationshipMap data={relationshipMapExample as any} />;
+      // case 'scenario-sandbox':
+      //   return <ScenarioSandbox data={scenarioSandboxExample as any} />;
+      default:
+        // Placeholder for templates not yet built
+        return (
+          <div className="flex items-center justify-center h-full min-h-[400px] bg-kno-surface">
+            <div className="text-center p-8">
+              <div className="text-6xl mb-4">🚧</div>
+              <h2 className="text-2xl font-header text-kno-ink mb-2">
+                {templateInfo.name}
+              </h2>
+              <p className="text-kno-ink-soft mb-4">
+                {templateInfo.description}
+              </p>
+              <p className="text-sm text-kno-ink-muted">
+                Template coming soon...
+              </p>
+            </div>
+          </div>
+        );
+    }
   };
 
   const getPreviewStyle = (): React.CSSProperties => {
