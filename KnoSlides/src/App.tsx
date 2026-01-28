@@ -12,7 +12,7 @@ import { useResponsive } from './hooks';
 import { LayeredDeepDive } from './templates/LayeredDeepDive';
 import { AnatomyExplorer } from './templates/AnatomyExplorer';
 import { RelationshipMap } from './templates/RelationshipMap';
-// import { ScenarioSandbox } from './templates/ScenarioSandbox';
+import { ScenarioSandbox } from './templates/ScenarioSandbox';
 
 // Example data imports
 import layeredDeepDiveExample from '../preview/layered-deep-dive-example.json';
@@ -48,7 +48,7 @@ const TEMPLATE_INFO: Record<TemplateName, { name: string; description: string; a
   'scenario-sandbox': {
     name: 'Scenario Sandbox',
     description: 'Manipulate variables and see different outcomes',
-    available: false,
+    available: true,
   },
 };
 
@@ -67,8 +67,8 @@ export default function App() {
         return <AnatomyExplorer data={anatomyExplorerExample as any} />;
       case 'relationship-map':
         return <RelationshipMap data={relationshipMapExample as any} />;
-      // case 'scenario-sandbox':
-      //   return <ScenarioSandbox data={scenarioSandboxExample as any} />;
+      case 'scenario-sandbox':
+        return <ScenarioSandbox data={scenarioSandboxExample as any} />;
       default:
         // Placeholder for templates not yet built
         return (
