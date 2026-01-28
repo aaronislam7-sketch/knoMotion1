@@ -1,46 +1,76 @@
 import React, { useState } from 'react';
 import { ShowcasePreview } from './admin/ShowcasePreview';
 import { SceneBuilder } from './admin/builder';
+import { SlidesPreview } from './admin/SlidesPreview';
 
 /**
- * KnoMotion Videos - Main Application
+ * KnoMotion - Main Application
  * 
- * Entry point with two views:
+ * Entry point with three views:
  * 1. JSON Builder - Visual editor for creating scene JSON configurations
- * 2. Showcase Preview - Preview and QA rendered videos
+ * 2. Video Preview - Preview and QA rendered videos
+ * 3. Slides Preview - Preview KnoSlides interactive templates
  * 
- * Toggle between views using the header button.
+ * Toggle between views using the header buttons.
  */
 export default function App() {
-  const [activeView, setActiveView] = useState('builder'); // 'builder' | 'preview'
+  const [activeView, setActiveView] = useState('builder'); // 'builder' | 'preview' | 'slides'
 
-  // If in builder mode, render the full SceneBuilder (which has its own layout)
+  // Navigation buttons component
+  const NavButtons = ({ current }) => (
+    <div className="fixed top-4 right-4 z-50 flex gap-2">
+      {current !== 'builder' && (
+        <button
+          onClick={() => setActiveView('builder')}
+          className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium shadow-lg transition-colors flex items-center gap-2"
+        >
+          <span>🔧</span> Builder
+        </button>
+      )}
+      {current !== 'preview' && (
+        <button
+          onClick={() => setActiveView('preview')}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg transition-colors flex items-center gap-2"
+        >
+          <span>🎬</span> Videos
+        </button>
+      )}
+      {current !== 'slides' && (
+        <button
+          onClick={() => setActiveView('slides')}
+          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-lg transition-colors flex items-center gap-2"
+        >
+          <span>📑</span> Slides
+        </button>
+      )}
+    </div>
+  );
+
+  // Builder mode
   if (activeView === 'builder') {
     return (
       <div className="relative">
-        {/* Floating toggle button */}
-        <button
-          onClick={() => setActiveView('preview')}
-          className="fixed top-4 right-4 z-50 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg transition-colors flex items-center gap-2"
-        >
-          <span>🎬</span> Switch to Preview
-        </button>
+        <NavButtons current="builder" />
         <SceneBuilder />
       </div>
     );
   }
 
-  // Preview mode with toggle back to builder
+  // Video Preview mode
+  if (activeView === 'preview') {
+    return (
+      <div className="relative">
+        <NavButtons current="preview" />
+        <ShowcasePreview />
+      </div>
+    );
+  }
+
+  // Slides Preview mode
   return (
     <div className="relative">
-      {/* Floating toggle button */}
-      <button
-        onClick={() => setActiveView('builder')}
-        className="fixed top-4 right-4 z-50 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium shadow-lg transition-colors flex items-center gap-2"
-      >
-        <span>🔧</span> Switch to Builder
-      </button>
-      <ShowcasePreview />
+      <NavButtons current="slides" />
+      <SlidesPreview />
     </div>
   );
 }
