@@ -11,7 +11,7 @@ import { useResponsive } from './hooks';
 // Template imports
 import { LayeredDeepDive } from './templates/LayeredDeepDive';
 import { AnatomyExplorer } from './templates/AnatomyExplorer';
-// import { RelationshipMap } from './templates/RelationshipMap';
+import { RelationshipMap } from './templates/RelationshipMap';
 // import { ScenarioSandbox } from './templates/ScenarioSandbox';
 
 // Example data imports
@@ -43,7 +43,7 @@ const TEMPLATE_INFO: Record<TemplateName, { name: string; description: string; a
   'relationship-map': {
     name: 'Relationship Map',
     description: 'Visualize and explore connections between concepts',
-    available: false,
+    available: true,
   },
   'scenario-sandbox': {
     name: 'Scenario Sandbox',
@@ -65,8 +65,8 @@ export default function App() {
         return <LayeredDeepDive data={layeredDeepDiveExample as any} />;
       case 'anatomy-explorer':
         return <AnatomyExplorer data={anatomyExplorerExample as any} />;
-      // case 'relationship-map':
-      //   return <RelationshipMap data={relationshipMapExample as any} />;
+      case 'relationship-map':
+        return <RelationshipMap data={relationshipMapExample as any} />;
       // case 'scenario-sandbox':
       //   return <ScenarioSandbox data={scenarioSandboxExample as any} />;
       default:
