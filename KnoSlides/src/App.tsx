@@ -10,7 +10,7 @@ import { useResponsive } from './hooks';
 
 // Template imports
 import { LayeredDeepDive } from './templates/LayeredDeepDive';
-// import { AnatomyExplorer } from './templates/AnatomyExplorer';
+import { AnatomyExplorer } from './templates/AnatomyExplorer';
 // import { RelationshipMap } from './templates/RelationshipMap';
 // import { ScenarioSandbox } from './templates/ScenarioSandbox';
 
@@ -38,7 +38,7 @@ const TEMPLATE_INFO: Record<TemplateName, { name: string; description: string; a
   'anatomy-explorer': {
     name: 'Anatomy Explorer',
     description: 'Deconstruct complex systems by exploring component parts',
-    available: false,
+    available: true,
   },
   'relationship-map': {
     name: 'Relationship Map',
@@ -63,8 +63,8 @@ export default function App() {
     switch (activeTemplate) {
       case 'layered-deep-dive':
         return <LayeredDeepDive data={layeredDeepDiveExample as any} />;
-      // case 'anatomy-explorer':
-      //   return <AnatomyExplorer data={anatomyExplorerExample as any} />;
+      case 'anatomy-explorer':
+        return <AnatomyExplorer data={anatomyExplorerExample as any} />;
       // case 'relationship-map':
       //   return <RelationshipMap data={relationshipMapExample as any} />;
       // case 'scenario-sandbox':
