@@ -23,10 +23,12 @@ export default {
   content: [
     './index.html',
     './KnoMotion-Videos/src/**/*.{js,jsx,ts,tsx}',
+    './KnoSlides/src/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {
       colors: {
+        // Original KnoMotion colors (CSS variable based)
         surface: colorVar('surface', '#FFF9F0'),
         board: colorVar('board', '#FFFFFF'),
         ink: colorVar('ink', '#1A1A1A'),
@@ -37,14 +39,33 @@ export default {
         warning: colorVar('warning', '#F39C12'),
         danger: colorVar('danger', '#E74C3C'),
         muted: colorVar('muted', '#9CA3AF'),
+        
+        // KnoSlides color scheme (direct values for portability)
+        kno: {
+          surface: '#FFF9F0',
+          board: '#FFFFFF',
+          ink: '#2C3E50',
+          'ink-soft': '#5D6D7E',
+          'ink-muted': '#95A5A6',
+          primary: '#FF6B35',
+          secondary: '#9B59B6',
+          accent: {
+            green: '#27AE60',
+            blue: '#3498DB',
+          },
+          highlight: '#F39C12',
+          rule: '#F0D9B5',
+          doodle: '#F39C12',
+        },
       },
       fontFamily: {
         display: [
           fontVar('display', '"Permanent Marker", cursive'),
           ...defaultTheme.fontFamily.sans,
         ],
+        header: ['"Cabin Sketch"', 'cursive', ...defaultTheme.fontFamily.sans],
         body: [
-          fontVar('body', '"Kalam", sans-serif'),
+          fontVar('body', '"Inter", sans-serif'),
           ...defaultTheme.fontFamily.sans,
         ],
         accent: [

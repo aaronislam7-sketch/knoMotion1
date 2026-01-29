@@ -1,0 +1,47 @@
+{
+  "title": "The Growth Mindset",
+  "centralNode": {
+    "id": "growth-mindset",
+    "label": "Growth Mindset",
+    "description": "The belief that abilities and intelligence can be developed through dedication, hard work, and learning from feedback.",
+    "detail": "Coined by psychologist Carol Dweck, growth mindset has transformed how we think about learning and achievement. People with this mindset embrace challenges, persist through obstacles, and see effort as the path to mastery.",
+    "connectsTo": ["challenges", "effort", "feedback", "persistence", "learning"]
+  },
+  "connectedNodes": [
+    {
+      "id": "challenges",
+      "label": "Embrace Challenges",
+      "description": "Viewing challenges as opportunities to grow rather than threats to avoid.",
+      "detail": "When you embrace challenges, you step outside your comfort zone. This is where real growth happens. Each challenge overcome builds confidence and expands your capabilities.",
+      "connectsTo": ["growth-mindset", "persistence"]
+    },
+    {
+      "id": "effort",
+      "label": "Value Effort",
+      "description": "Understanding that effort is the path to mastery, not a sign of inability.",
+      "detail": "Fixed mindset sees effort as evidence you're not smart enough. Growth mindset sees effort as the essential ingredient for achievement. The more you put in, the more you develop.",
+      "connectsTo": ["growth-mindset", "persistence", "learning"]
+    },
+    {
+      "id": "feedback",
+      "label": "Learn from Feedback",
+      "description": "Using criticism and feedback as valuable information for improvement.",
+      "detail": "Feedback - even negative feedback - is a gift. It shows you exactly where to focus your efforts. Growth mindset transforms criticism from a personal attack into a roadmap for getting better.",
+      "connectsTo": ["growth-mindset", "learning"]
+    },
+    {
+      "id": "persistence",
+      "label": "Persist Through Setbacks",
+      "description": "Maintaining effort and engagement even when facing obstacles.",
+      "detail": "Setbacks are not evidence of fixed limitations - they're part of the learning process. Every master was once a disaster. Persistence bridges the gap between where you are and where you want to be.",
+      "connectsTo": ["growth-mindset", "challenges", "effort"]
+    },
+    {
+      "id": "learning",
+      "label": "Lifelong Learning",
+      "description": "Seeing learning as a continuous journey, not a destination.",
+      "detail": "With growth mindset, you never 'arrive.' There's always more to learn, more ways to improve. This creates a love of learning that makes the journey itself rewarding.",
+      "connectsTo": ["growth-mindset", "effort", "feedback"]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "title": "The Anatomy of a Great Learning Experience",
+  "subtitle": "Explore how different components work together to create memorable learning",
+  "parts": [
+    {
+      "id": "core",
+      "label": "Learning Experience",
+      "shortLabel": "Experience",
+      "isCore": true,
+      "detail": {
+        "purpose": "A great learning experience combines multiple elements to help learners understand, retain, and apply new knowledge effectively.",
+        "howItWorks": "Each component serves a specific role - engagement captures attention, content delivers value, practice builds skills, and feedback closes the loop.",
+        "keyInsight": "The whole is greater than the sum of its parts. When all components work together, learning becomes transformative.",
+        "connectedParts": ["engagement", "content", "practice", "feedback"]
+      }
+    },
+    {
+      "id": "engagement",
+      "label": "Engagement",
+      "shortLabel": "Engage",
+      "isCore": false,
+      "detail": {
+        "purpose": "Captures and maintains the learner's attention throughout the experience.",
+        "howItWorks": "Uses curiosity gaps, relevance to personal goals, and appropriate challenge levels to keep learners invested.",
+        "keyInsight": "Without engagement, even the best content goes unnoticed. It's the gateway to learning.",
+        "connectedParts": ["core", "content"]
+      }
+    },
+    {
+      "id": "content",
+      "label": "Content Delivery",
+      "shortLabel": "Content",
+      "isCore": false,
+      "detail": {
+        "purpose": "Presents new information in a clear, structured, and memorable way.",
+        "howItWorks": "Breaks complex topics into digestible chunks, uses multiple modalities, and builds from known to unknown concepts.",
+        "keyInsight": "Good content doesn't just inform - it transforms how learners think about a topic.",
+        "connectedParts": ["core", "engagement", "practice"]
+      }
+    },
+    {
+      "id": "practice",
+      "label": "Active Practice",
+      "shortLabel": "Practice",
+      "isCore": false,
+      "detail": {
+        "purpose": "Provides opportunities to apply knowledge and build procedural skills.",
+        "howItWorks": "Offers varied exercises that gradually increase in complexity, with appropriate scaffolding and support.",
+        "keyInsight": "Learning is not a spectator sport. True understanding comes through doing.",
+        "connectedParts": ["core", "content", "feedback"]
+      }
+    },
+    {
+      "id": "feedback",
+      "label": "Feedback Loop",
+      "shortLabel": "Feedback",
+      "isCore": false,
+      "detail": {
+        "purpose": "Provides learners with information about their performance to guide improvement.",
+        "howItWorks": "Delivers timely, specific, and actionable information that helps learners understand gaps and next steps.",
+        "keyInsight": "Feedback isn't about judgment - it's about creating a clear path forward.",
+        "connectedParts": ["core", "practice"]
+      }
+    }
+  ],
+  "completionMessage": "You've explored all the components of a great learning experience. Notice how each part connects to and supports the others."
+}

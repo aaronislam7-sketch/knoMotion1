@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnatomyExplorer",
+  "description": "Understand complex systems by exploring their component parts",
+  "type": "object",
+  "required": ["title", "parts"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Main title for the anatomy exploration"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Optional subtitle"
+    },
+    "diagramLayout": {
+      "type": "string",
+      "enum": ["hierarchical", "radial", "linear", "grid"],
+      "default": "hierarchical",
+      "description": "Visual arrangement of parts"
+    },
+    "parts": {
+      "type": "array",
+      "description": "Component parts of the system",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "label": {
+            "type": "string",
+            "description": "Full name of the part"
+          },
+          "shortLabel": {
+            "type": "string",
+            "description": "Abbreviated label for diagram"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Emoji icon"
+          },
+          "color": {
+            "type": "string",
+            "description": "Theme color key (primary, secondary, accent-green, accent-blue)"
+          },
+          "isCore": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this is the central/core element"
+          },
+          "detail": {
+            "type": "object",
+            "description": "Detailed information about the part",
+            "properties": {
+              "purpose": { "type": "string", "description": "Why this part exists" },
+              "howItWorks": { "type": "string", "description": "How it functions" },
+              "keyInsight": { "type": "string", "description": "Important takeaway" },
+              "connectedParts": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "IDs of related parts"
+              }
+            }
+          }
+        }
+      }
+    },
+    "connections": {
+      "type": "array",
+      "description": "Visual connections between parts",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "label": { "type": "string" },
+          "style": {
+            "type": "string",
+            "enum": ["solid", "dashed", "dotted"],
+            "default": "solid"
+          }
+        }
+      }
+    },
+    "completionMessage": {
+      "type": "string",
+      "description": "Message shown when all parts are explored"
+    }
+  }
+}

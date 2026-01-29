@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LayeredDeepDive",
+  "description": "Progressive depth exploration - learners choose how deep to go",
+  "type": "object",
+  "required": ["title", "layers"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Main title of the deep dive"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Optional subtitle/description"
+    },
+    "layers": {
+      "type": "array",
+      "description": "Array of depth layers from surface to expert",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "content"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the layer"
+          },
+          "label": {
+            "type": "string",
+            "description": "Layer name (e.g., 'The Headline', 'The Explanation')"
+          },
+          "depthLabel": {
+            "type": "string",
+            "description": "Depth indicator (e.g., 'Surface', 'Detail', 'Expert')"
+          },
+          "content": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Simple text content"
+              },
+              {
+                "type": "object",
+                "description": "Structured content with summary and points",
+                "properties": {
+                  "summary": { "type": "string" },
+                  "points": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["text"],
+                      "properties": {
+                        "text": { "type": "string" },
+                        "tooltip": { "type": "string", "description": "Additional context on hover" }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "icon": {
+            "type": "string",
+            "description": "Emoji icon for the layer"
+          },
+          "lottieOnReveal": {
+            "type": "string",
+            "description": "Lottie animation key to play when layer is first expanded"
+          }
+        }
+      }
+    },
+    "initiallyExpanded": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of layers expanded on load (1 = just first layer)"
+    }
+  },
+  "examples": [
+    {
+      "title": "Understanding Cognitive Load",
+      "subtitle": "Why your brain gets tired when learning",
+      "layers": [
+        {
+          "id": "surface",
+          "label": "The Headline",
+          "depthLabel": "Surface",
+          "content": "Your brain has limited mental energy for learning.",
+          "icon": "🧠"
+        },
+        {
+          "id": "detail",
+          "label": "The Explanation",
+          "depthLabel": "Detail",
+          "content": {
+            "summary": "Cognitive load theory explains processing limits.",
+            "points": [
+              { "text": "Working memory holds 4-7 items", "tooltip": "Miller's Law" },
+              { "text": "New information competes for resources" }
+            ]
+          },
+          "icon": "📚"
+        }
+      ],
+      "initiallyExpanded": 1
+    }
+  ]
+}
