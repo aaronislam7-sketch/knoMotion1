@@ -1,0 +1,257 @@
+{
+  "title": "Building an INNER JOIN",
+  "learningObjective": "Understand how INNER JOIN combines rows from two tables based on a matching condition",
+  "enablesNext": "You'll be ready to use INNER JOIN in real queries and understand when rows are included or excluded",
+  "explanationContext": {
+    "title": "What is an INNER JOIN?",
+    "content": "An INNER JOIN combines rows from two tables where the join condition is met. Only rows with matching values in both tables appear in the result. Think of it as finding the intersection between two datasets.",
+    "visualReference": {
+      "type": "code",
+      "language": "sql",
+      "content": "SELECT columns\nFROM table1\nINNER JOIN table2\n  ON table1.column = table2.column"
+    },
+    "keyConcepts": [
+      "Matching condition",
+      "Both tables",
+      "Only matching rows"
+    ]
+  },
+  "steps": [
+    {
+      "id": "step-1-explain",
+      "phase": "explain",
+      "title": "Understanding the Tables",
+      "instruction": "Look at the two source tables on the right. The 'orders' table has customer_id values, and the 'customers' table has id values. Notice how some customer IDs appear in both tables, while others don't.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "Compare the customer_id column in orders with the id column in customers."
+        },
+        {
+          "level": 2,
+          "content": "Customer 101 appears in both tables. Customer 103 is in customers but has no orders. What about 104?"
+        }
+      ],
+      "requiresAction": false
+    },
+    {
+      "id": "step-2-guided",
+      "phase": "guided",
+      "title": "Start Building the Query",
+      "instruction": "Let's build the INNER JOIN query. First, drag the SELECT keyword to start the query, then add the columns we want to retrieve.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "Every SQL query starts with SELECT to specify which columns you want.",
+          "highlightId": "drop-select"
+        },
+        {
+          "level": 2,
+          "content": "Drag 'SELECT' first, then 'customers.name, orders.product' to specify the columns."
+        }
+      ],
+      "requiresAction": true,
+      "interactionType": "drag-drop",
+      "draggables": [
+        {
+          "id": "select-keyword",
+          "content": "SELECT",
+          "isCorrect": true,
+          "validTargets": ["drop-select"]
+        },
+        {
+          "id": "columns",
+          "content": "customers.name, orders.product",
+          "isCorrect": true,
+          "validTargets": ["drop-columns"]
+        },
+        {
+          "id": "from-keyword",
+          "content": "FROM",
+          "isCorrect": true,
+          "validTargets": ["drop-from"]
+        },
+        {
+          "id": "orders-table",
+          "content": "orders",
+          "isCorrect": true,
+          "validTargets": ["drop-table1"]
+        },
+        {
+          "id": "customers-table",
+          "content": "customers",
+          "isCorrect": true,
+          "validTargets": ["drop-table2"]
+        },
+        {
+          "id": "inner-join",
+          "content": "INNER JOIN",
+          "isCorrect": true,
+          "validTargets": ["drop-join"]
+        },
+        {
+          "id": "on-keyword",
+          "content": "ON",
+          "isCorrect": true,
+          "validTargets": ["drop-on"]
+        },
+        {
+          "id": "join-condition",
+          "content": "orders.customer_id = customers.id",
+          "isCorrect": true,
+          "validTargets": ["drop-condition"]
+        },
+        {
+          "id": "wrong-condition",
+          "content": "orders.id = customers.id",
+          "isCorrect": false,
+          "validTargets": ["drop-condition"]
+        }
+      ],
+      "dropZones": [
+        {
+          "id": "drop-select",
+          "label": "keyword",
+          "expectedItemId": "select-keyword",
+          "placeholder": "SELECT"
+        },
+        {
+          "id": "drop-columns",
+          "label": "columns",
+          "expectedItemId": "columns",
+          "placeholder": "columns..."
+        },
+        {
+          "id": "drop-from",
+          "label": "keyword",
+          "expectedItemId": "from-keyword",
+          "placeholder": "FROM"
+        },
+        {
+          "id": "drop-table1",
+          "label": "first table",
+          "expectedItemId": "orders-table",
+          "placeholder": "table1"
+        },
+        {
+          "id": "drop-join",
+          "label": "join type",
+          "expectedItemId": "inner-join",
+          "placeholder": "JOIN TYPE"
+        },
+        {
+          "id": "drop-table2",
+          "label": "second table",
+          "expectedItemId": "customers-table",
+          "placeholder": "table2"
+        },
+        {
+          "id": "drop-on",
+          "label": "keyword",
+          "expectedItemId": "on-keyword",
+          "placeholder": "ON"
+        },
+        {
+          "id": "drop-condition",
+          "label": "condition",
+          "expectedItemId": "join-condition",
+          "placeholder": "matching condition"
+        }
+      ]
+    },
+    {
+      "id": "step-3-construct",
+      "phase": "construct",
+      "title": "Complete the JOIN Condition",
+      "instruction": "The most important part of a JOIN is the condition that links the tables. Choose the correct condition that matches orders to customers.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "Look at which columns contain the same type of data in both tables."
+        },
+        {
+          "level": 2,
+          "content": "The orders table has 'customer_id' which should match the 'id' in customers.",
+          "highlightId": "drop-condition"
+        },
+        {
+          "level": 3,
+          "content": "The correct condition is: orders.customer_id = customers.id"
+        }
+      ],
+      "requiresAction": true,
+      "interactionType": "drag-drop"
+    },
+    {
+      "id": "step-4-outcome",
+      "phase": "outcome",
+      "title": "Analyze the Results",
+      "instruction": "Look at the query result. Notice that customer 103 (Charlie) doesn't appear - they have no orders. Customer 101 (Alice) appears twice because she has 2 orders. This is how INNER JOIN works: only matching rows from both tables are included.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "Count the rows: we have 4 orders but only 3 unique customers in the result."
+        },
+        {
+          "level": 2,
+          "content": "Charlie (id 103) has no orders, so they're excluded from the INNER JOIN result."
+        }
+      ],
+      "requiresAction": false
+    }
+  ],
+  "livePreview": {
+    "type": "table",
+    "title": "Query Result",
+    "tableSchema": {
+      "columns": [
+        { "key": "name", "label": "name", "type": "string" },
+        { "key": "product", "label": "product", "type": "string" }
+      ]
+    },
+    "initialData": [
+      { "id": "r1", "name": "Alice", "product": "Laptop" },
+      { "id": "r2", "name": "Alice", "product": "Mouse" },
+      { "id": "r3", "name": "Bob", "product": "Keyboard" },
+      { "id": "r4", "name": "Diana", "product": "Monitor" }
+    ]
+  },
+  "sourceData": {
+    "tables": [
+      {
+        "name": "orders",
+        "schema": {
+          "columns": [
+            { "key": "id", "label": "id", "type": "number" },
+            { "key": "customer_id", "label": "customer_id", "type": "number" },
+            { "key": "product", "label": "product", "type": "string" },
+            { "key": "amount", "label": "amount", "type": "number" }
+          ]
+        },
+        "data": [
+          { "id": 1, "customer_id": 101, "product": "Laptop", "amount": 999 },
+          { "id": 2, "customer_id": 102, "product": "Keyboard", "amount": 79 },
+          { "id": 3, "customer_id": 101, "product": "Mouse", "amount": 29 },
+          { "id": 4, "customer_id": 104, "product": "Monitor", "amount": 349 }
+        ]
+      },
+      {
+        "name": "customers",
+        "schema": {
+          "columns": [
+            { "key": "id", "label": "id", "type": "number" },
+            { "key": "name", "label": "name", "type": "string" },
+            { "key": "email", "label": "email", "type": "string" }
+          ]
+        },
+        "data": [
+          { "id": 101, "name": "Alice", "email": "alice@email.com" },
+          { "id": 102, "name": "Bob", "email": "bob@email.com" },
+          { "id": 103, "name": "Charlie", "email": "charlie@email.com" },
+          { "id": 104, "name": "Diana", "email": "diana@email.com" }
+        ]
+      }
+    ]
+  },
+  "completionMessage": "You've successfully built an INNER JOIN query! You now understand that INNER JOIN only returns rows where the join condition matches in both tables - customers without orders (like Charlie) are excluded from the results."
+}
