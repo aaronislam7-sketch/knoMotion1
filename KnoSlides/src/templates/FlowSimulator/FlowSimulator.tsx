@@ -41,7 +41,8 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ReactFlow, {
+import {
+  ReactFlow,
   Node,
   Edge,
   Background,
