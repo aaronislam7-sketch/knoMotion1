@@ -1,221 +1,313 @@
-# KnoSlides Build Status
+# KnoSlides Build Status - Unified Template Architecture
 
 ## Overview
 
-KnoSlides is a **guided construction** system for bite-sized learning. It sits between video exposure and quiz assessment in the Knode learning flow:
+KnoSlides is a guided construction system for bite-sized learning. It sits between video exposure and quiz assessment in the Knode learning flow:
 
 | Primitive | Role | Engagement |
 |-----------|------|------------|
-| **Videos** | Expose concepts and intuition | Passive, linear |
-| **Slides** | Build understanding through guided construction | Active, scaffolded |
-| **Quizzes** | Assess retention without support | Active, unscaffolded |
+| Videos | Expose concepts and intuition | Passive, linear |
+| Slides | Build understanding through guided construction | Active, scaffolded |
+| Quizzes | Assess retention without support | Active, unscaffolded |
 
-**Key Differentiator**: Slides are NOT presentations, NOT quizzes, and NOT LLM chat wrappers. They are interactive checkpoints where learners **construct understanding** with scaffolding.
+Key differentiator: Slides are not presentations, not quizzes, and not LLM chat wrappers. They are interactive checkpoints where learners construct understanding with scaffolding.
+
+This document defines the new direction: a single vanilla slide template driven by JSON, using named slots and reusable content blocks, aligned with KnoMotion's JSON-first architecture.
 
 ## Non-Negotiable Principles
 
-These principles are enforced in every template:
-
-1. **Slides must force meaningful cognitive engagement**
+1. Slides must force meaningful cognitive engagement
    - Learners must do something to progress
-   - Passive "Next" without thought is not allowed
+   - Passive "Next" without action is not allowed
 
-2. **Slides must never assume mastery**
-   - All construction is scaffolded
+2. Slides must never assume mastery
+   - Construction is scaffolded
    - Examples, references, and hints remain visible
-   - Progression: guided → constrained → lightly generative
+   - Progression: guided to constrained to lightly generative
 
-3. **Slides must not behave like quizzes**
+3. Slides must not behave like quizzes
    - No scoring
    - No hard fail states
    - Incorrect actions trigger explanation, not judgement
 
-4. **Templates are behaviour-driven, not content-driven**
-   - Same template works for databases, APIs, Python, etc.
-   - Content changes; behaviour does not
+4. Templates are behavior-driven, not content-driven
+   - Same template works for donuts, electricity, SQL, etc.
+   - Content changes; behavior does not
 
-## Templates
+5. Concept equals the 4-step sequence
+   - A concept is delivered through explain, guided, construct, outcome
 
-### 1. Build & Verify
+## Architecture (Aligned with KnoMotion)
 
-**Use when**: Teaching how something works and how to do it.
+KnoMotion:
+Scene JSON -> SceneFromConfig -> Mid-Scenes -> SDK Elements
 
-**Required Behaviours**:
-- ✓ Persistent explanation context
-- ✓ Interactive model that updates live as learner acts
-- ✓ Constrained construction (drag, select, reorder, fill blanks)
-- ✓ Live preview of results (table, output, response)
-- ✓ Hint ladder (minimum 2 levels)
-
-**Exemplar**: INNER JOIN query builder
-- Drag SQL keywords to build query
-- See live result table update
-- Source tables visible for reference
-
-### 2. Flow Simulator
-
-**Use when**: Teaching systems, processes, lifecycles, or causality.
-
-**Required Behaviours**:
-- ✓ Step-based progression (not scroll-based)
-- ✓ Visible system state
-- ✓ Branching or counterfactual paths ("what if X fails?")
-- ✓ Clear cause → effect explanations
-- ✓ Ability to inject or remove conditions
-
-**Exemplar**: API Authentication Flow
-- Visualize auth flow with ReactFlow
-- Toggle valid/invalid credentials
-- See 401 vs 200 response paths
-
-### 3. Repair the Model
-
-**Use when**: Teaching debugging, judgement, or common mistakes.
-
-**Required Behaviours**:
-- ✓ Present a flawed but realistic artifact
-- ✓ Learner identifies or fixes the issue
-- ✓ Before/after comparison
-- ✓ Explanation of why the fix matters
-
-**Exemplar**: Python list comprehension bug
-- Monaco editor with buggy code
-- Click to identify issues
-- See output change after fixes
-
-## Progression Model
-
-Every slide follows this 4-phase sequence:
-
-| Phase | Description | Learner Action |
-|-------|-------------|----------------|
-| **Explain** | Introduce concept visually/textually | Observe, read |
-| **Guided** | Manipulate model with heavy support | Interact with scaffolding |
-| **Construct** | Complete structure with bounded input | Build with constraints |
-| **Outcome** | See consequences of actions | Reflect on results |
-
-**Critical**: Progression is step-based. Scroll may exist within a step but NEVER unlocks progression.
-
-## Architecture
+KnoSlides:
+Slide JSON -> SlideRenderer -> Content Blocks -> SDK Elements
 
 ```
-/workspace
-├── KnoMotion-Videos/     # Video engine (Remotion-based)
-│   └── src/admin/
-│       └── SlidesPreview.jsx   # KnoSlides preview host
-│
-└── KnoSlides/            # Guided construction system
-    ├── src/
-    │   ├── templates/
-    │   │   ├── BuildAndVerify/    # Drag-drop, fill-blank, live preview
-    │   │   ├── FlowSimulator/     # Node diagrams, branching, state
-    │   │   └── RepairTheModel/    # Code editor, error identification
-    │   ├── components/
-    │   │   ├── slide/             # Shared slide components
-    │   │   │   ├── StepProgress.tsx
-    │   │   │   ├── HintLadder.tsx
-    │   │   │   ├── ExplanationPanel.tsx
-    │   │   │   ├── FeedbackIndicator.tsx
-    │   │   │   └── StepNavigation.tsx
-    │   │   └── [base components]
-    │   ├── hooks/
-    │   │   └── useSlideState.ts   # Unified state management
-    │   └── types/
-    │       └── templates.ts       # Type definitions
-    └── preview/           # Example JSON data files
+Slide JSON
+  -> SlideRenderer
+     -> SlotResolver (named slots)
+        -> ContentBlockRenderer (type registry)
+           -> SDK Elements
 ```
 
-## Tech Stack
+### Key Layers
 
-| Tool | Purpose | Why |
-|------|---------|-----|
-| **Vite + React** | Build & runtime | Fast dev, standard stack |
-| **Tailwind CSS** | Styling | Consistent with KnoMotion |
-| **@xyflow/react** | Flow diagrams | Flow Simulator template |
-| **@dnd-kit** | Drag and drop | Build & Verify template |
-| **motion** | Animations | Meaningful transitions |
-| **@tanstack/react-table** | Table logic | Live preview tables |
-| **@monaco-editor/react** | Code editing | Repair the Model template |
+1. Slide JSON
+   - Defines concept, layout, steps, tasks, and content blocks per slot
 
-## Quality Gates
+2. SlideRenderer
+   - Orchestrates step progression
+   - Gated by task completion (no passive advance)
 
-Every slide must pass ALL of these:
+3. SlotResolver
+   - Resolves named slots into layout regions
+   - Ensures consistent placement across slides
 
-### 1. Aesthetic
-- Clean, modern, calm design
-- Clear visual hierarchy
-- Animations reinforce meaning (cause → effect)
+4. ContentBlockRenderer (SDK)
+   - Renders a specific block type using block config
+   - Emits events for task validation
 
-### 2. Progression
-- No conceptual jumps
-- Each step builds on the last
-- Learner always knows WHY they're doing something
+## Slot System (Named Slots)
 
-### 3. Depth
-- Supports real-world complexity
-- Uses layered reveal to stay bite-sized
-- Does not oversimplify to distortion
+Slots are named to enforce consistent positioning across slides.
 
-### 4. Interactivity
-- Interaction changes the MODEL, not just the screen
-- Learner actions have visible consequences
+Recommended canonical layout (left guidance, right workspace):
 
-### 5. Cognitive Safety
-- No dead ends
-- Errors trigger explanation
-- Hints are always available
+| Slot Name | Purpose | Typical Position |
+|----------|---------|------------------|
+| HeaderSlot | Title, objective summary | Top |
+| OverviewSlot | What am I seeing / concept context | Left column (top) |
+| TaskSlot | Per-step tasks and progress | Left column (below overview) |
+| WorkspaceSlot | Primary interactive element | Right column (top) |
+| ReferenceSlot | Supporting references (data, diagrams) | Right column (mid) |
+| OutputSlot | Result or preview output | Right column (bottom) |
+| FooterSlot | Navigation, Ask KNO (hints) | Bottom |
 
-### 6. Purpose Clarity
-Each slide declares:
-- What understanding it builds (`learningObjective`)
-- What capability it enables next (`enablesNext`)
+Slots can be omitted for a step, but names stay consistent across templates.
 
-## How to Run
+## Unified Slide Schema (Draft)
 
-From workspace root:
-```bash
-npm run dev
+This is a draft JSON schema to unify Build and Verify, Flow Simulator, and Repair the Model.
+
+```
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KnoSlide",
+  "type": "object",
+  "required": ["concept", "layout", "steps"],
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "concept": {
+      "type": "object",
+      "required": ["id", "title", "learningObjective", "enablesNext"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "learningObjective": { "type": "string" },
+        "enablesNext": { "type": "string" }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": ["type", "slots"],
+      "properties": {
+        "type": { "enum": ["columnSplit", "rowStack", "gridSlots", "full"] },
+        "stylePreset": { "type": "string" },
+        "slots": {
+          "type": "array",
+          "items": {
+            "enum": ["HeaderSlot", "OverviewSlot", "TaskSlot", "WorkspaceSlot", "ReferenceSlot", "OutputSlot", "FooterSlot"]
+          }
+        }
+      }
+    },
+    "featureFlags": {
+      "type": "object",
+      "properties": {
+        "showHints": { "type": "boolean" },
+        "showTaskSlot": { "type": "boolean" },
+        "showReferenceSlot": { "type": "boolean" },
+        "showOutputSlot": { "type": "boolean" }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "phase", "title", "instruction", "tasks", "hints", "slots"],
+        "properties": {
+          "id": { "type": "string" },
+          "phase": { "enum": ["explain", "guided", "construct", "outcome"] },
+          "title": { "type": "string" },
+          "instruction": { "type": "string" },
+          "tasks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "label", "action", "required"],
+              "properties": {
+                "id": { "type": "string" },
+                "label": { "type": "string" },
+                "required": { "type": "boolean" },
+                "successMessage": { "type": "string" },
+                "action": {
+                  "type": "object",
+                  "required": ["type"],
+                  "properties": {
+                    "type": { "enum": ["click", "select", "toggle", "drag", "drop", "input", "reorder", "inspect", "compare", "event"] },
+                    "targetId": { "type": "string" },
+                    "eventId": { "type": "string" },
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          "hints": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "required": ["level", "content"],
+              "properties": {
+                "level": { "type": "number" },
+                "content": { "type": "string" },
+                "targetId": { "type": "string" }
+              }
+            }
+          },
+          "slots": {
+            "type": "object",
+            "properties": {
+              "HeaderSlot": { "$ref": "#/definitions/slotBlocks" },
+              "OverviewSlot": { "$ref": "#/definitions/slotBlocks" },
+              "TaskSlot": { "$ref": "#/definitions/slotBlocks" },
+              "WorkspaceSlot": { "$ref": "#/definitions/slotBlocks" },
+              "ReferenceSlot": { "$ref": "#/definitions/slotBlocks" },
+              "OutputSlot": { "$ref": "#/definitions/slotBlocks" },
+              "FooterSlot": { "$ref": "#/definitions/slotBlocks" }
+            }
+          }
+        }
+      }
+    },
+    "completionMessage": { "type": "string" }
+  },
+  "definitions": {
+    "slotBlocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "config"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "config": { "type": "object" },
+          "stylePreset": { "type": "string" },
+          "visibleWhen": { "type": "object" }
+        }
+      }
+    }
+  }
+}
 ```
 
-Click **"Slides"** in the header to access KnoSlides preview.
+Notes:
+- Tasks are per-step and contextual. Completion gates progression.
+- Ask KNO maps to the hint ladder (not a separate feature).
+- Content blocks emit events; tasks listen for those events.
 
-Toggle between templates: **Build & Verify** | **Flow Simulator** | **Repair the Model**
+## Content Blocks (SDK Element Types)
 
-## Content Injection
+These blocks map to existing templates and enable new subjects.
 
-Templates accept data via JSON schema. Each template has:
-- TypeScript interface in `/KnoSlides/src/types/templates.ts`
-- JSON Schema in `/KnoSlides/src/templates/[Template]/[Template].schema.json`
-- Example data in `/KnoSlides/preview/[template-name].json`
+### Core Guidance
+- contextCard: title, body, keyPoints, icon
+- taskList: tasks, completionState
+- hintLadder: hints, currentLevel, askKnoLabel
+- callout: tone, title, body
 
-Example usage:
-```tsx
-import { BuildAndVerifySlide } from '@/templates/BuildAndVerify';
-import data from './my-inner-join-content.json';
+### Content and Reference
+- textBlock: text, emphasis
+- richText: markdown, highlights
+- textAndCodeBlock: text, code, language
+- media: type (image, diagram, svg, lottie), src, alt
+- referencePanel: title, type, content
+- tableView: columns, rows, emptyState
+- outputPreview: type, current, expected, showExpected
 
-<BuildAndVerifySlide 
-  data={data} 
-  onComplete={() => console.log('Done!')}
-/>
-```
+### Interactive
+- dragAndDrop: items, zones, validation
+- selectGroup: options, selectionMode, validation
+- toggleGroup: toggles, validation
+- flowDiagram: nodes, edges, highlights
+- codeCompare: left, right, language, showDiff
+- errorList: items, severity, locations
 
-## Definition of Success
+Each block has its own config schema, but all blocks share:
+- id, type, config
+- optional stylePreset, visibleWhen
 
-After this refactor:
+## High-Level Block Config Attributes (Examples)
 
-✓ **Slides cannot be replaced by an LLM chat or static deck** without losing learning value
+- flowDiagram: nodes, edges, viewport, highlights
+- dragAndDrop: items, zones, expectedMap, feedback
+- codeCompare: leftCode, rightCode, language, diffMode
+- referencePanel: title, contentType, contentData
+- taskList: taskIds, statusMap, showProgress
 
-✓ **Learners leave slides thinking**: "I understand how this works — and I'm ready to try it myself"
+## UI Uplifts (Required)
 
-✓ **Slides feel clearly distinct** from both videos (passive) and quizzes (judgement)
+UI improvements are part of the refactor and must align with the mockup in:
+`/workspace/KnoSlides/Image 04-02-2026 at 14.59.png`.
 
-## Legacy Templates
+Key expectations:
+- Clear left-to-right hierarchy: OverviewSlot + TaskSlot on the left, Workspace/Reference/Output on the right.
+- Tasks are prominent and actionable per step (checklist with status, visible call-to-action).
+- "Continue" remains disabled until required tasks are completed.
+- "Ask KNO" is presented as a hint affordance (part of hint ladder behavior).
+- Consistent card styling, spacing, and calm visual hierarchy across all slides.
+- "So what?" callouts / outcome context are visually emphasized, not hidden.
 
-Previous templates (LayeredDeepDive, AnatomyExplorer, RelationshipMap, ScenarioSandbox) have been moved to `src/templates/_legacy/`. They do not meet the guided construction requirements:
-- They are exploratory/passive, not constructive
-- They don't require meaningful action to progress
-- They could be replaced by static content without losing much
+## Refactor Plan (Phased)
 
----
+Phase 0 - Alignment and naming
+- Confirm slot names and layout types
+- Finalize content block names and registry
+- Lock task schema and event model
 
-*Last updated after full template refactor to behaviour-driven guided construction model.*
+Phase 1 - Core framework
+- Build SlideRenderer and SlotResolver
+- Introduce block registry (content blocks)
+- Implement task gating and step progression
+
+Phase 2 - Core blocks
+- contextCard, taskList, hintLadder, callout
+- textBlock, textAndCodeBlock, media
+- referencePanel, tableView, outputPreview
+
+Phase 3 - Interactive blocks
+- dragAndDrop (Build and Verify)
+- flowDiagram + condition controls (Flow Simulator)
+- codeCompare + errorList (Repair the Model)
+
+Phase 4 - Migrate example content
+- Convert preview JSON into unified schema
+- Ensure slot placement and tasks per step
+
+Phase 5 - QA and polish
+- Enforce no passive progression
+- Verify hints and Ask KNO flow
+- Validate mobile layouts and accessibility
+
+Definition of success:
+- One vanilla template with named slots
+- JSON-only content injection
+- SDK block registry that can pivot across domains
