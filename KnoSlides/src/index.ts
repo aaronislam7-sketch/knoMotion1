@@ -14,10 +14,29 @@
 export * from './core';
 
 // =============================================================================
-// BLOCKS - Content Block Components
+// BLOCKS - Content Block Components (New Architecture)
 // =============================================================================
-export * from './blocks';
-export { registerCoreBlocks, initializeBlocks } from './blocks';
+export { 
+  // Guidance blocks
+  ContextCard,
+  TaskList,
+  HintLadder as HintLadderBlock,
+  Callout,
+  // Content blocks
+  TextBlock,
+  TextAndCodeBlock,
+  TableView,
+  OutputPreview,
+  ReferencePanel,
+  // Interactive blocks
+  DragAndDrop,
+  ErrorList,
+  CodeCompare,
+  FlowDiagram,
+  // Registry functions
+  registerCoreBlocks,
+  initializeBlocks,
+} from './blocks';
 
 // =============================================================================
 // LEGACY TEMPLATES (Will be migrated to unified schema)

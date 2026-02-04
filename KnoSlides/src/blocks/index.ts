@@ -18,9 +18,16 @@ export { TableView } from './content/TableView';
 export { OutputPreview } from './content/OutputPreview';
 export { ReferencePanel } from './content/ReferencePanel';
 
+// Interactive blocks
+export { DragAndDrop } from './interactive/DragAndDrop';
+export { ErrorList } from './interactive/ErrorList';
+export { CodeCompare } from './interactive/CodeCompare';
+export { FlowDiagram } from './interactive/FlowDiagram';
+
 // Re-export from submodules
 export * from './guidance';
 export * from './content';
+export * from './interactive';
 
 // Import block registry
 import { BlockRegistry, defaultRegistry } from '../core/BlockRegistry';
@@ -35,6 +42,10 @@ import { TextAndCodeBlock } from './content/TextAndCodeBlock';
 import { TableView } from './content/TableView';
 import { OutputPreview } from './content/OutputPreview';
 import { ReferencePanel } from './content/ReferencePanel';
+import { DragAndDrop } from './interactive/DragAndDrop';
+import { ErrorList } from './interactive/ErrorList';
+import { CodeCompare } from './interactive/CodeCompare';
+import { FlowDiagram } from './interactive/FlowDiagram';
 
 /**
  * Register all core blocks with a registry
@@ -52,6 +63,12 @@ export function registerCoreBlocks(registry: BlockRegistry = defaultRegistry): v
   registry.register('tableView', TableView);
   registry.register('outputPreview', OutputPreview);
   registry.register('referencePanel', ReferencePanel);
+  
+  // Interactive blocks
+  registry.register('dragAndDrop', DragAndDrop);
+  registry.register('errorList', ErrorList);
+  registry.register('codeCompare', CodeCompare);
+  registry.register('flowDiagram', FlowDiagram);
 }
 
 /**
