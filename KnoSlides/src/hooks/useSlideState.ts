@@ -17,20 +17,20 @@ import {
   Hint 
 } from '../types/templates';
 
-interface Step {
+interface BaseStep {
   id: string;
   phase: ProgressionPhase;
   requiresAction: boolean;
   hints: Hint[];
 }
 
-interface UseSlideStateOptions {
-  steps: Step[];
+interface UseSlideStateOptions<T extends BaseStep> {
+  steps: T[];
   onComplete?: () => void;
   onStepChange?: (stepIndex: number) => void;
 }
 
-export function useSlideState({ steps, onComplete, onStepChange }: UseSlideStateOptions) {
+export function useSlideState<T extends BaseStep>({ steps, onComplete, onStepChange }: UseSlideStateOptions<T>) {
   const [state, setState] = useState<TemplateState>({
     currentStepIndex: 0,
     currentPhase: steps[0]?.phase || 'explain',
@@ -41,7 +41,7 @@ export function useSlideState({ steps, onComplete, onStepChange }: UseSlideState
     isComplete: false,
   });
 
-  const currentStep = useMemo(() => steps[state.currentStepIndex], [steps, state.currentStepIndex]);
+  const currentStep: T | undefined = useMemo(() => steps[state.currentStepIndex], [steps, state.currentStepIndex]);
 
   // Get hint level for current step
   const currentHintLevel = useMemo(() => {

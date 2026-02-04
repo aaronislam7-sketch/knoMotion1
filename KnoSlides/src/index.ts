@@ -2,25 +2,55 @@
  * KnoSlides - Interactive Learning Templates
  * 
  * Main entry point for the KnoSlides library.
+ * 
+ * Architecture:
+ * - Core: Unified template rendering with named slots and content blocks
+ * - Legacy Templates: BuildAndVerify, FlowSimulator, RepairTheModel (to be migrated)
  */
 
-// Templates
-export { LayeredDeepDive } from './templates/LayeredDeepDive';
-export { AnatomyExplorer } from './templates/AnatomyExplorer';
-export { RelationshipMap } from './templates/RelationshipMap';
-export { ScenarioSandbox } from './templates/ScenarioSandbox';
+// =============================================================================
+// CORE - Unified Template Architecture (New)
+// =============================================================================
+export * from './core';
 
-// Components
+// =============================================================================
+// LEGACY TEMPLATES (Will be migrated to unified schema)
+// =============================================================================
+export { BuildAndVerifySlide } from './templates/BuildAndVerify';
+export { FlowSimulatorSlide } from './templates/FlowSimulator';
+export { RepairTheModelSlide } from './templates/RepairTheModel';
+
+// =============================================================================
+// SHARED COMPONENTS
+// =============================================================================
 export * from './components';
 
-// Hooks
-export * from './hooks';
+// =============================================================================
+// HOOKS
+// =============================================================================
+export { 
+  useResponsive, 
+  useScrollReveal, 
+  useTemplateState,
+  useLegacySlideState,
+  type ResponsiveState,
+  type ScrollRevealOptions,
+  type ScrollRevealState,
+  type TemplateStateActions,
+  type UseTemplateStateReturn,
+} from './hooks';
 
-// Animations
+// =============================================================================
+// ANIMATIONS
+// =============================================================================
 export * from './animations';
 
-// Theme
+// =============================================================================
+// THEME
+// =============================================================================
 export * from './theme';
 
-// Types
+// =============================================================================
+// TYPES
+// =============================================================================
 export * from './types';
