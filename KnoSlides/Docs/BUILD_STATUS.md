@@ -263,6 +263,19 @@ Each block has its own config schema, but all blocks share:
 - referencePanel: title, contentType, contentData
 - taskList: taskIds, statusMap, showProgress
 
+## UI Uplifts (Required)
+
+UI improvements are part of the refactor and must align with the mockup in:
+`/workspace/KnoSlides/Image 04-02-2026 at 14.59.png`.
+
+Key expectations:
+- Clear left-to-right hierarchy: OverviewSlot + TaskSlot on the left, Workspace/Reference/Output on the right.
+- Tasks are prominent and actionable per step (checklist with status, visible call-to-action).
+- "Continue" remains disabled until required tasks are completed.
+- "Ask KNO" is presented as a hint affordance (part of hint ladder behavior).
+- Consistent card styling, spacing, and calm visual hierarchy across all slides.
+- "So what?" callouts / outcome context are visually emphasized, not hidden.
+
 ## Refactor Plan (Phased)
 
 Phase 0 - Alignment and naming
