@@ -14,3 +14,5 @@ export type {
   TemplateStateActions, 
   UseTemplateStateReturn 
 } from './useTemplateState';
+
+export { useSlideState } from './useSlideState';

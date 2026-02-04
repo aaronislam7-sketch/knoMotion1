@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FlowSimulatorSlide",
+  "description": "Schema for Flow Simulator template - teaches systems, processes, and causality",
+  "type": "object",
+  "required": ["title", "learningObjective", "enablesNext", "systemContext", "nodes", "edges", "conditions", "steps", "branchOutcomes", "initialState"],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "learningObjective": {
+      "type": "string"
+    },
+    "enablesNext": {
+      "type": "string"
+    },
+    "systemContext": {
+      "type": "object",
+      "required": ["title", "description"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "realWorldExample": { "type": "string" }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "label", "position"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "enum": ["start", "process", "decision", "end", "state", "error", "success"] },
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "position": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "target"],
+        "properties": {
+          "id": { "type": "string" },
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "label": { "type": "string" },
+          "condition": { "type": "string" },
+          "style": { "enum": ["solid", "dashed", "dotted"] }
+        }
+      }
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "description", "value", "controlType", "affects"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "value": {},
+          "controlType": { "enum": ["toggle", "select", "input"] },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string" },
+                "label": { "type": "string" }
+              }
+            }
+          },
+          "affects": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "phase", "title", "instruction", "hints", "requiresAction"],
+        "properties": {
+          "id": { "type": "string" },
+          "phase": { "enum": ["explain", "guided", "construct", "outcome"] },
+          "title": { "type": "string" },
+          "instruction": { "type": "string" },
+          "hints": {
+            "type": "array",
+            "minItems": 2
+          },
+          "requiresAction": { "type": "boolean" },
+          "highlightNodes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "highlightEdges": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "manipulableConditions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "systemState": { "type": "object" },
+          "counterfactual": {
+            "type": "object",
+            "properties": {
+              "question": { "type": "string" },
+              "condition": { "type": "string" },
+              "expectedAnswer": { "type": "string" },
+              "explanation": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "branchOutcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["conditionId", "conditionValue", "resultPath", "explanation", "tone"],
+        "properties": {
+          "conditionId": { "type": "string" },
+          "conditionValue": {},
+          "resultPath": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "explanation": { "type": "string" },
+          "tone": { "enum": ["success", "error", "warning", "info"] }
+        }
+      }
+    },
+    "initialState": {
+      "type": "object",
+      "required": ["id", "label", "data"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "data": { "type": "object" },
+        "explanation": { "type": "string" }
+      }
+    },
+    "completionMessage": { "type": "string" }
+  }
+}

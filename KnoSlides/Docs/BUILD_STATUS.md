@@ -2,113 +2,173 @@
 
 ## Overview
 
-KnoSlides is an interactive React template system that complements KnoMotion (video content). While videos excel at delivering engaging, linear content, KnoSlides provides **depth** through highly interactive templates that allow learners to explore, make decisions, and engage with content at their own pace.
+KnoSlides is a **guided construction** system for bite-sized learning. It sits between video exposure and quiz assessment in the Knode learning flow:
 
-**Key Differentiator**: Videos are passive and linear. KnoSlides templates are interactive and non-linear, allowing personalized depth exploration.
+| Primitive | Role | Engagement |
+|-----------|------|------------|
+| **Videos** | Expose concepts and intuition | Passive, linear |
+| **Slides** | Build understanding through guided construction | Active, scaffolded |
+| **Quizzes** | Assess retention without support | Active, unscaffolded |
+
+**Key Differentiator**: Slides are NOT presentations, NOT quizzes, and NOT LLM chat wrappers. They are interactive checkpoints where learners **construct understanding** with scaffolding.
+
+## Non-Negotiable Principles
+
+These principles are enforced in every template:
+
+1. **Slides must force meaningful cognitive engagement**
+   - Learners must do something to progress
+   - Passive "Next" without thought is not allowed
+
+2. **Slides must never assume mastery**
+   - All construction is scaffolded
+   - Examples, references, and hints remain visible
+   - Progression: guided → constrained → lightly generative
+
+3. **Slides must not behave like quizzes**
+   - No scoring
+   - No hard fail states
+   - Incorrect actions trigger explanation, not judgement
+
+4. **Templates are behaviour-driven, not content-driven**
+   - Same template works for databases, APIs, Python, etc.
+   - Content changes; behaviour does not
+
+## Templates
+
+### 1. Build & Verify
+
+**Use when**: Teaching how something works and how to do it.
+
+**Required Behaviours**:
+- ✓ Persistent explanation context
+- ✓ Interactive model that updates live as learner acts
+- ✓ Constrained construction (drag, select, reorder, fill blanks)
+- ✓ Live preview of results (table, output, response)
+- ✓ Hint ladder (minimum 2 levels)
+
+**Exemplar**: INNER JOIN query builder
+- Drag SQL keywords to build query
+- See live result table update
+- Source tables visible for reference
+
+### 2. Flow Simulator
+
+**Use when**: Teaching systems, processes, lifecycles, or causality.
+
+**Required Behaviours**:
+- ✓ Step-based progression (not scroll-based)
+- ✓ Visible system state
+- ✓ Branching or counterfactual paths ("what if X fails?")
+- ✓ Clear cause → effect explanations
+- ✓ Ability to inject or remove conditions
+
+**Exemplar**: API Authentication Flow
+- Visualize auth flow with ReactFlow
+- Toggle valid/invalid credentials
+- See 401 vs 200 response paths
+
+### 3. Repair the Model
+
+**Use when**: Teaching debugging, judgement, or common mistakes.
+
+**Required Behaviours**:
+- ✓ Present a flawed but realistic artifact
+- ✓ Learner identifies or fixes the issue
+- ✓ Before/after comparison
+- ✓ Explanation of why the fix matters
+
+**Exemplar**: Python list comprehension bug
+- Monaco editor with buggy code
+- Click to identify issues
+- See output change after fixes
+
+## Progression Model
+
+Every slide follows this 4-phase sequence:
+
+| Phase | Description | Learner Action |
+|-------|-------------|----------------|
+| **Explain** | Introduce concept visually/textually | Observe, read |
+| **Guided** | Manipulate model with heavy support | Interact with scaffolding |
+| **Construct** | Complete structure with bounded input | Build with constraints |
+| **Outcome** | See consequences of actions | Reflect on results |
+
+**Critical**: Progression is step-based. Scroll may exist within a step but NEVER unlocks progression.
 
 ## Architecture
 
 ```
 /workspace
-├── KnoMotion-Videos/     # Existing video engine (Remotion-based)
-│   └── src/
-│       └── admin/
-│           └── SlidesPreview.jsx   # KnoSlides preview integration
-└── KnoSlides/            # NEW: Interactive template system
+├── KnoMotion-Videos/     # Video engine (Remotion-based)
+│   └── src/admin/
+│       └── SlidesPreview.jsx   # KnoSlides preview host
+│
+└── KnoSlides/            # Guided construction system
     ├── src/
-    │   ├── templates/    # The 4 core templates
-    │   ├── components/   # Shared UI components
-    │   ├── hooks/        # React hooks
-    │   ├── animations/   # Framer Motion utilities
-    │   ├── theme/        # Theme & responsive utilities
-    │   └── types/        # TypeScript interfaces
-    └── preview/          # Example JSON data files
+    │   ├── templates/
+    │   │   ├── BuildAndVerify/    # Drag-drop, fill-blank, live preview
+    │   │   ├── FlowSimulator/     # Node diagrams, branching, state
+    │   │   └── RepairTheModel/    # Code editor, error identification
+    │   ├── components/
+    │   │   ├── slide/             # Shared slide components
+    │   │   │   ├── StepProgress.tsx
+    │   │   │   ├── HintLadder.tsx
+    │   │   │   ├── ExplanationPanel.tsx
+    │   │   │   ├── FeedbackIndicator.tsx
+    │   │   │   └── StepNavigation.tsx
+    │   │   └── [base components]
+    │   ├── hooks/
+    │   │   └── useSlideState.ts   # Unified state management
+    │   └── types/
+    │       └── templates.ts       # Type definitions
+    └── preview/           # Example JSON data files
 ```
 
-### Key Technical Decisions
+## Tech Stack
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Animation Library | Framer Motion | Event-driven (click, hover) vs Remotion's frame-based |
-| Styling | Tailwind CSS | Consistent with KnoMotion, rapid development |
-| State Management | React useState | No persistence needed - reset on page refresh |
-| TypeScript | Relaxed strictness | MVP flexibility, type safety where it matters |
-| Build | Vite | Fast dev server, ES modules |
+| Tool | Purpose | Why |
+|------|---------|-----|
+| **Vite + React** | Build & runtime | Fast dev, standard stack |
+| **Tailwind CSS** | Styling | Consistent with KnoMotion |
+| **@xyflow/react** | Flow diagrams | Flow Simulator template |
+| **@dnd-kit** | Drag and drop | Build & Verify template |
+| **motion** | Animations | Meaningful transitions |
+| **@tanstack/react-table** | Table logic | Live preview tables |
+| **@monaco-editor/react** | Code editing | Repair the Model template |
 
-## Templates Delivered
+## Quality Gates
 
-### 1. Layered Deep Dive
-**Purpose**: Progressive depth exploration - learners choose how deep to go.
+Every slide must pass ALL of these:
 
-**Features**:
-- Expandable accordion layers (numbered 1, 2, 3, 4)
-- Color-coded depth levels (blue → purple → amber → emerald)
-- Progress tracking ("2 of 4 explored")
-- Expand/collapse all toggle
-- Rich content with summary + bullet points + tooltips
+### 1. Aesthetic
+- Clean, modern, calm design
+- Clear visual hierarchy
+- Animations reinforce meaning (cause → effect)
 
-**Pedagogy**: Information depth - learners self-select complexity level.
+### 2. Progression
+- No conceptual jumps
+- Each step builds on the last
+- Learner always knows WHY they're doing something
 
-### 2. Anatomy Explorer
-**Purpose**: Understand systems by exploring component parts and relationships.
+### 3. Depth
+- Supports real-world complexity
+- Uses layered reveal to stay bite-sized
+- Does not oversimplify to distortion
 
-**Features**:
-- Hierarchical diagram with core node centered at top
-- Child nodes arranged in row below
-- **Flowing animated connection lines** (CSS dash animation)
-- Core connects to ALL children (not just selected)
-- Cross-connections between related children
-- Click node → detail panel appears below diagram
-- Navigate between connected parts
+### 4. Interactivity
+- Interaction changes the MODEL, not just the screen
+- Learner actions have visible consequences
 
-**Pedagogy**: Structural understanding - deconstruct systems to understand how parts relate.
+### 5. Cognitive Safety
+- No dead ends
+- Errors trigger explanation
+- Hints are always available
 
-### 3. Relationship Map (Mind Map)
-**Purpose**: Explore ideas connected to a central concept.
-
-**Features**:
-- Radial layout with central concept in middle
-- Connected concepts arranged in circle around center
-- Flowing animated lines from center to all nodes
-- Curved cross-connections between related outer nodes
-- Click any node for detail panel below
-- Visual distinction (center = purple, outer = gray/white)
-
-**Pedagogy**: Conceptual associations - understand how ideas relate to a central theme.
-
-### 4. Scenario Sandbox
-**Purpose**: Learn through decision-making and seeing consequences.
-
-**Features**:
-- Single-column decision-focused layout
-- Decision options with letter labels (A, B, C)
-- Select option → outcome reveals
-- Color-coded outcomes (green/red/gray for positive/negative/neutral)
-- Key takeaways listed as bullets
-- "Try different approach" reset
-- Multi-decision support with progress tracker
-
-**Pedagogy**: Applied learning - understand cause and effect through simulation.
-
-## Design Principles Applied
-
-### Visual Aesthetic
-- **Inspiration**: Notion + Brilliant.org
-- **Feel**: Professional but fun, clean but not sterile
-- **Typography**: Large, readable text (18px+ body)
-- **Colors**: Subtle, purposeful - indigo/purple primary accents
-- **No emojis in body text** - only icons where appropriate
-
-### Animations
-- **Flowing lines**: CSS `stroke-dasharray` + `animation` creates "alive" connections
-- **Smooth transitions**: Framer Motion spring configs
-- **Micro-interactions**: Hover states, selection feedback, progress indicators
-- **Not excessive**: Animations serve purpose, not decoration
-
-### Layout
-- **Full width**: Templates render at 95% viewport width
-- **No sidebars**: Detail panels appear inline below diagrams
-- **Responsive foundation**: Built desktop-first, mobile-ready structure
+### 6. Purpose Clarity
+Each slide declares:
+- What understanding it builds (`learningObjective`)
+- What capability it enables next (`enablesNext`)
 
 ## How to Run
 
@@ -117,76 +177,45 @@ From workspace root:
 npm run dev
 ```
 
-Then click **"Slides"** in the header to access KnoSlides preview.
+Click **"Slides"** in the header to access KnoSlides preview.
 
-Toggle between templates using the header buttons: Deep Dive | Anatomy | Mind Map | Scenario
+Toggle between templates: **Build & Verify** | **Flow Simulator** | **Repair the Model**
 
 ## Content Injection
 
 Templates accept data via JSON schema. Each template has:
 - TypeScript interface in `/KnoSlides/src/types/templates.ts`
-- JSON Schema in `/KnoSlides/src/templates/[TemplateName]/[TemplateName].schema.json`
-- Example data in `/KnoSlides/preview/[template-name]-example.json`
+- JSON Schema in `/KnoSlides/src/templates/[Template]/[Template].schema.json`
+- Example data in `/KnoSlides/preview/[template-name].json`
 
 Example usage:
 ```tsx
-import { LayeredDeepDive } from '@/templates/LayeredDeepDive';
-import data from './my-content.json';
+import { BuildAndVerifySlide } from '@/templates/BuildAndVerify';
+import data from './my-inner-join-content.json';
 
-<LayeredDeepDive data={data} />
+<BuildAndVerifySlide 
+  data={data} 
+  onComplete={() => console.log('Done!')}
+/>
 ```
 
-## Shared Assets
+## Definition of Success
 
-KnoSlides reuses from KnoMotion:
-- **Theme colors**: `KNODE_THEME` from `/KnoMotion-Videos/src/sdk/theme/knodeTheme.ts`
-- **Lottie registry**: `LOTTIE_REGISTRY` from `/KnoMotion-Videos/src/sdk/lottie/registry.ts`
-- **Tailwind config**: Extended in root `tailwind.config.js` with `kno-*` colors
+After this refactor:
 
-## Dependencies Added
+✓ **Slides cannot be replaced by an LLM chat or static deck** without losing learning value
 
-Root `package.json` now includes:
-- `framer-motion` - Animation library
-- `lottie-react` - Lottie player (for future Lottie integration)
+✓ **Learners leave slides thinking**: "I understand how this works — and I'm ready to try it myself"
 
-## Files Modified in KnoMotion-Videos
+✓ **Slides feel clearly distinct** from both videos (passive) and quizzes (judgement)
 
-| File | Change |
-|------|--------|
-| `src/admin/SlidesPreview.jsx` | Created - hosts KnoSlides preview |
-| `src/App.jsx` | Added "Slides" toggle in header |
-| `src/tailwind.css` | Added Google Fonts imports |
+## Legacy Templates
 
-Root workspace:
-| File | Change |
-|------|--------|
-| `package.json` | Added framer-motion, lottie-react |
-| `tailwind.config.js` | Extended with kno-* colors, KnoSlides content paths |
-
-## What's NOT Implemented
-
-- **Webflow integration** - Out of scope for this phase
-- **Mobile-first optimization** - Desktop-first MVP, responsive foundation exists
-- **Lottie animations in templates** - Registry connected, not yet used in templates
-- **Drag interactions** - Considered but not implemented in MVP
-- **Quiz/assessment** - Handled separately per requirements
-- **State persistence** - Intentionally resets on page refresh
-
-## Known Considerations
-
-1. **Imports use relative paths**: KnoSlides imports KnoMotion assets via `../../../KnoMotion-Videos/...`
-2. **Vite aliases configured**: `@` → KnoSlides/src, `@knomotion` → KnoMotion-Videos/src/sdk
-3. **Standalone dev server exists** but integration preview is recommended (via main App.jsx)
-
-## Next Steps (Suggested)
-
-1. **User testing** - Get feedback on template interactions
-2. **Content variety** - Test with diverse real content
-3. **Mobile optimization** - Refine responsive breakpoints
-4. **Lottie integration** - Add animations to enhance delight
-5. **Additional templates** - If new pedagogical needs arise
-6. **Webflow integration** - When ready for production deployment
+Previous templates (LayeredDeepDive, AnatomyExplorer, RelationshipMap, ScenarioSandbox) have been moved to `src/templates/_legacy/`. They do not meet the guided construction requirements:
+- They are exploratory/passive, not constructive
+- They don't require meaningful action to progress
+- They could be replaced by static content without losing much
 
 ---
 
-*Last updated after Phase 4 refinements - templates feature Notion/Brilliant.org aesthetic, flowing line animations, and inline detail panels.*
+*Last updated after full template refactor to behaviour-driven guided construction model.*

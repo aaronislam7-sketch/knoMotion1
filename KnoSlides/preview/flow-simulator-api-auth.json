@@ -1,0 +1,301 @@
+{
+  "title": "API Authentication Flow",
+  "learningObjective": "Understand how API authentication works: from sending credentials to handling success and failure responses",
+  "enablesNext": "You'll be ready to implement authentication in your own API calls and debug 401 errors confidently",
+  "systemContext": {
+    "title": "How APIs Verify Your Identity",
+    "description": "When you call an API, you need to prove who you are. This is called authentication. Most APIs use tokens - special strings that identify you. The flow involves: 1) Sending credentials, 2) Receiving a token, 3) Using that token in subsequent requests.",
+    "realWorldExample": "Think of it like a hotel key card - you show ID at check-in (authenticate), get a card (token), then use it to access your room (make API calls)."
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "label": "Client App",
+      "description": "Your application",
+      "position": { "x": 250, "y": 0 }
+    },
+    {
+      "id": "send-request",
+      "type": "process",
+      "label": "Send Request",
+      "description": "POST /api/login",
+      "position": { "x": 250, "y": 80 }
+    },
+    {
+      "id": "server-check",
+      "type": "decision",
+      "label": "Valid Credentials?",
+      "description": "Server validates",
+      "position": { "x": 250, "y": 180 }
+    },
+    {
+      "id": "success-200",
+      "type": "success",
+      "label": "200 OK",
+      "description": "Token returned",
+      "position": { "x": 400, "y": 280 }
+    },
+    {
+      "id": "error-401",
+      "type": "error",
+      "label": "401 Unauthorized",
+      "description": "Invalid credentials",
+      "position": { "x": 100, "y": 280 }
+    },
+    {
+      "id": "store-token",
+      "type": "process",
+      "label": "Store Token",
+      "description": "Save for later use",
+      "position": { "x": 400, "y": 370 }
+    },
+    {
+      "id": "retry",
+      "type": "process",
+      "label": "Fix & Retry",
+      "description": "Check credentials",
+      "position": { "x": 100, "y": 370 }
+    },
+    {
+      "id": "use-token",
+      "type": "end",
+      "label": "Make API Calls",
+      "description": "With Authorization header",
+      "position": { "x": 400, "y": 460 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "start",
+      "target": "send-request",
+      "label": "username + password"
+    },
+    {
+      "id": "e2",
+      "source": "send-request",
+      "target": "server-check"
+    },
+    {
+      "id": "e3",
+      "source": "server-check",
+      "target": "success-200",
+      "label": "Yes",
+      "condition": "credentials-valid"
+    },
+    {
+      "id": "e4",
+      "source": "server-check",
+      "target": "error-401",
+      "label": "No",
+      "condition": "credentials-invalid"
+    },
+    {
+      "id": "e5",
+      "source": "success-200",
+      "target": "store-token"
+    },
+    {
+      "id": "e6",
+      "source": "store-token",
+      "target": "use-token"
+    },
+    {
+      "id": "e7",
+      "source": "error-401",
+      "target": "retry"
+    },
+    {
+      "id": "e8",
+      "source": "retry",
+      "target": "send-request",
+      "style": "dashed"
+    }
+  ],
+  "conditions": [
+    {
+      "id": "valid-credentials",
+      "label": "Valid Credentials",
+      "description": "Whether the username and password are correct",
+      "value": true,
+      "controlType": "toggle",
+      "affects": ["server-check", "e3", "e4"]
+    },
+    {
+      "id": "token-expired",
+      "label": "Token Expired",
+      "description": "Whether the stored token has expired",
+      "value": false,
+      "controlType": "toggle",
+      "affects": ["use-token"]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-1-explain",
+      "phase": "explain",
+      "title": "The Authentication Request",
+      "instruction": "Look at the flow diagram. The client app starts by sending a POST request to /api/login with username and password. This is the first step in any authentication flow.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "Notice the 'Client App' node at the top - this represents your application making the request."
+        },
+        {
+          "level": 2,
+          "content": "The arrow shows data flowing: username + password go to the server via POST /api/login."
+        }
+      ],
+      "requiresAction": false,
+      "highlightNodes": ["start", "send-request"],
+      "highlightEdges": ["e1"],
+      "systemState": {
+        "id": "initial",
+        "label": "Request State",
+        "data": {
+          "method": "POST",
+          "endpoint": "/api/login",
+          "body": "{ username, password }",
+          "token": null
+        },
+        "explanation": "The client sends credentials to the login endpoint"
+      }
+    },
+    {
+      "id": "step-2-guided",
+      "phase": "guided",
+      "title": "Server Validation",
+      "instruction": "The server receives the request and checks if the credentials are valid. This is a decision point - the flow branches based on whether authentication succeeds or fails.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "The diamond shape indicates a decision point - the server must choose a path."
+        },
+        {
+          "level": 2,
+          "content": "If credentials match what's in the database, the server responds with 200 OK and a token. Otherwise, it returns 401 Unauthorized."
+        }
+      ],
+      "requiresAction": false,
+      "highlightNodes": ["server-check"],
+      "highlightEdges": ["e2"],
+      "systemState": {
+        "id": "validating",
+        "label": "Server State",
+        "data": {
+          "checking": true,
+          "username": "user@example.com",
+          "passwordMatch": "pending..."
+        },
+        "explanation": "Server looks up the user and compares the password hash"
+      }
+    },
+    {
+      "id": "step-3-construct",
+      "phase": "construct",
+      "title": "Explore Success vs Failure",
+      "instruction": "Use the toggle to switch between valid and invalid credentials. Watch how the flow changes and observe the different system states.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "Toggle 'Valid Credentials' OFF to see what happens when authentication fails."
+        },
+        {
+          "level": 2,
+          "content": "With invalid credentials, the server returns 401 and the client must retry. With valid credentials, you get a token."
+        },
+        {
+          "level": 3,
+          "content": "In real apps, you'd show an error message and let the user correct their password."
+        }
+      ],
+      "requiresAction": true,
+      "highlightNodes": ["server-check", "success-200", "error-401"],
+      "highlightEdges": ["e3", "e4"],
+      "manipulableConditions": ["valid-credentials"],
+      "systemState": {
+        "id": "branching",
+        "label": "Response State",
+        "data": {
+          "status": 200,
+          "success": true,
+          "token": "eyJhbG...xyz",
+          "error": null
+        },
+        "explanation": "Toggle the condition to see how the response changes"
+      },
+      "counterfactual": {
+        "question": "What happens if the credentials are wrong?",
+        "condition": "valid-credentials",
+        "expectedAnswer": "false",
+        "explanation": "The server returns 401 Unauthorized, and the client must fix the credentials and retry"
+      }
+    },
+    {
+      "id": "step-4-outcome",
+      "phase": "outcome",
+      "title": "Using the Token",
+      "instruction": "After successful authentication, the token is stored and used in subsequent API calls. Every request includes the token in the Authorization header, proving your identity without re-sending your password.",
+      "hints": [
+        {
+          "level": 1,
+          "content": "The token acts like a temporary ID card - easier to carry than your full credentials."
+        },
+        {
+          "level": 2,
+          "content": "Tokens typically expire after some time (hours or days), requiring re-authentication."
+        }
+      ],
+      "requiresAction": false,
+      "highlightNodes": ["store-token", "use-token"],
+      "highlightEdges": ["e5", "e6"],
+      "systemState": {
+        "id": "authenticated",
+        "label": "Authenticated State",
+        "data": {
+          "isAuthenticated": true,
+          "token": "eyJhbG...xyz",
+          "expiresIn": "3600s",
+          "nextRequest": "Authorization: Bearer eyJhbG...xyz"
+        },
+        "explanation": "Now every API call includes the token in the Authorization header"
+      }
+    }
+  ],
+  "branchOutcomes": [
+    {
+      "conditionId": "valid-credentials",
+      "conditionValue": true,
+      "resultPath": ["server-check", "success-200", "store-token", "use-token"],
+      "explanation": "With valid credentials, the server returns a 200 OK response containing an access token. The client stores this token and includes it in all future API requests.",
+      "tone": "success"
+    },
+    {
+      "conditionId": "valid-credentials",
+      "conditionValue": false,
+      "resultPath": ["server-check", "error-401", "retry"],
+      "explanation": "With invalid credentials, the server returns a 401 Unauthorized error. The client should prompt the user to check their username/password and try again.",
+      "tone": "error"
+    },
+    {
+      "conditionId": "token-expired",
+      "conditionValue": true,
+      "resultPath": ["use-token", "error-401", "retry"],
+      "explanation": "When a token expires, subsequent API calls fail with 401. The client must re-authenticate to get a fresh token.",
+      "tone": "warning"
+    }
+  ],
+  "initialState": {
+    "id": "initial",
+    "label": "Initial State",
+    "data": {
+      "isAuthenticated": false,
+      "token": null,
+      "lastRequest": null,
+      "lastResponse": null
+    },
+    "explanation": "Starting state: no authentication yet"
+  },
+  "completionMessage": "You now understand the API authentication flow! You've seen how credentials are sent, validated, and exchanged for tokens. You also know what happens when authentication fails (401) and how to recover by retrying with correct credentials."
+}
