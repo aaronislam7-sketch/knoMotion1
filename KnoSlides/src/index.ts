@@ -14,6 +14,12 @@
 export * from './core';
 
 // =============================================================================
+// BLOCKS - Content Block Components
+// =============================================================================
+export * from './blocks';
+export { registerCoreBlocks, initializeBlocks } from './blocks';
+
+// =============================================================================
 // LEGACY TEMPLATES (Will be migrated to unified schema)
 // =============================================================================
 export { BuildAndVerifySlide } from './templates/BuildAndVerify';
