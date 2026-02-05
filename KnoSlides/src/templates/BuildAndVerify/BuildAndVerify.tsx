@@ -65,7 +65,7 @@ import {
   Feedback,
   ValidationResult,
 } from '../../types/templates';
-import { useSlideState } from '../../hooks/useSlideState';
+import { useLegacySlideState as useSlideState } from '../../hooks';
 import { 
   StepProgress, 
   HintLadder, 

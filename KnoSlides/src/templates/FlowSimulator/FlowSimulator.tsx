@@ -62,7 +62,7 @@ import {
   SystemState,
   Feedback,
 } from '../../types/templates';
-import { useSlideState } from '../../hooks/useSlideState';
+import { useLegacySlideState as useSlideState } from '../../hooks';
 import {
   StepProgress,
   HintLadder,
@@ -101,7 +101,7 @@ interface CustomNodeData {
 }
 
 const CustomNode: React.FC<NodeProps> = ({ data }) => {
-  const nodeData = data as CustomNodeData;
+  const nodeData = data as unknown as CustomNodeData;
   const colors = nodeColors[nodeData.type] || nodeColors.process;
   const stateStyle = stateStyles[nodeData.state || 'inactive'];
   

@@ -9,18 +9,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from './hooks';
 
 // Template imports
-import { LayeredDeepDive } from './templates/LayeredDeepDive';
-import { AnatomyExplorer } from './templates/AnatomyExplorer';
-import { RelationshipMap } from './templates/RelationshipMap';
-import { ScenarioSandbox } from './templates/ScenarioSandbox';
+import { BuildAndVerifySlide } from './templates/BuildAndVerify';
+import { FlowSimulatorSlide } from './templates/FlowSimulator';
+import { RepairTheModelSlide } from './templates/RepairTheModel';
 
 // Example data imports
-import layeredDeepDiveExample from '../preview/layered-deep-dive-example.json';
-import anatomyExplorerExample from '../preview/anatomy-explorer-example.json';
-import relationshipMapExample from '../preview/relationship-map-example.json';
-import scenarioSandboxExample from '../preview/scenario-sandbox-example.json';
+import buildAndVerifyExample from '../preview/build-and-verify-inner-join.json';
+import flowSimulatorExample from '../preview/flow-simulator-api-auth.json';
+import repairTheModelExample from '../preview/repair-model-python-bug.json';
 
-type TemplateName = 'layered-deep-dive' | 'anatomy-explorer' | 'relationship-map' | 'scenario-sandbox';
+type TemplateName = 'build-and-verify' | 'flow-simulator' | 'repair-the-model';
 type ViewportPreset = 'desktop' | 'tablet' | 'mobile' | 'responsive';
 
 const VIEWPORT_SIZES: Record<Exclude<ViewportPreset, 'responsive'>, { width: number; height: number }> = {
@@ -30,30 +28,25 @@ const VIEWPORT_SIZES: Record<Exclude<ViewportPreset, 'responsive'>, { width: num
 };
 
 const TEMPLATE_INFO: Record<TemplateName, { name: string; description: string; available: boolean }> = {
-  'layered-deep-dive': {
-    name: 'Layered Deep Dive',
-    description: 'Progressive depth exploration - learners choose how deep to go',
+  'build-and-verify': {
+    name: 'Build & Verify',
+    description: 'Teach how something works through guided construction',
     available: true,
   },
-  'anatomy-explorer': {
-    name: 'Anatomy Explorer',
-    description: 'Deconstruct complex systems by exploring component parts',
+  'flow-simulator': {
+    name: 'Flow Simulator',
+    description: 'Teach systems, processes, and causality through flow exploration',
     available: true,
   },
-  'relationship-map': {
-    name: 'Relationship Map',
-    description: 'Visualize and explore connections between concepts',
-    available: true,
-  },
-  'scenario-sandbox': {
-    name: 'Scenario Sandbox',
-    description: 'Manipulate variables and see different outcomes',
+  'repair-the-model': {
+    name: 'Repair the Model',
+    description: 'Teach debugging and judgement through error identification',
     available: true,
   },
 };
 
 export default function App() {
-  const [activeTemplate, setActiveTemplate] = useState<TemplateName>('layered-deep-dive');
+  const [activeTemplate, setActiveTemplate] = useState<TemplateName>('build-and-verify');
   const [viewportPreset, setViewportPreset] = useState<ViewportPreset>('responsive');
   const responsive = useResponsive();
 
@@ -61,27 +54,24 @@ export default function App() {
 
   const renderTemplate = () => {
     switch (activeTemplate) {
-      case 'layered-deep-dive':
-        return <LayeredDeepDive data={layeredDeepDiveExample as any} />;
-      case 'anatomy-explorer':
-        return <AnatomyExplorer data={anatomyExplorerExample as any} />;
-      case 'relationship-map':
-        return <RelationshipMap data={relationshipMapExample as any} />;
-      case 'scenario-sandbox':
-        return <ScenarioSandbox data={scenarioSandboxExample as any} />;
+      case 'build-and-verify':
+        return <BuildAndVerifySlide data={buildAndVerifyExample as any} />;
+      case 'flow-simulator':
+        return <FlowSimulatorSlide data={flowSimulatorExample as any} />;
+      case 'repair-the-model':
+        return <RepairTheModelSlide data={repairTheModelExample as any} />;
       default:
-        // Placeholder for templates not yet built
         return (
-          <div className="flex items-center justify-center h-full min-h-[400px] bg-kno-surface">
+          <div className="flex items-center justify-center h-full min-h-[400px] bg-slate-50">
             <div className="text-center p-8">
               <div className="text-6xl mb-4">🚧</div>
-              <h2 className="text-2xl font-header text-kno-ink mb-2">
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">
                 {templateInfo.name}
               </h2>
-              <p className="text-kno-ink-soft mb-4">
+              <p className="text-slate-600 mb-4">
                 {templateInfo.description}
               </p>
-              <p className="text-sm text-kno-ink-muted">
+              <p className="text-sm text-slate-400">
                 Template coming soon...
               </p>
             </div>
@@ -110,15 +100,15 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-display text-kno-ink">
+              <h1 className="text-2xl font-bold text-slate-800">
                 KnoSlides
               </h1>
-              <p className="text-sm text-kno-ink-soft">
+              <p className="text-sm text-slate-500">
                 Interactive Learning Templates
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-kno-ink-muted">
+              <span className="text-sm text-slate-400">
                 {responsive.viewportType} ({responsive.width}px)
               </span>
             </div>
@@ -131,7 +121,7 @@ export default function App() {
           {/* Sidebar - Template Selector */}
           <aside className="w-64 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm p-4">
-              <h2 className="text-sm font-semibold text-kno-ink mb-3">
+              <h2 className="text-sm font-semibold text-slate-800 mb-3">
                 Templates
               </h2>
               <nav className="space-y-1">
@@ -144,8 +134,8 @@ export default function App() {
                       onClick={() => setActiveTemplate(key)}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                         isActive
-                          ? 'bg-kno-primary text-white'
-                          : 'text-kno-ink hover:bg-gray-100'
+                          ? 'bg-indigo-600 text-white'
+                          : 'text-slate-700 hover:bg-gray-100'
                       }`}
                     >
                       <div className="font-medium">{info.name}</div>
@@ -159,7 +149,7 @@ export default function App() {
 
               <hr className="my-4 border-gray-200" />
 
-              <h2 className="text-sm font-semibold text-kno-ink mb-3">
+              <h2 className="text-sm font-semibold text-slate-800 mb-3">
                 Viewport
               </h2>
               <div className="space-y-1">
@@ -170,13 +160,13 @@ export default function App() {
                       onClick={() => setViewportPreset(preset)}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                         viewportPreset === preset
-                          ? 'bg-gray-100 text-kno-ink font-medium'
-                          : 'text-kno-ink-soft hover:bg-gray-50'
+                          ? 'bg-gray-100 text-slate-800 font-medium'
+                          : 'text-slate-600 hover:bg-gray-50'
                       }`}
                     >
                       {preset.charAt(0).toUpperCase() + preset.slice(1)}
                       {preset !== 'responsive' && (
-                        <span className="text-xs text-kno-ink-muted ml-2">
+                        <span className="text-xs text-slate-400 ml-2">
                           ({VIEWPORT_SIZES[preset].width}px)
                         </span>
                       )}
@@ -194,10 +184,10 @@ export default function App() {
               <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="font-semibold text-kno-ink">
+                    <h2 className="font-semibold text-slate-800">
                       {templateInfo.name}
                     </h2>
-                    <p className="text-sm text-kno-ink-soft">
+                    <p className="text-sm text-slate-500">
                       {templateInfo.description}
                     </p>
                   </div>

@@ -1,1 +1,0 @@
-export { AnatomyExplorer } from './AnatomyExplorer';

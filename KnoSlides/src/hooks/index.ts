@@ -10,9 +10,10 @@ export type { ScrollRevealOptions, ScrollRevealState } from './useScrollReveal';
 
 export { useTemplateState } from './useTemplateState';
 export type { 
-  TemplateState, 
   TemplateStateActions, 
   UseTemplateStateReturn 
 } from './useTemplateState';
 
-export { useSlideState } from './useSlideState';
+// Legacy slide state hook (for existing templates)
+// The new unified architecture uses core/SlideStateContext instead
+export { useSlideState as useLegacySlideState } from './useSlideState';
