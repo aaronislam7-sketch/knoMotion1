@@ -141,10 +141,10 @@ export default function App() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-slate-800">
-                KnoSlides
+                KnoSlides <span className="text-xs font-normal text-indigo-500 ml-2">v2.0 Unified</span>
               </h1>
               <p className="text-sm text-slate-500">
-                Interactive Learning Templates
+                Interactive Learning Templates - Phase 4 Complete
               </p>
             </div>
             <div className="flex items-center gap-4">
