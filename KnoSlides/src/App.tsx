@@ -2,23 +2,36 @@
  * KnoSlides Development Preview App
  * 
  * Allows testing and previewing templates with example data.
+ * Supports both:
+ * - NEW: Unified SlideRenderer with JSON-driven content
+ * - LEGACY: Original template components (for comparison)
  */
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from './hooks';
 
-// Template imports
+// Unified Renderer
+import { SlideRenderer } from './core/SlideRenderer';
+import type { KnoSlide } from './types/unified-schema';
+
+// Legacy Template imports (for comparison)
 import { BuildAndVerifySlide } from './templates/BuildAndVerify';
 import { FlowSimulatorSlide } from './templates/FlowSimulator';
 import { RepairTheModelSlide } from './templates/RepairTheModel';
 
-// Example data imports
-import buildAndVerifyExample from '../preview/build-and-verify-inner-join.json';
-import flowSimulatorExample from '../preview/flow-simulator-api-auth.json';
-import repairTheModelExample from '../preview/repair-model-python-bug.json';
+// Legacy example data imports
+import buildAndVerifyLegacy from '../preview/build-and-verify-inner-join.json';
+import flowSimulatorLegacy from '../preview/flow-simulator-api-auth.json';
+import repairTheModelLegacy from '../preview/repair-model-python-bug.json';
+
+// NEW: Unified schema example data imports
+import buildAndVerifyUnified from '../preview/build-and-verify-inner-join-unified.json';
+import flowSimulatorUnified from '../preview/flow-simulator-api-auth-unified.json';
+import repairTheModelUnified from '../preview/repair-model-python-bug-unified.json';
 
 type TemplateName = 'build-and-verify' | 'flow-simulator' | 'repair-the-model';
+type RenderMode = 'unified' | 'legacy';
 type ViewportPreset = 'desktop' | 'tablet' | 'mobile' | 'responsive';
 
 const VIEWPORT_SIZES: Record<Exclude<ViewportPreset, 'responsive'>, { width: number; height: number }> = {
@@ -45,21 +58,44 @@ const TEMPLATE_INFO: Record<TemplateName, { name: string; description: string; a
   },
 };
 
+// Map template names to unified JSON data
+const UNIFIED_DATA: Record<TemplateName, KnoSlide> = {
+  'build-and-verify': buildAndVerifyUnified as unknown as KnoSlide,
+  'flow-simulator': flowSimulatorUnified as unknown as KnoSlide,
+  'repair-the-model': repairTheModelUnified as unknown as KnoSlide,
+};
+
 export default function App() {
   const [activeTemplate, setActiveTemplate] = useState<TemplateName>('build-and-verify');
+  const [renderMode, setRenderMode] = useState<RenderMode>('unified');
   const [viewportPreset, setViewportPreset] = useState<ViewportPreset>('responsive');
   const responsive = useResponsive();
 
   const templateInfo = TEMPLATE_INFO[activeTemplate];
 
-  const renderTemplate = () => {
+  // Render using the new unified SlideRenderer
+  const renderUnified = () => {
+    const slideData = UNIFIED_DATA[activeTemplate];
+    
+    return (
+      <SlideRenderer
+        slide={slideData}
+        onStepChange={(index) => console.log('Step changed:', index)}
+        onComplete={() => console.log('Slide completed!')}
+        onEvent={(event) => console.log('Event:', event)}
+      />
+    );
+  };
+
+  // Render using legacy template components
+  const renderLegacy = () => {
     switch (activeTemplate) {
       case 'build-and-verify':
-        return <BuildAndVerifySlide data={buildAndVerifyExample as any} />;
+        return <BuildAndVerifySlide data={buildAndVerifyLegacy as any} />;
       case 'flow-simulator':
-        return <FlowSimulatorSlide data={flowSimulatorExample as any} />;
+        return <FlowSimulatorSlide data={flowSimulatorLegacy as any} />;
       case 'repair-the-model':
-        return <RepairTheModelSlide data={repairTheModelExample as any} />;
+        return <RepairTheModelSlide data={repairTheModelLegacy as any} />;
       default:
         return (
           <div className="flex items-center justify-center h-full min-h-[400px] bg-slate-50">
@@ -78,6 +114,10 @@ export default function App() {
           </div>
         );
     }
+  };
+
+  const renderTemplate = () => {
+    return renderMode === 'unified' ? renderUnified() : renderLegacy();
   };
 
   const getPreviewStyle = (): React.CSSProperties => {
@@ -108,6 +148,29 @@ export default function App() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Render mode toggle */}
+              <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+                <button
+                  onClick={() => setRenderMode('unified')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    renderMode === 'unified'
+                      ? 'bg-white text-indigo-600 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  Unified
+                </button>
+                <button
+                  onClick={() => setRenderMode('legacy')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    renderMode === 'legacy'
+                      ? 'bg-white text-indigo-600 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  Legacy
+                </button>
+              </div>
               <span className="text-sm text-slate-400">
                 {responsive.viewportType} ({responsive.width}px)
               </span>
@@ -174,6 +237,26 @@ export default function App() {
                   )
                 )}
               </div>
+
+              <hr className="my-4 border-gray-200" />
+
+              {/* Mode info */}
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+                  Render Mode
+                </h3>
+                <p className="text-xs text-slate-600">
+                  {renderMode === 'unified' ? (
+                    <>
+                      <span className="font-medium text-indigo-600">Unified:</span> Using the new SlideRenderer with JSON-driven content blocks.
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium text-amber-600">Legacy:</span> Using original template components for comparison.
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
           </aside>
 
@@ -194,6 +277,15 @@ export default function App() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
+                        renderMode === 'unified'
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {renderMode === 'unified' ? 'Unified Schema' : 'Legacy Template'}
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${
                         templateInfo.available
                           ? 'bg-green-100 text-green-700'
                           : 'bg-yellow-100 text-yellow-700'
@@ -212,7 +304,7 @@ export default function App() {
               >
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={activeTemplate}
+                    key={`${activeTemplate}-${renderMode}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
