@@ -918,7 +918,55 @@ Before outputting JSON, verify:
 
 ---
 
-## 13. Anti-Patterns (Avoid)
+## 13. Slot Array Behavior (Critical)
+
+**Slot arrays = LAYERED content in the same physical space, NOT sequential content.**
+
+### How Slot Arrays Work
+
+```javascript
+// Single mid-scene (standard)
+slots: {
+  row1: { midScene: 'textReveal', config: {...} }
+}
+
+// Array of mid-scenes (layered)
+slots: {
+  row1: [
+    { midScene: 'textReveal', config: {...} },    // Renders at row1 position
+    { midScene: 'bubbleCallout', config: {...} }  // ALSO renders at row1 position
+  ]
+}
+```
+
+When you use an array, **both mid-scenes occupy the same slot region**. They render on top of each other. Beats control when each is visible, but if their visible times overlap, they visually collide.
+
+### Safe Slot Array Usage
+
+**Ensure zero time overlap** if layering in same slot:
+
+```json
+"row1": [
+  { "midScene": "textReveal", "config": { "beats": { "start": 0.5, "exit": 3.5 } } },
+  { "midScene": "heroText", "config": { "beats": { "entrance": 4.0, "exit": 8.0 } } }
+]
+```
+
+Timeline: textReveal (0.5-3.5s) → gap → heroText (4.0-8.0s)
+
+### Components That Should NOT Share Slots
+
+| Component | Why |
+|-----------|-----|
+| `bubbleCallout` | Uses scattered/floating positioning, conflicts with everything |
+| `gridCards` | Takes full slot space, conflicts with text overlays |
+| `sideBySide` | Creates internal columns, needs full slot |
+
+**Rule**: Give `bubbleCallout` its own dedicated slot, or ensure complete time separation.
+
+---
+
+## 14. Anti-Patterns (Avoid)
 
 ❌ **Beats in frames instead of seconds**
 ```json
@@ -1008,3 +1056,60 @@ const scenes = [{ id: 'test' }];  // WRONG
   "full": { ... }
 }
 ```
+
+❌ **Overlapping mid-scenes in slot arrays**
+```json
+"row2": [
+  { "midScene": "textReveal", "config": { "beats": { "start": 1.0, "exit": 5.0 } } },
+  { "midScene": "bubbleCallout", "config": { "beats": { "start": 2.0 } } }
+]
+```
+They render in the same space and collide visually from 2-5s.
+
+✅ **Correct:** Non-overlapping beats or separate slots
+```json
+"row2": [
+  { "midScene": "textReveal", "config": { "beats": { "start": 1.0, "exit": 3.5 } } },
+  { "midScene": "bubbleCallout", "config": { "beats": { "start": 4.0, "exit": 8.0 } } }
+]
+```
+
+❌ **Script fragments as grid card labels**
+```json
+"cards": [
+  { "icon": "🗣️", "label": "Out loud" },
+  { "icon": "😅", "label": "Half a sentence" }
+]
+```
+These are voiceover excerpts, not standalone visual concepts.
+
+✅ **Correct:** Conceptual labels
+```json
+"cards": [
+  { "icon": "🗣️", "label": "Verbalize" },
+  { "icon": "✍️", "label": "Sketch" }
+]
+```
+
+❌ **Wrong Lottie for the concept**
+```json
+"heroRef": "signal-buffer"  // For "Accidental Arrival" concept
+```
+`signal-buffer` is a loading/buffering animation, not arrival.
+
+✅ **Correct:** Semantically matched Lottie
+```json
+"heroRef": "waving"  // or "confetti", "question" for arrival
+```
+
+❌ **Checklist with exit beats when you want items to build**
+```json
+"beats": { "start": 1.0, "exit": 8.0 }
+```
+Items will disappear at 8s.
+
+✅ **Correct:** Omit exit for building checklists
+```json
+"beats": { "start": 1.0 }
+```
+Items appear and persist.

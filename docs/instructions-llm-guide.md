@@ -494,6 +494,113 @@ What's the scene relationship?
 
 ---
 
+## Critical Slot Array Rules
+
+⚠️ **Slot arrays create LAYERED content, not sequential content.**
+
+When you define a slot as an array, all mid-scenes in that array render **in the same physical space simultaneously**. They stack on top of each other. Timing (beats) controls visibility, but they still occupy the same region.
+
+### WRONG: Expecting sequential behavior from slot arrays
+
+```json
+"row2": [
+  { "midScene": "textReveal", "config": { "beats": { "start": 0, "exit": 3 } } },
+  { "midScene": "bubbleCallout", "config": { "beats": { "start": 2 } } }
+]
+```
+**Result**: bubbleCallout renders ON TOP of textReveal in the same space. If their visible time overlaps (2-3s), they visually collide.
+
+### CORRECT: Non-overlapping beats OR separate slots
+
+**Option A**: Ensure beats don't overlap if layering in same slot:
+```json
+"row2": [
+  { "midScene": "textReveal", "config": { "beats": { "start": 0, "exit": 2.5 } } },
+  { "midScene": "bubbleCallout", "config": { "beats": { "start": 3.0, "exit": 6.0 } } }
+]
+```
+
+**Option B**: Use different slots for content that shouldn't overlap:
+```json
+"row2": { "midScene": "textReveal", ... },
+"row3": { "midScene": "bubbleCallout", ... }
+```
+
+### Components that need their own slot
+
+`bubbleCallout` uses scattered/floating positioning and almost always conflicts with other mid-scenes. **Give it its own slot or ensure zero time overlap.**
+
+---
+
+## Content Generation Guidelines
+
+### Grid card labels should be standalone concepts
+
+❌ **WRONG**: Echoing voiceover script as labels
+```json
+"cards": [
+  { "icon": "🗣️", "label": "Out loud" },
+  { "icon": "😅", "label": "Half a sentence" }
+]
+```
+These are script fragments that don't make sense as visual anchors.
+
+✅ **CORRECT**: Conceptual labels that work independently
+```json
+"cards": [
+  { "icon": "🗣️", "label": "Speak it" },
+  { "icon": "✍️", "label": "Write it" }
+]
+```
+Or use icons only if the voiceover carries the meaning.
+
+### Lottie selection must be semantically appropriate
+
+Match the Lottie animation to the **concept**, not just pick a technically valid key.
+
+| Concept | Wrong Choice | Right Choice |
+|---------|--------------|--------------|
+| Arrival/Welcome | `signal-buffer` (loading) | `waving`, `confetti` |
+| Brain/Thinking | `loading` | `brain-active`, `thinking` |
+| Success | `clock-delay` | `success`, `checkmark` |
+| Error/Warning | `sparkles` | `error`, `question` |
+
+---
+
+## Checklist Behavior
+
+**Checklists build and persist by default.** Items do NOT exit unless you explicitly provide an exit beat.
+
+✅ **Building checklist** (items stay on screen):
+```json
+{
+  "midScene": "checklist",
+  "config": {
+    "items": [
+      { "text": "First step", "beats": { "start": 1.0 } },
+      { "text": "Second step", "beats": { "start": 2.0 } },
+      { "text": "Third step", "beats": { "start": 3.0 } }
+    ],
+    "beats": { "start": 0.5 }
+  }
+}
+```
+Items appear staggered and remain visible.
+
+❌ **Exiting checklist** (only if you want items to disappear):
+```json
+{
+  "midScene": "checklist",
+  "config": {
+    "items": [...],
+    "beats": { "start": 0.5, "exit": 8.0 }
+  }
+}
+```
+Providing `exit` on the container or items will cause them to fade out.
+
+---
+
 ## Error Recovery
 
 If validation fails, check these common issues:
