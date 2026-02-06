@@ -1,142 +1,41 @@
 {
-  "title": "API Authentication Flow",
-  "learningObjective": "Understand how API authentication works: from sending credentials to handling success and failure responses",
-  "enablesNext": "You'll be ready to implement authentication in your own API calls and debug 401 errors confidently",
-  "systemContext": {
-    "title": "How APIs Verify Your Identity",
-    "description": "When you call an API, you need to prove who you are. This is called authentication. Most APIs use tokens - special strings that identify you. The flow involves: 1) Sending credentials, 2) Receiving a token, 3) Using that token in subsequent requests.",
-    "realWorldExample": "Think of it like a hotel key card - you show ID at check-in (authenticate), get a card (token), then use it to access your room (make API calls)."
+  "id": "flow-simulator-api-auth",
+  "version": "1.0.0",
+  "concept": {
+    "id": "api-authentication-flow",
+    "title": "API Authentication Flow",
+    "summary": "Learn how API authentication works from credentials to tokens.",
+    "learningObjective": "Understand how API authentication works: from sending credentials to handling success and failure responses",
+    "enablesNext": "You'll be ready to implement authentication in your own API calls and debug 401 errors confidently"
   },
-  "nodes": [
-    {
-      "id": "start",
-      "type": "start",
-      "label": "Client App",
-      "description": "Your application",
-      "position": { "x": 250, "y": 0 }
-    },
-    {
-      "id": "send-request",
-      "type": "process",
-      "label": "Send Request",
-      "description": "POST /api/login",
-      "position": { "x": 250, "y": 80 }
-    },
-    {
-      "id": "server-check",
-      "type": "decision",
-      "label": "Valid Credentials?",
-      "description": "Server validates",
-      "position": { "x": 250, "y": 180 }
-    },
-    {
-      "id": "success-200",
-      "type": "success",
-      "label": "200 OK",
-      "description": "Token returned",
-      "position": { "x": 400, "y": 280 }
-    },
-    {
-      "id": "error-401",
-      "type": "error",
-      "label": "401 Unauthorized",
-      "description": "Invalid credentials",
-      "position": { "x": 100, "y": 280 }
-    },
-    {
-      "id": "store-token",
-      "type": "process",
-      "label": "Store Token",
-      "description": "Save for later use",
-      "position": { "x": 400, "y": 370 }
-    },
-    {
-      "id": "retry",
-      "type": "process",
-      "label": "Fix & Retry",
-      "description": "Check credentials",
-      "position": { "x": 100, "y": 370 }
-    },
-    {
-      "id": "use-token",
-      "type": "end",
-      "label": "Make API Calls",
-      "description": "With Authorization header",
-      "position": { "x": 400, "y": 460 }
-    }
-  ],
-  "edges": [
-    {
-      "id": "e1",
-      "source": "start",
-      "target": "send-request",
-      "label": "username + password"
-    },
-    {
-      "id": "e2",
-      "source": "send-request",
-      "target": "server-check"
-    },
-    {
-      "id": "e3",
-      "source": "server-check",
-      "target": "success-200",
-      "label": "Yes",
-      "condition": "credentials-valid"
-    },
-    {
-      "id": "e4",
-      "source": "server-check",
-      "target": "error-401",
-      "label": "No",
-      "condition": "credentials-invalid"
-    },
-    {
-      "id": "e5",
-      "source": "success-200",
-      "target": "store-token"
-    },
-    {
-      "id": "e6",
-      "source": "store-token",
-      "target": "use-token"
-    },
-    {
-      "id": "e7",
-      "source": "error-401",
-      "target": "retry"
-    },
-    {
-      "id": "e8",
-      "source": "retry",
-      "target": "send-request",
-      "style": "dashed"
-    }
-  ],
-  "conditions": [
-    {
-      "id": "valid-credentials",
-      "label": "Valid Credentials",
-      "description": "Whether the username and password are correct",
-      "value": true,
-      "controlType": "toggle",
-      "affects": ["server-check", "e3", "e4"]
-    },
-    {
-      "id": "token-expired",
-      "label": "Token Expired",
-      "description": "Whether the stored token has expired",
-      "value": false,
-      "controlType": "toggle",
-      "affects": ["use-token"]
-    }
-  ],
+  "layout": {
+    "type": "columnSplit",
+    "slots": ["OverviewSlot", "TaskSlot", "WorkspaceSlot", "ReferenceSlot"]
+  },
+  "featureFlags": {
+    "showHints": true,
+    "showTaskSlot": true,
+    "showReferenceSlot": true,
+    "showOutputSlot": false
+  },
   "steps": [
     {
       "id": "step-1-explain",
       "phase": "explain",
       "title": "The Authentication Request",
       "instruction": "Look at the flow diagram. The client app starts by sending a POST request to /api/login with username and password. This is the first step in any authentication flow.",
+      "tasks": [
+        {
+          "id": "task-1-observe",
+          "label": "Observe the initial request flow",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "flow_observed"
+          },
+          "hint": "Notice how the Client App node connects to the Send Request node."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -147,19 +46,126 @@
           "content": "The arrow shows data flowing: username + password go to the server via POST /api/login."
         }
       ],
-      "requiresAction": false,
-      "highlightNodes": ["start", "send-request"],
-      "highlightEdges": ["e1"],
-      "systemState": {
-        "id": "initial",
-        "label": "Request State",
-        "data": {
-          "method": "POST",
-          "endpoint": "/api/login",
-          "body": "{ username, password }",
-          "token": null
-        },
-        "explanation": "The client sends credentials to the login endpoint"
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-explain",
+            "type": "contextCard",
+            "config": {
+              "title": "How APIs Verify Your Identity",
+              "body": "When you call an API, you need to prove who you are. This is called authentication. Most APIs use tokens - special strings that identify you.",
+              "keyPoints": [
+                "Send credentials first",
+                "Receive a token",
+                "Use token in subsequent requests"
+              ],
+              "icon": "lock"
+            }
+          },
+          {
+            "id": "real-world-callout",
+            "type": "callout",
+            "config": {
+              "tone": "info",
+              "title": "Real-World Analogy",
+              "body": "Think of it like a hotel key card - you show ID at check-in (authenticate), get a card (token), then use it to access your room (make API calls).",
+              "icon": "key"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "flow-diagram-explain",
+            "type": "flowDiagram",
+            "config": {
+              "nodes": [
+                {
+                  "id": "start",
+                  "type": "start",
+                  "label": "Client App",
+                  "description": "Your application",
+                  "position": { "x": 250, "y": 0 }
+                },
+                {
+                  "id": "send-request",
+                  "type": "process",
+                  "label": "Send Request",
+                  "description": "POST /api/login",
+                  "position": { "x": 250, "y": 80 }
+                },
+                {
+                  "id": "server-check",
+                  "type": "decision",
+                  "label": "Valid Credentials?",
+                  "description": "Server validates",
+                  "position": { "x": 250, "y": 180 }
+                },
+                {
+                  "id": "success-200",
+                  "type": "success",
+                  "label": "200 OK",
+                  "description": "Token returned",
+                  "position": { "x": 400, "y": 280 }
+                },
+                {
+                  "id": "error-401",
+                  "type": "error",
+                  "label": "401 Unauthorized",
+                  "description": "Invalid credentials",
+                  "position": { "x": 100, "y": 280 }
+                },
+                {
+                  "id": "store-token",
+                  "type": "process",
+                  "label": "Store Token",
+                  "description": "Save for later use",
+                  "position": { "x": 400, "y": 370 }
+                },
+                {
+                  "id": "retry",
+                  "type": "process",
+                  "label": "Fix & Retry",
+                  "description": "Check credentials",
+                  "position": { "x": 100, "y": 370 }
+                },
+                {
+                  "id": "use-token",
+                  "type": "end",
+                  "label": "Make API Calls",
+                  "description": "With Authorization header",
+                  "position": { "x": 400, "y": 460 }
+                }
+              ],
+              "edges": [
+                { "id": "e1", "source": "start", "target": "send-request", "label": "username + password" },
+                { "id": "e2", "source": "send-request", "target": "server-check" },
+                { "id": "e3", "source": "server-check", "target": "success-200", "label": "Yes", "condition": "credentials-valid" },
+                { "id": "e4", "source": "server-check", "target": "error-401", "label": "No", "condition": "credentials-invalid" },
+                { "id": "e5", "source": "success-200", "target": "store-token" },
+                { "id": "e6", "source": "store-token", "target": "use-token" },
+                { "id": "e7", "source": "error-401", "target": "retry" },
+                { "id": "e8", "source": "retry", "target": "send-request", "style": "dashed" }
+              ],
+              "highlights": {
+                "nodes": ["start", "send-request"],
+                "edges": ["e1"]
+              },
+              "interactive": false
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "request-state",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "Request State - the client sends credentials:",
+              "code": "{\n  \"method\": \"POST\",\n  \"endpoint\": \"/api/login\",\n  \"body\": { \"username\": \"...\", \"password\": \"...\" },\n  \"token\": null\n}",
+              "language": "json",
+              "codePosition": "below"
+            }
+          }
+        ]
       }
     },
     {
@@ -167,6 +173,18 @@
       "phase": "guided",
       "title": "Server Validation",
       "instruction": "The server receives the request and checks if the credentials are valid. This is a decision point - the flow branches based on whether authentication succeeds or fails.",
+      "tasks": [
+        {
+          "id": "task-2-identify",
+          "label": "Identify the decision point in the flow",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "decision_identified"
+          },
+          "hint": "The diamond shape indicates where the server makes a decision."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -177,29 +195,151 @@
           "content": "If credentials match what's in the database, the server responds with 200 OK and a token. Otherwise, it returns 401 Unauthorized."
         }
       ],
-      "requiresAction": false,
-      "highlightNodes": ["server-check"],
-      "highlightEdges": ["e2"],
-      "systemState": {
-        "id": "validating",
-        "label": "Server State",
-        "data": {
-          "checking": true,
-          "username": "user@example.com",
-          "passwordMatch": "pending..."
-        },
-        "explanation": "Server looks up the user and compares the password hash"
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-guided",
+            "type": "contextCard",
+            "config": {
+              "title": "Server Validation",
+              "body": "When the server receives credentials, it checks them against its database. This determines whether you get a token or an error.",
+              "keyPoints": [
+                "Database lookup",
+                "Password hash comparison",
+                "Two possible outcomes"
+              ],
+              "icon": "server"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "flow-diagram-guided",
+            "type": "flowDiagram",
+            "config": {
+              "nodes": [
+                {
+                  "id": "start",
+                  "type": "start",
+                  "label": "Client App",
+                  "description": "Your application",
+                  "position": { "x": 250, "y": 0 }
+                },
+                {
+                  "id": "send-request",
+                  "type": "process",
+                  "label": "Send Request",
+                  "description": "POST /api/login",
+                  "position": { "x": 250, "y": 80 }
+                },
+                {
+                  "id": "server-check",
+                  "type": "decision",
+                  "label": "Valid Credentials?",
+                  "description": "Server validates",
+                  "position": { "x": 250, "y": 180 }
+                },
+                {
+                  "id": "success-200",
+                  "type": "success",
+                  "label": "200 OK",
+                  "description": "Token returned",
+                  "position": { "x": 400, "y": 280 }
+                },
+                {
+                  "id": "error-401",
+                  "type": "error",
+                  "label": "401 Unauthorized",
+                  "description": "Invalid credentials",
+                  "position": { "x": 100, "y": 280 }
+                },
+                {
+                  "id": "store-token",
+                  "type": "process",
+                  "label": "Store Token",
+                  "description": "Save for later use",
+                  "position": { "x": 400, "y": 370 }
+                },
+                {
+                  "id": "retry",
+                  "type": "process",
+                  "label": "Fix & Retry",
+                  "description": "Check credentials",
+                  "position": { "x": 100, "y": 370 }
+                },
+                {
+                  "id": "use-token",
+                  "type": "end",
+                  "label": "Make API Calls",
+                  "description": "With Authorization header",
+                  "position": { "x": 400, "y": 460 }
+                }
+              ],
+              "edges": [
+                { "id": "e1", "source": "start", "target": "send-request", "label": "username + password" },
+                { "id": "e2", "source": "send-request", "target": "server-check" },
+                { "id": "e3", "source": "server-check", "target": "success-200", "label": "Yes", "condition": "credentials-valid" },
+                { "id": "e4", "source": "server-check", "target": "error-401", "label": "No", "condition": "credentials-invalid" },
+                { "id": "e5", "source": "success-200", "target": "store-token" },
+                { "id": "e6", "source": "store-token", "target": "use-token" },
+                { "id": "e7", "source": "error-401", "target": "retry" },
+                { "id": "e8", "source": "retry", "target": "send-request", "style": "dashed" }
+              ],
+              "highlights": {
+                "nodes": ["server-check"],
+                "edges": ["e2"]
+              },
+              "interactive": false
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "server-state",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "Server State - checking credentials:",
+              "code": "{\n  \"checking\": true,\n  \"username\": \"user@example.com\",\n  \"passwordMatch\": \"pending...\"\n}",
+              "language": "json",
+              "codePosition": "below"
+            }
+          }
+        ]
       }
     },
     {
       "id": "step-3-construct",
       "phase": "construct",
       "title": "Explore Success vs Failure",
-      "instruction": "Use the toggle to switch between valid and invalid credentials. Watch how the flow changes and observe the different system states.",
+      "instruction": "Now it's time to explore! Click on the flow diagram nodes to see what happens with valid vs invalid credentials. Watch how the highlighted path changes.",
+      "tasks": [
+        {
+          "id": "task-3-explore-success",
+          "label": "Explore the success path (200 OK)",
+          "required": true,
+          "action": {
+            "type": "click",
+            "targetId": "success-200",
+            "eventId": "node_clicked"
+          },
+          "successMessage": "You found the success path!"
+        },
+        {
+          "id": "task-3-explore-error",
+          "label": "Explore the error path (401)",
+          "required": true,
+          "action": {
+            "type": "click",
+            "targetId": "error-401",
+            "eventId": "node_clicked"
+          },
+          "successMessage": "You found the error path!"
+        }
+      ],
       "hints": [
         {
           "level": 1,
-          "content": "Toggle 'Valid Credentials' OFF to see what happens when authentication fails."
+          "content": "Click on the '200 OK' node to see the success path."
         },
         {
           "level": 2,
@@ -210,26 +350,137 @@
           "content": "In real apps, you'd show an error message and let the user correct their password."
         }
       ],
-      "requiresAction": true,
-      "highlightNodes": ["server-check", "success-200", "error-401"],
-      "highlightEdges": ["e3", "e4"],
-      "manipulableConditions": ["valid-credentials"],
-      "systemState": {
-        "id": "branching",
-        "label": "Response State",
-        "data": {
-          "status": 200,
-          "success": true,
-          "token": "eyJhbG...xyz",
-          "error": null
-        },
-        "explanation": "Toggle the condition to see how the response changes"
-      },
-      "counterfactual": {
-        "question": "What happens if the credentials are wrong?",
-        "condition": "valid-credentials",
-        "expectedAnswer": "false",
-        "explanation": "The server returns 401 Unauthorized, and the client must fix the credentials and retry"
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-construct",
+            "type": "contextCard",
+            "config": {
+              "title": "Two Paths",
+              "body": "Authentication always has two outcomes: success (token issued) or failure (error returned). Click the nodes to explore each path.",
+              "keyPoints": [
+                "200 OK = success + token",
+                "401 Unauthorized = failure",
+                "Failure requires retry"
+              ],
+              "icon": "fork"
+            }
+          }
+        ],
+        "TaskSlot": [
+          {
+            "id": "task-list-construct",
+            "type": "taskList",
+            "config": {
+              "taskIds": ["task-3-explore-success", "task-3-explore-error"],
+              "showProgress": true,
+              "variant": "checklist"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "flow-diagram-construct",
+            "type": "flowDiagram",
+            "config": {
+              "nodes": [
+                {
+                  "id": "start",
+                  "type": "start",
+                  "label": "Client App",
+                  "description": "Your application",
+                  "position": { "x": 250, "y": 0 }
+                },
+                {
+                  "id": "send-request",
+                  "type": "process",
+                  "label": "Send Request",
+                  "description": "POST /api/login",
+                  "position": { "x": 250, "y": 80 }
+                },
+                {
+                  "id": "server-check",
+                  "type": "decision",
+                  "label": "Valid Credentials?",
+                  "description": "Server validates",
+                  "position": { "x": 250, "y": 180 }
+                },
+                {
+                  "id": "success-200",
+                  "type": "success",
+                  "label": "200 OK",
+                  "description": "Token returned",
+                  "position": { "x": 400, "y": 280 }
+                },
+                {
+                  "id": "error-401",
+                  "type": "error",
+                  "label": "401 Unauthorized",
+                  "description": "Invalid credentials",
+                  "position": { "x": 100, "y": 280 }
+                },
+                {
+                  "id": "store-token",
+                  "type": "process",
+                  "label": "Store Token",
+                  "description": "Save for later use",
+                  "position": { "x": 400, "y": 370 }
+                },
+                {
+                  "id": "retry",
+                  "type": "process",
+                  "label": "Fix & Retry",
+                  "description": "Check credentials",
+                  "position": { "x": 100, "y": 370 }
+                },
+                {
+                  "id": "use-token",
+                  "type": "end",
+                  "label": "Make API Calls",
+                  "description": "With Authorization header",
+                  "position": { "x": 400, "y": 460 }
+                }
+              ],
+              "edges": [
+                { "id": "e1", "source": "start", "target": "send-request", "label": "username + password" },
+                { "id": "e2", "source": "send-request", "target": "server-check" },
+                { "id": "e3", "source": "server-check", "target": "success-200", "label": "Yes", "condition": "credentials-valid" },
+                { "id": "e4", "source": "server-check", "target": "error-401", "label": "No", "condition": "credentials-invalid" },
+                { "id": "e5", "source": "success-200", "target": "store-token" },
+                { "id": "e6", "source": "store-token", "target": "use-token" },
+                { "id": "e7", "source": "error-401", "target": "retry" },
+                { "id": "e8", "source": "retry", "target": "send-request", "style": "dashed" }
+              ],
+              "highlights": {
+                "nodes": ["server-check", "success-200", "error-401"],
+                "edges": ["e3", "e4"]
+              },
+              "interactive": true
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "response-state-success",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "Success Response (200 OK):",
+              "code": "{\n  \"status\": 200,\n  \"success\": true,\n  \"token\": \"eyJhbG...xyz\",\n  \"expiresIn\": \"3600s\"\n}",
+              "language": "json",
+              "codePosition": "below"
+            }
+          },
+          {
+            "id": "response-state-error",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "Error Response (401 Unauthorized):",
+              "code": "{\n  \"status\": 401,\n  \"success\": false,\n  \"error\": \"Invalid credentials\"\n}",
+              "language": "json",
+              "codePosition": "below"
+            }
+          }
+        ]
       }
     },
     {
@@ -237,6 +488,17 @@
       "phase": "outcome",
       "title": "Using the Token",
       "instruction": "After successful authentication, the token is stored and used in subsequent API calls. Every request includes the token in the Authorization header, proving your identity without re-sending your password.",
+      "tasks": [
+        {
+          "id": "task-4-understand",
+          "label": "Understand token usage",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "outcome_reviewed"
+          }
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -247,55 +509,128 @@
           "content": "Tokens typically expire after some time (hours or days), requiring re-authentication."
         }
       ],
-      "requiresAction": false,
-      "highlightNodes": ["store-token", "use-token"],
-      "highlightEdges": ["e5", "e6"],
-      "systemState": {
-        "id": "authenticated",
-        "label": "Authenticated State",
-        "data": {
-          "isAuthenticated": true,
-          "token": "eyJhbG...xyz",
-          "expiresIn": "3600s",
-          "nextRequest": "Authorization: Bearer eyJhbG...xyz"
-        },
-        "explanation": "Now every API call includes the token in the Authorization header"
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-outcome",
+            "type": "contextCard",
+            "config": {
+              "title": "Token-Based Access",
+              "body": "Once authenticated, every API call includes the token in the Authorization header. This proves your identity without sending your password each time.",
+              "keyPoints": [
+                "Token stored locally",
+                "Included in every request",
+                "Expires after time limit"
+              ],
+              "icon": "token"
+            }
+          },
+          {
+            "id": "so-what-callout",
+            "type": "callout",
+            "config": {
+              "tone": "insight",
+              "title": "So What?",
+              "body": "Understanding this flow helps you debug 401 errors: Is the token expired? Were credentials wrong? Is the token missing from the header? Now you know where to look.",
+              "icon": "lightbulb"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "flow-diagram-outcome",
+            "type": "flowDiagram",
+            "config": {
+              "nodes": [
+                {
+                  "id": "start",
+                  "type": "start",
+                  "label": "Client App",
+                  "description": "Your application",
+                  "position": { "x": 250, "y": 0 }
+                },
+                {
+                  "id": "send-request",
+                  "type": "process",
+                  "label": "Send Request",
+                  "description": "POST /api/login",
+                  "position": { "x": 250, "y": 80 }
+                },
+                {
+                  "id": "server-check",
+                  "type": "decision",
+                  "label": "Valid Credentials?",
+                  "description": "Server validates",
+                  "position": { "x": 250, "y": 180 }
+                },
+                {
+                  "id": "success-200",
+                  "type": "success",
+                  "label": "200 OK",
+                  "description": "Token returned",
+                  "position": { "x": 400, "y": 280 }
+                },
+                {
+                  "id": "error-401",
+                  "type": "error",
+                  "label": "401 Unauthorized",
+                  "description": "Invalid credentials",
+                  "position": { "x": 100, "y": 280 }
+                },
+                {
+                  "id": "store-token",
+                  "type": "process",
+                  "label": "Store Token",
+                  "description": "Save for later use",
+                  "position": { "x": 400, "y": 370 }
+                },
+                {
+                  "id": "retry",
+                  "type": "process",
+                  "label": "Fix & Retry",
+                  "description": "Check credentials",
+                  "position": { "x": 100, "y": 370 }
+                },
+                {
+                  "id": "use-token",
+                  "type": "end",
+                  "label": "Make API Calls",
+                  "description": "With Authorization header",
+                  "position": { "x": 400, "y": 460 }
+                }
+              ],
+              "edges": [
+                { "id": "e1", "source": "start", "target": "send-request", "label": "username + password" },
+                { "id": "e2", "source": "send-request", "target": "server-check" },
+                { "id": "e3", "source": "server-check", "target": "success-200", "label": "Yes", "condition": "credentials-valid" },
+                { "id": "e4", "source": "server-check", "target": "error-401", "label": "No", "condition": "credentials-invalid" },
+                { "id": "e5", "source": "success-200", "target": "store-token" },
+                { "id": "e6", "source": "store-token", "target": "use-token" },
+                { "id": "e7", "source": "error-401", "target": "retry" },
+                { "id": "e8", "source": "retry", "target": "send-request", "style": "dashed" }
+              ],
+              "highlights": {
+                "nodes": ["store-token", "use-token"],
+                "edges": ["e5", "e6"]
+              },
+              "interactive": false
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "authenticated-state",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "Authenticated State - using the token:",
+              "code": "// Every subsequent API call includes:\n{\n  headers: {\n    \"Authorization\": \"Bearer eyJhbG...xyz\"\n  }\n}\n\n// Token info:\n{\n  \"isAuthenticated\": true,\n  \"token\": \"eyJhbG...xyz\",\n  \"expiresIn\": \"3600s\"\n}",
+              "language": "javascript",
+              "codePosition": "below"
+            }
+          }
+        ]
       }
     }
   ],
-  "branchOutcomes": [
-    {
-      "conditionId": "valid-credentials",
-      "conditionValue": true,
-      "resultPath": ["server-check", "success-200", "store-token", "use-token"],
-      "explanation": "With valid credentials, the server returns a 200 OK response containing an access token. The client stores this token and includes it in all future API requests.",
-      "tone": "success"
-    },
-    {
-      "conditionId": "valid-credentials",
-      "conditionValue": false,
-      "resultPath": ["server-check", "error-401", "retry"],
-      "explanation": "With invalid credentials, the server returns a 401 Unauthorized error. The client should prompt the user to check their username/password and try again.",
-      "tone": "error"
-    },
-    {
-      "conditionId": "token-expired",
-      "conditionValue": true,
-      "resultPath": ["use-token", "error-401", "retry"],
-      "explanation": "When a token expires, subsequent API calls fail with 401. The client must re-authenticate to get a fresh token.",
-      "tone": "warning"
-    }
-  ],
-  "initialState": {
-    "id": "initial",
-    "label": "Initial State",
-    "data": {
-      "isAuthenticated": false,
-      "token": null,
-      "lastRequest": null,
-      "lastResponse": null
-    },
-    "explanation": "Starting state: no authentication yet"
-  },
   "completionMessage": "You now understand the API authentication flow! You've seen how credentials are sent, validated, and exchanged for tokens. You also know what happens when authentication fails (401) and how to recover by retrying with correct credentials."
 }

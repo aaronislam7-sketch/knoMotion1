@@ -1,62 +1,41 @@
 {
-  "title": "Fixing a List Comprehension Bug",
-  "learningObjective": "Identify and fix common list comprehension errors: off-by-one mistakes, incorrect conditions, and variable scope issues",
-  "enablesNext": "You'll debug list comprehensions confidently and avoid these common pitfalls in your own code",
-  "artifactContext": {
-    "title": "Processing Student Grades",
-    "description": "This function should filter students who passed (grade >= 60) and return their names in uppercase. A junior developer wrote this code but it's producing unexpected results.",
-    "intendedBehavior": "Return uppercase names of students with grades 60 or above",
-    "actualBehavior": "Returning students with grades above 60 (missing grade=60 students) and names are lowercase"
+  "id": "repair-model-python-bug",
+  "version": "1.0.0",
+  "concept": {
+    "id": "python-list-comprehension-debugging",
+    "title": "Fixing a List Comprehension Bug",
+    "summary": "Learn to identify and fix common list comprehension errors in Python.",
+    "learningObjective": "Identify and fix common list comprehension errors: off-by-one mistakes, incorrect conditions, and variable scope issues",
+    "enablesNext": "You'll debug list comprehensions confidently and avoid these common pitfalls in your own code"
   },
-  "artifact": {
-    "type": "code",
-    "language": "python",
-    "filename": "grades.py",
-    "buggyContent": "def get_passing_students(students):\n    \"\"\"Return uppercase names of passing students (grade >= 60)\"\"\"\n    \n    # Filter students with passing grades\n    passing = [s for s in students if s['grade'] > 60]\n    \n    # Get their names in uppercase  \n    names = [s['name'] for s in passing]\n    \n    return names\n\n# Test data\nstudents = [\n    {'name': 'Alice', 'grade': 85},\n    {'name': 'Bob', 'grade': 60},\n    {'name': 'Charlie', 'grade': 45},\n    {'name': 'Diana', 'grade': 72},\n]\n\nresult = get_passing_students(students)\nprint(result)",
-    "correctContent": "def get_passing_students(students):\n    \"\"\"Return uppercase names of passing students (grade >= 60)\"\"\"\n    \n    # Filter students with passing grades\n    passing = [s for s in students if s['grade'] >= 60]\n    \n    # Get their names in uppercase  \n    names = [s['name'].upper() for s in passing]\n    \n    return names\n\n# Test data\nstudents = [\n    {'name': 'Alice', 'grade': 85},\n    {'name': 'Bob', 'grade': 60},\n    {'name': 'Charlie', 'grade': 45},\n    {'name': 'Diana', 'grade': 72},\n]\n\nresult = get_passing_students(students)\nprint(result)"
+  "layout": {
+    "type": "columnSplit",
+    "slots": ["OverviewSlot", "TaskSlot", "WorkspaceSlot", "OutputSlot"]
   },
-  "errors": [
-    {
-      "id": "error-comparison",
-      "lineStart": 5,
-      "description": "Wrong comparison operator - excludes grade=60",
-      "explanation": "Using '>' (greater than) instead of '>=' (greater than or equal) excludes students with exactly 60 points. Bob has grade=60 and should pass, but '60 > 60' is False.",
-      "category": "logic",
-      "severity": "error",
-      "correctFix": "Change 's['grade'] > 60' to 's['grade'] >= 60'",
-      "commonMistakes": [
-        {
-          "attempt": "s['grade'] > 59",
-          "feedback": "This works but is less clear. Using >= 60 directly matches the requirement."
-        }
-      ]
-    },
-    {
-      "id": "error-uppercase",
-      "lineStart": 8,
-      "description": "Missing .upper() call - names stay lowercase",
-      "explanation": "The docstring says to return uppercase names, but we're just returning s['name'] without converting it. We need to call .upper() on the string.",
-      "category": "semantic",
-      "severity": "warning",
-      "correctFix": "Change 's['name']' to 's['name'].upper()'",
-      "commonMistakes": [
-        {
-          "attempt": "s['name'].uppercase()",
-          "feedback": "Python strings don't have an uppercase() method. The correct method is upper()."
-        },
-        {
-          "attempt": "str.upper(s['name'])",
-          "feedback": "This works but is non-idiomatic. Prefer calling .upper() directly on the string."
-        }
-      ]
-    }
-  ],
+  "featureFlags": {
+    "showHints": true,
+    "showTaskSlot": true,
+    "showReferenceSlot": false,
+    "showOutputSlot": true
+  },
   "steps": [
     {
       "id": "step-1-explain",
       "phase": "explain",
       "title": "Understanding the Problem",
       "instruction": "Read the code and look at the output. The function should return uppercase names of students with grade >= 60. But the output shows: ['Alice', 'Diana']. What's wrong?",
+      "tasks": [
+        {
+          "id": "task-1-review",
+          "label": "Review the buggy code",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "code_reviewed"
+          },
+          "hint": "Look at the test data: Bob has grade=60. Should Bob be in the results?"
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -67,13 +46,85 @@
           "content": "The docstring says 'grade >= 60' but look at line 5 - what comparison is actually being used?"
         }
       ],
-      "requiresAction": false
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-explain",
+            "type": "contextCard",
+            "config": {
+              "title": "Processing Student Grades",
+              "body": "This function should filter students who passed (grade >= 60) and return their names in uppercase. A junior developer wrote this code but it's producing unexpected results.",
+              "keyPoints": [
+                "Expected: uppercase names",
+                "Expected: grades >= 60",
+                "Actual: something is wrong"
+              ],
+              "icon": "bug"
+            }
+          },
+          {
+            "id": "requirements-callout",
+            "type": "callout",
+            "config": {
+              "tone": "info",
+              "title": "Requirements",
+              "body": "Intended behavior: Return uppercase names of students with grades 60 or above.\nActual behavior: Returning students with grades above 60 (missing grade=60) and names are lowercase.",
+              "icon": "clipboard"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "buggy-code",
+            "type": "codeCompare",
+            "config": {
+              "leftCode": "def get_passing_students(students):\n    \"\"\"Return uppercase names of passing students (grade >= 60)\"\"\"\n    \n    # Filter students with passing grades\n    passing = [s for s in students if s['grade'] > 60]\n    \n    # Get their names in uppercase  \n    names = [s['name'] for s in passing]\n    \n    return names\n\n# Test data\nstudents = [\n    {'name': 'Alice', 'grade': 85},\n    {'name': 'Bob', 'grade': 60},\n    {'name': 'Charlie', 'grade': 45},\n    {'name': 'Diana', 'grade': 72},\n]\n\nresult = get_passing_students(students)\nprint(result)",
+              "rightCode": "",
+              "language": "python",
+              "leftLabel": "Current (Buggy) Code",
+              "rightLabel": "",
+              "diffMode": "side-by-side",
+              "showDiff": false,
+              "highlightLines": {
+                "left": [5, 8],
+                "right": []
+              }
+            }
+          }
+        ],
+        "OutputSlot": [
+          {
+            "id": "output-comparison",
+            "type": "outputPreview",
+            "config": {
+              "type": "text",
+              "current": "['Alice', 'Diana']",
+              "expected": "['ALICE', 'BOB', 'DIANA']",
+              "showExpected": true,
+              "title": "Output Comparison"
+            }
+          }
+        ]
+      }
     },
     {
       "id": "step-2-guided",
       "phase": "guided",
       "title": "Find the First Bug",
-      "instruction": "Click on the issue that's causing Bob (grade=60) to be excluded from the results.",
+      "instruction": "Click on the error that's causing Bob (grade=60) to be excluded from the results. Look carefully at line 5.",
+      "tasks": [
+        {
+          "id": "task-2-find-error",
+          "label": "Click on the comparison operator error",
+          "required": true,
+          "action": {
+            "type": "click",
+            "targetId": "error-comparison",
+            "eventId": "error_clicked"
+          },
+          "successMessage": "Correct! The > operator excludes grade=60."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -88,16 +139,98 @@
           "content": "Line 5 uses '> 60' but should use '>= 60' to include students with exactly 60."
         }
       ],
-      "requiresAction": true,
-      "mode": "identify",
-      "expectedIdentifications": ["error-comparison"],
-      "relevantErrors": ["error-comparison", "error-uppercase"]
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-guided",
+            "type": "contextCard",
+            "config": {
+              "title": "Finding the Bug",
+              "body": "Bob has exactly grade=60, which should be passing. But he's not in the output. The bug must be related to how we check for passing grades.",
+              "keyPoints": [
+                "Bob's grade is exactly 60",
+                "60 should be passing",
+                "But Bob is missing"
+              ],
+              "icon": "search"
+            }
+          }
+        ],
+        "TaskSlot": [
+          {
+            "id": "task-list-guided",
+            "type": "taskList",
+            "config": {
+              "taskIds": ["task-2-find-error"],
+              "showProgress": true,
+              "variant": "checklist"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "error-list-guided",
+            "type": "errorList",
+            "config": {
+              "items": [
+                {
+                  "id": "error-comparison",
+                  "lineStart": 5,
+                  "description": "Wrong comparison operator - excludes grade=60",
+                  "explanation": "Using '>' (greater than) instead of '>=' (greater than or equal) excludes students with exactly 60 points. Bob has grade=60 and should pass, but '60 > 60' is False.",
+                  "severity": "error",
+                  "category": "logic",
+                  "correctFix": "Change 's['grade'] > 60' to 's['grade'] >= 60'"
+                },
+                {
+                  "id": "error-uppercase",
+                  "lineStart": 8,
+                  "description": "Missing .upper() call - names stay lowercase",
+                  "explanation": "The docstring says to return uppercase names, but we're just returning s['name'] without converting it. We need to call .upper() on the string.",
+                  "severity": "warning",
+                  "category": "semantic",
+                  "correctFix": "Change 's['name']' to 's['name'].upper()'"
+                }
+              ],
+              "showSeverity": true,
+              "showCategory": true,
+              "selectable": true
+            }
+          }
+        ],
+        "OutputSlot": [
+          {
+            "id": "output-guided",
+            "type": "outputPreview",
+            "config": {
+              "type": "text",
+              "current": "['Alice', 'Diana']",
+              "expected": "['ALICE', 'BOB', 'DIANA']",
+              "showExpected": true,
+              "title": "Output"
+            }
+          }
+        ]
+      }
     },
     {
       "id": "step-3-construct",
       "phase": "construct",
       "title": "Find and Fix All Issues",
-      "instruction": "There's one more issue: the output shows lowercase names but should be uppercase. Find and fix both bugs.",
+      "instruction": "There's one more issue: the output shows lowercase names but should be uppercase. Find and identify both bugs in the error list.",
+      "tasks": [
+        {
+          "id": "task-3-find-uppercase",
+          "label": "Click on the uppercase error",
+          "required": true,
+          "action": {
+            "type": "click",
+            "targetId": "error-uppercase",
+            "eventId": "error_clicked"
+          },
+          "successMessage": "Found it! The .upper() method is missing."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -108,15 +241,96 @@
           "content": "Python strings have a .upper() method. We need to call s['name'].upper()."
         }
       ],
-      "requiresAction": true,
-      "mode": "both",
-      "relevantErrors": ["error-comparison", "error-uppercase"]
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-construct",
+            "type": "contextCard",
+            "config": {
+              "title": "The Second Bug",
+              "body": "Even if we fix the comparison, the names would still be lowercase. The docstring clearly states 'uppercase names' but we're not converting them.",
+              "keyPoints": [
+                "Docstring says uppercase",
+                "Output is lowercase",
+                "Need string method"
+              ],
+              "icon": "text"
+            }
+          }
+        ],
+        "TaskSlot": [
+          {
+            "id": "task-list-construct",
+            "type": "taskList",
+            "config": {
+              "taskIds": ["task-3-find-uppercase"],
+              "showProgress": true,
+              "variant": "checklist"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "error-list-construct",
+            "type": "errorList",
+            "config": {
+              "items": [
+                {
+                  "id": "error-comparison",
+                  "lineStart": 5,
+                  "description": "Wrong comparison operator - excludes grade=60",
+                  "explanation": "Using '>' (greater than) instead of '>=' (greater than or equal) excludes students with exactly 60 points. Bob has grade=60 and should pass, but '60 > 60' is False.",
+                  "severity": "error",
+                  "category": "logic",
+                  "correctFix": "Change 's['grade'] > 60' to 's['grade'] >= 60'"
+                },
+                {
+                  "id": "error-uppercase",
+                  "lineStart": 8,
+                  "description": "Missing .upper() call - names stay lowercase",
+                  "explanation": "The docstring says to return uppercase names, but we're just returning s['name'] without converting it. We need to call .upper() on the string.",
+                  "severity": "warning",
+                  "category": "semantic",
+                  "correctFix": "Change 's['name']' to 's['name'].upper()'"
+                }
+              ],
+              "showSeverity": true,
+              "showCategory": true,
+              "selectable": true
+            }
+          }
+        ],
+        "OutputSlot": [
+          {
+            "id": "output-construct",
+            "type": "outputPreview",
+            "config": {
+              "type": "text",
+              "current": "['Alice', 'Diana']",
+              "expected": "['ALICE', 'BOB', 'DIANA']",
+              "showExpected": true,
+              "title": "Output"
+            }
+          }
+        ]
+      }
     },
     {
       "id": "step-4-outcome",
       "phase": "outcome",
       "title": "Verify the Fix",
       "instruction": "Compare the before and after code. With both bugs fixed, the output is now ['ALICE', 'BOB', 'DIANA'] - Bob is included, and all names are uppercase.",
+      "tasks": [
+        {
+          "id": "task-4-review",
+          "label": "Review the fixed code",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "fix_reviewed"
+          }
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -127,15 +341,77 @@
           "content": "These are common bugs: off-by-one errors (> vs >=) and forgetting to apply transformations (.upper())."
         }
       ],
-      "requiresAction": false,
-      "showComparison": true
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-outcome",
+            "type": "contextCard",
+            "config": {
+              "title": "Bugs Fixed!",
+              "body": "Both issues are now resolved. The comparison operator is >= and the names are converted to uppercase.",
+              "keyPoints": [
+                "> changed to >=",
+                "Added .upper() call",
+                "Bob now included"
+              ],
+              "icon": "check"
+            }
+          },
+          {
+            "id": "so-what-callout",
+            "type": "callout",
+            "config": {
+              "tone": "insight",
+              "title": "So What?",
+              "body": "Off-by-one errors are among the most common bugs in programming. In a real system, this bug could cause students with exactly 60 points to fail when they should pass - affecting their academic record. Always pay attention to boundary conditions!",
+              "icon": "lightbulb"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "code-compare-outcome",
+            "type": "codeCompare",
+            "config": {
+              "leftCode": "def get_passing_students(students):\n    \"\"\"Return uppercase names of passing students (grade >= 60)\"\"\"\n    \n    # Filter students with passing grades\n    passing = [s for s in students if s['grade'] > 60]\n    \n    # Get their names in uppercase  \n    names = [s['name'] for s in passing]\n    \n    return names",
+              "rightCode": "def get_passing_students(students):\n    \"\"\"Return uppercase names of passing students (grade >= 60)\"\"\"\n    \n    # Filter students with passing grades\n    passing = [s for s in students if s['grade'] >= 60]\n    \n    # Get their names in uppercase  \n    names = [s['name'].upper() for s in passing]\n    \n    return names",
+              "language": "python",
+              "leftLabel": "Before (Buggy)",
+              "rightLabel": "After (Fixed)",
+              "diffMode": "side-by-side",
+              "showDiff": true,
+              "highlightLines": {
+                "left": [5, 8],
+                "right": [5, 8]
+              }
+            }
+          }
+        ],
+        "OutputSlot": [
+          {
+            "id": "final-output",
+            "type": "outputPreview",
+            "config": {
+              "type": "diff",
+              "current": "['ALICE', 'BOB', 'DIANA']",
+              "expected": "['ALICE', 'BOB', 'DIANA']",
+              "showExpected": false,
+              "title": "Fixed Output"
+            }
+          },
+          {
+            "id": "success-callout",
+            "type": "callout",
+            "config": {
+              "tone": "success",
+              "title": "All Tests Pass!",
+              "body": "The function now correctly returns uppercase names of students with grade >= 60. Bob (60) is included, Charlie (45) is excluded.",
+              "icon": "check-circle"
+            }
+          }
+        ]
+      }
     }
   ],
-  "outputPreview": {
-    "buggyOutput": "['Alice', 'Diana']",
-    "correctOutput": "['ALICE', 'BOB', 'DIANA']",
-    "type": "text"
-  },
-  "realWorldImpact": "Off-by-one errors are among the most common bugs in programming. In a real system, this bug could cause students with exactly 60 points to fail when they should pass - affecting their academic record. Always pay attention to boundary conditions!",
   "completionMessage": "You've identified and fixed both bugs: the comparison operator (> to >=) and the missing .upper() call. These are extremely common mistakes - now you know to watch for them in your own code!"
 }

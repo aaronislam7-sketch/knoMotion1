@@ -1,20 +1,22 @@
 {
-  "title": "Building an INNER JOIN",
-  "learningObjective": "Understand how INNER JOIN combines rows from two tables based on a matching condition",
-  "enablesNext": "You'll be ready to use INNER JOIN in real queries and understand when rows are included or excluded",
-  "explanationContext": {
-    "title": "What is an INNER JOIN?",
-    "content": "An INNER JOIN combines rows from two tables where the join condition is met. Only rows with matching values in both tables appear in the result. Think of it as finding the intersection between two datasets.",
-    "visualReference": {
-      "type": "code",
-      "language": "sql",
-      "content": "SELECT columns\nFROM table1\nINNER JOIN table2\n  ON table1.column = table2.column"
-    },
-    "keyConcepts": [
-      "Matching condition",
-      "Both tables",
-      "Only matching rows"
-    ]
+  "id": "build-and-verify-inner-join",
+  "version": "1.0.0",
+  "concept": {
+    "id": "sql-inner-join",
+    "title": "Building an INNER JOIN",
+    "summary": "Learn how INNER JOIN combines rows from two tables based on a matching condition.",
+    "learningObjective": "Understand how INNER JOIN combines rows from two tables based on a matching condition",
+    "enablesNext": "You'll be ready to use INNER JOIN in real queries and understand when rows are included or excluded"
+  },
+  "layout": {
+    "type": "columnSplit",
+    "slots": ["OverviewSlot", "TaskSlot", "WorkspaceSlot", "ReferenceSlot", "OutputSlot"]
+  },
+  "featureFlags": {
+    "showHints": true,
+    "showTaskSlot": true,
+    "showReferenceSlot": true,
+    "showOutputSlot": true
   },
   "steps": [
     {
@@ -22,6 +24,18 @@
       "phase": "explain",
       "title": "Understanding the Tables",
       "instruction": "Look at the two source tables on the right. The 'orders' table has customer_id values, and the 'customers' table has id values. Notice how some customer IDs appear in both tables, while others don't.",
+      "tasks": [
+        {
+          "id": "task-1-review",
+          "label": "Review the source tables",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "tables_reviewed"
+          },
+          "hint": "Compare the customer_id column in orders with the id column in customers."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -32,138 +46,437 @@
           "content": "Customer 101 appears in both tables. Customer 103 is in customers but has no orders. What about 104?"
         }
       ],
-      "requiresAction": false
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-explain",
+            "type": "contextCard",
+            "config": {
+              "title": "What is an INNER JOIN?",
+              "body": "An INNER JOIN combines rows from two tables where the join condition is met. Only rows with matching values in both tables appear in the result. Think of it as finding the intersection between two datasets.",
+              "keyPoints": [
+                "Matching condition",
+                "Both tables",
+                "Only matching rows"
+              ],
+              "icon": "info",
+              "collapsible": false
+            }
+          },
+          {
+            "id": "code-example",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "The basic syntax of an INNER JOIN:",
+              "code": "SELECT columns\nFROM table1\nINNER JOIN table2\n  ON table1.column = table2.column",
+              "language": "sql",
+              "codePosition": "below"
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "source-tables",
+            "type": "referencePanel",
+            "config": {
+              "title": "Source Datasets",
+              "tabs": [
+                {
+                  "id": "orders-tab",
+                  "label": "orders",
+                  "content": {
+                    "id": "orders-table",
+                    "type": "tableView",
+                    "config": {
+                      "title": "orders",
+                      "columns": [
+                        { "key": "id", "label": "id", "type": "number" },
+                        { "key": "customer_id", "label": "customer_id", "type": "number" },
+                        { "key": "product", "label": "product", "type": "string" },
+                        { "key": "amount", "label": "amount", "type": "number" }
+                      ],
+                      "rows": [
+                        { "id": 1, "customer_id": 101, "product": "Laptop", "amount": 999 },
+                        { "id": 2, "customer_id": 102, "product": "Keyboard", "amount": 79 },
+                        { "id": 3, "customer_id": 101, "product": "Mouse", "amount": 29 },
+                        { "id": 4, "customer_id": 104, "product": "Monitor", "amount": 349 }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "customers-tab",
+                  "label": "customers",
+                  "content": {
+                    "id": "customers-table",
+                    "type": "tableView",
+                    "config": {
+                      "title": "customers",
+                      "columns": [
+                        { "key": "id", "label": "id", "type": "number" },
+                        { "key": "name", "label": "name", "type": "string" },
+                        { "key": "email", "label": "email", "type": "string" }
+                      ],
+                      "rows": [
+                        { "id": 101, "name": "Alice", "email": "alice@email.com" },
+                        { "id": 102, "name": "Bob", "email": "bob@email.com" },
+                        { "id": 103, "name": "Charlie", "email": "charlie@email.com" },
+                        { "id": 104, "name": "Diana", "email": "diana@email.com" }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "OutputSlot": [
+          {
+            "id": "result-preview",
+            "type": "tableView",
+            "config": {
+              "title": "Query Result Preview",
+              "columns": [
+                { "key": "name", "label": "name", "type": "string" },
+                { "key": "product", "label": "product", "type": "string" }
+              ],
+              "rows": [
+                { "name": "Alice", "product": "Laptop" },
+                { "name": "Alice", "product": "Mouse" },
+                { "name": "Bob", "product": "Keyboard" },
+                { "name": "Diana", "product": "Monitor" }
+              ],
+              "emptyState": "Complete the query to see results"
+            }
+          }
+        ]
+      }
     },
     {
       "id": "step-2-guided",
       "phase": "guided",
       "title": "Start Building the Query",
-      "instruction": "Let's build the INNER JOIN query. First, drag the SELECT keyword to start the query, then add the columns we want to retrieve.",
+      "instruction": "Let's build the INNER JOIN query. Drag the SQL keywords and elements into the correct positions to construct the query.",
+      "tasks": [
+        {
+          "id": "task-2-place-select",
+          "label": "Place the SELECT keyword",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-select",
+            "eventId": "drop",
+            "value": "select-keyword"
+          },
+          "successMessage": "SELECT keyword placed correctly!"
+        },
+        {
+          "id": "task-2-place-columns",
+          "label": "Add the column selection",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-columns",
+            "eventId": "drop",
+            "value": "columns"
+          },
+          "successMessage": "Columns added!"
+        },
+        {
+          "id": "task-2-place-from",
+          "label": "Add the FROM keyword",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-from",
+            "eventId": "drop",
+            "value": "from-keyword"
+          },
+          "successMessage": "FROM keyword placed!"
+        },
+        {
+          "id": "task-2-place-table1",
+          "label": "Add the first table (orders)",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-table1",
+            "eventId": "drop",
+            "value": "orders-table"
+          },
+          "successMessage": "Orders table added!"
+        }
+      ],
       "hints": [
         {
           "level": 1,
           "content": "Every SQL query starts with SELECT to specify which columns you want.",
-          "highlightId": "drop-select"
+          "targetId": "drop-select"
         },
         {
           "level": 2,
           "content": "Drag 'SELECT' first, then 'customers.name, orders.product' to specify the columns."
+        },
+        {
+          "level": 3,
+          "content": "The order is: SELECT → columns → FROM → first table"
         }
       ],
-      "requiresAction": true,
-      "interactionType": "drag-drop",
-      "draggables": [
-        {
-          "id": "select-keyword",
-          "content": "SELECT",
-          "isCorrect": true,
-          "validTargets": ["drop-select"]
-        },
-        {
-          "id": "columns",
-          "content": "customers.name, orders.product",
-          "isCorrect": true,
-          "validTargets": ["drop-columns"]
-        },
-        {
-          "id": "from-keyword",
-          "content": "FROM",
-          "isCorrect": true,
-          "validTargets": ["drop-from"]
-        },
-        {
-          "id": "orders-table",
-          "content": "orders",
-          "isCorrect": true,
-          "validTargets": ["drop-table1"]
-        },
-        {
-          "id": "customers-table",
-          "content": "customers",
-          "isCorrect": true,
-          "validTargets": ["drop-table2"]
-        },
-        {
-          "id": "inner-join",
-          "content": "INNER JOIN",
-          "isCorrect": true,
-          "validTargets": ["drop-join"]
-        },
-        {
-          "id": "on-keyword",
-          "content": "ON",
-          "isCorrect": true,
-          "validTargets": ["drop-on"]
-        },
-        {
-          "id": "join-condition",
-          "content": "orders.customer_id = customers.id",
-          "isCorrect": true,
-          "validTargets": ["drop-condition"]
-        },
-        {
-          "id": "wrong-condition",
-          "content": "orders.id = customers.id",
-          "isCorrect": false,
-          "validTargets": ["drop-condition"]
-        }
-      ],
-      "dropZones": [
-        {
-          "id": "drop-select",
-          "label": "keyword",
-          "expectedItemId": "select-keyword",
-          "placeholder": "SELECT"
-        },
-        {
-          "id": "drop-columns",
-          "label": "columns",
-          "expectedItemId": "columns",
-          "placeholder": "columns..."
-        },
-        {
-          "id": "drop-from",
-          "label": "keyword",
-          "expectedItemId": "from-keyword",
-          "placeholder": "FROM"
-        },
-        {
-          "id": "drop-table1",
-          "label": "first table",
-          "expectedItemId": "orders-table",
-          "placeholder": "table1"
-        },
-        {
-          "id": "drop-join",
-          "label": "join type",
-          "expectedItemId": "inner-join",
-          "placeholder": "JOIN TYPE"
-        },
-        {
-          "id": "drop-table2",
-          "label": "second table",
-          "expectedItemId": "customers-table",
-          "placeholder": "table2"
-        },
-        {
-          "id": "drop-on",
-          "label": "keyword",
-          "expectedItemId": "on-keyword",
-          "placeholder": "ON"
-        },
-        {
-          "id": "drop-condition",
-          "label": "condition",
-          "expectedItemId": "join-condition",
-          "placeholder": "matching condition"
-        }
-      ]
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-guided",
+            "type": "contextCard",
+            "config": {
+              "title": "Building the Query",
+              "body": "We're constructing an INNER JOIN step by step. Start with the SELECT clause to specify which columns you want in your result.",
+              "keyPoints": [
+                "SELECT specifies output columns",
+                "FROM identifies the first table",
+                "INNER JOIN adds the second table"
+              ],
+              "icon": "build"
+            }
+          }
+        ],
+        "TaskSlot": [
+          {
+            "id": "task-list-guided",
+            "type": "taskList",
+            "config": {
+              "taskIds": ["task-2-place-select", "task-2-place-columns", "task-2-place-from", "task-2-place-table1"],
+              "showProgress": true,
+              "variant": "checklist"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "drag-drop-query",
+            "type": "dragAndDrop",
+            "config": {
+              "items": [
+                {
+                  "id": "select-keyword",
+                  "content": "SELECT",
+                  "validTargets": ["drop-select"]
+                },
+                {
+                  "id": "columns",
+                  "content": "customers.name, orders.product",
+                  "validTargets": ["drop-columns"]
+                },
+                {
+                  "id": "from-keyword",
+                  "content": "FROM",
+                  "validTargets": ["drop-from"]
+                },
+                {
+                  "id": "orders-table",
+                  "content": "orders",
+                  "validTargets": ["drop-table1"]
+                },
+                {
+                  "id": "customers-table",
+                  "content": "customers",
+                  "validTargets": ["drop-table2"]
+                },
+                {
+                  "id": "inner-join",
+                  "content": "INNER JOIN",
+                  "validTargets": ["drop-join"]
+                },
+                {
+                  "id": "on-keyword",
+                  "content": "ON",
+                  "validTargets": ["drop-on"]
+                },
+                {
+                  "id": "join-condition",
+                  "content": "orders.customer_id = customers.id",
+                  "validTargets": ["drop-condition"]
+                },
+                {
+                  "id": "wrong-condition",
+                  "content": "orders.id = customers.id",
+                  "validTargets": ["drop-condition"]
+                }
+              ],
+              "zones": [
+                {
+                  "id": "drop-select",
+                  "label": "keyword",
+                  "expectedItemId": "select-keyword",
+                  "placeholder": "SELECT"
+                },
+                {
+                  "id": "drop-columns",
+                  "label": "columns",
+                  "expectedItemId": "columns",
+                  "placeholder": "columns..."
+                },
+                {
+                  "id": "drop-from",
+                  "label": "keyword",
+                  "expectedItemId": "from-keyword",
+                  "placeholder": "FROM"
+                },
+                {
+                  "id": "drop-table1",
+                  "label": "first table",
+                  "expectedItemId": "orders-table",
+                  "placeholder": "table1"
+                },
+                {
+                  "id": "drop-join",
+                  "label": "join type",
+                  "expectedItemId": "inner-join",
+                  "placeholder": "JOIN TYPE"
+                },
+                {
+                  "id": "drop-table2",
+                  "label": "second table",
+                  "expectedItemId": "customers-table",
+                  "placeholder": "table2"
+                },
+                {
+                  "id": "drop-on",
+                  "label": "keyword",
+                  "expectedItemId": "on-keyword",
+                  "placeholder": "ON"
+                },
+                {
+                  "id": "drop-condition",
+                  "label": "condition",
+                  "expectedItemId": "join-condition",
+                  "placeholder": "matching condition"
+                }
+              ],
+              "layout": "inline",
+              "validation": "immediate",
+              "feedback": {
+                "correct": "Great job! Query piece placed correctly.",
+                "incorrect": "That piece doesn't go there. Try again!",
+                "partial": "Keep going - more pieces to place."
+              }
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "source-tables-guided",
+            "type": "referencePanel",
+            "config": {
+              "title": "Source Datasets",
+              "tabs": [
+                {
+                  "id": "orders-tab",
+                  "label": "orders",
+                  "content": {
+                    "id": "orders-table-2",
+                    "type": "tableView",
+                    "config": {
+                      "title": "orders",
+                      "columns": [
+                        { "key": "id", "label": "id", "type": "number" },
+                        { "key": "customer_id", "label": "customer_id", "type": "number" },
+                        { "key": "product", "label": "product", "type": "string" },
+                        { "key": "amount", "label": "amount", "type": "number" }
+                      ],
+                      "rows": [
+                        { "id": 1, "customer_id": 101, "product": "Laptop", "amount": 999 },
+                        { "id": 2, "customer_id": 102, "product": "Keyboard", "amount": 79 },
+                        { "id": 3, "customer_id": 101, "product": "Mouse", "amount": 29 },
+                        { "id": 4, "customer_id": 104, "product": "Monitor", "amount": 349 }
+                      ],
+                      "highlightColumns": ["customer_id"]
+                    }
+                  }
+                },
+                {
+                  "id": "customers-tab",
+                  "label": "customers",
+                  "content": {
+                    "id": "customers-table-2",
+                    "type": "tableView",
+                    "config": {
+                      "title": "customers",
+                      "columns": [
+                        { "key": "id", "label": "id", "type": "number" },
+                        { "key": "name", "label": "name", "type": "string" },
+                        { "key": "email", "label": "email", "type": "string" }
+                      ],
+                      "rows": [
+                        { "id": 101, "name": "Alice", "email": "alice@email.com" },
+                        { "id": 102, "name": "Bob", "email": "bob@email.com" },
+                        { "id": 103, "name": "Charlie", "email": "charlie@email.com" },
+                        { "id": 104, "name": "Diana", "email": "diana@email.com" }
+                      ],
+                      "highlightColumns": ["id"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
       "id": "step-3-construct",
       "phase": "construct",
       "title": "Complete the JOIN Condition",
-      "instruction": "The most important part of a JOIN is the condition that links the tables. Choose the correct condition that matches orders to customers.",
+      "instruction": "The most important part of a JOIN is the condition that links the tables. Complete the query by adding INNER JOIN, the second table, and the correct join condition.",
+      "tasks": [
+        {
+          "id": "task-3-place-join",
+          "label": "Add INNER JOIN keyword",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-join",
+            "eventId": "drop",
+            "value": "inner-join"
+          },
+          "successMessage": "INNER JOIN added!"
+        },
+        {
+          "id": "task-3-place-table2",
+          "label": "Add the customers table",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-table2",
+            "eventId": "drop",
+            "value": "customers-table"
+          },
+          "successMessage": "Customers table added!"
+        },
+        {
+          "id": "task-3-place-on",
+          "label": "Add the ON keyword",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-on",
+            "eventId": "drop",
+            "value": "on-keyword"
+          },
+          "successMessage": "ON keyword placed!"
+        },
+        {
+          "id": "task-3-place-condition",
+          "label": "Choose the correct join condition",
+          "required": true,
+          "action": {
+            "type": "drop",
+            "targetId": "drop-condition",
+            "eventId": "drop",
+            "value": "join-condition"
+          },
+          "successMessage": "Correct join condition! The query is complete."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -172,21 +485,186 @@
         {
           "level": 2,
           "content": "The orders table has 'customer_id' which should match the 'id' in customers.",
-          "highlightId": "drop-condition"
+          "targetId": "drop-condition"
         },
         {
           "level": 3,
           "content": "The correct condition is: orders.customer_id = customers.id"
         }
       ],
-      "requiresAction": true,
-      "interactionType": "drag-drop"
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-construct",
+            "type": "contextCard",
+            "config": {
+              "title": "The Join Condition",
+              "body": "The ON clause specifies which columns to match between tables. This is the heart of any JOIN - it determines which rows get combined.",
+              "keyPoints": [
+                "ON specifies the matching columns",
+                "Usually a foreign key relationship",
+                "Wrong condition = wrong results"
+              ],
+              "icon": "key"
+            }
+          }
+        ],
+        "TaskSlot": [
+          {
+            "id": "task-list-construct",
+            "type": "taskList",
+            "config": {
+              "taskIds": ["task-3-place-join", "task-3-place-table2", "task-3-place-on", "task-3-place-condition"],
+              "showProgress": true,
+              "variant": "checklist"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "drag-drop-query-2",
+            "type": "dragAndDrop",
+            "config": {
+              "items": [
+                {
+                  "id": "inner-join",
+                  "content": "INNER JOIN",
+                  "validTargets": ["drop-join"]
+                },
+                {
+                  "id": "customers-table",
+                  "content": "customers",
+                  "validTargets": ["drop-table2"]
+                },
+                {
+                  "id": "on-keyword",
+                  "content": "ON",
+                  "validTargets": ["drop-on"]
+                },
+                {
+                  "id": "join-condition",
+                  "content": "orders.customer_id = customers.id",
+                  "validTargets": ["drop-condition"]
+                },
+                {
+                  "id": "wrong-condition",
+                  "content": "orders.id = customers.id",
+                  "validTargets": ["drop-condition"]
+                }
+              ],
+              "zones": [
+                {
+                  "id": "drop-join",
+                  "label": "join type",
+                  "expectedItemId": "inner-join",
+                  "placeholder": "JOIN TYPE"
+                },
+                {
+                  "id": "drop-table2",
+                  "label": "second table",
+                  "expectedItemId": "customers-table",
+                  "placeholder": "table2"
+                },
+                {
+                  "id": "drop-on",
+                  "label": "keyword",
+                  "expectedItemId": "on-keyword",
+                  "placeholder": "ON"
+                },
+                {
+                  "id": "drop-condition",
+                  "label": "condition",
+                  "expectedItemId": "join-condition",
+                  "placeholder": "matching condition"
+                }
+              ],
+              "layout": "inline",
+              "validation": "immediate",
+              "feedback": {
+                "correct": "Perfect! That's the correct piece.",
+                "incorrect": "Not quite - check the column names in both tables.",
+                "partial": "Almost there! Keep building the query."
+              }
+            }
+          }
+        ],
+        "ReferenceSlot": [
+          {
+            "id": "source-tables-construct",
+            "type": "referencePanel",
+            "config": {
+              "title": "Source Datasets",
+              "tabs": [
+                {
+                  "id": "orders-tab",
+                  "label": "orders",
+                  "content": {
+                    "id": "orders-table-3",
+                    "type": "tableView",
+                    "config": {
+                      "title": "orders",
+                      "columns": [
+                        { "key": "id", "label": "id", "type": "number" },
+                        { "key": "customer_id", "label": "customer_id", "type": "number" },
+                        { "key": "product", "label": "product", "type": "string" },
+                        { "key": "amount", "label": "amount", "type": "number" }
+                      ],
+                      "rows": [
+                        { "id": 1, "customer_id": 101, "product": "Laptop", "amount": 999 },
+                        { "id": 2, "customer_id": 102, "product": "Keyboard", "amount": 79 },
+                        { "id": 3, "customer_id": 101, "product": "Mouse", "amount": 29 },
+                        { "id": 4, "customer_id": 104, "product": "Monitor", "amount": 349 }
+                      ],
+                      "highlightColumns": ["customer_id"]
+                    }
+                  }
+                },
+                {
+                  "id": "customers-tab",
+                  "label": "customers",
+                  "content": {
+                    "id": "customers-table-3",
+                    "type": "tableView",
+                    "config": {
+                      "title": "customers",
+                      "columns": [
+                        { "key": "id", "label": "id", "type": "number" },
+                        { "key": "name", "label": "name", "type": "string" },
+                        { "key": "email", "label": "email", "type": "string" }
+                      ],
+                      "rows": [
+                        { "id": 101, "name": "Alice", "email": "alice@email.com" },
+                        { "id": 102, "name": "Bob", "email": "bob@email.com" },
+                        { "id": 103, "name": "Charlie", "email": "charlie@email.com" },
+                        { "id": 104, "name": "Diana", "email": "diana@email.com" }
+                      ],
+                      "highlightColumns": ["id"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
       "id": "step-4-outcome",
       "phase": "outcome",
       "title": "Analyze the Results",
       "instruction": "Look at the query result. Notice that customer 103 (Charlie) doesn't appear - they have no orders. Customer 101 (Alice) appears twice because she has 2 orders. This is how INNER JOIN works: only matching rows from both tables are included.",
+      "tasks": [
+        {
+          "id": "task-4-understand",
+          "label": "Understand why Charlie is missing",
+          "required": false,
+          "action": {
+            "type": "event",
+            "eventId": "outcome_reviewed"
+          },
+          "hint": "Charlie (id 103) has no matching orders in the orders table."
+        }
+      ],
       "hints": [
         {
           "level": 1,
@@ -197,61 +675,77 @@
           "content": "Charlie (id 103) has no orders, so they're excluded from the INNER JOIN result."
         }
       ],
-      "requiresAction": false
-    }
-  ],
-  "livePreview": {
-    "type": "table",
-    "title": "Query Result",
-    "tableSchema": {
-      "columns": [
-        { "key": "name", "label": "name", "type": "string" },
-        { "key": "product", "label": "product", "type": "string" }
-      ]
-    },
-    "initialData": [
-      { "id": "r1", "name": "Alice", "product": "Laptop" },
-      { "id": "r2", "name": "Alice", "product": "Mouse" },
-      { "id": "r3", "name": "Bob", "product": "Keyboard" },
-      { "id": "r4", "name": "Diana", "product": "Monitor" }
-    ]
-  },
-  "sourceData": {
-    "tables": [
-      {
-        "name": "orders",
-        "schema": {
-          "columns": [
-            { "key": "id", "label": "id", "type": "number" },
-            { "key": "customer_id", "label": "customer_id", "type": "number" },
-            { "key": "product", "label": "product", "type": "string" },
-            { "key": "amount", "label": "amount", "type": "number" }
-          ]
-        },
-        "data": [
-          { "id": 1, "customer_id": 101, "product": "Laptop", "amount": 999 },
-          { "id": 2, "customer_id": 102, "product": "Keyboard", "amount": 79 },
-          { "id": 3, "customer_id": 101, "product": "Mouse", "amount": 29 },
-          { "id": 4, "customer_id": 104, "product": "Monitor", "amount": 349 }
-        ]
-      },
-      {
-        "name": "customers",
-        "schema": {
-          "columns": [
-            { "key": "id", "label": "id", "type": "number" },
-            { "key": "name", "label": "name", "type": "string" },
-            { "key": "email", "label": "email", "type": "string" }
-          ]
-        },
-        "data": [
-          { "id": 101, "name": "Alice", "email": "alice@email.com" },
-          { "id": 102, "name": "Bob", "email": "bob@email.com" },
-          { "id": 103, "name": "Charlie", "email": "charlie@email.com" },
-          { "id": 104, "name": "Diana", "email": "diana@email.com" }
+      "slots": {
+        "OverviewSlot": [
+          {
+            "id": "context-outcome",
+            "type": "contextCard",
+            "config": {
+              "title": "Understanding the Results",
+              "body": "The INNER JOIN returned 4 rows - one for each order that has a matching customer. Notice the patterns in the results.",
+              "keyPoints": [
+                "Alice appears twice (2 orders)",
+                "Charlie is missing (no orders)",
+                "Diana appears once (1 order)"
+              ],
+              "icon": "check"
+            }
+          },
+          {
+            "id": "so-what-callout",
+            "type": "callout",
+            "config": {
+              "tone": "insight",
+              "title": "So What?",
+              "body": "INNER JOIN is like a filter - it only shows data that exists in BOTH tables. If you need to see customers without orders too, you'd use a LEFT JOIN instead.",
+              "icon": "lightbulb"
+            }
+          }
+        ],
+        "WorkspaceSlot": [
+          {
+            "id": "final-query",
+            "type": "textAndCodeBlock",
+            "config": {
+              "text": "Your completed INNER JOIN query:",
+              "code": "SELECT customers.name, orders.product\nFROM orders\nINNER JOIN customers\n  ON orders.customer_id = customers.id",
+              "language": "sql",
+              "codePosition": "below"
+            }
+          }
+        ],
+        "OutputSlot": [
+          {
+            "id": "final-result",
+            "type": "tableView",
+            "config": {
+              "title": "Query Result",
+              "columns": [
+                { "key": "name", "label": "name", "type": "string" },
+                { "key": "product", "label": "product", "type": "string" }
+              ],
+              "rows": [
+                { "name": "Alice", "product": "Laptop" },
+                { "name": "Alice", "product": "Mouse" },
+                { "name": "Bob", "product": "Keyboard" },
+                { "name": "Diana", "product": "Monitor" }
+              ],
+              "highlightRows": [0, 1]
+            }
+          },
+          {
+            "id": "comparison-callout",
+            "type": "callout",
+            "config": {
+              "tone": "info",
+              "title": "Key Insight",
+              "body": "Alice appears twice because she has 2 orders. Charlie doesn't appear at all because they have no orders. This is the defining behavior of INNER JOIN.",
+              "icon": "info"
+            }
+          }
         ]
       }
-    ]
-  },
+    }
+  ],
   "completionMessage": "You've successfully built an INNER JOIN query! You now understand that INNER JOIN only returns rows where the join condition matches in both tables - customers without orders (like Charlie) are excluded from the results."
 }
