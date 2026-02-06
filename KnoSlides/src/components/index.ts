@@ -1,5 +1,8 @@
 /**
  * KnoSlides Shared Components
+ * 
+ * Base UI components used across the KnoSlides framework.
+ * These are generic building blocks that can be used by content blocks.
  */
 
 // Base UI components
@@ -20,20 +23,3 @@ export type { IconProps, IconSize } from './Icon';
 
 export { Accordion } from './Accordion';
 export type { AccordionProps } from './Accordion';
-
-// Slide-specific components for guided construction
-export {
-  StepProgress,
-  HintLadder,
-  ExplanationPanel,
-  FeedbackIndicator,
-  StepNavigation,
-} from './slide';
-
-export type {
-  StepProgressProps,
-  HintLadderProps,
-  ExplanationPanelProps,
-  FeedbackIndicatorProps,
-  StepNavigationProps,
-} from './slide';
