@@ -1,8 +1,11 @@
 # KnoSlides Build Status - Unified Template Architecture
 
-## Current Status: Phase 4 Complete (Content Migration)
+## Status: Ready for Merge
 
-**Last Updated:** February 5, 2026
+**Last Updated:** February 5, 2026  
+**Phase:** All phases complete (0-4), legacy code removed
+
+---
 
 ## Overview
 
@@ -14,274 +17,278 @@ KnoSlides is a guided construction system for bite-sized learning. It sits betwe
 | Slides | Build understanding through guided construction | Active, scaffolded |
 | Quizzes | Assess retention without support | Active, unscaffolded |
 
-Key differentiator: Slides are not presentations, not quizzes, and not LLM chat wrappers. They are interactive checkpoints where learners construct understanding with scaffolding.
+**Key differentiator:** Slides are interactive checkpoints where learners construct understanding with scaffolding - not presentations, not quizzes, not LLM chat wrappers.
 
-This document defines the new direction: a single vanilla slide template driven by JSON, using named slots and reusable content blocks, aligned with KnoMotion's JSON-first architecture.
-
-## Phase Completion Status
-
-| Phase | Status | Description |
-|-------|--------|-------------|
-| Phase 0 | ✅ Complete | Alignment and Naming - Types defined |
-| Phase 1 | ✅ Complete | Core Framework - SlideRenderer, SlotResolver, BlockRegistry |
-| Phase 2 | ✅ Complete | Core Blocks - All guidance and content blocks |
-| Phase 3 | ✅ Complete | Interactive Blocks - DragAndDrop, FlowDiagram, CodeCompare, ErrorList |
-| Phase 4 | ✅ Complete | Content Migration - Unified JSON examples created |
-| Phase 5 | 🔲 Pending | QA and Polish |
-
-## What's Been Built
-
-### Phase 0 - Types and Schema (`src/types/unified-schema.ts`)
-- ✅ SlotName type (7 canonical slots: HeaderSlot, OverviewSlot, TaskSlot, WorkspaceSlot, ReferenceSlot, OutputSlot, FooterSlot)
-- ✅ LayoutType (columnSplit, rowStack, gridSlots, full)
-- ✅ BlockType (16 block types across guidance, content, and interactive categories)
-- ✅ Task and Action types with validation
-- ✅ Step and Hint system types
-- ✅ Complete KnoSlide interface
-
-### Phase 1 - Core Framework (`src/core/`)
-- ✅ `SlideRenderer.tsx` - Main orchestrator component
-  - Step state management
-  - Task gating and progression
-  - Feedback display
-  - Completion tracking
-- ✅ `SlotResolver.tsx` - Layout system
-  - ColumnSplit layout (left guidance, right workspace)
-  - RowStack layout (vertical stacking)
-  - GridSlots layout (flexible grid)
-  - Full layout (single column)
-  - Visibility condition evaluation
-- ✅ `BlockRegistry.tsx` - Block component registry
-  - Type-safe block registration
-  - Runtime block lookup
-  - Placeholder for unregistered blocks
-- ✅ `SlideStateContext.tsx` - State management
-  - Step progression
-  - Task completion tracking
-  - Hint revelation
-- ✅ `SlideEventContext.tsx` - Event bus
-  - Inter-block communication
-  - Event emission and subscription
-
-### Phase 2 - Core Blocks (`src/blocks/`)
-
-#### Guidance Blocks (`src/blocks/guidance/`)
-- ✅ `ContextCard.tsx` - Title, body, key points, collapsible
-- ✅ `TaskList.tsx` - Task checklist with status indicators
-- ✅ `HintLadder.tsx` - Progressive hint revelation
-- ✅ `Callout.tsx` - Tone-based callouts (info, success, warning, error, insight)
-
-#### Content Blocks (`src/blocks/content/`)
-- ✅ `TextBlock.tsx` - Simple text with emphasis
-- ✅ `TextAndCodeBlock.tsx` - Text with code snippet
-- ✅ `TableView.tsx` - Data tables with highlighting
-- ✅ `OutputPreview.tsx` - Current vs expected comparison
-- ✅ `ReferencePanel.tsx` - Tabbed reference panels
-
-### Phase 3 - Interactive Blocks (`src/blocks/interactive/`)
-- ✅ `DragAndDrop.tsx` - Drag items to drop zones
-  - Uses @dnd-kit/core
-  - Immediate validation
-  - Event emission for task completion
-- ✅ `FlowDiagram.tsx` - Node/edge flow visualization
-  - Clickable nodes
-  - Highlight support
-  - Interactive mode
-- ✅ `CodeCompare.tsx` - Side-by-side code comparison
-  - Diff highlighting
-  - Language support
-- ✅ `ErrorList.tsx` - Selectable error items
-  - Severity indicators
-  - Category display
-  - Click events
-
-### Phase 4 - Content Migration (`preview/`)
-
-Three example JSON files have been migrated to the unified schema:
-
-#### `build-and-verify-inner-join-unified.json`
-- **Topic:** SQL INNER JOIN construction
-- **Template type:** Build & Verify
-- **Steps:** 4 (explain → guided → construct → outcome)
-- **Key blocks:** contextCard, textAndCodeBlock, dragAndDrop, referencePanel, tableView, callout
-- **Tasks:** Drag-and-drop SQL query construction
-
-#### `flow-simulator-api-auth-unified.json`
-- **Topic:** API Authentication Flow
-- **Template type:** Flow Simulator
-- **Steps:** 4 (explain → guided → construct → outcome)
-- **Key blocks:** contextCard, callout, flowDiagram, textAndCodeBlock
-- **Tasks:** Explore success/failure paths by clicking flow nodes
-
-#### `repair-model-python-bug-unified.json`
-- **Topic:** Python List Comprehension Debugging
-- **Template type:** Repair the Model
-- **Steps:** 4 (explain → guided → construct → outcome)
-- **Key blocks:** contextCard, codeCompare, errorList, outputPreview, callout
-- **Tasks:** Identify and click on bugs in code
-
-### App Integration (`src/App.tsx`, `src/main.tsx`)
-- ✅ Block registry initialization in main.tsx
-- ✅ Unified SlideRenderer integration
-- ✅ Toggle between "Unified" and "Legacy" render modes
-- ✅ All three unified JSON examples loadable
-
-## Non-Negotiable Principles
-
-1. Slides must force meaningful cognitive engagement
-   - Learners must do something to progress
-   - Passive "Next" without action is not allowed
-
-2. Slides must never assume mastery
-   - Construction is scaffolded
-   - Examples, references, and hints remain visible
-   - Progression: guided to constrained to lightly generative
-
-3. Slides must not behave like quizzes
-   - No scoring
-   - No hard fail states
-   - Incorrect actions trigger explanation, not judgement
-
-4. Templates are behavior-driven, not content-driven
-   - Same template works for donuts, electricity, SQL, etc.
-   - Content changes; behavior does not
-
-5. Concept equals the 4-step sequence
-   - A concept is delivered through explain, guided, construct, outcome
+---
 
 ## Architecture
 
 ```
-Slide JSON
-  -> SlideRenderer
-     -> SlotResolver (named slots)
-        -> ContentBlockRenderer (type registry)
-           -> SDK Elements
+Slide JSON (preview/*.json)
+  └── SlideRenderer (src/core/SlideRenderer.tsx)
+       ├── SlideStateProvider (src/core/SlideStateContext.tsx) - State management
+       ├── SlideEventProvider (src/core/SlideEventContext.tsx) - Event bus
+       ├── BlockRegistryProvider (src/core/BlockRegistry.tsx) - Block lookup
+       └── SlotResolver (src/core/SlotResolver.tsx) - Layout system
+            └── BlockRenderer → Content Block Components (src/blocks/)
 ```
 
-### Key Layers
+### Entry Points
 
-1. **Slide JSON** - Defines concept, layout, steps, tasks, and content blocks per slot
-2. **SlideRenderer** - Orchestrates step progression, gated by task completion
-3. **SlotResolver** - Resolves named slots into layout regions
-4. **ContentBlockRenderer** - Renders a specific block type using block config
+| Context | File | Description |
+|---------|------|-------------|
+| Main Preview | `KnoMotion-Videos/src/admin/SlidesPreview.jsx` | Full preview environment |
+| Standalone Dev | `KnoSlides/src/App.tsx` | Minimal standalone testing |
+| Library Export | `KnoSlides/src/index.ts` | npm package exports |
 
-## Slot System (Named Slots)
+### How It Works
 
-| Slot Name | Purpose | Typical Position |
-|----------|---------|------------------|
-| HeaderSlot | Title, objective summary | Top |
-| OverviewSlot | What am I seeing / concept context | Left column (top) |
-| TaskSlot | Per-step tasks and progress | Left column (below overview) |
-| WorkspaceSlot | Primary interactive element | Right column (top) |
-| ReferenceSlot | Supporting references (data, diagrams) | Right column (mid) |
-| OutputSlot | Result or preview output | Right column (bottom) |
-| FooterSlot | Navigation, Ask KNO (hints) | Bottom |
+1. **JSON Content** (`preview/*.json`) defines the slide: concept, layout, steps, tasks, and content blocks
+2. **SlideRenderer** orchestrates step progression, task gating, and event handling
+3. **SlotResolver** arranges content blocks into named layout regions
+4. **BlockRegistry** maps block types to React components
+5. **Content Blocks** render UI and emit events for task validation
 
-## Content Blocks (SDK Element Types)
-
-### Core Guidance
-- `contextCard`: title, body, keyPoints, icon
-- `taskList`: tasks, completionState
-- `hintLadder`: hints, currentLevel, askKnoLabel
-- `callout`: tone, title, body
-
-### Content and Reference
-- `textBlock`: text, emphasis
-- `richText`: markdown, highlights (not yet implemented)
-- `textAndCodeBlock`: text, code, language
-- `media`: type (image, diagram, svg, lottie), src, alt (not yet implemented)
-- `referencePanel`: title, type, content
-- `tableView`: columns, rows, emptyState
-- `outputPreview`: type, current, expected, showExpected
-
-### Interactive
-- `dragAndDrop`: items, zones, validation
-- `selectGroup`: options, selectionMode, validation (not yet implemented)
-- `toggleGroup`: toggles, validation (not yet implemented)
-- `flowDiagram`: nodes, edges, highlights
-- `codeCompare`: left, right, language, showDiff
-- `errorList`: items, severity, locations
-
-## Phase 5 - Remaining Work
-
-### QA and Polish (Pending)
-1. **No passive progression enforcement:**
-   - Audit all steps to ensure tasks.required is set appropriately
-   - Add runtime warning if a step has no required tasks
-
-2. **Hints and Ask KNO flow:**
-   - Ensure hintLadder appears in FooterSlot consistently
-   - "Ask KNO" button triggers progressive hint reveal
-   - Minimum 2 hints per step validation
-
-3. **Mobile layouts:**
-   - Test columnSplit → single column stack on mobile
-   - Ensure touch targets are adequately sized
-   - Test drag-and-drop on touch devices
-
-4. **Accessibility:**
-   - ARIA labels on interactive elements
-   - Keyboard navigation for drag-and-drop
-   - Focus management on step transitions
-
-5. **Visual polish per mockup:**
-   - Tasks panel styling with checkboxes
-   - "So What?" callout styling (green accent, icon)
-   - Consistent card borders, spacing, typography
-
-6. **Missing blocks to implement:**
-   - `richText` block with markdown support
-   - `media` block for images, diagrams, Lottie
-   - `selectGroup` block for multiple choice
-   - `toggleGroup` block for toggle switches
-
-## Running the Preview
-
-```bash
-cd KnoSlides
-npm install
-npm run dev
-```
-
-The preview app allows:
-- Switching between all three example templates
-- Toggle between "Unified" (new) and "Legacy" render modes
-- Viewport testing (responsive, desktop, tablet, mobile)
+---
 
 ## File Structure
 
 ```
 KnoSlides/
+├── Docs/
+│   └── BUILD_STATUS.md           # This file
+│
+├── preview/                       # Content JSON files
+│   ├── build-and-verify-inner-join.json    # SQL INNER JOIN example
+│   ├── flow-simulator-api-auth.json        # API Auth Flow example
+│   └── repair-model-python-bug.json        # Python debugging example
+│
 ├── src/
-│   ├── core/
-│   │   ├── SlideRenderer.tsx      # Main orchestrator
-│   │   ├── SlotResolver.tsx       # Layout system
-│   │   ├── BlockRegistry.tsx      # Block registration
-│   │   ├── SlideStateContext.tsx  # State management
-│   │   └── SlideEventContext.tsx  # Event bus
-│   ├── blocks/
-│   │   ├── guidance/              # ContextCard, TaskList, HintLadder, Callout
-│   │   ├── content/               # TextBlock, TextAndCodeBlock, TableView, etc.
-│   │   └── interactive/           # DragAndDrop, FlowDiagram, CodeCompare, ErrorList
-│   ├── types/
-│   │   └── unified-schema.ts      # All TypeScript types
-│   ├── App.tsx                    # Preview app with mode toggle
-│   └── main.tsx                   # Entry point with block initialization
-├── preview/
-│   ├── build-and-verify-inner-join.json        # Legacy format
-│   ├── build-and-verify-inner-join-unified.json # New unified format
-│   ├── flow-simulator-api-auth.json            # Legacy format
-│   ├── flow-simulator-api-auth-unified.json    # New unified format
-│   ├── repair-model-python-bug.json            # Legacy format
-│   └── repair-model-python-bug-unified.json    # New unified format
-└── Docs/
-    └── BUILD_STATUS.md            # This file
+│   ├── core/                      # Framework layer
+│   │   ├── SlideRenderer.tsx      # Main orchestrator component
+│   │   ├── SlotResolver.tsx       # Layout system (columnSplit, rowStack, etc.)
+│   │   ├── BlockRegistry.tsx      # Block type → component mapping
+│   │   ├── SlideStateContext.tsx  # Step/task/hint state management
+│   │   ├── SlideEventContext.tsx  # Inter-block event bus
+│   │   └── index.ts               # Core exports
+│   │
+│   ├── blocks/                    # Content block components
+│   │   ├── guidance/              # Guidance blocks
+│   │   │   ├── ContextCard.tsx    # Title, body, key points
+│   │   │   ├── TaskList.tsx       # Task checklist
+│   │   │   ├── HintLadder.tsx     # Progressive hints
+│   │   │   ├── Callout.tsx        # Tone-based callouts
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── content/               # Content blocks
+│   │   │   ├── TextBlock.tsx      # Simple text
+│   │   │   ├── TextAndCodeBlock.tsx # Text + code snippet
+│   │   │   ├── TableView.tsx      # Data tables
+│   │   │   ├── OutputPreview.tsx  # Current vs expected
+│   │   │   ├── ReferencePanel.tsx # Tabbed reference content
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── interactive/           # Interactive blocks
+│   │   │   ├── DragAndDrop.tsx    # Drag items to zones
+│   │   │   ├── FlowDiagram.tsx    # Node/edge flow visualization
+│   │   │   ├── CodeCompare.tsx    # Side-by-side code diff
+│   │   │   ├── ErrorList.tsx      # Clickable error list
+│   │   │   └── index.ts
+│   │   │
+│   │   └── index.ts               # Block exports + initializeBlocks()
+│   │
+│   ├── types/                     # TypeScript types
+│   │   ├── unified-schema.ts      # Main schema (KnoSlide, Step, Task, etc.)
+│   │   ├── events.ts              # Event system types
+│   │   ├── templates.ts           # Shared types (Feedback)
+│   │   └── index.ts               # Type exports
+│   │
+│   ├── components/                # Shared UI components
+│   │   ├── Card.tsx
+│   │   ├── Text.tsx
+│   │   ├── Icon.tsx
+│   │   ├── Accordion.tsx
+│   │   ├── ProgressIndicator.tsx
+│   │   ├── LottiePlayer.tsx
+│   │   └── index.ts
+│   │
+│   ├── hooks/                     # Utility hooks
+│   │   ├── useResponsive.ts       # Viewport detection
+│   │   ├── useScrollReveal.ts     # Scroll animations
+│   │   └── index.ts
+│   │
+│   ├── animations/                # Animation utilities
+│   │   ├── springs.ts             # Spring configs
+│   │   ├── variants.ts            # Motion variants
+│   │   └── index.ts
+│   │
+│   ├── theme/                     # Theme utilities
+│   │   ├── responsive.ts          # Breakpoints
+│   │   └── index.ts
+│   │
+│   ├── App.tsx                    # Standalone dev preview
+│   ├── main.tsx                   # Dev server entry
+│   ├── index.ts                   # Library exports
+│   └── index.css                  # Tailwind CSS
+│
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.js
+└── postcss.config.js
 ```
 
-## Definition of Success
+---
 
-- ✅ One vanilla template with named slots
-- ✅ JSON-only content injection
-- ✅ SDK block registry that can pivot across domains
-- 🔲 Production-ready quality (Phase 5)
+## Slot System
+
+Named slots ensure consistent positioning across all slides:
+
+| Slot Name | Purpose | Position |
+|-----------|---------|----------|
+| `HeaderSlot` | Title, objective | Top |
+| `OverviewSlot` | Concept context, "what am I seeing" | Left column |
+| `TaskSlot` | Task checklist, progress | Left column (below overview) |
+| `WorkspaceSlot` | Primary interactive element | Right column |
+| `ReferenceSlot` | Supporting data, diagrams | Right column |
+| `OutputSlot` | Result preview | Right column (bottom) |
+| `FooterSlot` | Navigation, hints | Bottom |
+
+### Layout Types
+
+| Type | Description |
+|------|-------------|
+| `columnSplit` | Left guidance (1/3), right workspace (2/3) |
+| `rowStack` | Vertical stacking |
+| `gridSlots` | Flexible grid |
+| `full` | Single column, full width |
+
+---
+
+## Content Blocks
+
+### Guidance Blocks
+
+| Block | Config | Description |
+|-------|--------|-------------|
+| `contextCard` | `title`, `body`, `keyPoints`, `icon`, `collapsible` | Contextual explanation |
+| `taskList` | `taskIds`, `showProgress`, `variant` | Task checklist |
+| `hintLadder` | `askKnoLabel`, `showLevelIndicator` | Progressive hints |
+| `callout` | `tone`, `title`, `body`, `icon` | Highlighted callout (info, success, warning, error, insight) |
+
+### Content Blocks
+
+| Block | Config | Description |
+|-------|--------|-------------|
+| `textBlock` | `text`, `emphasis`, `align` | Simple text |
+| `textAndCodeBlock` | `text`, `code`, `language`, `codePosition` | Text with code snippet |
+| `tableView` | `columns`, `rows`, `highlightRows`, `highlightColumns` | Data table |
+| `outputPreview` | `type`, `current`, `expected`, `showExpected` | Current vs expected output |
+| `referencePanel` | `title`, `tabs`, `content` | Tabbed reference content |
+
+### Interactive Blocks
+
+| Block | Config | Description |
+|-------|--------|-------------|
+| `dragAndDrop` | `items`, `zones`, `layout`, `validation`, `feedback` | Drag items to drop zones |
+| `flowDiagram` | `nodes`, `edges`, `highlights`, `interactive` | Flow visualization |
+| `codeCompare` | `leftCode`, `rightCode`, `language`, `diffMode` | Side-by-side code diff |
+| `errorList` | `items`, `showSeverity`, `selectable` | Clickable error items |
+
+---
+
+## Styles
+
+- **Framework:** Tailwind CSS
+- **Config:** `tailwind.config.js`
+- **Entry:** `src/index.css` (imports Tailwind layers)
+- **Fonts:** Inter (UI), Cabin Sketch, Caveat, Permanent Marker (decorative)
+
+All components use Tailwind utility classes. The theme is configured in `tailwind.config.js` with custom colors and spacing.
+
+---
+
+## Example Templates
+
+### 1. Build & Verify (SQL INNER JOIN)
+- **File:** `preview/build-and-verify-inner-join.json`
+- **Blocks:** contextCard, textAndCodeBlock, dragAndDrop, referencePanel, tableView, callout
+- **Interaction:** Drag SQL keywords to build a query
+
+### 2. Flow Simulator (API Authentication)
+- **File:** `preview/flow-simulator-api-auth.json`
+- **Blocks:** contextCard, callout, flowDiagram, textAndCodeBlock
+- **Interaction:** Click nodes to explore authentication flow paths
+
+### 3. Repair the Model (Python Bug)
+- **File:** `preview/repair-model-python-bug.json`
+- **Blocks:** contextCard, codeCompare, errorList, outputPreview, callout
+- **Interaction:** Click to identify bugs in Python code
+
+---
+
+## Non-Negotiable Principles
+
+1. **Meaningful engagement** - Learners must act to progress (no passive "Next")
+2. **Never assume mastery** - Scaffolding remains visible throughout
+3. **Not a quiz** - No scoring, no hard fails; incorrect → explanation, not judgement
+4. **Behavior-driven** - Same template works for any domain (SQL, Python, APIs, etc.)
+5. **4-phase model** - Every concept: explain → guided → construct → outcome
+
+---
+
+## Usage
+
+### Running the Preview
+
+```bash
+# Full preview (recommended)
+cd KnoMotion-Videos
+npm install
+npm run dev
+# Click "Slides" button in the header
+
+# Standalone KnoSlides
+cd KnoSlides
+npm install
+npm run dev
+```
+
+### Using in Your App
+
+```tsx
+import { SlideRenderer, initializeBlocks } from '@kno/slides';
+import slideData from './my-slide.json';
+
+// Initialize blocks once at app start
+initializeBlocks();
+
+// Render a slide
+<SlideRenderer
+  slide={slideData}
+  onStepChange={(index) => console.log('Step:', index)}
+  onComplete={() => console.log('Complete!')}
+/>
+```
+
+---
+
+## Phase Completion Summary
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 0 | Alignment and Naming | ✅ Types defined |
+| 1 | Core Framework | ✅ SlideRenderer, SlotResolver, BlockRegistry |
+| 2 | Core Blocks | ✅ Guidance + Content blocks |
+| 3 | Interactive Blocks | ✅ DragAndDrop, FlowDiagram, CodeCompare, ErrorList |
+| 4 | Content Migration | ✅ 3 unified JSON examples |
+| 5 | Cleanup | ✅ Legacy removed, docs updated |
+
+---
+
+## Future Work (Phase 5+)
+
+- **Missing blocks:** `richText` (markdown), `media` (images, Lottie), `selectGroup`, `toggleGroup`
+- **Accessibility:** ARIA labels, keyboard navigation, focus management
+- **Mobile:** Touch-friendly drag-and-drop, responsive layouts
+- **Validation:** Runtime warnings for steps with no required tasks
