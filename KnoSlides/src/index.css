@@ -3,31 +3,28 @@
 @tailwind utilities;
 
 /* Google Fonts - loaded via CDN for dev, can be bundled for production */
-@import url('https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&family=Caveat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Permanent+Marker&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Teachers:opsz,wght@8..144,400..800&display=swap');
 
 @layer base {
   :root {
-    /* CSS Custom Properties matching KNODE_THEME */
-    --kno-surface: #FFF9F0;
+    /* Global visual system for KnoSlides */
+    --kno-surface: #f2f5fa;
     --kno-board: #FFFFFF;
-    --kno-ink: #2C3E50;
-    --kno-ink-soft: #5D6D7E;
-    --kno-ink-muted: #95A5A6;
-    --kno-primary: #FF6B35;
-    --kno-secondary: #9B59B6;
-    --kno-accent-green: #27AE60;
-    --kno-accent-blue: #3498DB;
-    --kno-highlight: #F39C12;
-    --kno-rule: #F0D9B5;
-    --kno-doodle: #F39C12;
-    
-    /* Shadows */
-    --kno-shadow-card: 0 14px 30px rgba(0,0,0,0.08);
-    --kno-shadow-soft: 0 8px 18px rgba(0,0,0,0.05);
-    
-    /* Radii */
-    --kno-radius-card: 1.125rem;
-    --kno-radius-soft: 1.5rem;
+    --kno-ink: #1f2937;
+    --kno-ink-soft: #475569;
+    --kno-ink-muted: #64748b;
+    --kno-primary: #4f46e5;
+    --kno-secondary: #7c3aed;
+    --kno-accent-green: #22c55e;
+    --kno-accent-blue: #0ea5e9;
+    --kno-highlight: #14b8a6;
+    --kno-rule: #dce5f3;
+    --kno-doodle: #6366f1;
+
+    --kno-shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --kno-shadow-soft: 0 4px 14px rgba(15, 23, 42, 0.05);
+    --kno-radius-card: 0.95rem;
+    --kno-radius-soft: 1.2rem;
   }
 
   html {
@@ -37,6 +34,18 @@
   body {
     @apply bg-kno-surface text-kno-ink font-body antialiased;
     min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-body tracking-tight text-kno-ink;
+    line-height: 1.2;
+  }
+
+  p, li {
+    @apply text-kno-ink-soft;
+    line-height: 1.5;
   }
 
   /* Smooth transitions for interactive elements */
@@ -88,6 +97,34 @@
     @apply focus:outline-none focus:ring-2 focus:ring-kno-primary/50 focus:ring-offset-2;
   }
 
+  .kno-slide-shell {
+    @apply w-full max-w-[88rem] mx-auto px-5 sm:px-8 lg:px-12 xl:px-14 py-7 lg:py-9;
+  }
+
+  .kno-panel {
+    @apply bg-kno-board rounded-card border border-slate-200/80 shadow-soft;
+  }
+
+  .kno-slot-frame {
+    @apply bg-white/75 rounded-[1.05rem] border border-slate-200/90 shadow-soft p-3 sm:p-4;
+  }
+
+  .kno-panel-header {
+    @apply px-4 py-3 border-b border-slate-200/80 bg-slate-50/90;
+  }
+
+  .kno-title-main {
+    @apply text-[1.65rem] sm:text-[2rem] lg:text-[2.35rem] font-semibold text-slate-900;
+  }
+
+  .kno-text-body {
+    @apply text-sm sm:text-[15px] text-slate-600 leading-6;
+  }
+
+  .kno-text-meta {
+    @apply text-xs sm:text-[13px] text-slate-500;
+  }
+
   /* Progress indicator */
   .kno-progress {
     @apply h-2 bg-kno-rule rounded-full overflow-hidden;
@@ -137,5 +174,21 @@
   .stagger-children > * {
     --stagger-delay: 0.1s;
     animation-delay: calc(var(--child-index, 0) * var(--stagger-delay));
+  }
+
+  .slot {
+    @apply min-w-0;
+  }
+
+  .slot-block {
+    @apply min-w-0;
+  }
+
+  .slot pre {
+    @apply text-[13px] leading-6;
+  }
+
+  .slot table {
+    @apply w-full;
   }
 }

@@ -111,9 +111,9 @@ export const Callout: React.FC<BlockComponentProps<CalloutConfig>> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={`
-        rounded-xl border p-4
+        rounded-xl border p-4 min-w-0
         ${styles.bg} ${styles.border}
-        ${stylePreset === 'prominent' ? 'shadow-sm' : ''}
+        ${stylePreset === 'prominent' ? 'shadow-soft' : ''}
         ${className}
       `}
     >
@@ -131,11 +131,11 @@ export const Callout: React.FC<BlockComponentProps<CalloutConfig>> = ({
         
         <div className="flex-1 min-w-0">
           {title && (
-            <h4 className={`font-semibold mb-1 ${styles.titleColor}`}>
+            <h4 className={`text-sm font-semibold mb-1 ${styles.titleColor}`}>
               {title}
             </h4>
           )}
-          <p className={`text-sm leading-relaxed ${styles.bodyColor}`}>
+          <p className={`text-sm leading-6 ${styles.bodyColor}`}>
             {body}
           </p>
         </div>

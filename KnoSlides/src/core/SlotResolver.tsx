@@ -134,7 +134,7 @@ const Slot: React.FC<SlotProps> = ({ name, blocks, className = '' }) => {
   
   return (
     <div 
-      className={`slot slot-${name.toLowerCase().replace('slot', '')} ${className}`}
+      className={`slot slot-${name.toLowerCase().replace('slot', '')} kno-slot-frame min-w-0 ${className}`}
       data-slot={name}
     >
       <AnimatePresence mode="sync">
@@ -145,7 +145,7 @@ const Slot: React.FC<SlotProps> = ({ name, blocks, className = '' }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ delay: index * 0.05 }}
-            className="slot-block"
+            className="slot-block min-w-0"
           >
             <BlockRenderer block={block} />
           </motion.div>
@@ -174,10 +174,10 @@ const ColumnSplitLayout: React.FC<LayoutProps> = ({ slots, activeSlots, classNam
   const hasRightContent = activeSlots.some(s => ['WorkspaceSlot', 'ReferenceSlot', 'OutputSlot'].includes(s));
   
   return (
-    <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${className}`}>
+    <div className={`grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6 xl:gap-7 items-start min-w-0 ${className}`}>
       {/* Left column - Guidance */}
       {hasLeftContent && (
-        <div className="lg:col-span-1 space-y-6">
+        <div className="xl:col-span-4 space-y-4 lg:space-y-5 min-w-0">
           {slots.OverviewSlot && (
             <Slot name="OverviewSlot" blocks={slots.OverviewSlot} />
           )}
@@ -189,7 +189,7 @@ const ColumnSplitLayout: React.FC<LayoutProps> = ({ slots, activeSlots, classNam
       
       {/* Right column - Workspace */}
       {hasRightContent && (
-        <div className={`${hasLeftContent ? 'lg:col-span-2' : 'lg:col-span-3'} space-y-6`}>
+        <div className={`${hasLeftContent ? 'xl:col-span-8' : 'xl:col-span-12'} space-y-4 lg:space-y-5 min-w-0`}>
           {slots.WorkspaceSlot && (
             <Slot name="WorkspaceSlot" blocks={slots.WorkspaceSlot} />
           )}
@@ -210,7 +210,7 @@ const ColumnSplitLayout: React.FC<LayoutProps> = ({ slots, activeSlots, classNam
  */
 const RowStackLayout: React.FC<LayoutProps> = ({ slots, activeSlots, className = '' }) => {
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 lg:space-y-5 min-w-0 ${className}`}>
       {slots.OverviewSlot && (
         <Slot name="OverviewSlot" blocks={slots.OverviewSlot} />
       )}
@@ -235,29 +235,29 @@ const RowStackLayout: React.FC<LayoutProps> = ({ slots, activeSlots, className =
  */
 const GridSlotsLayout: React.FC<LayoutProps> = ({ slots, activeSlots, className = '' }) => {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${className}`}>
+    <div className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 lg:gap-6 min-w-0 ${className}`}>
       {slots.OverviewSlot && (
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 xl:col-span-4 min-w-0">
           <Slot name="OverviewSlot" blocks={slots.OverviewSlot} />
         </div>
       )}
       {slots.TaskSlot && (
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 xl:col-span-4 min-w-0">
           <Slot name="TaskSlot" blocks={slots.TaskSlot} />
         </div>
       )}
       {slots.WorkspaceSlot && (
-        <div className="md:col-span-2 lg:col-span-1">
+        <div className="md:col-span-2 xl:col-span-8 min-w-0">
           <Slot name="WorkspaceSlot" blocks={slots.WorkspaceSlot} />
         </div>
       )}
       {slots.ReferenceSlot && (
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 xl:col-span-6 min-w-0">
           <Slot name="ReferenceSlot" blocks={slots.ReferenceSlot} />
         </div>
       )}
       {slots.OutputSlot && (
-        <div className="md:col-span-2 lg:col-span-2">
+        <div className="md:col-span-2 xl:col-span-6 min-w-0">
           <Slot name="OutputSlot" blocks={slots.OutputSlot} />
         </div>
       )}
@@ -270,7 +270,7 @@ const GridSlotsLayout: React.FC<LayoutProps> = ({ slots, activeSlots, className 
  */
 const FullLayout: React.FC<LayoutProps> = ({ slots, activeSlots, className = '' }) => {
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 lg:space-y-5 min-w-0 ${className}`}>
       {slots.OverviewSlot && (
         <Slot name="OverviewSlot" blocks={slots.OverviewSlot} className="max-w-4xl mx-auto" />
       )}

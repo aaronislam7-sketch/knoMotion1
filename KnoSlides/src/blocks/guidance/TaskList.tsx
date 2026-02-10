@@ -79,24 +79,24 @@ export const TaskList: React.FC<BlockComponentProps<TaskListConfig>> = ({
     <div
       id={id}
       className={`
-        bg-white rounded-xl border border-slate-200 overflow-hidden
+        kno-panel overflow-hidden
         ${stylePreset === 'highlighted' ? 'ring-2 ring-indigo-200' : ''}
         ${className}
       `}
     >
       {/* Header */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+      <div className="kno-panel-header flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
             <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
           </div>
-          <h3 className="font-semibold text-slate-800">Tasks</h3>
+          <h3 className="text-[15px] font-semibold text-slate-800">Tasks</h3>
         </div>
         
         {showProgress && (
-          <span className="text-sm text-slate-500">
+          <span className="text-xs font-medium text-slate-500">
             {completedCount}/{tasks.length}
           </span>
         )}
@@ -117,7 +117,7 @@ export const TaskList: React.FC<BlockComponentProps<TaskListConfig>> = ({
       )}
 
       {/* Task list */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-2.5">
         <AnimatePresence>
           {tasks.map((task, index) => {
             const status = getTaskStatus(task.id);
@@ -137,7 +137,7 @@ export const TaskList: React.FC<BlockComponentProps<TaskListConfig>> = ({
                 {renderTaskIcon(task)}
                 
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${isComplete ? 'text-emerald-700' : 'text-slate-700'}`}>
+                  <p className={`text-sm leading-5 font-semibold ${isComplete ? 'text-emerald-700' : 'text-slate-700'}`}>
                     {task.label}
                     {task.required && !isComplete && (
                       <span className="ml-1 text-xs text-red-500">*</span>
@@ -145,7 +145,7 @@ export const TaskList: React.FC<BlockComponentProps<TaskListConfig>> = ({
                   </p>
                   
                   {task.hint && !isComplete && (
-                    <p className="text-xs text-slate-500 mt-1">{task.hint}</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-5">{task.hint}</p>
                   )}
                   
                   {isComplete && task.successMessage && (

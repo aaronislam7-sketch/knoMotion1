@@ -5,7 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:video-builder": "vite --host 0.0.0.0 --port 5173 --open '/?view=builder'",
+    "dev:video-preview": "vite --host 0.0.0.0 --port 5173 --open '/?view=preview'",
+    "dev:slides-preview": "vite --host 0.0.0.0 --port 5173 --open '/?view=slides'",
+    "dev:slide-builder": "vite --host 0.0.0.0 --port 5173 --open '/?view=slide-builder'",
+    "dev:knoslides-standalone": "npm --prefix KnoSlides run dev -- --host 0.0.0.0 --port 4173",
     "build": "vite build",
+    "build:knoslides": "npm --prefix KnoSlides run build",
     "preview": "vite preview",
     "render": "npx remotion render",
     "render:tiktok-brain": "npx remotion render src/remotion/index.ts TikTokBrainLies out/tiktok-brain-lies.mp4",

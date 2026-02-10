@@ -9,3 +9,6 @@ node_modules/vite/dist/node/chunks/.config.js.swp
 node_modules/.vite/deps/_metadata.json
 node_modules/.vite/deps/_metadata.json
 node_modules
+dist/index.html
+package.json
+package-lock.json

@@ -2,8 +2,8 @@
 
 ## Status: Ready for Merge
 
-**Last Updated:** February 5, 2026  
-**Phase:** All phases complete (0-4), legacy code removed
+**Last Updated:** February 10, 2026  
+**Phase:** Core phases complete (0-5), authoring tooling integrated in dev environment
 
 ---
 
@@ -37,9 +37,10 @@ Slide JSON (preview/*.json)
 
 | Context | File | Description |
 |---------|------|-------------|
-| Main Preview | `KnoMotion-Videos/src/admin/SlidesPreview.jsx` | Full preview environment |
+| Main Preview | `KnoMotion-Videos/src/admin/SlidesPreview.jsx` | Full preview environment (imports local `KnoSlides/src/index.css` and local renderer source) |
 | Standalone Dev | `KnoSlides/src/App.tsx` | Minimal standalone testing |
 | Library Export | `KnoSlides/src/index.ts` | npm package exports |
+| Dev Authoring | `KnoMotion-Videos/src/admin/slides-builder/SlideBuilder.jsx` | Dev-only visual Slide JSON builder (structured fields + live preview) |
 
 ### How It Works
 
@@ -202,9 +203,25 @@ Named slots ensure consistent positioning across all slides:
 - **Framework:** Tailwind CSS
 - **Config:** `tailwind.config.js`
 - **Entry:** `src/index.css` (imports Tailwind layers)
-- **Fonts:** Inter (UI), Cabin Sketch, Caveat, Permanent Marker (decorative)
+- **Fonts:** Teachers (primary UI + headings in current global system)
 
 All components use Tailwind utility classes. The theme is configured in `tailwind.config.js` with custom colors and spacing.
+
+---
+
+## Dev Tooling Updates (Feb 2026)
+
+- `KnoMotion-Videos` now has explicit separated views/modes for:
+- `Video Builder`
+- `Video Preview`
+- `Slides Preview`
+- `Slide Builder`
+- `Slides Preview` and `Slide Builder` both consume the local `KnoSlides` source (`src/core`, `src/blocks`, and `src/index.css`) to avoid drift between preview and package code during development.
+- `Slide Builder` is dev-mode only and currently:
+- Uses structured field editors (not raw JSON editing for block/task authoring)
+- Supports slot-aware block configuration
+- Provides generated “trackable action” suggestions for task creation
+- Allows optional advanced/manual task payload editing
 
 ---
 
@@ -246,7 +263,11 @@ All components use Tailwind utility classes. The theme is configured in `tailwin
 cd KnoMotion-Videos
 npm install
 npm run dev
-# Click "Slides" button in the header
+# Use view param for direct modes:
+# /?view=builder        (Video Builder)
+# /?view=preview        (Video Preview)
+# /?view=slides         (Slides Preview)
+# /?view=slide-builder  (Slide Builder)
 
 # Standalone KnoSlides
 cd KnoSlides
@@ -283,6 +304,7 @@ initializeBlocks();
 | 3 | Interactive Blocks | ✅ DragAndDrop, FlowDiagram, CodeCompare, ErrorList |
 | 4 | Content Migration | ✅ 3 unified JSON examples |
 | 5 | Cleanup | ✅ Legacy removed, docs updated |
+| 6 | Dev Authoring Tooling | ✅ Initial Slide Builder integrated in `KnoMotion-Videos` |
 
 ---
 

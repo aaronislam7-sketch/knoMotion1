@@ -27,10 +27,10 @@ export default {
       },
       // KnoMotion font families
       fontFamily: {
-        display: ['"Permanent Marker"', 'cursive'],
-        header: ['"Cabin Sketch"', 'cursive'],
-        body: ['"Inter"', 'system-ui', 'sans-serif'],
-        accent: ['"Caveat"', 'cursive'],
+        display: ['"Teachers"', 'system-ui', 'sans-serif'],
+        header: ['"Teachers"', 'system-ui', 'sans-serif'],
+        body: ['"Teachers"', 'system-ui', 'sans-serif'],
+        accent: ['"Teachers"', 'system-ui', 'sans-serif'],
       },
       // Spacing
       spacing: {

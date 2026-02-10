@@ -68,15 +68,15 @@ export const TableView: React.FC<BlockComponentProps<TableViewConfig>> = ({
     <div
       id={id}
       className={`
-        rounded-xl border border-slate-200 bg-white overflow-hidden
+        kno-panel overflow-hidden min-w-0
         ${stylePreset === 'compact' ? '' : ''}
         ${className}
       `}
     >
       {/* Header */}
       {title && (
-        <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-          <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+        <div className="kno-panel-header">
+          <h4 className="text-[13px] font-semibold uppercase tracking-wide text-slate-700 flex items-center gap-2">
             <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
             </svg>
@@ -86,7 +86,7 @@ export const TableView: React.FC<BlockComponentProps<TableViewConfig>> = ({
       )}
       
       {/* Table content */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-w-0">
         <AnimatePresence mode="wait">
           {isEmpty ? (
             <motion.div
@@ -120,7 +120,7 @@ export const TableView: React.FC<BlockComponentProps<TableViewConfig>> = ({
                         <th
                           key={header.id}
                           className={`
-                            px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider
+                            px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider
                             ${isHighlighted ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600'}
                           `}
                           style={columns.find(c => c.key === header.column.id)?.width 
@@ -153,7 +153,7 @@ export const TableView: React.FC<BlockComponentProps<TableViewConfig>> = ({
                           <td 
                             key={cell.id} 
                             className={`
-                              px-4 py-3 text-sm
+                              px-4 py-3 text-[13px] leading-6
                               ${isColHighlighted || isHighlighted ? 'text-slate-900 font-medium' : 'text-slate-700'}
                             `}
                           >
@@ -172,7 +172,7 @@ export const TableView: React.FC<BlockComponentProps<TableViewConfig>> = ({
       
       {/* Footer with row count */}
       {!isEmpty && (
-        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 text-xs text-slate-500">
+        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 text-[11px] font-medium text-slate-500">
           {rows.length} row{rows.length !== 1 ? 's' : ''}
         </div>
       )}

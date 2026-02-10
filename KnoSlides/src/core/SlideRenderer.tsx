@@ -27,15 +27,15 @@ interface HeaderSlotProps {
 
 const HeaderSlot: React.FC<HeaderSlotProps> = ({ concept }) => {
   return (
-    <div className="mb-8">
-      <h1 className="text-2xl font-bold text-slate-800 mb-2">{concept.title}</h1>
-      <div className="flex items-center gap-4 text-sm text-slate-500">
-        <span className="flex items-center gap-1">
+    <div className="mb-6 lg:mb-8">
+      <h1 className="kno-title-main mb-2">{concept.title}</h1>
+      <div className="flex items-start gap-3 kno-text-body">
+        <span className="mt-0.5 text-indigo-500">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          {concept.learningObjective}
         </span>
+        <span className="max-w-4xl">{concept.learningObjective}</span>
       </div>
     </div>
   );
@@ -53,7 +53,7 @@ interface StepProgressProps {
 
 const StepProgress: React.FC<StepProgressProps> = ({ steps, currentIndex, completedSteps }) => {
   return (
-    <div className="flex items-center gap-2 mb-6">
+    <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
       {steps.map((step, index) => {
         const isComplete = completedSteps.includes(step.id) || index < currentIndex;
         const isCurrent = index === currentIndex;
@@ -63,12 +63,12 @@ const StepProgress: React.FC<StepProgressProps> = ({ steps, currentIndex, comple
             <div className="flex items-center gap-2">
               <div
                 className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                  w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold
                   transition-all duration-300
                   ${isComplete 
                     ? 'bg-emerald-500 text-white' 
                     : isCurrent 
-                      ? 'bg-indigo-500 text-white ring-4 ring-indigo-200' 
+                      ? 'bg-indigo-500 text-white ring-2 ring-indigo-100' 
                       : 'bg-slate-200 text-slate-500'
                   }
                 `}
@@ -83,7 +83,7 @@ const StepProgress: React.FC<StepProgressProps> = ({ steps, currentIndex, comple
               </div>
               <span 
                 className={`
-                  text-sm hidden sm:block
+                  text-xs sm:text-sm hidden sm:block whitespace-nowrap
                   ${isCurrent ? 'text-slate-800 font-medium' : 'text-slate-500'}
                 `}
               >
@@ -93,7 +93,7 @@ const StepProgress: React.FC<StepProgressProps> = ({ steps, currentIndex, comple
             {index < steps.length - 1 && (
               <div 
                 className={`
-                  flex-1 h-0.5 max-w-[60px]
+                  flex-1 h-0.5 max-w-[56px]
                   ${isComplete ? 'bg-emerald-500' : 'bg-slate-200'}
                 `}
               />
@@ -117,7 +117,7 @@ const StepInstruction: React.FC = () => {
       key={currentStep.id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl border border-slate-200 p-5 mb-6"
+      className="kno-panel p-4 sm:p-5 mb-5"
     >
       <div className="flex items-start gap-3">
         <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
@@ -126,8 +126,8 @@ const StepInstruction: React.FC = () => {
           </svg>
         </div>
         <div>
-          <h3 className="font-semibold text-slate-800 mb-1">{currentStep.title}</h3>
-          <p className="text-slate-600">{currentStep.instruction}</p>
+          <h3 className="text-base font-semibold text-slate-800 mb-1">{currentStep.title}</h3>
+          <p className="kno-text-body">{currentStep.instruction}</p>
         </div>
       </div>
     </motion.div>
@@ -155,7 +155,7 @@ const FooterNavigation: React.FC = () => {
   const hasRequiredTasks = currentStep.tasks.some(t => t.required);
   
   return (
-    <div className="mt-8 pt-6 border-t border-slate-200">
+    <div className="mt-8 pt-5 border-t border-slate-200">
       <div className="flex items-center justify-between">
         {/* Back button */}
         <button
@@ -181,7 +181,7 @@ const FooterNavigation: React.FC = () => {
           onClick={revealHint}
           disabled={!canRevealMoreHints()}
           className={`
-            flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+            flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
             transition-colors duration-200
             ${canRevealMoreHints()
               ? 'text-indigo-600 hover:bg-indigo-50 border border-indigo-200'
@@ -200,7 +200,7 @@ const FooterNavigation: React.FC = () => {
           onClick={nextStep}
           disabled={hasRequiredTasks && !canProceed()}
           className={`
-            flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium
+            flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold
             transition-all duration-200
             ${hasRequiredTasks && !canProceed()
               ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
@@ -349,8 +349,8 @@ const InnerRenderer: React.FC<InnerRendererProps> = ({ slide }) => {
   const currentSlots = currentStep.slots;
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-[var(--kno-surface)]">
+      <div className="kno-slide-shell">
         {/* Header */}
         <HeaderSlot concept={slide.concept} />
         

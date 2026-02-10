@@ -29,7 +29,7 @@ export const ContextCard: React.FC<BlockComponentProps<ContextCardConfig>> = ({
     <div
       id={id}
       className={`
-        bg-white rounded-xl border border-slate-200 overflow-hidden
+        kno-panel overflow-hidden
         ${stylePreset === 'highlighted' ? 'ring-2 ring-indigo-200' : ''}
         ${className}
       `}
@@ -37,7 +37,7 @@ export const ContextCard: React.FC<BlockComponentProps<ContextCardConfig>> = ({
       {/* Header */}
       <div
         className={`
-          px-4 py-3 bg-slate-50 border-b border-slate-200
+          kno-panel-header
           flex items-center justify-between gap-3
           ${collapsible ? 'cursor-pointer hover:bg-slate-100' : ''}
         `}
@@ -57,7 +57,7 @@ export const ContextCard: React.FC<BlockComponentProps<ContextCardConfig>> = ({
               </svg>
             </div>
           )}
-          <h3 className="font-semibold text-slate-800">{title}</h3>
+          <h3 className="text-[15px] font-semibold text-slate-800">{title}</h3>
         </div>
         
         {collapsible && (
@@ -82,18 +82,18 @@ export const ContextCard: React.FC<BlockComponentProps<ContextCardConfig>> = ({
             transition={{ duration: 0.2 }}
           >
             <div className="p-4">
-              <p className="text-slate-600 leading-relaxed">{body}</p>
+              <p className="kno-text-body">{body}</p>
               
               {keyPoints && keyPoints.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Key Points</p>
+                  <p className="kno-text-meta uppercase tracking-wide mb-2">Key Points</p>
                   <ul className="space-y-2">
                     {keyPoints.map((point, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <svg className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="text-sm text-slate-700">{point}</span>
+                        <span className="text-sm text-slate-700 leading-6">{point}</span>
                       </li>
                     ))}
                   </ul>

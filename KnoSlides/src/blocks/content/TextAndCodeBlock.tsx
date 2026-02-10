@@ -51,16 +51,16 @@ export const TextAndCodeBlock: React.FC<BlockComponentProps<TextAndCodeBlockConf
   const { text, code, language, codePosition = 'below' } = config;
 
   const codeBlock = (
-    <div className="bg-slate-800 rounded-lg overflow-hidden">
-      <div className="px-4 py-2 bg-slate-900 border-b border-slate-700 flex items-center justify-between">
-        <span className="text-xs text-slate-400 uppercase tracking-wide">{language}</span>
+    <div className="rounded-xl overflow-hidden border border-slate-700 bg-slate-900 shadow-soft min-w-0">
+      <div className="px-4 py-2.5 bg-slate-950 border-b border-slate-700 flex items-center justify-between">
+        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{language}</span>
         <div className="flex gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-500/50" />
           <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
           <div className="w-3 h-3 rounded-full bg-green-500/50" />
         </div>
       </div>
-      <pre className="p-4 text-sm font-mono text-slate-200 overflow-x-auto">
+      <pre className="p-4 font-mono text-[13px] leading-6 text-slate-200 overflow-x-auto">
         <code 
           dangerouslySetInnerHTML={{ 
             __html: highlightCode(code, language) 
@@ -71,12 +71,12 @@ export const TextAndCodeBlock: React.FC<BlockComponentProps<TextAndCodeBlockConf
   );
 
   const textBlock = (
-    <p className="text-slate-600 leading-relaxed">{text}</p>
+    <p className="kno-text-body">{text}</p>
   );
 
   if (codePosition === 'right') {
     return (
-      <div id={id} className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
+      <div id={id} className={`grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 ${className}`}>
         <div className="flex items-center">{textBlock}</div>
         {codeBlock}
       </div>

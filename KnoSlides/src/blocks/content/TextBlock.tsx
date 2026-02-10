@@ -18,7 +18,7 @@ export const TextBlock: React.FC<BlockComponentProps<TextBlockConfig>> = ({
 
   const emphasisStyles = {
     normal: 'text-slate-700',
-    strong: 'text-slate-900 font-medium',
+    strong: 'text-slate-900 font-semibold',
     subtle: 'text-slate-500',
   };
 
@@ -32,13 +32,14 @@ export const TextBlock: React.FC<BlockComponentProps<TextBlockConfig>> = ({
     <div
       id={id}
       className={`
+        text-sm sm:text-[15px]
         ${emphasisStyles[emphasis]}
         ${alignStyles[align]}
         ${stylePreset === 'prose' ? 'prose prose-slate max-w-none' : ''}
         ${className}
       `}
     >
-      <p className="leading-relaxed">{text}</p>
+      <p className="leading-6">{text}</p>
     </div>
   );
 };

@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 // Core unified renderer from KnoSlides
 import { SlideRenderer } from '../../../KnoSlides/src/core/SlideRenderer';
 import { initializeBlocks } from '../../../KnoSlides/src/blocks';
+import '../../../KnoSlides/src/index.css';
 
 // Unified schema example data (JSON-driven content)
 import buildAndVerifyData from '../../../KnoSlides/preview/build-and-verify-inner-join.json';

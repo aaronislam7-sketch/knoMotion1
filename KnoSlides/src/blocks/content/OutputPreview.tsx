@@ -60,13 +60,13 @@ export const OutputPreview: React.FC<BlockComponentProps<OutputPreviewConfig>> =
     <div
       id={id}
       className={`
-        rounded-xl border border-slate-200 overflow-hidden bg-white
+        kno-panel overflow-hidden bg-white min-w-0
         ${className}
       `}
     >
       {/* Header */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+      <div className="kno-panel-header flex items-center justify-between">
+        <h4 className="text-[13px] font-semibold uppercase tracking-wide text-slate-700 flex items-center gap-2">
           <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -88,12 +88,12 @@ export const OutputPreview: React.FC<BlockComponentProps<OutputPreviewConfig>> =
         // Side-by-side comparison
         <div className="flex border-b border-slate-200">
           {/* Tab headers */}
-          <div className={`flex-1 px-4 py-2 text-sm font-medium bg-slate-100 border-r border-slate-200`}>
+          <div className={`flex-1 px-4 py-2 text-xs font-semibold bg-slate-100 border-r border-slate-200`}>
             <span className="text-slate-800">
               {type === 'error' ? '❌ Current' : '📤 Current'}
             </span>
           </div>
-          <div className={`flex-1 px-4 py-2 text-sm font-medium bg-emerald-50`}>
+          <div className={`flex-1 px-4 py-2 text-xs font-semibold bg-emerald-50`}>
             <span className="text-emerald-800">✓ Expected</span>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const OutputPreview: React.FC<BlockComponentProps<OutputPreviewConfig>> =
               className={`p-4 ${getTypeStyles()}`}
             >
               {currentFormatted ? (
-                <pre className="whitespace-pre-wrap overflow-auto max-h-[300px]">
+                <pre className="whitespace-pre-wrap overflow-auto max-h-[320px] text-[13px] leading-6">
                   {currentFormatted}
                 </pre>
               ) : (
@@ -132,7 +132,7 @@ export const OutputPreview: React.FC<BlockComponentProps<OutputPreviewConfig>> =
         {hasExpected && (
           <div className="flex-1 bg-emerald-50/50">
             <div className="p-4">
-              <pre className={`whitespace-pre-wrap overflow-auto max-h-[300px] text-emerald-800 ${type === 'json' ? 'font-mono text-sm' : ''}`}>
+              <pre className={`whitespace-pre-wrap overflow-auto max-h-[320px] text-emerald-800 text-[13px] leading-6 ${type === 'json' ? 'font-mono' : ''}`}>
                 {expectedFormatted}
               </pre>
             </div>
