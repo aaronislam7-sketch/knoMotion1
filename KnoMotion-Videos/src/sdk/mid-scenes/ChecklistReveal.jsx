@@ -386,10 +386,15 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
           : baseFontSize;
 
         // Calculate animation timing for this item
+        // Check if exit was explicitly provided (items should NOT exit by default - they build and stay)
+        const itemExplicitExit = typeof item === 'object' ? item.beats?.exit : undefined;
+        const containerExplicitExit = beats?.exit;
+        const hasExplicitExit = itemExplicitExit !== undefined || containerExplicitExit !== undefined;
+        
         const itemBeats = resolveBeats(item.beats, {
           start: sequenceBeats.start + index * staggerDelay,
           holdDuration: animationDuration,
-          exit: sequenceBeats.exit, // Ensure items persist until scene exit
+          exit: hasExplicitExit ? (itemExplicitExit ?? containerExplicitExit) : Infinity,
         });
         const itemStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getRevealAnimationStyle(
@@ -400,11 +405,11 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
           fps,
           true
         );
-        // Exit animation - much slower for smooth fade out (0.8 seconds)
-        const exitFrame = toFrames(itemBeats.exit, fps);
+        // Exit animation - only apply if explicit exit was provided (items persist by default)
+        const exitFrame = hasExplicitExit ? toFrames(itemBeats.exit, fps) : Infinity;
         const exitDuration = toFrames(0.8, fps);
         const exitProgress =
-          frame > exitFrame
+          hasExplicitExit && frame > exitFrame
             ? Math.min(1, (frame - exitFrame) / exitDuration)
             : 0;
 
