@@ -1015,4 +1015,447 @@ This section tracks code that should be deleted after specific tasks are complet
 
 ---
 
+## 11. AMAZING POLISH — New Mid-Scenes, Layout Primitives & KnoMotion-Specific Additions
+
+This section covers additions that move KnoMotion from "good educational video engine" to "wow, this looks like it was made by a professional studio."
+
+### New Mid-Scenes
+
+#### MS1: `progressTimeline` — Animated Progress / Journey Map
+
+**What it does:** Renders a horizontal or vertical timeline with milestones that light up sequentially. Each milestone has an icon, label, and optional description. A progress line animates between milestones.
+
+**Why it's amazing:** Every learning journey has stages. This mid-scene lets the LLM say "you're at step 3 of 7" visually. It also works for historical timelines, process flows, and story arcs.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "progressTimeline",
+  "config": {
+    "milestones": [
+      { "icon": "1️⃣", "label": "Foundations", "status": "complete" },
+      { "icon": "2️⃣", "label": "Core Concepts", "status": "current" },
+      { "icon": "3️⃣", "label": "Application", "status": "upcoming" }
+    ],
+    "orientation": "horizontal",
+    "lineColor": "primary",
+    "animation": "drawLine",
+    "beats": { "start": 0.5 }
+  }
+}
+```
+
+**Remotion tech:** `@remotion/paths` `evolvePath()` for the animated connecting line. `@remotion/shapes` `<Circle>` for milestones. `spring()` for milestone pop-in.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/ProgressTimeline.jsx`
+
+---
+
+#### MS2: `quoteReveal` — Dramatic Quote / Testimonial
+
+**What it does:** A large quotation mark fades in, followed by text that types or slides in word-by-word, followed by an attribution line. Optional background dim/spotlight.
+
+**Why it's amazing:** Quotes and testimonials are core to learning content ("Einstein said..."). This creates a broadcast-quality quote card that would take hours in After Effects.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "quoteReveal",
+  "config": {
+    "quote": "The only way to do great work is to love what you do.",
+    "attribution": "Steve Jobs",
+    "attributionRole": "Co-founder, Apple",
+    "revealType": "wordByWord",
+    "quoteMarkStyle": "large",
+    "emphasis": ["great work", "love"],
+    "beats": { "start": 0.3, "exit": 6.0 }
+  }
+}
+```
+
+**Remotion tech:** `spring()` for the quote mark entrance. Word-by-word reveal using `interpolate()` with stagger. `@remotion/motion-blur` `<Trail>` on the quote mark for a cinematic entrance blur.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/QuoteReveal.jsx`
+
+---
+
+#### MS3: `beforeAfterSlider` — Interactive-Style Before/After
+
+**What it does:** A dedicated mid-scene (not overloaded into `sideBySide`) that shows a before/after comparison with an animated divider sliding across. Supports images, text blocks, or mixed content.
+
+**Why it's amazing:** The current `sideBySide` has a `beforeAfter` mode buried in it, but it's undocumented in the schema and overloads the component. A dedicated mid-scene is cleaner for LLMs and more visually dramatic — the slider wipes across revealing the transformation.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "beforeAfterSlider",
+  "config": {
+    "before": {
+      "title": "Before KnoMotion",
+      "image": { "src": "...", "fit": "cover" },
+      "overlay": "Problem: 3 hours to create one video"
+    },
+    "after": {
+      "title": "After KnoMotion",
+      "image": { "src": "...", "fit": "cover" },
+      "overlay": "Solution: 3 minutes with JSON"
+    },
+    "slider": {
+      "autoAnimate": true,
+      "from": 0.05,
+      "to": 0.95,
+      "style": "gradient"
+    },
+    "beats": { "start": 0.5, "exit": 8.0 }
+  }
+}
+```
+
+**Remotion tech:** `interpolate()` for the clip-path reveal. `spring()` for bounce at the end position.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/BeforeAfterSlider.jsx`
+
+---
+
+#### MS4: `codeBlock` — Syntax-Highlighted Code Reveal
+
+**What it does:** Renders a code block with syntax highlighting, line-by-line or character-by-character typewriter reveal. Supports highlighting specific lines, cursor blink, and "diff" mode (red/green for removed/added).
+
+**Why it's amazing:** KnoMotion is a tech product for learning. When teaching programming, data structures, or config formats, a proper code block mid-scene is essential. No other JSON-driven video engine does this well.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "codeBlock",
+  "config": {
+    "code": "const video = await render(sceneJSON);",
+    "language": "javascript",
+    "theme": "dark",
+    "revealType": "typewriter",
+    "highlightLines": [1, 3],
+    "showLineNumbers": true,
+    "beats": { "start": 0.5, "exit": 6.0 }
+  }
+}
+```
+
+**Implementation:** Use a lightweight syntax tokenizer (no heavy deps — just regex-based token coloring for JS/Python/JSON). Typewriter effect via `interpolate(frame, ...)` on character count.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/CodeBlock.jsx`
+
+---
+
+#### MS5: `flowDiagram` — Animated Flow / Mind Map
+
+**What it does:** Renders a simple flow diagram with nodes and animated connecting arrows. Nodes appear sequentially with spring animations, then arrows draw between them using `evolvePath()`.
+
+**Why it's amazing:** Concept maps and flow diagrams are the backbone of educational content. Currently, you'd need a `gridCards` hack to approximate this. A dedicated flow diagram mid-scene with animated connections is a massive differentiator.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "flowDiagram",
+  "config": {
+    "nodes": [
+      { "id": "a", "label": "Input", "icon": "📥", "position": "left" },
+      { "id": "b", "label": "Process", "icon": "⚙️", "position": "center" },
+      { "id": "c", "label": "Output", "icon": "📤", "position": "right" }
+    ],
+    "connections": [
+      { "from": "a", "to": "b", "label": "transform" },
+      { "from": "b", "to": "c", "label": "render" }
+    ],
+    "direction": "horizontal",
+    "nodeStyle": "rounded",
+    "connectionAnimation": "drawLine",
+    "beats": { "start": 0.5 }
+  }
+}
+```
+
+**Remotion tech:** `@remotion/paths` `evolvePath()` for animated arrow drawing. `@remotion/shapes` for node backgrounds. `calculateItemPositions(ARRANGEMENT_TYPES.STACKED_HORIZONTAL)` for node placement. `spring()` for node entrance.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/FlowDiagram.jsx`
+
+---
+
+#### MS6: `timerCountdown` — Dramatic Countdown / Timer
+
+**What it does:** A large circular countdown timer that ticks down (or up) with arc animation. Optional pulse at key moments. Works for "you have 10 seconds to think" pause moments in learning videos.
+
+**Why it's amazing:** Creates tension and engagement. The `<Pie>` component from `@remotion/shapes` with `progress` driven by `interpolate()` makes this trivially elegant.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "timerCountdown",
+  "config": {
+    "from": 10,
+    "to": 0,
+    "label": "Think about it...",
+    "color": "primary",
+    "pulseAtSeconds": [3, 2, 1],
+    "size": "lg",
+    "beats": { "start": 0.3, "exit": 11.0 }
+  }
+}
+```
+
+**Remotion tech:** `@remotion/shapes` `<Pie progress={...}>` driven by `interpolate(frame, ...)`. `spring()` pulse at key seconds.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/TimerCountdown.jsx`
+
+---
+
+#### MS7: `revealStack` — Stacked Card Reveal / Flashcard
+
+**What it does:** A stack of cards where each card flips or slides away to reveal the next. Like a deck of flashcards being dealt. Each card can have front/back content for "question → answer" reveals.
+
+**Why it's amazing:** Flashcards are the most fundamental learning primitive. A stack that reveals answers creates "aha moments" in video form. No other video engine has this as a JSON-configurable component.
+
+**JSON config shape:**
+```json
+{
+  "midScene": "revealStack",
+  "config": {
+    "cards": [
+      { "front": "What is spaced repetition?", "back": "Reviewing at increasing intervals" },
+      { "front": "What is active recall?", "back": "Testing yourself from memory" }
+    ],
+    "revealType": "flip",
+    "staggerDelay": 2.0,
+    "beats": { "start": 0.5 }
+  }
+}
+```
+
+**Remotion tech:** 3D CSS `rotateY` transform for flip, or `@remotion/transitions` `flip()` presentation applied per-card. `spring()` for natural flip physics.
+
+**File to create:** `KnoMotion-Videos/src/sdk/mid-scenes/RevealStack.jsx`
+
+---
+
+### New Layout Primitives
+
+#### LP1: `focus` Layout — Spotlight with Context
+
+**What it does:** A layout type where one slot gets 70-80% of the viewport as the "focus" area, and a smaller "context" strip sits along one edge (like a ticker or sidebar). The context strip can hold a persistent label, progress indicator, or branding.
+
+**Why it's amazing:** Broadcast TV always has context — a lower third, a topic label, a progress bar. Adding a persistent context strip makes videos feel professional without requiring the LLM to manually position elements.
+
+**Layout config:**
+```json
+{
+  "type": "focus",
+  "options": {
+    "contextPosition": "bottom",
+    "contextHeight": 120,
+    "padding": 50
+  }
+}
+```
+
+**Slots generated:** `focus` (main area), `context` (persistent strip)
+
+---
+
+#### LP2: `splitDiagonal` Layout — Diagonal Split
+
+**What it does:** Divides the viewport along a diagonal line. Two slots are created, each occupying a triangular/trapezoidal region. The divider can be animated (drawing in via `evolvePath()`).
+
+**Why it's amazing:** Diagonal splits are a staple of professional video editing. They create visual energy that horizontal/vertical splits cannot. A single CSS `clip-path: polygon(...)` achieves this.
+
+**Layout config:**
+```json
+{
+  "type": "splitDiagonal",
+  "options": {
+    "angle": 15,
+    "bias": 0.5
+  }
+}
+```
+
+**Slots generated:** `topLeft`, `bottomRight`
+
+---
+
+#### LP3: `pip` Layout — Picture-in-Picture
+
+**What it does:** One slot fills the viewport ("main"), and a second smaller slot is inset in a corner ("pip"). The PIP slot has a subtle border/shadow and can be positioned in any corner.
+
+**Why it's amazing:** Picture-in-picture is standard in educational content — show a speaker bubble, a diagram inset, or a Lottie animation in the corner while the main content plays. Currently requires manual absolute positioning.
+
+**Layout config:**
+```json
+{
+  "type": "pip",
+  "options": {
+    "pipPosition": "bottomRight",
+    "pipSize": 0.25,
+    "pipPadding": 30,
+    "pipBorderRadius": 20
+  }
+}
+```
+
+**Slots generated:** `main`, `pip`
+
+---
+
+### KnoMotion-Specific Additions
+
+#### KM1: Scene-Level Lower Third / Topic Banner
+
+**What it does:** A persistent, semi-transparent banner at the bottom of the scene displaying the current topic, module name, or progress. Slides in with the scene, persists, slides out at exit. Configured at the scene level (not as a mid-scene).
+
+**Why it's amazing:** Every professional educational video has a topic banner. It orients the learner and provides context. Making it scene-level means the LLM doesn't have to waste a slot on it.
+
+**JSON config:**
+```json
+{
+  "id": "scene-1",
+  "config": {
+    "lowerThird": {
+      "title": "Module 3: Neural Networks",
+      "subtitle": "Lesson 2 of 8",
+      "icon": "🧠",
+      "position": "bottomLeft",
+      "style": "glass"
+    }
+  }
+}
+```
+
+**File to create:** `KnoMotion-Videos/src/sdk/overlays/LowerThird.jsx`
+
+**Rendered by:** `SceneFromConfig` as an overlay layer (after slots, before transitions).
+
+---
+
+#### KM2: Branded Intro/Outro Sequences
+
+**What it does:** Pre-built intro and outro scene templates that the LLM can invoke by key. The intro shows the brand logo (Lottie), title, and subtitle with a signature animation. The outro shows a CTA, social links, or "next video" prompt.
+
+**Why it's amazing:** Every video needs bookends. Currently the LLM manually creates hook/CTA scenes. Branded templates ensure consistency across hundreds of generated videos.
+
+**JSON config:**
+```json
+{
+  "id": "intro",
+  "template": "brandedIntro",
+  "config": {
+    "title": "Neural Networks Explained",
+    "subtitle": "Module 3 • KnoMotion Academy",
+    "logo": "lottie:success",
+    "theme": "educational"
+  }
+}
+```
+
+**File to create:** `KnoMotion-Videos/src/sdk/templates/BrandedIntro.jsx`, `BrandedOutro.jsx`
+
+---
+
+#### KM3: Scene-Level Watermark / Branding Overlay
+
+**What it does:** A subtle, persistent watermark (logo, text, or both) that appears on every scene. Configurable opacity, position, and size. Set once at the video level, not per-scene.
+
+**JSON config (video-level):**
+```json
+{
+  "branding": {
+    "watermark": {
+      "text": "KnoMotion",
+      "position": "topRight",
+      "opacity": 0.15,
+      "fontSize": 24
+    }
+  },
+  "scenes": [...]
+}
+```
+
+---
+
+#### KM4: Motion Blur on Fast Transitions
+
+**What it does:** Wraps scene transitions in `@remotion/motion-blur`'s `<CameraMotionBlur>` for cinematic blur during fast slides/wipes.
+
+**Why it's amazing:** Motion blur is the single most recognizable marker of "professional" video. A fast slide transition with blur looks like broadcast TV; without it, it looks like a PowerPoint.
+
+**Remotion tech:** `@remotion/motion-blur` `<CameraMotionBlur samples={10} shutterAngle={180}>` wrapping the transition layer.
+
+---
+
+#### KM5: Animated Progress Bar (Video-Level)
+
+**What it does:** A thin animated progress bar across the top or bottom of every scene, showing how far through the video the learner is. Fills from left to right proportional to total video time.
+
+**Why it's amazing:** YouTube-style progress bars embedded in the video itself. Learners know how much is left. Creates a sense of momentum.
+
+**JSON config (video-level):**
+```json
+{
+  "progressBar": {
+    "enabled": true,
+    "position": "top",
+    "height": 4,
+    "color": "primary",
+    "backgroundColor": "rgba(0,0,0,0.1)"
+  }
+}
+```
+
+**Implementation:** Rendered by `GenericVideoPlayer` as an overlay `AbsoluteFill` with a `div` whose width is `interpolate(frame, [0, totalFrames], ['0%', '100%'])`.
+
+---
+
+#### KM6: Particle Burst on Emphasis Beats
+
+**What it does:** When a `beats.emphasis` timestamp fires on a `high` emphasis element, trigger a subtle particle burst (confetti, sparkles, or stars) around that element.
+
+**Why it's amazing:** Emphasis is currently visual-only (bold, color, pulse). Adding particle bursts at emphasis moments creates "wow" micro-interactions that make the video feel alive. The particle system already exists in `particleSystem.jsx`.
+
+**Implementation:** In `TextRevealSequence.jsx` and `ChecklistReveal.jsx`, detect when `frame === emphasisFrame` and render `generateBurstParticles()` at the element's position.
+
+---
+
+#### KM7: TikTok-Style Animated Captions
+
+**What it does:** Word-level animated captions that pop, scale, and color-shift as each word is spoken. Uses `@remotion/captions` `createTikTokStyleCaptions()`.
+
+**Why it's amazing:** This is the #1 feature that makes TikTok/Reels/Shorts videos feel professional and engaging. It's the most direct "this looks expensive" signal a video can have.
+
+**Remotion tech:** `@remotion/captions` provides `createTikTokStyleCaptions()` which takes word-level timestamps and creates animated caption segments. Combine with `spring()` for word pop-in.
+
+**File to create:** `KnoMotion-Videos/src/sdk/overlays/AnimatedCaptions.jsx`
+
+---
+
+### Summary: What "Amazing" Looks Like
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| **New Mid-Scenes** | 7 | progressTimeline, quoteReveal, beforeAfterSlider, codeBlock, flowDiagram, timerCountdown, revealStack |
+| **New Layout Primitives** | 3 | focus, splitDiagonal, pip (picture-in-picture) |
+| **KnoMotion Overlays** | 4 | lowerThird, watermark, progressBar, animatedCaptions |
+| **KnoMotion Templates** | 2 | brandedIntro, brandedOutro |
+| **Cinematic Effects** | 2 | motionBlur on transitions, particleBurst on emphasis |
+
+**Total new components: 18**
+
+Combined with the existing 10 mid-scenes, 5 layouts, 23 elements, and the rendering/audio/personalisation pipeline from the main build plan, this gives KnoMotion:
+
+- **17 mid-scenes** (10 existing + 7 new)
+- **8 layout types** (5 existing + 3 new)
+- **4 overlay types** (all new)
+- **2 template types** (all new)
+- **Audio + captions** (all new)
+- **Cinematic effects** (motion blur, particle bursts)
+
+This is a comprehensive, professional-grade JSON-driven video engine with no meaningful competitor at this level of LLM-friendliness.
+
+---
+
 *End of Build Status Document*
