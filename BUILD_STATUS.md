@@ -17,6 +17,8 @@
 8. [Build Tasks — NICE TO HAVES](#8-build-tasks--nice-to-haves)
 9. [Legacy Code Deletion Register](#9-legacy-code-deletion-register)
 10. [Dependency Summary](#10-dependency-summary)
+11. [AMAZING POLISH — New Mid-Scenes, Layouts & KnoMotion Additions](#11-amazing-polish--new-mid-scenes-layout-primitives--knomotion-specific-additions)
+12. [Blue-Sky Pipeline Gaps — Final Sweep](#12-blue-sky-pipeline-gaps--final-sweep)
 
 ---
 
@@ -1455,6 +1457,387 @@ Combined with the existing 10 mid-scenes, 5 layouts, 23 elements, and the render
 - **Cinematic effects** (motion blur, particle bursts)
 
 This is a comprehensive, professional-grade JSON-driven video engine with no meaningful competitor at this level of LLM-friendliness.
+
+---
+
+## 12. Blue-Sky Pipeline Gaps — Final Sweep
+
+These are the overlooked pieces that complete the end-to-end pipeline from PDF upload to polished video output. Without these, the pipeline has seams where an agent (or human) has to improvise.
+
+### BSG1: Video Plan Schema — "How Many Videos?"
+
+**The gap:** When an agent receives a 40-page training guide PDF, it needs to decide: how many videos? What length each? What topics? What order? Currently there's no schema for this intermediate planning step.
+
+**What's needed:** A `VideoPlan` schema that the agent produces before generating scene JSON.
+
+**Schema shape:**
+```json
+{
+  "courseName": "Introduction to Neural Networks",
+  "totalVideos": 5,
+  "format": "desktop",
+  "targetAudience": "beginners",
+  "videos": [
+    {
+      "videoId": "nn-01-intro",
+      "title": "What Are Neural Networks?",
+      "objectives": ["Define neural networks", "Explain why they matter"],
+      "estimatedDurationSeconds": 60,
+      "sourcePages": [1, 2, 3],
+      "keyVisuals": ["brain diagram", "network graph"],
+      "suggestedMidScenes": ["textReveal", "heroText", "flowDiagram"],
+      "precedingVideo": null,
+      "followingVideo": "nn-02-perceptron"
+    }
+  ],
+  "seriesBranding": {
+    "intro": "brandedIntro",
+    "outro": "brandedOutro",
+    "watermark": { "text": "KnoMotion Academy" },
+    "progressBar": true,
+    "colorTheme": "educational"
+  }
+}
+```
+
+**Why it matters:** Without this, the agent jumps straight from "here's a PDF" to "here's scene JSON" — skipping the most important creative decision: content structure. The video plan also enables series-level consistency (same intro/outro, watermark, progress tracking across videos).
+
+**File to create:** `KnoMotion-Videos/src/sdk/schemas/videoPlan.schema.ts`
+
+---
+
+### BSG2: Narration Script Schema — Bridging Scenes and TTS
+
+**The gap:** The build plan mentions TTS-to-beats alignment (P4d) but there's no schema for the intermediate script that bridges scene structure and TTS audio. The agent needs to produce a structured script that maps narration text to specific scenes and timing windows.
+
+**What's needed:** A `NarrationScript` type.
+
+**Schema shape:**
+```json
+{
+  "videoId": "nn-01-intro",
+  "voice": { "provider": "elevenlabs", "voiceId": "rachel", "speed": 1.0 },
+  "segments": [
+    {
+      "sceneId": "hook",
+      "narration": "Have you ever wondered how your phone recognises your face?",
+      "durationSeconds": 4.5,
+      "tone": "curious",
+      "emphasisWords": ["wondered", "recognises"]
+    },
+    {
+      "sceneId": "explain-concept",
+      "narration": "A neural network is a system inspired by the human brain.",
+      "durationSeconds": 5.0,
+      "tone": "explanatory",
+      "emphasisWords": ["neural network", "human brain"]
+    }
+  ]
+}
+```
+
+**Why it matters:** This script becomes the input to TTS APIs. The `emphasisWords` drive both TTS SSML emphasis tags AND visual `beats.emphasis` in the scene JSON. The `durationSeconds` per segment validates that scene `durationInFrames` is sufficient for the narration. Without this, the agent has no structured handoff between "write words" and "generate audio."
+
+**File to create:** `KnoMotion-Videos/src/sdk/schemas/narrationScript.schema.ts`
+
+---
+
+### BSG3: TTS Provider Abstraction Layer
+
+**The gap:** The pipeline assumes TTS happens but there's no abstraction for different TTS providers. Each provider returns timestamps in different formats.
+
+**What's needed:** A unified `TTSProvider` interface that normalises output to `@remotion/captions` `Caption[]` format.
+
+**Interface shape:**
+```typescript
+interface TTSProvider {
+  synthesize(text: string, options: TTSOptions): Promise<TTSResult>;
+}
+
+interface TTSResult {
+  audioUrl: string;
+  captions: Caption[];  // @remotion/captions format (startMs, endMs, text)
+  durationMs: number;
+}
+
+interface TTSOptions {
+  voiceId: string;
+  speed?: number;
+  emphasisWords?: string[];
+}
+```
+
+**Supported providers to implement:**
+- **ElevenLabs** — returns word-level timestamps via alignment API
+- **Google Cloud TTS** — returns `timepoints` in response
+- **OpenAI TTS** — use `@remotion/openai-whisper` `openAiWhisperApiToCaptions()` to transcribe the output audio back to word-level timestamps
+- **Azure TTS** — returns viseme/word events
+
+**File to create:** `KnoMotion-Videos/src/sdk/audio/ttsProvider.ts`
+
+---
+
+### BSG4: Asset Sourcing Strategy — "The Image Doesn't Exist Yet"
+
+**The gap:** When the agent decides a scene needs a hero image of "a neural network diagram" or a specific icon that isn't in the lottie registry, what happens? Currently the agent either uses a lottie key or guesses a URL. There's no structured approach.
+
+**What's needed:** An asset resolution strategy with fallback chain.
+
+**Resolution order:**
+1. **Lottie registry** — `resolveLottieRef('brain')` → URL
+2. **Animated emoji** — `@remotion/animated-emoji` for emoji icons
+3. **Static assets** — Pre-bundled images in `public/` (maps, diagrams, photos)
+4. **AI generation** — Call an image generation API (DALL-E, Midjourney API) and cache the result
+5. **Placeholder** — If all else fails, render a themed placeholder with icon + label
+
+**What the agent should output in JSON:**
+```json
+{
+  "heroType": "image",
+  "heroRef": {
+    "strategy": "generate",
+    "prompt": "minimalist diagram of a neural network, blue nodes on white background",
+    "fallback": "lottie:brain"
+  }
+}
+```
+
+**Why it matters:** The blue-sky pipeline will inevitably need visuals that don't exist yet. A structured asset resolution chain with a generation fallback means the pipeline doesn't stall when the agent needs a novel image. The `fallback` field ensures a valid video is always producible even if generation fails.
+
+**File to create:** `KnoMotion-Videos/src/sdk/assets/assetResolver.ts`
+
+---
+
+### BSG5: Scene Duration Auto-Calculation from Narration
+
+**The gap:** Currently `durationInFrames` is set manually. In the blue-sky pipeline, the narration script determines how long each scene should be — not the other way around. If the narration for a scene is 6.2 seconds, `durationInFrames` should be `Math.ceil(6.2 * 30) + bufferFrames`.
+
+**What's needed:** A `calculateSceneDuration()` function that takes the narration segment and returns the correct `durationInFrames`.
+
+**Implementation:**
+```typescript
+function calculateSceneDuration(
+  narrationDurationSeconds: number,
+  options?: { bufferSeconds?: number; minDurationSeconds?: number }
+): number {
+  const buffer = options?.bufferSeconds ?? 1.0;
+  const min = options?.minDurationSeconds ?? 3.0;
+  const totalSeconds = Math.max(min, narrationDurationSeconds + buffer);
+  return Math.ceil(totalSeconds * 30);
+}
+```
+
+**Why it matters:** This closes the loop. The agent writes a script → TTS returns exact timing → scene durations auto-calculate → beats align → everything fits perfectly. Without this, the agent guesses durations and risks narration being cut off or scenes having awkward silences.
+
+**File to create:** `KnoMotion-Videos/src/sdk/utils/calculateSceneDuration.ts`
+
+---
+
+### BSG6: Multi-Language / i18n Support
+
+**The gap:** The LLM guide mentions locale as a personalisation vector but there's no structured approach. For a learning platform, generating the same video in French, Spanish, or Japanese is a high-value capability.
+
+**What's needed:** A locale-aware scene config pattern where text content is separated from structure.
+
+**Pattern:**
+```json
+{
+  "id": "explain-concept",
+  "durationInFrames": 180,
+  "config": {
+    "layout": { "type": "rowStack", "options": { "rows": 2 } },
+    "slots": {
+      "row1": {
+        "midScene": "textReveal",
+        "config": {
+          "lines": [
+            { "textKey": "nn.intro.line1", "emphasis": "high" }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Combined with a locale file:
+```json
+{
+  "en": { "nn.intro.line1": "Your brain has 86 billion neurons." },
+  "fr": { "nn.intro.line1": "Votre cerveau possède 86 milliards de neurones." },
+  "es": { "nn.intro.line1": "Tu cerebro tiene 86 mil millones de neuronas." }
+}
+```
+
+**Resolution:** `SceneFromConfig` resolves `textKey` via a locale context provider. Same scene JSON, different language, different TTS voice.
+
+**Why it matters:** Knode is a learning platform. International reach multiplies content value. If one video can serve 10 languages, that's 10x the value from the same agent effort.
+
+---
+
+### BSG7: Visual Regression Testing via `renderStill()`
+
+**The gap:** As the engine grows (17 mid-scenes, 8 layouts, overlays, effects), there's no way to catch visual regressions. A change to `spring()` config could break the look of every canon video.
+
+**What's needed:** A test harness that renders key frames of canon videos using `renderStill()` and compares against baseline screenshots.
+
+**Implementation:**
+```typescript
+import { renderStill } from '@remotion/renderer';
+
+const testCases = [
+  { compositionId: 'TikTokBrainLies', frames: [0, 30, 60, 90] },
+  { compositionId: 'KnodoviaAccidentalArrival', frames: [0, 45, 150, 300] },
+];
+
+for (const test of testCases) {
+  for (const frame of test.frames) {
+    await renderStill({
+      serveUrl: bundleLocation,
+      composition: test.compositionId,
+      output: `test-output/${test.compositionId}-frame-${frame}.png`,
+      frame,
+    });
+    // Compare against baseline in test-baselines/ using pixel diff
+  }
+}
+```
+
+**Why it matters:** The agent-driven development model means changes happen fast. Without visual regression tests, a mid-scene refactor could silently break existing videos. Remotion's `renderStill()` makes this trivially implementable.
+
+**File to create:** `scripts/visual-regression-test.ts`
+
+---
+
+### BSG8: Structured Review / Feedback Format
+
+**The gap:** After the agent generates a video and it renders, how does the human provide structured feedback that the agent can act on? Currently it's freeform text. A structured feedback format would let the agent precisely identify and fix issues.
+
+**What's needed:** A `VideoReview` schema.
+
+**Schema shape:**
+```json
+{
+  "videoId": "nn-01-intro",
+  "overallRating": 4,
+  "sceneNotes": [
+    {
+      "sceneId": "hook",
+      "issue": "timing",
+      "note": "Text appears too fast, needs 1 more second",
+      "suggestedFix": "Increase durationInFrames from 150 to 180"
+    },
+    {
+      "sceneId": "explain-concept",
+      "issue": "content",
+      "note": "Missing mention of deep learning",
+      "suggestedFix": "Add a line about deep learning being a subset"
+    },
+    {
+      "sceneId": "summary",
+      "issue": "visual",
+      "note": "The grid cards feel cramped on mobile",
+      "suggestedFix": "Reduce columns from 3 to 2"
+    }
+  ],
+  "globalNotes": [
+    { "issue": "pacing", "note": "Overall feels rushed, add 0.5s buffer between scenes" },
+    { "issue": "audio", "note": "Background music too loud relative to narration" }
+  ]
+}
+```
+
+**Why it matters:** Closes the human-in-the-loop feedback cycle. The agent receives structured data, maps issues to specific scenes, and applies fixes programmatically. Without this, the review loop is "make it better" → agent guesses what to change.
+
+**File to create:** `KnoMotion-Videos/src/sdk/schemas/videoReview.schema.ts`
+
+---
+
+### BSG9: Series Continuity Engine
+
+**The gap:** A training guide produces multiple videos (BSG1). But those videos need continuity: "In the last video, we covered X. Today we'll explore Y." The agent needs context about what came before and what comes next.
+
+**What's needed:** A `SeriesContext` that's passed to the agent when generating each video.
+
+**Schema shape:**
+```json
+{
+  "seriesId": "neural-networks-101",
+  "currentVideoIndex": 2,
+  "totalVideos": 5,
+  "previousVideo": {
+    "title": "What Are Neural Networks?",
+    "keyConcepts": ["neurons", "connections", "activation"],
+    "endingCTA": "Next: The Perceptron"
+  },
+  "nextVideo": {
+    "title": "Training Your First Network",
+    "preview": "backpropagation, loss functions, gradient descent"
+  },
+  "recurringElements": {
+    "characterName": "Professor Knode",
+    "catchphrase": "Let's think about this...",
+    "colorTheme": "educational"
+  }
+}
+```
+
+**Why it matters:** Without series context, each video is an island. With it, the agent generates "Previously on..." recaps, "Coming up next..." teasers, and maintains character/theme consistency across a 5-10 video course. This is what makes a series feel professionally produced.
+
+---
+
+### BSG10: Render Artifact Management
+
+**The gap:** When the pipeline renders a video, where does the MP4 go? How is it versioned? How does the system track "this is v3 of the intro video, v2 had the timing bug"?
+
+**What's needed:** An artifact registry that tracks rendered outputs with metadata.
+
+**Schema shape:**
+```json
+{
+  "artifactId": "nn-01-intro-v3",
+  "videoId": "nn-01-intro",
+  "version": 3,
+  "renderedAt": "2026-04-01T14:30:00Z",
+  "renderMethod": "lambda",
+  "format": "desktop",
+  "duration": 62.5,
+  "fileUrl": "s3://knomotion-renders/nn-01-intro-v3.mp4",
+  "thumbnailUrl": "s3://knomotion-renders/nn-01-intro-v3-thumb.png",
+  "inputHash": "sha256:abc123...",
+  "sceneJsonSnapshot": "s3://knomotion-configs/nn-01-intro-v3.json",
+  "changelog": "Fixed timing on hook scene, added narration audio"
+}
+```
+
+**Why it matters:** The agent needs to know what's been rendered before, whether a re-render is needed (did the JSON change?), and how to reference previous versions for comparison. Without this, every render is fire-and-forget.
+
+---
+
+### Updated Blue-Sky Alignment Score
+
+With ALL items in this document implemented:
+
+| Component | Status | Score Contribution |
+|-----------|--------|-------------------|
+| JSON-first architecture | Existing | +1.5 |
+| Mid-scene library (17 types) | Existing + New | +1.5 |
+| Beats system (seconds-based) | Existing | +1.0 |
+| Style/emphasis presets | Existing | +0.5 |
+| Audio layer + TTS alignment | New (P4, BSG2, BSG3) | +1.0 |
+| Generic composition + calculateMetadata | New (S2) | +1.0 |
+| Complete schemas + capability manifest | New (S3, S4) | +0.5 |
+| @remotion/transitions | New (P1) | +0.5 |
+| Video plan schema | New (BSG1) | +0.5 |
+| Narration script schema | New (BSG2) | +0.25 |
+| TTS provider abstraction | New (BSG3) | +0.25 |
+| Auto scene duration from narration | New (BSG5) | +0.25 |
+| Series continuity engine | New (BSG9) | +0.25 |
+| Captions / animated subtitles | New (P4c, KM7) | +0.5 |
+| Structured review format | New (BSG8) | +0.25 |
+| Visual regression testing | New (BSG7) | +0.25 |
+
+**Revised score with all items: 10/10**
 
 ---
 
