@@ -18,7 +18,10 @@
 9. [Legacy Code Deletion Register](#9-legacy-code-deletion-register)
 10. [Dependency Summary](#10-dependency-summary)
 11. [AMAZING POLISH — New Mid-Scenes, Layouts & KnoMotion Additions](#11-amazing-polish--new-mid-scenes-layout-primitives--knomotion-specific-additions)
-12. [Blue-Sky Pipeline Gaps — Final Sweep](#12-blue-sky-pipeline-gaps--final-sweep)
+12. [remotion-bits Integration Plan](#12-remotion-bits-integration-plan)
+13. [Architecture Decision: More Mid-Scenes vs Complex Schemas](#13-architecture-decision-more-mid-scenes-vs-complex-schemas)
+14. [Overlap Guidance: Remotion MCP vs remotion-bits vs KnoMotion SDK](#14-overlap-guidance-remotion-mcp-vs-remotion-bits-vs-knomotion-sdk)
+15. [Blue-Sky Pipeline Gaps — Final Sweep](#15-blue-sky-pipeline-gaps--final-sweep)
 
 ---
 
@@ -1460,7 +1463,190 @@ This is a comprehensive, professional-grade JSON-driven video engine with no mea
 
 ---
 
-## 12. Blue-Sky Pipeline Gaps — Final Sweep
+## 12. remotion-bits Integration Plan
+
+### Overview
+
+`remotion-bits` (npm: `remotion-bits`, v0.2.0) is an open-source component kit providing 42 reusable "bits" — text effects, particle systems, 3D scenes, motion primitives, code blocks, and more. It requires React 18+ and Remotion 4.0+, which we already satisfy.
+
+**Installation:** `npm install remotion-bits`
+
+### Key Primitive: `StaggeredMotion`
+
+The single most impactful thing from remotion-bits is the `StaggeredMotion` component. It is a declarative animation wrapper providing: `x`, `y`, `z` translation; `scale`, `rotate`, `skew`; `opacity`, `blur`; `color`, `backgroundColor` keyframes; `stagger` (frames between children); `staggerDirection` (`"forward"`, `"reverse"`, `"center"`, `"random"`); configurable `easing` and `duration`.
+
+This replaces significant hand-rolled animation code across all mid-scenes.
+
+### Existing Mid-Scenes — Upgrade Map
+
+| # | Your Mid-Scene | remotion-bits Upgrade | Upgrade Type | Action |
+|---|---|---|---|---|
+| 1 | `textReveal` | **Blur In**, **Word by Word**, **Variable Speed Typewriter**, **Glitch In**, **Glitch Cycle**, **Staggered Char Animation** | Add new `revealType` options (`'blurSlide'`, `'charByChar'`, `'glitchIn'`, `'variableTypewriter'`, `'glitchCycle'`) using remotion-bits components as rendering primitives inside `TextRevealSequence`. JSON interface stays identical. | Enhance |
+| 2 | `heroText` | **Ken Burns Effect** | Add `heroAnimation: 'kenBurns'` option that wraps the hero image in a `Scene3D` Ken Burns camera move. | Enhance |
+| 3 | `gridCards` | **Grid Stagger**, **Mosaic Reframe** | Replace animation layer with `StaggeredMotion`. Add `animation: 'centerRipple'` (center-outward stagger) and `animation: 'mosaicReframe'` (layout morphing). | Enhance |
+| 4 | `checklist` | **List Reveal** | Use `StaggeredMotion` for item entrance (nested: outer controls Y, inner controls scale). Icon/checkbox animation stays custom. | Enhance |
+| 5 | `bubbleCallout` | None | No remotion-bits equivalent. Keep as-is. | Keep |
+| 6 | `sideBySide` | None | No remotion-bits equivalent. Keep as-is. | Keep |
+| 7 | `iconGrid` | **Grid Stagger** | Same as `gridCards` — use center-ripple entrance via `StaggeredMotion`. | Enhance |
+| 8 | `cardSequence` | **3D Card Stack**, **3D Carousel** | Add `layout: '3dStack'` (cards spread in 3D with fan effect) and `layout: 'carousel'` (rotating 3D carousel). | Enhance |
+| 9 | `bigNumber` | **Counter Confetti** | Add `celebration: true` option that triggers remotion-bits Particle confetti burst when count completes. | Enhance |
+| 10 | `animatedCounter` | **Basic Counter** | Replace internal interpolation with remotion-bits `AnimatedCounter`. JSON interface unchanged. | Replace internals |
+
+### New Mid-Scenes Unlocked by remotion-bits
+
+#### Tier 1: High-Impact for Education
+
+| New Mid-Scene | remotion-bits Source | Description | Priority |
+|---|---|---|---|
+| **`codeBlock`** | `CodeBlock` + `TypingCodeBlock` | Syntax highlighting with Prism, line-by-line reveal, line highlighting, focus mode, typing effect. **Replaces the planned custom build in MS4 — use remotion-bits, don't build from scratch.** | HIGH |
+| **`cliSimulation`** | `CLI Simulation` | Simulates a terminal with user typing commands and system output. Teaching CLI tools, git, npm, deployment. | HIGH |
+| **`cursorDemo`** | `Cursor Flyover` | Camera flies over an app screenshot while a cursor highlights areas. Product walkthroughs, feature tours, UI tutorials. | HIGH |
+| **`terminal3D`** | `3D Terminal` | Multiple terminal windows in a 3D scene executing commands. Tech education visual showcase. | MEDIUM |
+| **`flyingText`** | `Flying Through Words` | Words spawning and flying past the camera in 3D. Dramatic hook scenes, key concept reveals. | MEDIUM |
+
+#### Tier 2: Visual Wow-Factor
+
+| New Mid-Scene | remotion-bits Source | Description | Priority |
+|---|---|---|---|
+| **`carousel3D`** | `3D Carousel` | Rotating card carousel in 3D space. Concept showcases, team members, option displays. | MEDIUM |
+| **`mosaicGrid`** | `Mosaic Reframe` | Tiles morph between three layouts (grid → featured → diagonal). Photo galleries, concept collections. | MEDIUM |
+| **`fractureReveal`** | `Fracture Reassemble` | Content shatters into tiles flying into 3D space, then reassembles. Dramatic scene transitions or reveals. | LOW |
+| **`presentation3D`** | `Basic 3D Scene` | impress.js-style 3D camera flying between positioned content. Spatial explainers. | LOW |
+| **`scrollingGallery`** | `Scrolling Columns` | Parallax columns scrolling at different speeds in 3D. Credits, showcases, summaries. | LOW |
+
+#### Background & Ambient Effects
+
+| Effect | remotion-bits Source | Usage | Priority |
+|---|---|---|---|
+| **`fireflies`** | `Fireflies` | Ambient wandering glow particles. Replaces/upgrades `particles: { style: 'sparkle' }`. Far more organic. | HIGH |
+| **`animatedGradients`** | `Linear Gradient` + `Radial Gradient` + `Conic Gradient` | Smooth animated gradient transitions. Replaces static background presets with living gradients. | HIGH |
+| **`snowfall`** | `Snow` | Falling snow particles. Seasonal or atmospheric. | LOW |
+| **`matrixRain`** | `Matrix Rain` | Digital rain background. Tech/cyberpunk aesthetic. | LOW |
+| **`particleFountain`** | `Fountain` | Bursting fountain particles. Celebration moments. | LOW |
+| **`gridParticles`** | `Grid Particles` | Particles snapping to a grid. Structured tech aesthetic. | LOW |
+
+### Contradictions Resolved
+
+The following items from earlier sections are updated by the remotion-bits integration:
+
+**1. MS4 `codeBlock` (Section 11) — NO LONGER CUSTOM BUILD**
+Previously: "Use a lightweight syntax tokenizer (no heavy deps — just regex-based token coloring)."
+Now: Use remotion-bits `CodeBlock` which includes Prism syntax highlighting, line reveal, focus mode, and typing effect. Production-ready, no custom build needed.
+
+**2. MS7 `revealStack` (Section 11) — USE remotion-bits 3D CARD STACK**
+Previously: "3D CSS `rotateY` transform for flip."
+Now: Use remotion-bits `3D Card Stack` with `StaggeredMotion` for the card spread/fan effect. Adapt for front/back flip by composing with CSS `rotateY`.
+
+**3. S4 Capability Manifest (Section 5) — 3D IS NOW SUPPORTED**
+Previously listed `"3D scenes"` under `"unsupported"`.
+Now: With remotion-bits `Scene3D`, 3D scenes are supported. Remove from unsupported list. Add `"3dScene"`, `"carousel3D"`, `"presentation3D"` to supported mid-scenes.
+
+**4. Section 11 Mid-Scene Counts — UPDATED**
+Previously: "17 mid-scenes (10 existing + 7 new)."
+Now: Up to **27 mid-scenes** (10 existing + 7 originally planned + 10 remotion-bits unlocked). Not all need to be built immediately — the Tier 1 + Tier 2 items bring it to ~22 at first pass.
+
+**5. N1 `@remotion/noise` for Backgrounds (Section 8) — COMPLEMENT, NOT REPLACE**
+`@remotion/noise` (`noise2D`, `noise3D`) serves a different purpose to remotion-bits gradient components. Noise is for film grain/organic texture. remotion-bits gradients are for smooth animated color transitions. Both are valid — use noise for grain overlays, remotion-bits for background gradients.
+
+**6. KM6 Particle Burst on Emphasis (Section 11) — CAN USE EITHER SYSTEM**
+KnoMotion's existing `particleSystem.jsx` or remotion-bits `Fountain`/`Particles` engine. The agent should check with the user on which to use, per the overlap guidance in Section 14.
+
+### Legacy Code Implications
+
+| remotion-bits Adoption | Legacy Code to Phase Out |
+|---|---|
+| `StaggeredMotion` for mid-scene entrances | Custom stagger calculation in each mid-scene's `getAnimationStyle()` function. After adoption, the per-mid-scene stagger math (~20-40 lines each in 8 files) becomes redundant. |
+| remotion-bits `CodeBlock` | Planned custom `CodeBlock.jsx` — never needs to be built. |
+| remotion-bits animated gradients for backgrounds | Static gradient CSS in `resolveBackground.tsx` presets (`sunriseGradient`, `chalkboardGradient`) can optionally be upgraded to animated versions. Keep both — static for simplicity, animated as an opt-in via `animated: true` in background config. |
+| remotion-bits `Fireflies` | KnoMotion `particleSystem.jsx` `sparkle` style. Both can coexist — `sparkle` for structured particles, `fireflies` for organic ambient. |
+
+### Dependency Addition
+
+Add to Section 10 dependency table:
+
+| Package | Version | Task | Purpose |
+|---|---|---|---|
+| `remotion-bits` | `0.2.0` | Section 12 | `StaggeredMotion`, `CodeBlock`, `Scene3D`, `Particles`, gradient components, text effects, 3D layouts |
+
+---
+
+## 13. Architecture Decision: More Mid-Scenes vs Complex Schemas
+
+### The Question
+
+Should KnoMotion have many focused mid-scenes with simple schemas, or fewer mid-scenes with complex branching schemas (modes, variants, conditional fields)?
+
+### Decision: FAVOR MORE MID-SCENES
+
+**Rationale:**
+
+1. **LLMs work better with distinct types.** `"midScene": "codeBlock"` is unambiguous. `"midScene": "textReveal", "config": { "mode": "code", "subMode": "typing", ... }` requires the LLM to discover hidden capabilities deep in a branching schema.
+
+2. **Schema validation is simpler.** Each mid-scene has its own flat schema. No conditional validation ("if `mode` is X then field Y is required but field Z is forbidden"). The existing `sideBySide` already shows the problem — the `beforeAfter` mode is undocumented in the schema, and the agent doesn't know it exists.
+
+3. **Implementation stays modular.** Each mid-scene is a self-contained file + schema + registry entry. Extending the engine = adding a new file, not adding branches to an existing component. This is critical for agent-driven CI where the agent proposes new mid-scenes.
+
+4. **Discovery is explicit.** The capability manifest (S4) lists every mid-scene by name. An LLM can scan the list and pick the right one. Buried modes inside a component are invisible to the manifest.
+
+5. **Performance and bundle size.** A mid-scene that conditionally imports 3D libraries, code syntax highlighters, AND particle systems is a monolithic bundle. Separate mid-scenes only import what they need.
+
+### When Branching IS Appropriate
+
+Branching within a mid-scene is acceptable for **visual variants that share the same content structure**:
+
+- `textReveal` with different `revealType` values (`'typewriter'`, `'fade'`, `'blurSlide'`, `'glitchIn'`) — same `lines` array, different visual treatment.
+- `gridCards` with different `animation` values (`'cascade'`, `'centerRipple'`, `'fade'`) — same `cards` array, different entrance.
+- `cardSequence` with different `layout` values (`'stacked'`, `'grid'`, `'3dStack'`, `'carousel'`) — same `cards` array, different spatial arrangement.
+
+Branching is NOT appropriate when the **content structure fundamentally changes**:
+- `sideBySide` with `mode: 'beforeAfter'` changes the props from `left`/`right` to `before`/`after`/`slider`. This should be a separate mid-scene (which is why `beforeAfterSlider` was proposed in Section 11).
+
+### Implementation Rule for Agents
+
+When an agent proposes a new feature:
+1. **If it shares the content schema with an existing mid-scene** (same props, different visual) → add a new variant/option to the existing mid-scene.
+2. **If it requires different props or a fundamentally different content structure** → create a new mid-scene.
+3. **When in doubt** → create a new mid-scene. It's easier to merge two simple mid-scenes later than to untangle a complex branching one.
+
+---
+
+## 14. Overlap Guidance: Remotion MCP vs remotion-bits vs KnoMotion SDK
+
+### The Problem
+
+With three sources of animation/component primitives — Remotion core (via MCP), remotion-bits, and KnoMotion's existing SDK — there are overlapping capabilities. An implementing agent needs clear guidance on which to use when, and when to escalate to the user.
+
+### Resolution Matrix
+
+| Capability | Remotion Core (MCP) | remotion-bits | KnoMotion SDK | **USE** |
+|---|---|---|---|---|
+| **Scene transitions** | `@remotion/transitions` (`TransitionSeries`, `fade()`, `slide()`, etc.) | — | `SceneTransitionWrapper` (legacy) | **Remotion Core.** Delete KnoMotion legacy (P1c). |
+| **Element entrance animation** | `spring()`, `interpolate()`, `Easing` | `StaggeredMotion` (declarative wrapper over `interpolate`) | `fadeIn()`, `slideIn()`, `scaleIn()`, `bounceIn()` in `animations/index.js` | **CHECK WITH USER.** `StaggeredMotion` is higher-level and more composable, but Remotion's `spring()` is more precise for individual elements. Recommended default: `StaggeredMotion` for groups/lists, `spring()` for individual hero elements. |
+| **Spring physics** | `spring()` with config objects | `StaggeredMotion` easing (wraps `interpolate`, not `spring`) | `SPRING_CONFIGS` (duplicate) | **Remotion Core `spring()`** for physics-based motion. remotion-bits for interpolation-based stagger. Delete KnoMotion duplicates (P2c). |
+| **Easing curves** | `Easing` module (bezier, elastic, bounce, etc.) | Named easing strings (`"easeOutCubic"`, etc.) | `sdk/easing.ts` (custom) | **Remotion Core `Easing`** as canonical. remotion-bits easing names are fine within `StaggeredMotion` context. Delete KnoMotion custom easing (P2b). |
+| **Particles** | — | `Particles` engine (Spawner, Behavior, physics-based) | `particleSystem.jsx` (ambient, burst) | **CHECK WITH USER.** remotion-bits has a more sophisticated physics engine. KnoMotion's is simpler and already integrated. Recommend: remotion-bits for new particle effects (fireflies, fountain), keep KnoMotion's for existing beat-triggered bursts. |
+| **Code blocks** | — | `CodeBlock` (Prism, line reveal, focus, typing) | None (was planned as custom MS4) | **remotion-bits.** Don't build custom. |
+| **3D scenes** | `@remotion/three` (React Three Fiber) | `Scene3D` (CSS 3D transforms, no WebGL) | None | **CHECK WITH USER.** `@remotion/three` is full WebGL (heavier, GPU-dependent). remotion-bits `Scene3D` is CSS 3D (lighter, no GPU issues on Lambda). For educational video, CSS 3D is almost always sufficient. Recommend: remotion-bits `Scene3D` as default, `@remotion/three` only if user specifically needs WebGL. |
+| **Text reveals** | `interpolate()` for character/word counting | `BlurIn`, `WordByWord`, `GlitchIn`, `BasicTypewriter`, `VariableSpeedTypewriter` | `TextRevealSequence` with reveal types | **remotion-bits as rendering primitives inside KnoMotion's `TextRevealSequence`.** The JSON interface stays KnoMotion's; the visual rendering uses remotion-bits components as the inner layer. |
+| **Noise/grain** | `@remotion/noise` (`noise2D`, `noise3D`) | — | `NoiseTexture` (SVG overlay) | **Remotion Core `@remotion/noise`** for animated procedural noise. Delete KnoMotion SVG overlay (N1). |
+| **Shapes** | `@remotion/shapes` (`Star`, `Circle`, `Pie`, etc.) | — | None | **Remotion Core.** |
+| **SVG paths** | `@remotion/paths` (`evolvePath`, `interpolatePath`) | — | `handwritingEffects.jsx` (manual dasharray) | **Remotion Core.** Replace KnoMotion manual code (P5a). |
+| **Gradients** | — | `LinearGradient`, `RadialGradient`, `ConicGradient` (animated) | `resolveBackground` (static CSS) | **Both.** KnoMotion static presets for simple cases, remotion-bits animated gradients as an opt-in upgrade (`animated: true`). |
+| **Captions** | `@remotion/captions` (`createTikTokStyleCaptions`) | — | None | **Remotion Core.** |
+
+### Agent Escalation Rule
+
+**When the agent encounters an overlapping capability between Remotion MCP, remotion-bits, and KnoMotion SDK, it MUST:**
+
+1. Check this resolution matrix first.
+2. If the matrix says "CHECK WITH USER" — pause and ask: "I have two options for [X]: [Option A] from Remotion core and [Option B] from remotion-bits. [Brief tradeoff]. Which approach do you prefer?"
+3. If the matrix gives a clear answer — use it without asking.
+4. Always consult the Remotion MCP documentation for the canonical API of any `@remotion/*` package before implementing.
+5. For remotion-bits components, refer to https://remotion-bits.dev/docs/bits-catalog/ for API details.
+
+---
+
+## 15. Blue-Sky Pipeline Gaps — Final Sweep
 
 These are the overlooked pieces that complete the end-to-end pipeline from PDF upload to polished video output. Without these, the pipeline has seams where an agent (or human) has to improvise.
 
@@ -1821,7 +2007,7 @@ With ALL items in this document implemented:
 | Component | Status | Score Contribution |
 |-----------|--------|-------------------|
 | JSON-first architecture | Existing | +1.5 |
-| Mid-scene library (17 types) | Existing + New | +1.5 |
+| Mid-scene library (22+ types with remotion-bits) | Existing + New + remotion-bits | +1.5 |
 | Beats system (seconds-based) | Existing | +1.0 |
 | Style/emphasis presets | Existing | +0.5 |
 | Audio layer + TTS alignment | New (P4, BSG2, BSG3) | +1.0 |
