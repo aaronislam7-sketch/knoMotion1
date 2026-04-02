@@ -21,7 +21,8 @@
 12. [remotion-bits Integration Plan](#12-remotion-bits-integration-plan)
 13. [Architecture Decision: More Mid-Scenes vs Complex Schemas](#13-architecture-decision-more-mid-scenes-vs-complex-schemas)
 14. [Overlap Guidance: Remotion MCP vs remotion-bits vs KnoMotion SDK](#14-overlap-guidance-remotion-mcp-vs-remotion-bits-vs-knomotion-sdk)
-15. [Blue-Sky Pipeline Gaps — Final Sweep](#15-blue-sky-pipeline-gaps--final-sweep)
+15. [`@remotion/layout-utils` — Text Measurement & Fitting](#15-remotionlayout-utils--text-measurement--fitting)
+16. [Blue-Sky Pipeline Gaps — Final Sweep](#16-blue-sky-pipeline-gaps--final-sweep)
 
 ---
 
@@ -1646,7 +1647,64 @@ With three sources of animation/component primitives — Remotion core (via MCP)
 
 ---
 
-## 15. Blue-Sky Pipeline Gaps — Final Sweep
+## 15. `@remotion/layout-utils` — Text Measurement & Fitting
+
+**Priority:** LOW
+**Type:** Complement to existing layout system (not a replacement)
+
+### What It Is
+
+`@remotion/layout-utils` provides text measurement and fitting utilities. It does NOT replace `resolveSceneSlots` (scene-level viewport division) or `calculateItemPositions` (item-level positioning). It solves a different problem: ensuring text content fits within its allocated space.
+
+### Functions
+
+| Function | Purpose | KnoMotion Use Case |
+|---|---|---|
+| `measureText()` | Returns pixel `width`/`height` of a text string given font properties | Dynamic node sizing in `flowDiagram`; precise text positioning |
+| `fitText()` | Calculates `fontSize` to fit text within a given pixel width | Auto-sizing text in `textReveal`, `bigNumber`, `quoteReveal` when LLM generates unpredictably long text |
+| `fitTextOnNLines()` | Calculates `fontSize` to fit text on exactly N lines; returns line-split array | `quoteReveal` displaying long quotes across 2-3 lines at max font size |
+| `fillTextBox()` | Progressively adds words, reports new lines and overflow | **Validation:** detect text overflow at JSON-validation time before rendering |
+
+Companion package `@remotion/rounded-text-box` creates TikTok/Instagram-style rounded text box SVG paths — useful for animated captions (KM7) and lower third overlays (KM1).
+
+### Why It Matters for the Blue-Sky Pipeline
+
+Agent-generated text has unpredictable length. Without text fitting:
+- A line might overflow its slot silently
+- Font sizes are guessed, not calculated
+- Validation can't catch overflow before rendering
+
+With `@remotion/layout-utils`:
+- `fitText()` in mid-scenes auto-shrinks font to fit the slot
+- `fillTextBox()` in the validation CLI (S6) catches overflow before render
+- `fitTextOnNLines()` gives the planned `quoteReveal` precise multi-line layout
+
+### Integration Points
+
+| Where | How | Impact |
+|---|---|---|
+| `TextRevealSequence.jsx` | Use `fitText()` to auto-size lines that exceed slot width | Eliminates text overflow |
+| `ChecklistReveal.jsx` | Replace the `autoFitText` flag with real `fitText()` measurement | Proper auto-fit instead of placeholder logic |
+| `BigNumberReveal.jsx` | Use `fitText()` to size the number to fill the slot | Consistent dramatic sizing |
+| Scene validation (S6) | Use `fillTextBox()` to detect overflow at validation time | Agent catches problems before rendering |
+| `QuoteReveal.jsx` (planned) | Use `fitTextOnNLines()` for multi-line quote layout | Precise line-splitting with max font |
+| `FlowDiagram.jsx` (planned) | Use `measureText()` for dynamic node width | Nodes adapt to label length |
+| Animated captions (KM7) | Use `@remotion/rounded-text-box` for word-level caption boxes | TikTok-style rounded backgrounds behind caption words |
+
+### Dependency
+
+| Package | Version | Purpose |
+|---|---|---|
+| `@remotion/layout-utils` | Match remotion version (4.0.382) | `measureText()`, `fitText()`, `fillTextBox()`, `fitTextOnNLines()` |
+| `@remotion/rounded-text-box` | Match remotion version | `createRoundedTextBox()` for caption styling |
+
+### Overlap Note
+
+This does NOT conflict with or replace any existing KnoMotion layout code. It is purely additive — text measurement utilities that the codebase currently lacks. No legacy deletion required.
+
+---
+
+## 16. Blue-Sky Pipeline Gaps — Final Sweep
 
 These are the overlooked pieces that complete the end-to-end pipeline from PDF upload to polished video output. Without these, the pipeline has seams where an agent (or human) has to improvise.
 
