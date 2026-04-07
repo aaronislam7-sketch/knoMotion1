@@ -18,10 +18,15 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import {
+  resolvePresentation,
+  resolveTransitionTiming,
+  calculateTransitionSeriesDuration,
+} from '../sdk/transitions';
 
-const FPS = 30;
 const TRANSITION_FRAMES = 20;
 
 const scenes = [
@@ -84,7 +89,7 @@ const scenes = [
   {
     id: 'the-delay',
     durationInFrames: 390, // 13s
-    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+    transition: { type: 'slide', direction: 'right', wobble: true },
     config: {
       format: 'mobile',
       background: { preset: 'notebookSoft', layerNoise: true },
@@ -262,7 +267,7 @@ const scenes = [
   {
     id: 'close',
     durationInFrames: 300, // 10s
-    transition: { type: 'eraser' },
+    transition: { type: 'slide' },
     config: {
       format: 'mobile',
       background: {
@@ -293,9 +298,9 @@ const scenes = [
 ];
 
 // Calculate total duration
-export const TIKTOK_80MSDELAY_DURATION = scenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0
+export const TIKTOK_80MSDELAY_DURATION = calculateTransitionSeriesDuration(
+  scenes,
+  TRANSITION_FRAMES
 );
 
 /**
@@ -305,24 +310,26 @@ export const TIKTOK_80MSDELAY_DURATION = scenes.reduce(
  * Features the "buffering livestream" analogy in Scene 3.
  */
 export const TikTok_80msDelay = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
+
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {scenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };
