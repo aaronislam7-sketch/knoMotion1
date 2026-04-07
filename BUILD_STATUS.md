@@ -23,6 +23,7 @@
 14. [Overlap Guidance: Remotion MCP vs remotion-bits vs KnoMotion SDK](#14-overlap-guidance-remotion-mcp-vs-remotion-bits-vs-knomotion-sdk)
 15. [`@remotion/layout-utils` — Text Measurement & Fitting](#15-remotionlayout-utils--text-measurement--fitting)
 16. [Blue-Sky Pipeline Gaps — Final Sweep](#16-blue-sky-pipeline-gaps--final-sweep)
+17. [Implementation Kickstart Prompt](#17-implementation-kickstart-prompt)
 
 ---
 
@@ -2082,6 +2083,137 @@ With ALL items in this document implemented:
 | Visual regression testing | New (BSG7) | +0.25 |
 
 **Revised score with all items: 10/10**
+
+---
+
+## 17. Implementation Kickstart Prompt
+
+The following prompt is designed to be pasted into an inline Cursor chat session to begin actioning this plan. It is structured for iterative execution — each chunk completes, commits, and pushes before the next begins. The agent should not attempt to do everything in one session.
+
+---
+
+### THE PROMPT
+
+```
+You are working in the KnoMotion repository — a JSON-first video engine built on Remotion.
+
+## Your Bible
+
+Read BUILD_STATUS.md at the repo root FIRST. It is a 2000+ line plan with 16 sections
+covering every aspect of this build. Do not deviate from it. If something isn't in the
+plan, ask me before implementing.
+
+## Context Files (read these for architecture understanding)
+
+- docs/ARCHITECTURE.md — Engine architecture
+- docs/reference-llm-guide.md — JSON schemas for all mid-scenes
+- docs/instructions-llm-guide.md — LLM behavioral guidelines
+- SDK.md — Full SDK reference
+- KnoMotion-Videos/src/compositions/SceneRenderer.jsx — Core renderer
+- KnoMotion-Videos/src/sdk/mid-scenes/index.js — Mid-scene registry
+- KnoMotion-Videos/src/sdk/theme/knodeTheme.ts — Theme tokens
+- KnoMotion-Videos/src/remotion/Root.tsx — Composition registration
+- remotion.config.ts — Remotion config
+
+## Three Sources of Truth
+
+1. **Remotion MCP** — Always consult for any @remotion/* package API. This is canonical.
+2. **remotion-bits** (https://remotion-bits.dev/docs/bits-catalog/) — For StaggeredMotion,
+   CodeBlock, Scene3D, Particles, text effects. See BUILD_STATUS Section 12.
+3. **BUILD_STATUS.md** — For KnoMotion-specific architecture decisions, overlap guidance
+   (Section 14), and the "more mid-scenes vs complex schemas" ruling (Section 13).
+
+## Overlap Rule (CRITICAL)
+
+Section 14 of BUILD_STATUS.md has a resolution matrix for every overlapping capability
+between Remotion core, remotion-bits, and KnoMotion SDK. When the matrix says
+"CHECK WITH USER" — stop and ask me before choosing an approach. Do not guess.
+
+## Version Constraint
+
+All @remotion/* packages MUST be the exact same version (currently 4.0.382).
+No ^ prefixes. Check package.json before installing anything.
+
+## Legacy Deletion Rule
+
+Section 9 of BUILD_STATUS.md has the Legacy Code Deletion Register. When you complete
+a task that has a deletion entry, execute the deletion in the same commit. Do not
+leave dead code behind.
+
+## How to Work — Iterative Chunks
+
+DO NOT try to implement the entire plan in one session. Work in focused chunks:
+
+### Chunk 1: P1 — Adopt @remotion/transitions
+- P1a: Create sdk/transitions/ with resolvePresentation() mapper + custom doodleWipe
+  and eraser presentations.
+- P1b: Refactor ONE canon video (start with TikTok_BrainLies.jsx) to use TransitionSeries.
+  Verify it works. Then refactor the remaining canon videos.
+- P1c: Delete SceneTransitionWrapper per the Legacy Deletion Register.
+- Commit and push. Update me.
+
+### Chunk 2: S2 + S3 — Generic Composition + Schemas
+- S3a: Add missing schemas (BigNumberReveal, AnimatedCounter).
+- S3b: Update incomplete schemas (SideBySide beforeAfter, BubbleCallout collision).
+- S3c: Add BigNumberReveal to mid-scenes barrel.
+- S2a: Create GenericVideoPlayer.jsx using TransitionSeries.
+- S2b: Register with calculateMetadata() in Root.tsx.
+- Commit and push. Update me.
+
+### Chunk 3: P4 — Audio Layer
+- P4a: Add audio fields to scene JSON schema.
+- P4b: Create AudioLayer component.
+- P4c: Create CaptionOverlay component.
+- P4d: Create ttsToBeatAlignment() utility.
+- Commit and push. Update me.
+
+### Chunk 4: S1 + S4 — Zod Schemas + Capability Manifest
+- S1a: Define complete Zod schema for video config.
+- S1b: Register schema on compositions in Root.tsx.
+- S4a: Generate capability manifest JSON.
+- Commit and push. Update me.
+
+### Chunk 5: R1 — Player Integration
+- R1a: Create KnoMotionPlayer wrapper.
+- R1b: Add @remotion/preload for asset preloading.
+- Commit and push. Update me.
+
+### Chunk 6: P2 + P3 — Spring/Easing Standardization + Emoji
+- P2a: Consolidate spring configs to single source.
+- P2b: Replace custom easing with Remotion Easing.
+- P2c: Delete legacy duplicates per Legacy Deletion Register.
+- P3a: Verify animated emoji assets.
+- P3b: Expand emoji mapping.
+- Commit and push. Update me.
+
+### Chunk 7: remotion-bits Integration (Section 12 — Tier 1)
+- Install remotion-bits.
+- Add new revealType options to textReveal using remotion-bits text components.
+- Add centerRipple animation to gridCards using StaggeredMotion.
+- Add List Reveal animation to checklist using StaggeredMotion.
+- Integrate CodeBlock from remotion-bits as new codeBlock mid-scene.
+- Commit and push. Update me.
+
+### Chunk 8+: Continue with remaining tasks in priority order
+- Section 11 new mid-scenes (progressTimeline, quoteReveal, flowDiagram, etc.)
+- Section 12 Tier 2 mid-scenes (carousel3D, mosaicGrid, etc.)
+- Section 16 blue-sky gaps (BSG1-BSG10)
+- Section 8 nice-to-haves (N1-N5)
+- Section 15 @remotion/layout-utils
+
+After each chunk: commit, push, and give me a summary of what was completed
+and what's next. I will tell you whether to continue or adjust direction.
+
+## What "Done" Looks Like Per Chunk
+
+- Code compiles without errors
+- No lint regressions introduced
+- Legacy code deleted per Section 9 if applicable
+- Any new mid-scene has: component file, schema file, registry entry, entry in
+  MID_SCENE_COMPONENTS in SceneRenderer.jsx
+- Commit message describes what was done
+- Changes pushed to the working branch
+```
 
 ---
 
