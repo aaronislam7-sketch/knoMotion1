@@ -17,16 +17,12 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { KNODE_THEME } from '../sdk/theme/knodeTheme';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import { resolvePresentation, resolveTransitionTiming } from '../sdk/transitions';
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const FPS = 30;
-const TRANSITION_DURATION = 15; // frames for crossfade
+const TRANSITION_FRAMES = 20;
 
 // Scene durations in frames
 const SCENE_DURATIONS = {
@@ -40,17 +36,6 @@ const SCENE_DURATIONS = {
   outro: 480,        // 16s - Summary + CTA
 };
 
-// Total: 3600 frames = 120 seconds
-
-// ============================================================================
-// SCENE CONFIGURATIONS (JSON-DRIVEN)
-// ============================================================================
-
-/**
- * Scene 1: Intro Hook
- * Layout: full
- * Mid-scenes: TextRevealSequence
- */
 const scene1Config = {
   id: "intro-hook",
   layout: {
@@ -86,11 +71,6 @@ const scene1Config = {
   }
 };
 
-/**
- * Scene 2: Common Myths
- * Layout: columnSplit
- * Mid-scenes: TextRevealSequence, BubbleCalloutSequence
- */
 const scene2Config = {
   id: "common-myths",
   layout: {
@@ -141,11 +121,6 @@ const scene2Config = {
   }
 };
 
-/**
- * Scene 3: Myth vs Reality
- * Layout: full (SideBySideCompare handles its own layout)
- * Mid-scenes: SideBySideCompare
- */
 const scene3Config = {
   id: "myth-reality",
   layout: {
@@ -195,11 +170,6 @@ const scene3Config = {
   }
 };
 
-/**
- * Scene 4: The Science
- * Layout: headerRowColumns
- * Mid-scenes: TextRevealSequence, IconGrid
- */
 const scene4Config = {
   id: "the-science",
   layout: {
@@ -265,11 +235,6 @@ const scene4Config = {
   }
 };
 
-/**
- * Scene 5: The Real Culprits
- * Layout: gridSlots (2x2)
- * Mid-scenes: GridCardReveal
- */
 const scene5Config = {
   id: "real-culprits",
   layout: {
@@ -310,11 +275,6 @@ const scene5Config = {
   }
 };
 
-/**
- * Scene 6: Fixes / Checklist
- * Layout: columnSplit
- * Mid-scenes: ChecklistReveal, TextRevealSequence
- */
 const scene6Config = {
   id: "fixes-checklist",
   layout: {
@@ -369,11 +329,6 @@ const scene6Config = {
   }
 };
 
-/**
- * Scene 7: Fun Facts
- * Layout: rowStack
- * Mid-scenes: BubbleCalloutSequence, CardSequence
- */
 const scene7Config = {
   id: "fun-facts",
   layout: {
@@ -420,11 +375,6 @@ const scene7Config = {
   }
 };
 
-/**
- * Scene 8: Outro / Summary
- * Layout: full
- * Mid-scenes: TextRevealSequence
- */
 const scene8Config = {
   id: "outro-summary",
   layout: {
@@ -460,70 +410,38 @@ const scene8Config = {
   }
 };
 
-// ============================================================================
-// MAIN COMPOSITION
-// ============================================================================
+const allScenes = [
+  { id: 'intro', durationInFrames: SCENE_DURATIONS.intro, transition: { type: 'fade' }, config: scene1Config },
+  { id: 'myths', durationInFrames: SCENE_DURATIONS.myths, transition: { type: 'slide', direction: 'right' }, config: scene2Config },
+  { id: 'mythBust', durationInFrames: SCENE_DURATIONS.mythBust, transition: { type: 'slide', direction: 'left' }, config: scene3Config },
+  { id: 'science', durationInFrames: SCENE_DURATIONS.science, transition: { type: 'slide', direction: 'up' }, config: scene4Config },
+  { id: 'culprits', durationInFrames: SCENE_DURATIONS.culprits, transition: { type: 'slide', direction: 'right' }, config: scene5Config },
+  { id: 'fixes', durationInFrames: SCENE_DURATIONS.fixes, transition: { type: 'page-turn', direction: 'right' }, config: scene6Config },
+  { id: 'funFacts', durationInFrames: SCENE_DURATIONS.funFacts, transition: { type: 'slide', direction: 'left' }, config: scene7Config },
+  { id: 'outro', durationInFrames: SCENE_DURATIONS.outro, transition: { type: 'fade' }, config: scene8Config },
+];
 
 export const CanonShowerVideo = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
+
   return (
     <AbsoluteFill>
-      <Series>
-        {/* Scene 1: Intro Hook (10s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.intro}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.intro}>
-            <SceneFromConfig config={scene1Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 2: Common Myths (15s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.myths} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.myths}>
-            <SceneFromConfig config={scene2Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 3: Myth vs Reality (18s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.mythBust} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.mythBust}>
-            <SceneFromConfig config={scene3Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 4: The Science (16s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.science} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.science}>
-            <SceneFromConfig config={scene4Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 5: The Real Culprits (18s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.culprits} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.culprits}>
-            <SceneFromConfig config={scene5Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 6: Fixes Checklist (15s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.fixes} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.fixes}>
-            <SceneFromConfig config={scene6Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 7: Fun Facts (12s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.funFacts} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.funFacts}>
-            <SceneFromConfig config={scene7Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-
-        {/* Scene 8: Outro (16s) */}
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.outro} offset={-TRANSITION_DURATION}>
-          <SceneTransitionWrapper durationInFrames={SCENE_DURATIONS.outro}>
-            <SceneFromConfig config={scene8Config} />
-          </SceneTransitionWrapper>
-        </Series.Sequence>
-      </Series>
+      <TransitionSeries>
+        {allScenes.map((scene, index) => (
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
+              <SceneFromConfig config={scene.config} />
+            </TransitionSeries.Sequence>
+          </React.Fragment>
+        ))}
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

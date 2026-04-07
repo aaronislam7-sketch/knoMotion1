@@ -16,10 +16,11 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import { resolvePresentation, resolveTransitionTiming, calculateTransitionSeriesDuration } from '../sdk/transitions';
 
-const FPS = 30;
 const TRANSITION_FRAMES = 20;
 
 const scenes = [
@@ -82,7 +83,7 @@ const scenes = [
   {
     id: 'experience',
     durationInFrames: 330, // 11s
-    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+    transition: { type: 'slide', direction: 'right' },
     config: {
       format: 'mobile',
       background: { preset: 'notebookSoft', layerNoise: true },
@@ -256,7 +257,7 @@ const scenes = [
   {
     id: 'punchline',
     durationInFrames: 300, // 10s
-    transition: { type: 'doodle-wipe', direction: 'right' },
+    transition: { type: 'slide', direction: 'right' },
     config: {
       format: 'mobile',
       background: { preset: 'cleanCard', layerNoise: true },
@@ -298,7 +299,7 @@ const scenes = [
   {
     id: 'closing-twist',
     durationInFrames: 270, // 9s
-    transition: { type: 'eraser' },
+    transition: { type: 'slide', direction: 'right' },
     config: {
       format: 'mobile',
       background: {
@@ -328,11 +329,7 @@ const scenes = [
   },
 ];
 
-// Calculate total duration
-export const TIKTOK_BRAINLIES_DURATION = scenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0
-);
+export const TIKTOK_BRAINLIES_DURATION = calculateTransitionSeriesDuration(scenes, TRANSITION_FRAMES);
 
 /**
  * TikTok_BrainLies
@@ -340,24 +337,26 @@ export const TIKTOK_BRAINLIES_DURATION = scenes.reduce(
  * Mobile-optimized (1080x1920) TikTok video about the Baader-Meinhof Phenomenon.
  */
 export const TikTok_BrainLies = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
+
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {scenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

@@ -291,20 +291,31 @@ export const JsonOutput = ({ scenes, format }) => {
         <div className="mt-4 p-3 bg-gray-700/50 rounded-lg">
           <div className="text-xs text-gray-500 mb-1">Example usage in .jsx file:</div>
           <pre className="text-xs text-gray-400 overflow-x-auto">
-{`const scenes = ${jsonOutput.slice(0, 100)}...
+{`import { TransitionSeries } from '@remotion/transitions';
+import { resolvePresentation, resolveTransitionTiming } from '../sdk/transitions';
+
+const scenes = ${jsonOutput.slice(0, 100)}...
 
 export const MyVideo = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {scenes.map((scene, index) => (
-          <Series.Sequence key={scene.id} durationInFrames={scene.durationInFrames}>
-            <SceneTransitionWrapper transition={scene.transition}>
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, 20)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };`}
