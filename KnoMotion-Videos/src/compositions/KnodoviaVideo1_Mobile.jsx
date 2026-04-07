@@ -13,11 +13,12 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import { resolvePresentation, resolveTransitionTiming, calculateTransitionSeriesDuration } from '../sdk/transitions';
 
-const FPS = 30;
-const TRANSITION_FRAMES = 18;
+const TRANSITION_FRAMES = 20;
 
 /**
  * Mobile-optimized scene configurations
@@ -30,7 +31,7 @@ const mobileScenes = [
   {
     id: 'mobile-cold-open',
     durationInFrames: 300,
-    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+    transition: { type: 'slide', direction: 'right', wobble: true },
     config: {
       format: 'mobile', // Explicit format hint
       background: {
@@ -266,7 +267,7 @@ const mobileScenes = [
   {
     id: 'mobile-cta',
     durationInFrames: 270,
-    transition: { type: 'eraser' },
+    transition: { type: 'slide' },
     config: {
       format: 'mobile',
       background: { preset: 'sunriseGradient' },
@@ -309,9 +310,9 @@ const mobileScenes = [
   },
 ];
 
-export const KNODOVIA_VIDEO1_MOBILE_DURATION = mobileScenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0,
+export const KNODOVIA_VIDEO1_MOBILE_DURATION = calculateTransitionSeriesDuration(
+  mobileScenes,
+  TRANSITION_FRAMES,
 );
 
 /**
@@ -321,24 +322,25 @@ export const KNODOVIA_VIDEO1_MOBILE_DURATION = mobileScenes.reduce(
  * Designed for TikTok, Instagram Reels, and YouTube Shorts.
  */
 export const KnodoviaAccidentalArrivalMobile = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {mobileScenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };
