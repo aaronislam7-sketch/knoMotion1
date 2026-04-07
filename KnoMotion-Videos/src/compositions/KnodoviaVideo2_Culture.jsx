@@ -13,11 +13,16 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import {
+  resolvePresentation,
+  resolveTransitionTiming,
+  calculateTransitionSeriesDuration,
+} from '../sdk/transitions';
 
-const FPS = 30;
-const TRANSITION_FRAMES = 18;
+const TRANSITION_FRAMES = 20;
 
 /**
  * SCENE 1: Cold Open - "Welcome to Culture Class"
@@ -96,7 +101,7 @@ const scene1_ColdOpen = {
 const scene2_CoreValues = {
   id: 'culture-core-values',
   durationInFrames: 420,
-  transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+  transition: { type: 'slide', direction: 'right', wobble: true },
   config: {
     background: { preset: 'notebookSoft', layerNoise: true },
     layout: {
@@ -314,7 +319,7 @@ const scene4_SocialNorms = {
 const scene5_Holidays = {
   id: 'culture-holidays',
   durationInFrames: 420,
-  transition: { type: 'doodle-wipe', direction: 'right' },
+  transition: { type: 'slide', direction: 'right' },
   config: {
     background: { preset: 'sunriseGradient', layerNoise: true },
     layout: {
@@ -397,7 +402,7 @@ const scene5_Holidays = {
 const scene6_Close = {
   id: 'culture-close',
   durationInFrames: 360,
-  transition: { type: 'eraser' },
+  transition: { type: 'slide' },
   config: {
     background: { preset: 'cleanCard', layerNoise: true },
     layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 0 } },
@@ -454,30 +459,31 @@ const video2Scenes = [
   scene6_Close,
 ];
 
-export const KNODOVIA_VIDEO2_DURATION = video2Scenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0,
+export const KNODOVIA_VIDEO2_DURATION = calculateTransitionSeriesDuration(
+  video2Scenes,
+  TRANSITION_FRAMES,
 );
 
 export const KnodoviaCultureAnthro = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {video2Scenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };
