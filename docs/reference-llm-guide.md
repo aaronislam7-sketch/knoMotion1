@@ -185,6 +185,8 @@ Applied via `stylePreset` on slots.
 
 ## 4. Transitions
 
+Powered by `@remotion/transitions` with `TransitionSeries` and `springTiming()`.
+
 ```javascript
 transition: { 
   type: 'slide',  // Required
@@ -192,13 +194,13 @@ transition: {
 }
 ```
 
-| Type | Directions | Description |
-|------|------------|-------------|
-| `fade` | — | Simple opacity |
-| `slide` | up, down, left, right | Directional slide |
-| `page-turn` | left, right | 3D page flip |
-| `doodle-wipe` | left, right | Hand-drawn wipe |
-| `eraser` | — | Eraser sweep |
+| Type | Directions | Remotion Presentation | Description |
+|------|------------|----------------------|-------------|
+| `fade` | — | `fade()` | Opacity crossfade |
+| `slide` | up, down, left, right | `slide()` | Push in/out with spring physics |
+| `page-turn` | left, right | `flip()` | 3D flip with perspective |
+| `clock-wipe` | — | `clockWipe()` | Circular reveal like a clock hand |
+| `iris` | — | `iris()` | Circular mask expanding from center |
 
 ---
 
@@ -818,7 +820,7 @@ Before outputting JSON, verify:
 - [ ] **`sideBySide` uses `layout: full`** (it creates its own internal columns)
 - [ ] `midScene` is valid: `textReveal`, `heroText`, `gridCards`, `checklist`, `bubbleCallout`, `sideBySide`, `iconGrid`, `cardSequence`, `bigNumber`, `animatedCounter`
 - [ ] `heroRef` uses valid Lottie registry key or URL
-- [ ] `transition.type` is valid: `fade`, `slide`, `page-turn`, `doodle-wipe`, `eraser`
+- [ ] `transition.type` is valid: `fade`, `slide`, `page-turn`, `clock-wipe`, `iris`
 - [ ] `background.preset` is valid: `notebookSoft`, `sunriseGradient`, `cleanCard`, `chalkboardGradient`, `spotlight`
 - [ ] Content arrays (`lines`, `cards`, `items`, `callouts`) have at least 1 item
 - [ ] Exit beats don't exceed scene duration in seconds

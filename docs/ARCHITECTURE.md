@@ -231,13 +231,16 @@ Options:
 
 ## Transition Types
 
-| Type | Effect |
-|------|--------|
-| `fade` | Simple opacity transition |
-| `slide` | Directional slide (up/down/left/right) |
-| `page-turn` | 3D page flip |
-| `doodle-wipe` | Hand-drawn wipe effect |
-| `eraser` | Eraser sweep effect |
+Transitions are powered by `@remotion/transitions` using `TransitionSeries` with spring-based timing.
+The `resolvePresentation()` mapper in `sdk/transitions/index.ts` converts scene transition configs to Remotion presentations.
+
+| Type | Remotion Presentation | Effect |
+|------|----------------------|--------|
+| `fade` | `fade()` | Opacity crossfade |
+| `slide` | `slide()` | Directional push (up/down/left/right) with spring physics |
+| `page-turn` | `flip()` | 3D flip with perspective |
+| `clock-wipe` | `clockWipe()` | Circular reveal like a clock hand |
+| `iris` | `iris()` | Circular mask expanding from center |
 
 ---
 
@@ -246,7 +249,7 @@ Options:
 ```
 KnoMotion-Videos/src/
 ├── compositions/           # Video entry points
-│   ├── SceneRenderer.jsx   # Core: SceneFromConfig, SceneTransitionWrapper
+│   ├── SceneRenderer.jsx   # Core: SceneFromConfig
 │   ├── KnodoviaVideo*.jsx  # Canon video compositions
 │   └── TikTok_*.jsx        # TikTok format videos
 ├── sdk/

@@ -1091,26 +1091,14 @@ const { x, y } = resolvePosition('centerRight', {
 
 ---
 
-## 🎞️ Scene Rendering Helpers
+## 🎞️ Scene Rendering & Transitions
 
 ### Module: `compositions/SceneRenderer.jsx`
 
-Utilities for turning JSON scene configs into rendered shots with consistent transitions.
+Core scene renderer that turns JSON configs into rendered scenes.
 
 ```jsx
-import {
-  SceneFromConfig,
-  SceneTransitionWrapper,
-} from '../compositions/SceneRenderer';
-
-const Scene = ({ config, durationInFrames }) => (
-  <SceneTransitionWrapper
-    durationInFrames={durationInFrames}
-    transition={{ type: 'doodle-wipe' }}
-  >
-    <SceneFromConfig config={config} />
-  </SceneTransitionWrapper>
-);
+import { SceneFromConfig } from '../compositions/SceneRenderer';
 ```
 
 - **`SceneFromConfig`**
@@ -1118,12 +1106,45 @@ const Scene = ({ config, durationInFrames }) => (
   - Applies `resolveBackground` (including overlays/noise) if `config.background` is provided.
   - For each slot: renders the requested mid-scene with `stylePreset` + `config`.
 
-- **`SceneTransitionWrapper`**
-  - Accepts `transition.type`: `fade`, `slide`, `page-turn`, `doodle-wipe`, or `eraser`.
-  - `durationInFrames` controls both enter + exit easing windows.
-  - Slide/page-turn respect `transition.direction` (`left/right/up/down`).
+### Module: `sdk/transitions/index.ts`
 
-Use these helpers for any multi-scene composition so transitions stay consistent with beats and layouts.
+Transition layer powered by `@remotion/transitions`. All compositions use `TransitionSeries` with spring-based timing.
+
+```jsx
+import { TransitionSeries } from '@remotion/transitions';
+import { resolvePresentation, resolveTransitionTiming, calculateTransitionSeriesDuration } from '../sdk/transitions';
+
+// In a composition:
+<TransitionSeries>
+  {scenes.map((scene, index) => (
+    <React.Fragment key={scene.id}>
+      {index > 0 && (
+        <TransitionSeries.Transition
+          presentation={resolvePresentation(scene.transition, viewport)}
+          timing={resolveTransitionTiming(scene.transition, 20)}
+        />
+      )}
+      <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
+        <SceneFromConfig config={scene.config} />
+      </TransitionSeries.Sequence>
+    </React.Fragment>
+  ))}
+</TransitionSeries>
+```
+
+**Available transition types:**
+
+| Type | Remotion Presentation | Directions |
+|------|----------------------|------------|
+| `fade` | `fade()` | — |
+| `slide` | `slide()` | up, down, left, right |
+| `page-turn` | `flip()` | left, right |
+| `clock-wipe` | `clockWipe()` | — |
+| `iris` | `iris()` | — |
+
+- **`resolvePresentation(transition, viewport)`** — Maps transition config to a Remotion presentation.
+- **`resolveTransitionTiming(transition, defaultFrames)`** — Returns `springTiming()` with damping 200.
+- **`calculateTransitionSeriesDuration(scenes, defaultFrames)`** — Computes total rendered duration accounting for overlaps.
 
 ---
 
