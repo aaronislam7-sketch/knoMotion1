@@ -3,7 +3,7 @@ import {
   AbsoluteFill,
   useVideoConfig,
 } from 'remotion';
-import { resolveSceneSlots, detectFormat, isMobileFormat } from '../sdk/scene-layout/sceneLayout';
+import { resolveSceneSlots, detectFormat } from '../sdk/scene-layout/sceneLayout';
 import { KNODE_THEME } from '../sdk/theme/knodeTheme';
 import { resolveBackground } from '../sdk/effects/resolveBackground';
 

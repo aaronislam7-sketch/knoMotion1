@@ -29,7 +29,7 @@
 
 ## 1. Product Alignment Score
 
-### Score: 7/10
+### Score: 7.25/10 (was 7/10 — P1 complete)
 
 **What's strong (earning the 7):**
 - The JSON-first architecture is perfectly aligned with the blue sky pipeline. Scene configs are pure data — exactly what an LLM produces.
@@ -44,7 +44,7 @@
 - **No generic composition.** Every video requires a new `.jsx` file in `compositions/`. There's no single parameterised composition that accepts scene JSON as input props and dynamically adjusts duration/dimensions. This blocks the "agent creates JSON → video renders" pipeline. (-0.5)
 - **No TTS-to-beats alignment tooling.** The beats system works in seconds, which is TTS-friendly, but there's no function to convert word-level timestamps (from Whisper/TTS APIs) into beat objects. (-0.5)
 - **Schemas incomplete.** Missing schemas for `BigNumberReveal`, `AnimatedCounter`. Several schemas behind implementation (`SideBySide` beforeAfter, `BubbleCallout` collision). LLM validation depends on complete schemas. (-0.5)
-- **Transitions are hand-rolled.** Custom `SceneTransitionWrapper` instead of `@remotion/transitions`, missing spring physics and audio transition support. (-0.25)
+- ~~**Transitions are hand-rolled.** Custom `SceneTransitionWrapper` instead of `@remotion/transitions`, missing spring physics and audio transition support. (-0.25)~~ **✅ FIXED by P1** — All compositions now use `@remotion/transitions` `TransitionSeries` with `springTiming()`. (+0.25 recovered)
 - **No captions/subtitles.** `@remotion/captions` is not used. Professional learning videos need subtitles. (-0.25)
 
 ### Path to 10/10
@@ -180,122 +180,105 @@ All animations should use one of 3-4 approved easing curves from Remotion's `Eas
 
 ### P1: Adopt `@remotion/transitions` with `TransitionSeries`
 
-**Priority:** HIGH
+**Priority:** HIGH — **STATUS: ✅ COMPLETE**
 **Impact:** Major polish improvement + cleaner code
+**Completed:** 2026-04-07
 
-#### P1a: Create presentation adapters for custom transitions
+#### P1a: Create transition resolution layer ✅
 
-**What:** Write custom `TransitionPresentation` implementations for `doodle-wipe` and `eraser` effects that currently live in `SceneTransitionWrapper`.
+**What was done:** Created `KnoMotion-Videos/src/sdk/transitions/index.ts` with three exported functions:
 
-**Files to create/modify:**
-- Create: `KnoMotion-Videos/src/sdk/transitions/doodleWipePresentation.ts`
-- Create: `KnoMotion-Videos/src/sdk/transitions/eraserPresentation.ts`
-- Create: `KnoMotion-Videos/src/sdk/transitions/index.ts` (barrel + `resolvePresentation()` mapper)
+- `resolvePresentation(transition, viewport)` — Maps KnoMotion transition config to Remotion `TransitionPresentation`. Uses `fade()`, `slide()`, `flip()`, `clockWipe()`, `iris()` from `@remotion/transitions/*`. Discontinued types (`doodle-wipe`, `eraser`, `spring`) fall back to `slide()`.
+- `resolveTransitionTiming(transition, defaultFrames)` — Returns `springTiming({ damping: 200, durationInFrames, durationRestThreshold: 0.001 })`.
+- `calculateTransitionSeriesDuration(scenes, defaultFrames)` — Computes `totalSceneFrames - (transitionCount * transitionFrames)`.
 
-**Implementation detail:**
-```typescript
-import { TransitionPresentation } from '@remotion/transitions';
+**Decision made:** Custom `doodleWipe` and `eraser` presentations were NOT implemented. User decision: these niche effects aren't needed; all compositions use standard Remotion presentations. Discontinued types silently fall back to `slide()` for backward compatibility.
 
-export function doodleWipe(options?: { direction?: 'left' | 'right' }): TransitionPresentation {
-  return {
-    component: ({ presentationDirection, presentationProgress, passedProps }) => {
-      // Port the clip-path + decorative SVG edge logic from
-      // SceneTransitionWrapper's 'doodle-wipe' case (lines ~85-120)
-      // presentationProgress replaces manual enterProgress/exitProgress
-    },
-  };
-}
-```
+**Available transition types:**
+| Type | Remotion Presentation | Directions |
+|------|----------------------|------------|
+| `fade` | `fade()` | — |
+| `slide` | `slide()` | up, down, left, right |
+| `page-turn` | `flip()` | left, right |
+| `clock-wipe` | `clockWipe()` | — |
+| `iris` | `iris()` | — |
 
-**`resolvePresentation()` mapper:**
-```typescript
-import { fade } from '@remotion/transitions/fade';
-import { slide } from '@remotion/transitions/slide';
-import { flip } from '@remotion/transitions/flip';
-import { clockWipe } from '@remotion/transitions/clock-wipe';
-import { iris } from '@remotion/transitions/iris';
-import { doodleWipe } from './doodleWipePresentation';
-import { eraser } from './eraserPresentation';
+#### P1b: Refactor all compositions to `TransitionSeries` ✅
 
-export function resolvePresentation(transition, viewport) {
-  switch (transition.type) {
-    case 'fade': return fade();
-    case 'slide': return slide({ direction: transition.direction || 'from-right' });
-    case 'page-turn': return flip({ direction: transition.direction || 'from-right' });
-    case 'doodle-wipe': return doodleWipe({ direction: transition.direction });
-    case 'eraser': return eraser();
-    case 'clock-wipe': return clockWipe({ width: viewport.width, height: viewport.height });
-    case 'iris': return iris({ width: viewport.width, height: viewport.height });
-    default: return fade();
-  }
-}
-```
+**What was done:** All 10 composition files refactored from `Series` + `SceneTransitionWrapper` to `TransitionSeries`:
 
-#### P1b: Refactor canon video compositions to use `TransitionSeries`
+| File | Old `TRANSITION_FRAMES` | New |
+|------|------------------------|-----|
+| `TikTok_BrainLies.jsx` | 20 | 20 |
+| `TikTok_ADHDOverpowered.jsx` | 20 | 20 |
+| `TikTok_80msDelay.jsx` | 20 | 20 |
+| `KnodoviaVideo1_AccidentalArrival.jsx` | 18 | 20 |
+| `KnodoviaVideo2_Culture.jsx` | 18 | 20 |
+| `KnodoviaVideo3_Economics.jsx` | 18 | 20 |
+| `KnodoviaVideo1_Mobile.jsx` | 18 | 20 |
+| `KnodoviaVideo2_Mobile.jsx` | 24 | 20 |
+| `KnodoviaVideo3_Mobile.jsx` | 24 | 20 |
+| `CanonShowerVideo.jsx` | 15 | 20 |
 
-**What:** Replace the `Series` + negative `offset` + `SceneTransitionWrapper` pattern in all canon video files.
+**Transition durations standardized** to 20 frames across all compositions. Duration exports use `calculateTransitionSeriesDuration()` for accurate composition registration.
 
-**Files to modify:**
-- `KnoMotion-Videos/src/compositions/TikTok_BrainLies.jsx`
-- `KnoMotion-Videos/src/compositions/TikTok_ADHDOverpowered.jsx`
-- `KnoMotion-Videos/src/compositions/TikTok_80msDelay.jsx`
-- `KnoMotion-Videos/src/compositions/KnodoviaVideo1_AccidentalArrival.jsx`
-- `KnoMotion-Videos/src/compositions/KnodoviaVideo2_Culture.jsx`
-- `KnoMotion-Videos/src/compositions/KnodoviaVideo3_Economics.jsx`
-- All mobile variants
+**Scene transition types updated:** All `doodle-wipe` → `slide` (direction preserved), all `eraser` → `slide`.
 
-**Current pattern (to replace):**
-```jsx
-<Series>
-  {scenes.map((scene, index) => (
-    <Series.Sequence
-      key={scene.id}
-      durationInFrames={scene.durationInFrames}
-      offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-    >
-      <SceneTransitionWrapper
-        durationInFrames={scene.durationInFrames}
-        transition={scene.transition}
-      >
-        <SceneFromConfig config={scene.config} />
-      </SceneTransitionWrapper>
-    </Series.Sequence>
-  ))}
-</Series>
-```
-
-**New pattern:**
+**Canonical pattern for new compositions:**
 ```jsx
 import { TransitionSeries } from '@remotion/transitions';
-import { springTiming } from '@remotion/transitions';
-import { resolvePresentation } from '../sdk/transitions';
+import { resolvePresentation, resolveTransitionTiming, calculateTransitionSeriesDuration } from '../sdk/transitions';
 
-<TransitionSeries>
-  {scenes.map((scene, index) => (
-    <React.Fragment key={scene.id}>
-      {index > 0 && scene.transition && (
-        <TransitionSeries.Transition
-          presentation={resolvePresentation(scene.transition, viewport)}
-          timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
-        />
-      )}
-      <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
-        <SceneFromConfig config={scene.config} />
-      </TransitionSeries.Sequence>
-    </React.Fragment>
-  ))}
-</TransitionSeries>
+const TRANSITION_FRAMES = 20;
+
+export const DURATION = calculateTransitionSeriesDuration(scenes, TRANSITION_FRAMES);
+
+export const MyVideo = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
+  return (
+    <AbsoluteFill>
+      <TransitionSeries>
+        {scenes.map((scene, index) => (
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
+              <SceneFromConfig config={scene.config} />
+            </TransitionSeries.Sequence>
+          </React.Fragment>
+        ))}
+      </TransitionSeries>
+    </AbsoluteFill>
+  );
+};
 ```
 
-#### P1c: LEGACY DELETION — Remove `SceneTransitionWrapper`
+#### P1c: LEGACY DELETION — Remove `SceneTransitionWrapper` ✅
 
-**What:** After P1b is complete, delete `SceneTransitionWrapper` from `SceneRenderer.jsx`.
+**What was deleted:**
+- `SceneTransitionWrapper` export (~180 lines) from `SceneRenderer.jsx`
+- Helper constants: `DEFAULT_TRANSITION`, `SLIDE_OFFSETS`, `clamp01`
+- Unused imports: `useCurrentFrame`, `interpolate`, `spring`, `Easing`, `resolveAnimationPreset`, `SPRING_CONFIGS`, `isMobileFormat`
+- All `import { SceneTransitionWrapper }` statements across compositions
+- Updated `JsonOutput.jsx` example code to show `TransitionSeries` pattern
+- Updated `TransitionPicker.jsx` to show new transition types (clock-wipe, iris replacing doodle-wipe, eraser)
 
-**Files to modify:**
-- `KnoMotion-Videos/src/compositions/SceneRenderer.jsx` — Remove the `SceneTransitionWrapper` export and all its internal functions (`SLIDE_OFFSETS`, `DEFAULT_TRANSITION`, enterProgress/exitProgress logic, overlay rendering for doodle-wipe/eraser).
-- Grep for any remaining imports of `SceneTransitionWrapper` and remove them.
+**Zero remaining code references** to `SceneTransitionWrapper` in any `.jsx`/`.tsx`/`.js`/`.ts` file.
 
-**Lines to delete:** Approximately lines 50-160 of `SceneRenderer.jsx` (the entire `SceneTransitionWrapper` component and its helpers).
+**Documentation updated:** `ARCHITECTURE.md`, `reference-llm-guide.md`, `SDK.md` all reflect new transition types and `TransitionSeries` pattern.
+
+#### Learnings for Future Agent Sessions
+
+1. **`@remotion/transitions` was already in `package.json`** — no installation needed. Always check before adding packages.
+2. **`springTiming` with `durationInFrames`** produces a fixed-duration transition, making duration calculation deterministic: `total = sum(scenes) - count(transitions) * transitionFrames`.
+3. **`durationRestThreshold: 0.001`** is recommended by Remotion docs to avoid a visible cutoff at 99.5% progress.
+4. **The `sdk/transitions.ts` shim** re-exports both legacy `core/transitions.ts` (for backward compatibility) and the new `transitions/index.ts`. New code should import from `../sdk/transitions` which resolves to this shim.
+5. **Backward compatibility:** `resolvePresentation()` silently maps discontinued types to `slide()`, so any old JSON with `doodle-wipe` or `eraser` still works.
 
 ---
 
@@ -574,10 +557,12 @@ export const VideoConfigSchema = z.object({
 ```jsx
 import React from 'react';
 import { AbsoluteFill, useVideoConfig } from 'remotion';
-import { TransitionSeries, springTiming } from '@remotion/transitions';
+import { TransitionSeries } from '@remotion/transitions';
 import { SceneFromConfig } from './SceneRenderer';
-import { resolvePresentation } from '../sdk/transitions';
+import { resolvePresentation, resolveTransitionTiming } from '../sdk/transitions';
 import { AudioLayer } from '../sdk/audio/AudioLayer';
+
+const TRANSITION_FRAMES = 20;
 
 export const GenericVideoPlayer = ({ scenes }) => {
   const { width, height } = useVideoConfig();
@@ -588,10 +573,10 @@ export const GenericVideoPlayer = ({ scenes }) => {
       <TransitionSeries>
         {scenes.map((scene, index) => (
           <React.Fragment key={scene.id}>
-            {index > 0 && scene.transition && (
+            {index > 0 && (
               <TransitionSeries.Transition
                 presentation={resolvePresentation(scene.transition, viewport)}
-                timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
               />
             )}
             <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
@@ -626,11 +611,11 @@ export const GenericVideoPlayer = ({ scenes }) => {
   height={1080}
   defaultProps={{ scenes: [] }}
   calculateMetadata={({ props }) => {
-    const totalFrames = props.scenes.reduce((sum, s) => sum + s.durationInFrames, 0);
-    const transitionOverlap = Math.max(0, (props.scenes.length - 1) * 20);
+    const { calculateTransitionSeriesDuration } = require('../sdk/transitions');
+    const totalFrames = calculateTransitionSeriesDuration(props.scenes, 20);
     const isMobile = props.format === 'mobile';
     return {
-      durationInFrames: totalFrames - transitionOverlap,
+      durationInFrames: totalFrames,
       width: isMobile ? 1080 : 1920,
       height: isMobile ? 1920 : 1080,
     };
@@ -956,10 +941,10 @@ export function buildPersonalizedScenes(
 
 This section tracks code that should be deleted after specific tasks are completed to avoid duplication.
 
-| Task | Files / Code to Delete | Depends On |
-|------|----------------------|------------|
-| P1c | `SceneTransitionWrapper` export + all helper functions in `SceneRenderer.jsx` (~110 lines). Remove `SLIDE_OFFSETS`, `DEFAULT_TRANSITION`, enterProgress/exitProgress logic, doodle-wipe overlay, eraser overlay. | P1a, P1b complete |
-| P1c | All `import { SceneTransitionWrapper }` statements across compositions. Remove `TRANSITION_FRAMES` constants from canon videos. | P1b complete |
+| Task | Files / Code to Delete | Depends On | Status |
+|------|----------------------|------------|--------|
+| P1c | `SceneTransitionWrapper` export + all helper functions in `SceneRenderer.jsx` (~180 lines). Remove `SLIDE_OFFSETS`, `DEFAULT_TRANSITION`, enterProgress/exitProgress logic, doodle-wipe overlay, eraser overlay. | P1a, P1b complete | ✅ DONE |
+| P1c | All `import { SceneTransitionWrapper }` statements across compositions. Updated `CanonShowerVideo.jsx`, `JsonOutput.jsx` example code. | P1b complete | ✅ DONE |
 | P2c | `springConfigs` object in `broadcastAnimations.ts`. Update functions to import from `theme/animationPresets.ts`. | P2a complete |
 | P2c | Duplicate `SPRING_CONFIGS` in `animations/index.js` — consolidate to single source in `theme/animationPresets.ts`. | P2a complete |
 | P2b | Custom easing implementations in `sdk/easing.ts` that duplicate Remotion's `Easing` module. Keep as thin re-exports only. | P2b complete |
@@ -977,7 +962,7 @@ This section tracks code that should be deleted after specific tasks are complet
 
 | Package | Version | Task | Purpose |
 |---------|---------|------|---------|
-| `@remotion/transitions` | Match current remotion version (4.0.382) | P1 | `TransitionSeries`, `springTiming`, `linearTiming`, presentations |
+| ~~`@remotion/transitions`~~ | ~~4.0.382~~ | ~~P1~~ | ~~Already in package.json. Used by P1.~~ ✅ |
 | `@remotion/noise` | Match remotion version | N1 | `noise2D()`, `noise3D()` for procedural backgrounds |
 | `@remotion/shapes` | Match remotion version | N2 | `<Star>`, `<Circle>`, `<Heart>`, `<Pie>` decorative elements |
 | `@remotion/paths` | Match remotion version | P5 | `evolvePath()`, `interpolatePath()`, `getLength()` |
@@ -992,6 +977,7 @@ This section tracks code that should be deleted after specific tasks are complet
 |---------|---------|-------|
 | `remotion` | 4.0.382 | Core |
 | `@remotion/player` | 4.0.382 | Already present |
+| `@remotion/transitions` | 4.0.382 | Already present — used by P1 |
 | `@remotion/lottie` | 4.0.382 | Already present |
 | `@remotion/animated-emoji` | 4.0.382 | Already present |
 | `@remotion/tailwind` | 4.0.382 | Already present |
@@ -1003,22 +989,22 @@ This section tracks code that should be deleted after specific tasks are complet
 
 ## Task Priority Matrix
 
-| Priority | Task ID | Description | Depends On |
-|----------|---------|-------------|------------|
-| CRITICAL | S2 | Generic parameterized composition | P1 |
-| CRITICAL | P4 | Audio layer (narration, music, captions) | — |
-| HIGH | P1 | `@remotion/transitions` adoption | — |
-| HIGH | S1 | Zod schemas for Studio visual editing | S3 |
-| HIGH | S3 | Complete mid-scene schemas | — |
-| HIGH | S4 | Capability manifest for agents | S3 |
-| HIGH | R1 | Player integration | S2 |
-| MEDIUM | P2 | Standardize spring/easing | — |
-| MEDIUM | P3 | Animated emoji upgrade | — |
-| MEDIUM | R2 | Lambda rendering pipeline | S2 |
-| MEDIUM | L2 | Scene selection engine | S2 |
-| MEDIUM | S6 | Scene validation CLI | S3 |
-| LOW | P5 | `@remotion/paths` for hand-drawn effects | — |
-| LOW | N1-N5 | Nice to haves | Various |
+| Priority | Task ID | Description | Depends On | Status |
+|----------|---------|-------------|------------|--------|
+| CRITICAL | S2 | Generic parameterized composition | P1 | Ready (P1 done) |
+| CRITICAL | P4 | Audio layer (narration, music, captions) | — | Pending |
+| HIGH | P1 | `@remotion/transitions` adoption | — | ✅ COMPLETE |
+| HIGH | S1 | Zod schemas for Studio visual editing | S3 | Pending |
+| HIGH | S3 | Complete mid-scene schemas | — | Pending |
+| HIGH | S4 | Capability manifest for agents | S3 | Pending |
+| HIGH | R1 | Player integration | S2 | Pending |
+| MEDIUM | P2 | Standardize spring/easing | — | Pending |
+| MEDIUM | P3 | Animated emoji upgrade | — | Pending |
+| MEDIUM | R2 | Lambda rendering pipeline | S2 | Pending |
+| MEDIUM | L2 | Scene selection engine | S2 | Pending |
+| MEDIUM | S6 | Scene validation CLI | S3 | Pending |
+| LOW | P5 | `@remotion/paths` for hand-drawn effects | — | Pending |
+| LOW | N1-N5 | Nice to haves | Various | Pending |
 
 ---
 
@@ -1622,7 +1608,7 @@ With three sources of animation/component primitives — Remotion core (via MCP)
 
 | Capability | Remotion Core (MCP) | remotion-bits | KnoMotion SDK | **USE** |
 |---|---|---|---|---|
-| **Scene transitions** | `@remotion/transitions` (`TransitionSeries`, `fade()`, `slide()`, etc.) | — | `SceneTransitionWrapper` (legacy) | **Remotion Core.** Delete KnoMotion legacy (P1c). |
+| **Scene transitions** | `@remotion/transitions` (`TransitionSeries`, `fade()`, `slide()`, etc.) | — | ~~`SceneTransitionWrapper` (deleted)~~ | **Remotion Core.** ✅ P1 complete. Use `resolvePresentation()` from `sdk/transitions/index.ts`. |
 | **Element entrance animation** | `spring()`, `interpolate()`, `Easing` | `StaggeredMotion` (declarative wrapper over `interpolate`) | `fadeIn()`, `slideIn()`, `scaleIn()`, `bounceIn()` in `animations/index.js` | **CHECK WITH USER.** `StaggeredMotion` is higher-level and more composable, but Remotion's `spring()` is more precise for individual elements. Recommended default: `StaggeredMotion` for groups/lists, `spring()` for individual hero elements. |
 | **Spring physics** | `spring()` with config objects | `StaggeredMotion` easing (wraps `interpolate`, not `spring`) | `SPRING_CONFIGS` (duplicate) | **Remotion Core `spring()`** for physics-based motion. remotion-bits for interpolation-based stagger. Delete KnoMotion duplicates (P2c). |
 | **Easing curves** | `Easing` module (bezier, elastic, bounce, etc.) | Named easing strings (`"easeOutCubic"`, etc.) | `sdk/easing.ts` (custom) | **Remotion Core `Easing`** as canonical. remotion-bits easing names are fine within `StaggeredMotion` context. Delete KnoMotion custom easing (P2b). |
