@@ -2074,7 +2074,10 @@ With ALL items in this document implemented:
 
 ## 17. Implementation Kickstart Prompt
 
-The following prompt is designed to be pasted into an inline Cursor chat session to begin actioning this plan. It is structured for iterative execution — each chunk completes, commits, and pushes before the next begins. The agent should not attempt to do everything in one session.
+The following prompt is designed to be pasted into a Cursor agent session to continue
+actioning this plan. It is structured for iterative execution — each chunk completes,
+commits, and pushes before the next begins. The agent should not attempt to do
+everything in one session.
 
 ---
 
@@ -2085,9 +2088,28 @@ You are working in the KnoMotion repository — a JSON-first video engine built 
 
 ## Your Bible
 
-Read BUILD_STATUS.md at the repo root FIRST. It is a 2000+ line plan with 16 sections
+Read BUILD_STATUS.md at the repo root FIRST. It is a 2000+ line plan with 17 sections
 covering every aspect of this build. Do not deviate from it. If something isn't in the
 plan, ask me before implementing.
+
+## Completed Work
+
+Chunk 1 (P1 — @remotion/transitions) is COMPLETE. Key things to know:
+
+- All 10 compositions now use `TransitionSeries` from `@remotion/transitions`.
+- `SceneTransitionWrapper` has been deleted from `SceneRenderer.jsx`.
+- The canonical transition layer is `KnoMotion-Videos/src/sdk/transitions/index.ts`
+  which exports `resolvePresentation()`, `resolveTransitionTiming()`, and
+  `calculateTransitionSeriesDuration()`.
+- There is also a legacy `sdk/core/transitions.ts` (older utility) re-exported via
+  `sdk/transitions.ts` shim. New code should use `../sdk/transitions` imports.
+- Transition types: fade, slide, page-turn, clock-wipe, iris. Discontinued types
+  (doodle-wipe, eraser, spring) silently fall back to slide() for backward compat.
+- All compositions standardized to TRANSITION_FRAMES = 20 with springTiming
+  (damping: 200, durationRestThreshold: 0.001).
+- Duration exports use `calculateTransitionSeriesDuration(scenes, 20)`.
+- `BigNumberReveal` is imported directly in SceneRenderer.jsx but NOT yet in the
+  mid-scenes barrel (index.js). This is task S3c in Chunk 2.
 
 ## Context Files (read these for architecture understanding)
 
@@ -2095,7 +2117,8 @@ plan, ask me before implementing.
 - docs/reference-llm-guide.md — JSON schemas for all mid-scenes
 - docs/instructions-llm-guide.md — LLM behavioral guidelines
 - SDK.md — Full SDK reference
-- KnoMotion-Videos/src/compositions/SceneRenderer.jsx — Core renderer
+- KnoMotion-Videos/src/compositions/SceneRenderer.jsx — Core renderer (SceneFromConfig only)
+- KnoMotion-Videos/src/sdk/transitions/index.ts — Transition resolution layer
 - KnoMotion-Videos/src/sdk/mid-scenes/index.js — Mid-scene registry
 - KnoMotion-Videos/src/sdk/theme/knodeTheme.ts — Theme tokens
 - KnoMotion-Videos/src/remotion/Root.tsx — Composition registration
@@ -2128,22 +2151,26 @@ leave dead code behind.
 
 ## How to Work — Iterative Chunks
 
-DO NOT try to implement the entire plan in one session. Work in focused chunks:
+DO NOT try to implement the entire plan in one session. Work in focused chunks.
+There are checkpoints/signoffs 3 times per chunk:
+1. Present detailed implementation plan and ask clarifying questions. Do NOT proceed
+   to development until the user approves (Sign-off 1).
+2. After development is complete, present summary. User provides feedback. Do NOT
+   continue until feedback is addressed (Sign-off 2).
+3. User provides closing sign-off. Update BUILD_STATUS.md with completion notes,
+   learnings, and any context needed for the next agent session.
 
-### Chunk 1: P1 — Adopt @remotion/transitions
-- P1a: Create sdk/transitions/ with resolvePresentation() mapper + custom doodleWipe
-  and eraser presentations.
-- P1b: Refactor ONE canon video (start with TikTok_BrainLies.jsx) to use TransitionSeries.
-  Verify it works. Then refactor the remaining canon videos.
-- P1c: Delete SceneTransitionWrapper per the Legacy Deletion Register.
-- Commit and push. Update me.
+### Chunk 1: P1 — Adopt @remotion/transitions ✅ COMPLETE
+See Section 4 P1 for full completion notes.
 
-### Chunk 2: S2 + S3 — Generic Composition + Schemas
+### Chunk 2: S2 + S3 — Generic Composition + Schemas (NEXT)
 - S3a: Add missing schemas (BigNumberReveal, AnimatedCounter).
 - S3b: Update incomplete schemas (SideBySide beforeAfter, BubbleCallout collision).
-- S3c: Add BigNumberReveal to mid-scenes barrel.
+- S3c: Add BigNumberReveal to mid-scenes barrel (index.js + MID_SCENE_REGISTRY).
 - S2a: Create GenericVideoPlayer.jsx using TransitionSeries.
-- S2b: Register with calculateMetadata() in Root.tsx.
+  Use the canonical pattern from P1 (resolvePresentation + resolveTransitionTiming).
+- S2b: Register with calculateMetadata() in Root.tsx using calculateTransitionSeriesDuration.
+- Update docs (reference-llm-guide.md, SDK.md, ARCHITECTURE.md).
 - Commit and push. Update me.
 
 ### Chunk 3: P4 — Audio Layer
@@ -2192,11 +2219,14 @@ and what's next. I will tell you whether to continue or adjust direction.
 
 ## What "Done" Looks Like Per Chunk
 
-- Code compiles without errors
+- Code compiles without errors (`npm run build` passes)
 - No lint regressions introduced
 - Legacy code deleted per Section 9 if applicable
 - Any new mid-scene has: component file, schema file, registry entry, entry in
   MID_SCENE_COMPONENTS in SceneRenderer.jsx
+- Documentation updated (reference-llm-guide.md, SDK.md, ARCHITECTURE.md)
+- TransitionPicker / Video Builder updated if transition or composition changes made
+- BUILD_STATUS.md updated with completion status, learnings, and context for next agent
 - Commit message describes what was done
 - Changes pushed to the working branch
 ```
