@@ -16,11 +16,16 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import {
+  resolvePresentation,
+  resolveTransitionTiming,
+  calculateTransitionSeriesDuration,
+} from '../sdk/transitions';
 
-const FPS = 30;
-const TRANSITION_FRAMES = 18;
+const TRANSITION_FRAMES = 20;
 
 // Visual asset helpers for economic indicators
 const createBadge = (color) => {
@@ -106,7 +111,7 @@ const scene1_ColdOpen = {
 const scene2_Currency = {
   id: 'econ-currency',
   durationInFrames: 420,
-  transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+  transition: { type: 'slide', direction: 'right', wobble: true },
   config: {
     background: { preset: 'cleanCard', layerNoise: true },
     layout: {
@@ -331,7 +336,7 @@ const scene4_Spending = {
 const scene5_Marketplace = {
   id: 'econ-marketplace',
   durationInFrames: 420,
-  transition: { type: 'doodle-wipe', direction: 'right' },
+  transition: { type: 'slide', direction: 'right' },
   config: {
     background: { preset: 'cleanCard' },
     layout: {
@@ -474,7 +479,7 @@ const scene6_BigInsight = {
 const scene7_Close = {
   id: 'econ-close',
   durationInFrames: 360,
-  transition: { type: 'eraser' },
+  transition: { type: 'slide' },
   config: {
     background: { preset: 'sunriseGradient' },
     layout: { type: 'rowStack', options: { rows: 2, padding: 60, titleHeight: 0 } },
@@ -543,30 +548,31 @@ const video3Scenes = [
   scene7_Close,
 ];
 
-export const KNODOVIA_VIDEO3_DURATION = video3Scenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0,
+export const KNODOVIA_VIDEO3_DURATION = calculateTransitionSeriesDuration(
+  video3Scenes,
+  TRANSITION_FRAMES,
 );
 
 export const KnodoviaEconomics = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {video3Scenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

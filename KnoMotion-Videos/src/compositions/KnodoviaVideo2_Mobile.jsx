@@ -13,11 +13,12 @@
  */
 
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import { resolvePresentation, resolveTransitionTiming, calculateTransitionSeriesDuration } from '../sdk/transitions';
 
-const FPS = 30;
-const TRANSITION_FRAMES = 24; // Slightly longer for mobile
+const TRANSITION_FRAMES = 20;
 
 const mobileScenes = [
   /**
@@ -82,7 +83,7 @@ const mobileScenes = [
   {
     id: 'mobile-values-1',
     durationInFrames: 360,
-    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+    transition: { type: 'slide', direction: 'right', wobble: true },
     config: {
       format: 'mobile',
       background: { preset: 'cleanCard', layerNoise: true },
@@ -231,7 +232,7 @@ const mobileScenes = [
   {
     id: 'mobile-holidays',
     durationInFrames: 360,
-    transition: { type: 'doodle-wipe', direction: 'right' },
+    transition: { type: 'slide', direction: 'right' },
     config: {
       format: 'mobile',
       background: { preset: 'sunriseGradient', layerNoise: true },
@@ -279,7 +280,7 @@ const mobileScenes = [
   {
     id: 'mobile-culture-close',
     durationInFrames: 300,
-    transition: { type: 'eraser' },
+    transition: { type: 'slide' },
     config: {
       format: 'mobile',
       background: { preset: 'cleanCard', layerNoise: true },
@@ -326,30 +327,31 @@ const mobileScenes = [
   },
 ];
 
-export const KNODOVIA_VIDEO2_MOBILE_DURATION = mobileScenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0,
+export const KNODOVIA_VIDEO2_MOBILE_DURATION = calculateTransitionSeriesDuration(
+  mobileScenes,
+  TRANSITION_FRAMES,
 );
 
 export const KnodoviaCultureMobile = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {mobileScenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

@@ -1,9 +1,14 @@
 import React from 'react';
-import { AbsoluteFill, Series } from 'remotion';
-import { SceneFromConfig, SceneTransitionWrapper } from './SceneRenderer';
+import { AbsoluteFill, useVideoConfig } from 'remotion';
+import { TransitionSeries } from '@remotion/transitions';
+import { SceneFromConfig } from './SceneRenderer';
+import {
+  resolvePresentation,
+  resolveTransitionTiming,
+  calculateTransitionSeriesDuration,
+} from '../sdk/transitions';
 
-const FPS = 30;
-const TRANSITION_FRAMES = 18;
+const TRANSITION_FRAMES = 20;
 
 const createBlob = (fillA, fillB) => {
   const svg = `
@@ -27,7 +32,7 @@ const video1Scenes = [
   {
     id: 'knodovia-cold-open',
     durationInFrames: 360,
-    transition: { type: 'doodle-wipe', direction: 'right', wobble: true },
+    transition: { type: 'slide', direction: 'right', wobble: true },
     config: {
       background: {
         preset: 'sunriseGradient',
@@ -332,7 +337,7 @@ const video1Scenes = [
   {
     id: 'knodovia-cta',
     durationInFrames: 450,
-    transition: { type: 'eraser' },
+    transition: { type: 'slide' },
     config: {
       background: { preset: 'sunriseGradient' },
       layout: { type: 'full', options: { padding: 70, titleHeight: 0 } },
@@ -368,30 +373,31 @@ const video1Scenes = [
   },
 ];
 
-export const KNODOVIA_VIDEO1_DURATION = video1Scenes.reduce(
-  (total, scene) => total + scene.durationInFrames,
-  0,
+export const KNODOVIA_VIDEO1_DURATION = calculateTransitionSeriesDuration(
+  video1Scenes,
+  TRANSITION_FRAMES,
 );
 
 export const KnodoviaAccidentalArrival = () => {
+  const { width, height } = useVideoConfig();
+  const viewport = { width, height };
   return (
     <AbsoluteFill>
-      <Series>
+      <TransitionSeries>
         {video1Scenes.map((scene, index) => (
-          <Series.Sequence
-            key={scene.id}
-            durationInFrames={scene.durationInFrames}
-            offset={index === 0 ? 0 : -TRANSITION_FRAMES}
-          >
-            <SceneTransitionWrapper
-              durationInFrames={scene.durationInFrames}
-              transition={scene.transition}
-            >
+          <React.Fragment key={scene.id}>
+            {index > 0 && (
+              <TransitionSeries.Transition
+                presentation={resolvePresentation(scene.transition, viewport)}
+                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+              />
+            )}
+            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
               <SceneFromConfig config={scene.config} />
-            </SceneTransitionWrapper>
-          </Series.Sequence>
+            </TransitionSeries.Sequence>
+          </React.Fragment>
         ))}
-      </Series>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };
