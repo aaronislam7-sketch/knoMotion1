@@ -111,7 +111,22 @@ Mid-scenes are **composed components** that combine SDK elements, animations, ef
 
 **NOT Layouts**: Mid-scenes are **NOT** layout systems. They are pre-built components that **use** layout systems.
 
-### Current Mid-Scenes (4)
+### Current Mid-Scenes (10)
+
+All 10 mid-scenes are exported from `sdk/mid-scenes/index.js` with a `MID_SCENE_REGISTRY` mapping. Each has a JSON schema in `sdk/mid-scenes/schemas/`.
+
+| # | Key | Component | Schema |
+|---|-----|-----------|--------|
+| 1 | `heroText` | HeroTextEntranceExit | ✅ |
+| 2 | `cardSequence` | CardSequence | ✅ |
+| 3 | `textReveal` | TextRevealSequence | ✅ |
+| 4 | `iconGrid` | IconGrid | ✅ |
+| 5 | `checklist` | ChecklistReveal | ✅ |
+| 6 | `bubbleCallout` | BubbleCalloutSequence | ✅ |
+| 7 | `sideBySide` | SideBySideCompare | ✅ |
+| 8 | `gridCards` | GridCardReveal | ✅ |
+| 9 | `animatedCounter` | AnimatedCounter | ✅ |
+| 10 | `bigNumber` | BigNumberReveal | ✅ |
 
 #### 1. HeroTextEntranceExit
 
@@ -1105,6 +1120,23 @@ import { SceneFromConfig } from '../compositions/SceneRenderer';
   - Calls `resolveSceneSlots(layout, viewport)` to position header/body/columns.
   - Applies `resolveBackground` (including overlays/noise) if `config.background` is provided.
   - For each slot: renders the requested mid-scene with `stylePreset` + `config`.
+
+### Generic Parameterized Composition
+
+`GenericVideoPlayer` (`compositions/GenericVideoPlayer.jsx`) is the universal composition that accepts a `scenes` array and optional `format` as input props. Registered in `Root.tsx` as `KnoMotionVideo` with `calculateMetadata()` for dynamic duration and dimensions.
+
+```jsx
+import { GenericVideoPlayer } from '../compositions/GenericVideoPlayer';
+
+// Input props shape:
+// { scenes: SceneConfig[], format?: 'desktop' | 'mobile' }
+```
+
+The `calculateMetadata()` function computes:
+- `durationInFrames` via `calculateTransitionSeriesDuration(scenes, 20)`
+- `width`/`height` based on format (1920×1080 desktop, 1080×1920 mobile)
+
+**Studio preview:** `KnoMotionVideo` has a 3-scene test payload as `defaultProps` in `Root.tsx`. Select it in Remotion Studio to preview immediately. Once Zod schemas are registered (Chunk 4, S1b), the Studio Props panel will allow editing scenes visually without requiring `defaultProps`.
 
 ### Module: `sdk/transitions/index.ts`
 

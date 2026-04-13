@@ -3,8 +3,14 @@
   "title": "SideBySideCompare",
   "description": "Left vs right comparison blocks with text, icons, and animated reveals. Uses SDK Card and Text elements.",
   "type": "object",
-  "required": ["left", "right", "beats"],
+  "required": ["beats"],
   "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["standard", "beforeAfter"],
+      "default": "standard",
+      "description": "Comparison mode. 'standard': left/right text comparison. 'beforeAfter': image slider comparison with clip-path reveal."
+    },
     "left": {
       "type": "object",
       "description": "Left side configuration",
@@ -99,6 +105,110 @@
       "default": "center",
       "description": "Content alignment. 'center': both sides centered. 'inner': content faces the divider."
     },
+    "before": {
+      "type": "object",
+      "description": "Before-state config (only used when mode is 'beforeAfter')",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Overlay label for the before state"
+        },
+        "media": {
+          "type": "object",
+          "description": "Media content for the before state",
+          "properties": {
+            "image": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "src": { "type": "string" },
+                    "alt": { "type": "string" },
+                    "fit": { "type": "string", "enum": ["cover", "contain"] },
+                    "borderRadius": { "type": "number" },
+                    "style": { "type": "object" }
+                  },
+                  "required": ["src"]
+                }
+              ]
+            },
+            "lottie": { "type": "string", "description": "Lottie registry key or URL" }
+          }
+        }
+      }
+    },
+    "after": {
+      "type": "object",
+      "description": "After-state config (only used when mode is 'beforeAfter')",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Overlay label for the after state"
+        },
+        "media": {
+          "type": "object",
+          "description": "Media content for the after state",
+          "properties": {
+            "image": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "src": { "type": "string" },
+                    "alt": { "type": "string" },
+                    "fit": { "type": "string", "enum": ["cover", "contain"] },
+                    "borderRadius": { "type": "number" },
+                    "style": { "type": "object" }
+                  },
+                  "required": ["src"]
+                }
+              ]
+            },
+            "lottie": { "type": "string", "description": "Lottie registry key or URL" }
+          }
+        }
+      }
+    },
+    "slider": {
+      "type": "object",
+      "description": "Slider configuration for beforeAfter mode",
+      "properties": {
+        "autoAnimate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the slider animates automatically"
+        },
+        "from": {
+          "type": "number",
+          "default": 0.05,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Starting position of the slider (0-1)"
+        },
+        "to": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Ending position of the slider (0-1)"
+        },
+        "initial": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Initial slider position before animation starts"
+        },
+        "beats": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "description": "When the slider animation starts (seconds)" },
+            "exit": { "type": "number", "description": "When the slider animation ends (seconds)" }
+          }
+        }
+      }
+    },
     "beats": {
       "type": "object",
       "required": ["start"],
@@ -106,6 +216,14 @@
         "start": {
           "type": "number",
           "description": "Start time in seconds"
+        },
+        "hold": {
+          "type": "number",
+          "description": "Hold duration in seconds"
+        },
+        "exit": {
+          "type": "number",
+          "description": "Exit time in seconds"
         }
       }
     },
@@ -190,6 +308,28 @@
       "dividerType": "dashed",
       "staggerDelay": 0.4,
       "beats": { "start": 0.5 }
+    },
+    {
+      "mode": "beforeAfter",
+      "before": {
+        "title": "Before",
+        "media": {
+          "image": { "src": "https://example.com/before.jpg", "fit": "cover", "borderRadius": 28 }
+        }
+      },
+      "after": {
+        "title": "After",
+        "media": {
+          "image": { "src": "https://example.com/after.jpg", "fit": "cover", "borderRadius": 28 }
+        }
+      },
+      "slider": {
+        "autoAnimate": true,
+        "from": 0.05,
+        "to": 0.95,
+        "beats": { "start": 1.5, "exit": 7.0 }
+      },
+      "beats": { "start": 0.5, "hold": 4.8, "exit": 10.0 }
     }
   ],
   "useCase": {

@@ -29,7 +29,7 @@
 
 ## 1. Product Alignment Score
 
-### Score: 7.25/10 (was 7/10 — P1 complete)
+### Score: 8.25/10 (was 7.25/10 — P1, S2, S3 complete)
 
 **What's strong (earning the 7):**
 - The JSON-first architecture is perfectly aligned with the blue sky pipeline. Scene configs are pure data — exactly what an LLM produces.
@@ -41,9 +41,9 @@
 
 **What's holding it back from 10 (the gaps):**
 - **No audio layer at all.** The engine produces silent video. TTS/narration alignment is the single biggest gap to the blue sky vision. (-1)
-- **No generic composition.** Every video requires a new `.jsx` file in `compositions/`. There's no single parameterised composition that accepts scene JSON as input props and dynamically adjusts duration/dimensions. This blocks the "agent creates JSON → video renders" pipeline. (-0.5)
+- ~~**No generic composition.** Every video requires a new `.jsx` file in `compositions/`. There's no single parameterised composition that accepts scene JSON as input props and dynamically adjusts duration/dimensions. This blocks the "agent creates JSON → video renders" pipeline. (-0.5)~~ **✅ FIXED by S2** — `GenericVideoPlayer` composition with `calculateMetadata()` for dynamic duration/dimensions. (+0.5 recovered)
 - **No TTS-to-beats alignment tooling.** The beats system works in seconds, which is TTS-friendly, but there's no function to convert word-level timestamps (from Whisper/TTS APIs) into beat objects. (-0.5)
-- **Schemas incomplete.** Missing schemas for `BigNumberReveal`, `AnimatedCounter`. Several schemas behind implementation (`SideBySide` beforeAfter, `BubbleCallout` collision). LLM validation depends on complete schemas. (-0.5)
+- ~~**Schemas incomplete.** Missing schemas for `BigNumberReveal`, `AnimatedCounter`. Several schemas behind implementation (`SideBySide` beforeAfter, `BubbleCallout` collision). LLM validation depends on complete schemas. (-0.5)~~ **✅ FIXED by S3** — All 10 mid-scenes now have complete JSON schemas. SideBySide beforeAfter mode, BubbleCallout collision/jitter, HeroText optional text all documented. (+0.5 recovered)
 - ~~**Transitions are hand-rolled.** Custom `SceneTransitionWrapper` instead of `@remotion/transitions`, missing spring physics and audio transition support. (-0.25)~~ **✅ FIXED by P1** — All compositions now use `@remotion/transitions` `TransitionSeries` with `springTiming()`. (+0.25 recovered)
 - **No captions/subtitles.** `@remotion/captions` is not used. Professional learning videos need subtitles. (-0.25)
 
@@ -544,14 +544,15 @@ export const VideoConfigSchema = z.object({
 
 ### S2: Generic Parameterized Composition
 
-**Priority:** CRITICAL
+**Priority:** CRITICAL — **STATUS: ✅ COMPLETE**
 **Impact:** Eliminates per-video composition files; enables the entire blue sky pipeline
+**Completed:** 2026-04-13
 
-#### S2a: Create `GenericVideoPlayer` component
+#### S2a: Create `GenericVideoPlayer` component ✅
 
-**What:** A single composition that takes a scene array as input props and renders any KnoMotion video.
+**What was done:** Created `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx` — a single composition that takes a `scenes` array and optional `format` as input props and renders any KnoMotion video.
 
-**File to create:** `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx`
+**File created:** `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx`
 
 **Implementation detail:**
 ```jsx
@@ -560,93 +561,105 @@ import { AbsoluteFill, useVideoConfig } from 'remotion';
 import { TransitionSeries } from '@remotion/transitions';
 import { SceneFromConfig } from './SceneRenderer';
 import { resolvePresentation, resolveTransitionTiming } from '../sdk/transitions';
-import { AudioLayer } from '../sdk/audio/AudioLayer';
 
 const TRANSITION_FRAMES = 20;
 
-export const GenericVideoPlayer = ({ scenes }) => {
+export const GenericVideoPlayer = ({ scenes = [], format }) => {
   const { width, height } = useVideoConfig();
   const viewport = { width, height };
 
   return (
     <AbsoluteFill>
       <TransitionSeries>
-        {scenes.map((scene, index) => (
-          <React.Fragment key={scene.id}>
-            {index > 0 && (
-              <TransitionSeries.Transition
-                presentation={resolvePresentation(scene.transition, viewport)}
-                timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
-              />
-            )}
-            <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
-              <SceneFromConfig config={scene.config} />
-              {scene.audio && (
-                <AudioLayer audio={scene.audio} durationInFrames={scene.durationInFrames} />
+        {scenes.map((scene, index) => {
+          const sceneConfig = scene.config
+            ? { ...scene.config, format: format || scene.config?.format }
+            : { format };
+          return (
+            <React.Fragment key={scene.id || `scene-${index}`}>
+              {index > 0 && (
+                <TransitionSeries.Transition
+                  presentation={resolvePresentation(scene.transition, viewport)}
+                  timing={resolveTransitionTiming(scene.transition, TRANSITION_FRAMES)}
+                />
               )}
-            </TransitionSeries.Sequence>
-          </React.Fragment>
-        ))}
+              <TransitionSeries.Sequence durationInFrames={scene.durationInFrames}>
+                <SceneFromConfig config={sceneConfig} />
+              </TransitionSeries.Sequence>
+            </React.Fragment>
+          );
+        })}
       </TransitionSeries>
     </AbsoluteFill>
   );
 };
 ```
 
-#### S2b: Register with `calculateMetadata()`
+**Note:** AudioLayer integration (`scene.audio` → `<AudioLayer>`) will be added in Chunk 3 (P4b) when the audio layer is implemented. The component structure is ready for it.
 
-**What:** Dynamic composition registration in `Root.tsx`.
+#### S2b: Register with `calculateMetadata()` ✅
 
-**Files to modify:**
-- `KnoMotion-Videos/src/remotion/Root.tsx`
+**What was done:** Registered `KnoMotionVideo` composition in `Root.tsx` with a typed `calculateGenericMetadata` function that:
+- Computes `durationInFrames` via `calculateTransitionSeriesDuration(scenes, 20)`
+- Sets dimensions based on `format`: 1920×1080 (desktop) or 1080×1920 (mobile)
+- Handles empty scenes gracefully (minimum 1 frame)
 
-**Implementation detail:**
-```tsx
-<Composition
-  id="KnoMotionVideo"
-  component={GenericVideoPlayer}
-  schema={VideoConfigSchema}
-  fps={30}
-  width={1920}
-  height={1080}
-  defaultProps={{ scenes: [] }}
-  calculateMetadata={({ props }) => {
-    const { calculateTransitionSeriesDuration } = require('../sdk/transitions');
-    const totalFrames = calculateTransitionSeriesDuration(props.scenes, 20);
-    const isMobile = props.format === 'mobile';
-    return {
-      durationInFrames: totalFrames,
-      width: isMobile ? 1080 : 1920,
-      height: isMobile ? 1920 : 1080,
-    };
-  }}
-/>
+**Composition ID:** `KnoMotionVideo`
+
+**Input props interface:**
+```typescript
+interface GenericVideoProps {
+  scenes: Array<{
+    id: string;
+    durationInFrames: number;
+    transition?: { type: string; direction?: string; durationInFrames?: number };
+    config: Record<string, unknown>;
+  }>;
+  format?: 'desktop' | 'mobile';
+}
 ```
+
+**Note:** The `schema` prop (Zod schema for Studio visual editing) will be added in Chunk 4 (S1b) when the full Zod schema is defined.
+
+#### Learnings for Future Agent Sessions (Chunk 2)
+
+1. **`calculateMetadata` must be typed.** Used `CalculateMetadataFunction<GenericVideoProps>` from Remotion for proper type inference. The function returns `{ durationInFrames, width, height }`.
+2. **Empty scenes edge case.** `calculateMetadata` must handle `scenes: []` (the `defaultProps` case) — returns `durationInFrames: 1` to avoid Remotion validation errors.
+3. **Format passthrough.** The `format` prop is passed through to `SceneFromConfig` via the scene's `config` object, enabling mobile-aware layout adaptation (`columnSplit` → `rowStack` on mobile).
+4. **`defaultProps` must match the TypeScript interface.** Remotion validates that `defaultProps` shape matches the component props. Used `format: 'desktop' as const` for type narrowing.
+5. **All 10 mid-scene schemas are now in `schemas/` directory.** This unblocks S4 (capability manifest) and S1 (Zod schemas) which need to reference these schemas.
+6. **SideBySide `required` changed.** In beforeAfter mode, `left`/`right` are not used — so `required` was changed from `["left", "right", "beats"]` to just `["beats"]`. The standard mode still validates left/right at the component level.
+7. **Studio visual props editing requires Zod schema.** Without a `schema` prop on `<Composition>`, the Remotion Studio Props panel has no input fields to paste/edit JSON. Until S1b (Chunk 4) adds the Zod schema, testing `KnoMotionVideo` in Studio requires populating `defaultProps` with test scenes. A 3-scene test payload is currently set as `defaultProps` for this purpose.
+8. **Remotion bundle is the build check.** `npx remotion bundle KnoMotion-Videos/src/remotion/index.ts` is the correct compilation check for this project (not `npm run build` which is vite). Use `npx remotion compositions` to verify all compositions are registered correctly.
+9. **`build/` directory is not gitignored.** The Remotion bundle output (`/workspace/build/`) is generated by `npx remotion bundle` and should not be committed. It's not in `.gitignore` currently — future agents should avoid staging it.
 
 ---
 
 ### S3: Complete Mid-Scene Schemas
 
-**Priority:** HIGH
+**Priority:** HIGH — **STATUS: ✅ COMPLETE**
 **Impact:** LLM validation, Studio editing, agent self-checking
+**Completed:** 2026-04-13
 
-#### S3a: Add missing schemas
+#### S3a: Add missing schemas ✅
 
-**Files to create:**
-- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/BigNumberReveal.schema.json`
-- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/AnimatedCounter.schema.json`
+**Files created:**
+- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/BigNumberReveal.schema.json` — Documents `number`, `label`, `emphasis`, `animation`, `countFrom`, `color`, `beats`, `position`, `style`. Includes 3 examples and use-case/sizing metadata.
+- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/AnimatedCounter.schema.json` — Documents `startValue`, `endValue`, `duration`, `prefix`, `suffix`, `label`, `color`, `beats`, `position`, `style`. Includes 2 examples.
 
-#### S3b: Update incomplete schemas
+#### S3b: Update incomplete schemas ✅
 
-**Files to modify:**
-- `SideBySideCompare.schema.json` — Add `mode`, `beforeAfter`, `slider` fields
-- `BubbleCalloutSequence.schema.json` — Add `collisionDetection`, `jitter` fields
-- `HeroTextEntranceExit.schema.json` — Mark `text` as optional (code allows it)
+**Files modified:**
+- `SideBySideCompare.schema.json` — Added `mode` (`'standard'` | `'beforeAfter'`), `before`/`after` objects (with `title` and `media` containing `image`/`lottie`), `slider` object (with `autoAnimate`, `from`, `to`, `initial`, `beats`). Added `hold` and `exit` to beats. Added beforeAfter example. Changed `required` from `["left", "right", "beats"]` to `["beats"]` since beforeAfter mode doesn't use left/right.
+- `BubbleCalloutSequence.schema.json` — Added `collisionDetection` (boolean, default true), `jitter` (object with `x`/`y` pixel offsets), per-callout `beats` and `animated` fields.
+- `HeroTextEntranceExit.schema.json` — Removed `text` from required array (code allows it to be omitted).
 
-#### S3c: Add `BigNumberReveal` to mid-scenes barrel
+#### S3c: Add `BigNumberReveal` to mid-scenes barrel ✅
 
-**Files to modify:**
-- `KnoMotion-Videos/src/sdk/mid-scenes/index.js` — Add `BigNumberReveal` export and `MID_SCENE_REGISTRY` entry.
+**Files modified:**
+- `KnoMotion-Videos/src/sdk/mid-scenes/index.js` — Added `BigNumberReveal` export and `MID_SCENE_REGISTRY` entries (`bigNumberReveal` and `bigNumber` aliases).
+
+**Note on Legacy Deletion Register S3c entry:** The direct import of `BigNumberReveal` in `SceneRenderer.jsx` is part of the `MID_SCENE_COMPONENTS` registry pattern (the canonical way components are registered for rendering). It's not "outside the registry pattern" — it IS the registry. No deletion needed.
 
 ---
 
@@ -991,13 +1004,13 @@ This section tracks code that should be deleted after specific tasks are complet
 
 | Priority | Task ID | Description | Depends On | Status |
 |----------|---------|-------------|------------|--------|
-| CRITICAL | S2 | Generic parameterized composition | P1 | Ready (P1 done) |
+| CRITICAL | S2 | Generic parameterized composition | P1 | ✅ COMPLETE |
 | CRITICAL | P4 | Audio layer (narration, music, captions) | — | Pending |
 | HIGH | P1 | `@remotion/transitions` adoption | — | ✅ COMPLETE |
-| HIGH | S1 | Zod schemas for Studio visual editing | S3 | Pending |
-| HIGH | S3 | Complete mid-scene schemas | — | Pending |
-| HIGH | S4 | Capability manifest for agents | S3 | Pending |
-| HIGH | R1 | Player integration | S2 | Pending |
+| HIGH | S1 | Zod schemas for Studio visual editing | S3 | Ready (S3 done) |
+| HIGH | S3 | Complete mid-scene schemas | — | ✅ COMPLETE |
+| HIGH | S4 | Capability manifest for agents | S3 | Ready (S3 done) |
+| HIGH | R1 | Player integration | S2 | Ready (S2 done) |
 | MEDIUM | P2 | Standardize spring/easing | — | Pending |
 | MEDIUM | P3 | Animated emoji upgrade | — | Pending |
 | MEDIUM | R2 | Lambda rendering pipeline | S2 | Pending |
@@ -2094,8 +2107,7 @@ plan, ask me before implementing.
 
 ## Completed Work
 
-Chunk 1 (P1 — @remotion/transitions) is COMPLETE. Key things to know:
-
+### Chunk 1 (P1 — @remotion/transitions) ✅ COMPLETE
 - All 10 compositions now use `TransitionSeries` from `@remotion/transitions`.
 - `SceneTransitionWrapper` has been deleted from `SceneRenderer.jsx`.
 - The canonical transition layer is `KnoMotion-Videos/src/sdk/transitions/index.ts`
@@ -2108,16 +2120,54 @@ Chunk 1 (P1 — @remotion/transitions) is COMPLETE. Key things to know:
 - All compositions standardized to TRANSITION_FRAMES = 20 with springTiming
   (damping: 200, durationRestThreshold: 0.001).
 - Duration exports use `calculateTransitionSeriesDuration(scenes, 20)`.
-- `BigNumberReveal` is imported directly in SceneRenderer.jsx but NOT yet in the
-  mid-scenes barrel (index.js). This is task S3c in Chunk 2.
+
+### Chunk 2 (S2 + S3 — Generic Composition + Schemas) ✅ COMPLETE
+- **S2a:** `GenericVideoPlayer.jsx` created — universal parameterized composition
+  that accepts `{ scenes, format }` as input props. Uses TransitionSeries with
+  resolvePresentation + resolveTransitionTiming from the P1 transition layer.
+  Passes `format` through to SceneFromConfig for mobile-aware layout adaptation.
+- **S2b:** Registered as `KnoMotionVideo` in Root.tsx with typed
+  `calculateGenericMetadata` function (CalculateMetadataFunction<GenericVideoProps>).
+  Computes durationInFrames via calculateTransitionSeriesDuration(scenes, 20).
+  Dimensions: 1920×1080 (desktop) or 1080×1920 (mobile).
+- **S3a:** Created BigNumberReveal.schema.json and AnimatedCounter.schema.json
+  with full field docs, examples, and use-case metadata.
+- **S3b:** Updated SideBySideCompare.schema.json (added mode, before/after, slider),
+  BubbleCalloutSequence.schema.json (added collisionDetection, jitter, per-callout
+  beats/animated), HeroTextEntranceExit.schema.json (text now optional).
+- **S3c:** BigNumberReveal added to mid-scenes barrel (index.js) with exports and
+  MID_SCENE_REGISTRY entries (bigNumber, bigNumberReveal aliases).
+- All 10 mid-scenes now have complete JSON schemas in `sdk/mid-scenes/schemas/`.
+- `KnoMotionVideo` defaultProps contain a 3-scene test payload for Studio preview
+  (textReveal, bigNumber+checklist, clock-wipe transition). This exists because
+  Remotion Studio's visual props editor requires a Zod schema (S1b, Chunk 4).
+- Product alignment score: 8.25/10 (was 7.25).
+
+### Key architecture facts for new agents:
+- `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx` — THE composition
+  for the blue-sky pipeline. All future rendering should target `KnoMotionVideo`.
+- `KnoMotion-Videos/src/compositions/SceneRenderer.jsx` — `SceneFromConfig` is
+  the scene-level renderer. GenericVideoPlayer calls it per scene.
+- `KnoMotion-Videos/src/sdk/transitions/index.ts` — Transition resolution layer.
+  Three exports: resolvePresentation, resolveTransitionTiming,
+  calculateTransitionSeriesDuration.
+- `KnoMotion-Videos/src/sdk/mid-scenes/index.js` — Barrel exports for all 10
+  mid-scenes + MID_SCENE_REGISTRY mapping.
+- `KnoMotion-Videos/src/remotion/Root.tsx` — Composition registration. The
+  KnoMotionVideo composition has calculateMetadata for dynamic props.
+- Build check: `npx remotion bundle KnoMotion-Videos/src/remotion/index.ts`
+- Composition check: `npx remotion compositions KnoMotion-Videos/src/remotion/index.ts`
+- `npm run build` is vite (for the admin UI), NOT for Remotion. Use the above.
+- `build/` directory (Remotion bundle output) should not be committed.
 
 ## Context Files (read these for architecture understanding)
 
-- docs/ARCHITECTURE.md — Engine architecture
-- docs/reference-llm-guide.md — JSON schemas for all mid-scenes
+- docs/ARCHITECTURE.md — Engine architecture + GenericVideoPlayer docs
+- docs/reference-llm-guide.md — JSON schemas for all mid-scenes + KnoMotionVideo usage
 - docs/instructions-llm-guide.md — LLM behavioral guidelines
-- SDK.md — Full SDK reference
-- KnoMotion-Videos/src/compositions/SceneRenderer.jsx — Core renderer (SceneFromConfig only)
+- SDK.md — Full SDK reference (10 mid-scenes documented)
+- KnoMotion-Videos/src/compositions/SceneRenderer.jsx — Core renderer (SceneFromConfig)
+- KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx — Universal composition
 - KnoMotion-Videos/src/sdk/transitions/index.ts — Transition resolution layer
 - KnoMotion-Videos/src/sdk/mid-scenes/index.js — Mid-scene registry
 - KnoMotion-Videos/src/sdk/theme/knodeTheme.ts — Theme tokens
@@ -2163,44 +2213,55 @@ There are checkpoints/signoffs 3 times per chunk:
 ### Chunk 1: P1 — Adopt @remotion/transitions ✅ COMPLETE
 See Section 4 P1 for full completion notes.
 
-### Chunk 2: S2 + S3 — Generic Composition + Schemas (NEXT)
-- S3a: Add missing schemas (BigNumberReveal, AnimatedCounter).
-- S3b: Update incomplete schemas (SideBySide beforeAfter, BubbleCallout collision).
-- S3c: Add BigNumberReveal to mid-scenes barrel (index.js + MID_SCENE_REGISTRY).
-- S2a: Create GenericVideoPlayer.jsx using TransitionSeries.
-  Use the canonical pattern from P1 (resolvePresentation + resolveTransitionTiming).
-- S2b: Register with calculateMetadata() in Root.tsx using calculateTransitionSeriesDuration.
+### Chunk 2: S2 + S3 — Generic Composition + Schemas ✅ COMPLETE
+See Section 5 S2 and S3 for full completion notes. Score: 7.25 → 8.25.
+
+### Chunk 3: P4 — Audio Layer (NEXT)
+- P4a: Add audio fields to scene JSON schema (scene.schema.ts).
+  New fields: audio.narration, audio.music, audio.sfx, captions.
+  See Section 4 P4a for the exact schema shape.
+- P4b: Create AudioLayer component (sdk/audio/AudioLayer.jsx).
+  Handles narration (<Html5Audio>), background music (with fade in/out volume
+  curves), and sound effects (positioned via <Sequence>).
+  See Section 4 P4b for implementation detail.
+- P4c: Create CaptionOverlay component (sdk/audio/CaptionOverlay.jsx).
+  Uses @remotion/captions createTikTokStyleCaptions() for word-level animated
+  subtitles. Supports 'tiktok', 'subtitle', 'karaoke' styles.
+  NOTE: @remotion/captions is NOT yet in package.json — install it at 4.0.382.
+- P4d: Create ttsToBeatAlignment() utility (sdk/utils/ttsToBeatAlignment.ts).
+  Bridge function: TTS word-level timestamps → KnoMotion beats.
+  Uses @remotion/captions Caption type.
+- After P4b is done, integrate AudioLayer into GenericVideoPlayer.jsx:
+  Add `{scene.audio && <AudioLayer audio={scene.audio} ... />}` inside
+  each TransitionSeries.Sequence. The structure is already prepared for this.
 - Update docs (reference-llm-guide.md, SDK.md, ARCHITECTURE.md).
 - Commit and push. Update me.
 
-### Chunk 3: P4 — Audio Layer
-- P4a: Add audio fields to scene JSON schema.
-- P4b: Create AudioLayer component.
-- P4c: Create CaptionOverlay component.
-- P4d: Create ttsToBeatAlignment() utility.
-- Commit and push. Update me.
-
 ### Chunk 4: S1 + S4 — Zod Schemas + Capability Manifest
-- S1a: Define complete Zod schema for video config.
-- S1b: Register schema on compositions in Root.tsx.
-- S4a: Generate capability manifest JSON.
+- S1a: Define complete Zod schema for video config (schemas/videoConfig.schema.ts).
+- S1b: Register schema on KnoMotionVideo composition in Root.tsx.
+  This will enable Remotion Studio visual props editing (currently blocked).
+  When done, the test defaultProps in Root.tsx can be simplified back to
+  `{ scenes: [], format: 'desktop' }` since Studio will provide the JSON editor.
+- S4a: Generate capability manifest JSON (sdk/capability-manifest.json).
 - Commit and push. Update me.
 
 ### Chunk 5: R1 — Player Integration
-- R1a: Create KnoMotionPlayer wrapper.
-- R1b: Add @remotion/preload for asset preloading.
+- R1a: Create KnoMotionPlayer wrapper (player/KnoMotionPlayer.jsx).
+- R1b: Add @remotion/preload for asset preloading (player/preloadSceneAssets.ts).
+  NOTE: @remotion/preload is NOT yet in package.json — install at 4.0.382.
 - Commit and push. Update me.
 
 ### Chunk 6: P2 + P3 — Spring/Easing Standardization + Emoji
-- P2a: Consolidate spring configs to single source.
-- P2b: Replace custom easing with Remotion Easing.
+- P2a: Consolidate spring configs to single source in theme/animationPresets.ts.
+- P2b: Replace custom easing (sdk/easing.ts) with Remotion Easing re-exports.
 - P2c: Delete legacy duplicates per Legacy Deletion Register.
 - P3a: Verify animated emoji assets.
-- P3b: Expand emoji mapping.
+- P3b: Expand emoji mapping in elements/atoms/Icon.jsx.
 - Commit and push. Update me.
 
 ### Chunk 7: remotion-bits Integration (Section 12 — Tier 1)
-- Install remotion-bits.
+- Install remotion-bits (0.2.0).
 - Add new revealType options to textReveal using remotion-bits text components.
 - Add centerRipple animation to gridCards using StaggeredMotion.
 - Add List Reveal animation to checklist using StaggeredMotion.
@@ -2219,7 +2280,7 @@ and what's next. I will tell you whether to continue or adjust direction.
 
 ## What "Done" Looks Like Per Chunk
 
-- Code compiles without errors (`npm run build` passes)
+- Code compiles without errors (`npx remotion bundle KnoMotion-Videos/src/remotion/index.ts`)
 - No lint regressions introduced
 - Legacy code deleted per Section 9 if applicable
 - Any new mid-scene has: component file, schema file, registry entry, entry in

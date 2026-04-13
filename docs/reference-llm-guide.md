@@ -806,7 +806,36 @@ For advanced animation control:
 
 ---
 
-## 11. Validation Checklist
+## 11. Generic Parameterized Composition
+
+The `KnoMotionVideo` composition accepts any scene array via input props and renders it dynamically. This is the composition used by the blue-sky pipeline.
+
+**Composition ID:** `KnoMotionVideo`
+
+**Input Props:**
+```json
+{
+  "scenes": [...],
+  "format": "desktop"
+}
+```
+
+- `scenes` — Array of scene objects (same structure as documented throughout this guide)
+- `format` — `"desktop"` (1920×1080) or `"mobile"` (1080×1920). Optional, defaults to `"desktop"`.
+
+Duration, width, and height are computed automatically via `calculateMetadata()`:
+- Duration = `sum(scene.durationInFrames) - (sceneCount - 1) × 20` (transition overlap)
+- Dimensions from `format`
+
+**Rendering:**
+```bash
+npx remotion render KnoMotion-Videos/src/remotion/index.ts KnoMotionVideo \
+  --props='{"scenes":[...],"format":"desktop"}'
+```
+
+---
+
+## 12. Validation Checklist
 
 Before outputting JSON, verify:
 
@@ -828,7 +857,7 @@ Before outputting JSON, verify:
 
 ---
 
-## 12. Common Patterns
+## 13. Common Patterns
 
 ### Hook Scene (TikTok/Reels)
 
@@ -920,7 +949,7 @@ Before outputting JSON, verify:
 
 ---
 
-## 13. Anti-Patterns (Avoid)
+## 14. Anti-Patterns (Avoid)
 
 ❌ **Beats in frames instead of seconds**
 ```json

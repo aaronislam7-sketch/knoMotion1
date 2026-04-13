@@ -3,7 +3,7 @@
   "title": "HeroTextEntranceExit Schema",
   "description": "Schema for HeroTextEntranceExit mid-scene component",
   "type": "object",
-  "required": ["text", "heroType", "heroRef", "beats"],
+  "required": ["heroType", "heroRef", "beats"],
   "properties": {
     "text": {
       "type": "string",

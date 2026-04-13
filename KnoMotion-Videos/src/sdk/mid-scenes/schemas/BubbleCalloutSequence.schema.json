@@ -34,6 +34,19 @@
                 "type": "string",
                 "enum": ["speech", "rounded", "notebook"],
                 "description": "Bubble shape override"
+              },
+              "animated": {
+                "type": "boolean",
+                "description": "Whether the bubble has continuous floating animation"
+              },
+              "beats": {
+                "type": "object",
+                "description": "Per-callout beat overrides (start, exit, emphasis)",
+                "properties": {
+                  "start": { "type": "number" },
+                  "exit": { "type": "number" },
+                  "emphasis": { "type": "number" }
+                }
               }
             }
           }
@@ -70,6 +83,19 @@
       "default": 0.6,
       "minimum": 0.1,
       "description": "Animation duration per callout in seconds"
+    },
+    "collisionDetection": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable collision detection to prevent overlapping bubbles"
+    },
+    "jitter": {
+      "type": "object",
+      "description": "Optional pixel offset jitter applied per bubble for organic placement",
+      "properties": {
+        "x": { "type": "number", "description": "Maximum horizontal jitter in pixels" },
+        "y": { "type": "number", "description": "Maximum vertical jitter in pixels" }
+      }
     },
     "beats": {
       "type": "object",
