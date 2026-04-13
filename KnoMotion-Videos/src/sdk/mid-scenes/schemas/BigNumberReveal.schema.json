@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BigNumberReveal",
+  "description": "Dramatic reveal of a large statistic or number. Supports count-up, pop, typewriter, and fade animations.",
+  "type": "object",
+  "required": ["number", "beats"],
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "The number to display, pre-formatted (e.g., '11,000,000', '99%', '$2.5M')"
+    },
+    "label": {
+      "type": "string",
+      "description": "Optional label displayed below the number (e.g., 'bits per second')"
+    },
+    "emphasis": {
+      "type": "string",
+      "enum": ["high", "normal", "low"],
+      "default": "high",
+      "description": "Emphasis level — controls color and animation intensity"
+    },
+    "animation": {
+      "type": "string",
+      "enum": ["pop", "countUp", "typewriter", "fade"],
+      "default": "pop",
+      "description": "Animation type. 'pop': scale-up. 'countUp': animate from countFrom to number. 'typewriter': chars appear one by one. 'fade': simple fade in."
+    },
+    "countFrom": {
+      "type": "number",
+      "default": 0,
+      "description": "Starting number for countUp animation"
+    },
+    "color": {
+      "type": "string",
+      "description": "Optional color override. Theme keys (primary, secondary, accentGreen, etc.) or hex/rgb."
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        },
+        "exit": {
+          "type": "number",
+          "description": "Exit time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "container": { "type": "object" },
+        "number": { "type": "object" },
+        "label": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "number": "11,000,000",
+      "label": "bits per second",
+      "emphasis": "high",
+      "animation": "countUp",
+      "countFrom": 0,
+      "beats": { "start": 0.5, "exit": 5.0 }
+    },
+    {
+      "number": "99%",
+      "label": "accuracy rate",
+      "animation": "pop",
+      "color": "accentGreen",
+      "beats": { "start": 0.3 }
+    },
+    {
+      "number": "$2.5M",
+      "label": "funding raised",
+      "animation": "typewriter",
+      "beats": { "start": 1.0, "exit": 6.0 }
+    }
+  ],
+  "useCase": {
+    "description": "Dramatic statistic or number reveal for impact moments",
+    "when": "Use when presenting a key statistic, milestone, or impressive number",
+    "notFor": "Counting sequences — use animatedCounter for smooth number counting"
+  },
+  "sizingBehavior": {
+    "description": "BigNumberReveal centers the number vertically and horizontally within the slot",
+    "width": "Number fills available width with auto-scaled font size",
+    "height": "Content is vertically centered",
+    "fontScaling": "Font size scales with slot dimensions; larger on mobile"
+  }
+}

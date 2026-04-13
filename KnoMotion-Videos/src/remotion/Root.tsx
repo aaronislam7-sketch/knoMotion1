@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Composition } from 'remotion';
+import type { CalculateMetadataFunction } from 'remotion';
 
 // Load Google Fonts using the correct Remotion v4 API
 import { loadFont as loadCabinSketch } from '@remotion/google-fonts/CabinSketch';
@@ -16,6 +17,35 @@ import { loadFont as loadInter } from '@remotion/google-fonts/Inter';
 loadCabinSketch();
 loadPermanentMarker();
 loadInter();
+
+// Generic Parameterized Composition (S2)
+import { GenericVideoPlayer } from '../compositions/GenericVideoPlayer';
+import { calculateTransitionSeriesDuration } from '../sdk/transitions';
+
+interface GenericVideoProps {
+  scenes: Array<{
+    id: string;
+    durationInFrames: number;
+    transition?: { type: string; direction?: string; durationInFrames?: number };
+    config: Record<string, unknown>;
+  }>;
+  format?: 'desktop' | 'mobile';
+}
+
+const calculateGenericMetadata: CalculateMetadataFunction<GenericVideoProps> = ({
+  props,
+}) => {
+  const scenes = props.scenes || [];
+  const isMobile = props.format === 'mobile';
+  const totalFrames =
+    scenes.length > 0 ? calculateTransitionSeriesDuration(scenes, 20) : 1;
+
+  return {
+    durationInFrames: Math.max(1, totalFrames),
+    width: isMobile ? 1080 : 1920,
+    height: isMobile ? 1920 : 1080,
+  };
+};
 
 // TikTok Viral Videos
 import { TikTok_BrainLies, TIKTOK_BRAINLIES_DURATION } from '../compositions/TikTok_BrainLies';
@@ -128,6 +158,25 @@ export const Root: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={{}}
+      />
+
+      {/* ================================================================= */}
+      {/* GENERIC PARAMETERIZED COMPOSITION (S2) */}
+      {/* Accepts any scene array via input props. Duration, width, and */}
+      {/* height are computed dynamically via calculateMetadata(). */}
+      {/* ================================================================= */}
+      <Composition
+        id="KnoMotionVideo"
+        component={GenericVideoPlayer}
+        durationInFrames={1}
+        fps={FPS}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          scenes: [],
+          format: 'desktop' as const,
+        }}
+        calculateMetadata={calculateGenericMetadata}
       />
     </>
   );

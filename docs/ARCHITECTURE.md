@@ -69,10 +69,13 @@ Mid-scenes are **composed components** that render specific content patterns:
 | `bigNumber` | Large stat display | `number`, `label`, `animation` |
 | `animatedCounter` | Number animation | `startValue`, `endValue`, `duration` |
 
+All 10 mid-scenes are registered in `MID_SCENE_COMPONENTS` (SceneRenderer.jsx) and exported from the barrel (`sdk/mid-scenes/index.js`).
+
 Each mid-scene:
 - Receives a **slot position** (left, top, width, height)
 - Receives a **config object** with content and options
 - Uses SDK elements and animations internally
+- Has a corresponding JSON schema in `sdk/mid-scenes/schemas/`
 
 ### Layer 4: SDK
 
@@ -244,24 +247,44 @@ The `resolvePresentation()` mapper in `sdk/transitions/index.ts` converts scene 
 
 ---
 
+## Generic Parameterized Composition
+
+`GenericVideoPlayer` (`compositions/GenericVideoPlayer.jsx`) is the universal composition that accepts any scene array via input props. It eliminates the need for per-video composition files and powers the entire blue-sky pipeline.
+
+**Key features:**
+- Accepts `scenes` array and optional `format` (`'desktop'` | `'mobile'`) as input props
+- Uses `TransitionSeries` with `resolvePresentation()` and `resolveTransitionTiming()` from the SDK transition layer
+- Registered in `Root.tsx` as `KnoMotionVideo` with `calculateMetadata()` for dynamic duration/dimensions
+- Duration computed via `calculateTransitionSeriesDuration(scenes, 20)`
+- Dimensions adapt based on `format`: 1920×1080 (desktop) or 1080×1920 (mobile)
+
+**Usage:**
+```bash
+npx remotion render KnoMotion-Videos/src/remotion/index.ts KnoMotionVideo --props='{"scenes":[...],"format":"desktop"}'
+```
+
+---
+
 ## File Structure
 
 ```
 KnoMotion-Videos/src/
-├── compositions/           # Video entry points
-│   ├── SceneRenderer.jsx   # Core: SceneFromConfig
-│   ├── KnodoviaVideo*.jsx  # Canon video compositions
-│   └── TikTok_*.jsx        # TikTok format videos
+├── compositions/              # Video entry points
+│   ├── SceneRenderer.jsx      # Core: SceneFromConfig
+│   ├── GenericVideoPlayer.jsx # Universal parameterized composition (S2)
+│   ├── KnodoviaVideo*.jsx     # Canon video compositions
+│   └── TikTok_*.jsx           # TikTok format videos
 ├── sdk/
-│   ├── mid-scenes/         # 10 mid-scene components + schemas
-│   ├── elements/           # UI atoms and compositions
-│   ├── theme/              # Presets, emphasis, colors
-│   ├── effects/            # Backgrounds, particles
-│   ├── lottie/             # Animation registry
-│   ├── scene-layout/       # Slot resolution
-│   └── animations/         # Animation helpers
-├── admin/                  # Preview tools
-└── remotion/               # Remotion entry points
+│   ├── mid-scenes/            # 10 mid-scene components + schemas
+│   ├── transitions/           # Transition resolution layer (P1)
+│   ├── elements/              # UI atoms and compositions
+│   ├── theme/                 # Presets, emphasis, colors
+│   ├── effects/               # Backgrounds, particles
+│   ├── lottie/                # Animation registry
+│   ├── scene-layout/          # Slot resolution
+│   └── animations/            # Animation helpers
+├── admin/                     # Preview tools
+└── remotion/                  # Remotion entry points
 ```
 
 ---

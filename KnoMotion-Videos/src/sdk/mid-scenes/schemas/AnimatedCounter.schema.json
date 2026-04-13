@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnimatedCounter",
+  "description": "Smooth animated number counting from startValue to endValue. Supports prefix/suffix and optional label.",
+  "type": "object",
+  "required": ["startValue", "endValue", "beats"],
+  "properties": {
+    "startValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Starting number for the count animation"
+    },
+    "endValue": {
+      "type": "number",
+      "default": 100,
+      "description": "Ending number for the count animation"
+    },
+    "duration": {
+      "type": "number",
+      "default": 2,
+      "minimum": 0.1,
+      "description": "Duration of the counting animation in seconds"
+    },
+    "prefix": {
+      "type": "string",
+      "default": "",
+      "description": "Text prepended to the number (e.g., '$')"
+    },
+    "suffix": {
+      "type": "string",
+      "default": "",
+      "description": "Text appended to the number (e.g., '%')"
+    },
+    "label": {
+      "type": "string",
+      "description": "Optional label displayed below the number"
+    },
+    "color": {
+      "type": "string",
+      "description": "Optional color override. Theme keys (primary, secondary, etc.) or hex/rgb."
+    },
+    "beats": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "type": "number",
+          "description": "Start time in seconds"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "description": "Slot position from layout resolver",
+      "properties": {
+        "left": { "type": "number" },
+        "top": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional style overrides",
+      "properties": {
+        "container": { "type": "object" },
+        "number": { "type": "object" },
+        "label": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "startValue": 0,
+      "endValue": 100,
+      "duration": 2,
+      "suffix": "%",
+      "label": "completion rate",
+      "beats": { "start": 0.5 }
+    },
+    {
+      "startValue": 0,
+      "endValue": 50000,
+      "duration": 3,
+      "prefix": "$",
+      "label": "revenue",
+      "color": "accentGreen",
+      "beats": { "start": 1.0 }
+    }
+  ],
+  "useCase": {
+    "description": "Smooth number counting animation for metrics and progress",
+    "when": "Use when showing a number incrementing or decrementing over time (e.g., progress, revenue, score)",
+    "notFor": "Static number display — use bigNumber for dramatic static reveals"
+  },
+  "sizingBehavior": {
+    "description": "AnimatedCounter centers content within the slot",
+    "width": "Number fills available width",
+    "height": "Content is vertically centered",
+    "fontScaling": "Font size scales with slot dimensions; larger on mobile"
+  }
+}

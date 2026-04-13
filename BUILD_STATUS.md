@@ -29,7 +29,7 @@
 
 ## 1. Product Alignment Score
 
-### Score: 7.25/10 (was 7/10 — P1 complete)
+### Score: 8.25/10 (was 7.25/10 — P1, S2, S3 complete)
 
 **What's strong (earning the 7):**
 - The JSON-first architecture is perfectly aligned with the blue sky pipeline. Scene configs are pure data — exactly what an LLM produces.
@@ -41,9 +41,9 @@
 
 **What's holding it back from 10 (the gaps):**
 - **No audio layer at all.** The engine produces silent video. TTS/narration alignment is the single biggest gap to the blue sky vision. (-1)
-- **No generic composition.** Every video requires a new `.jsx` file in `compositions/`. There's no single parameterised composition that accepts scene JSON as input props and dynamically adjusts duration/dimensions. This blocks the "agent creates JSON → video renders" pipeline. (-0.5)
+- ~~**No generic composition.** Every video requires a new `.jsx` file in `compositions/`. There's no single parameterised composition that accepts scene JSON as input props and dynamically adjusts duration/dimensions. This blocks the "agent creates JSON → video renders" pipeline. (-0.5)~~ **✅ FIXED by S2** — `GenericVideoPlayer` composition with `calculateMetadata()` for dynamic duration/dimensions. (+0.5 recovered)
 - **No TTS-to-beats alignment tooling.** The beats system works in seconds, which is TTS-friendly, but there's no function to convert word-level timestamps (from Whisper/TTS APIs) into beat objects. (-0.5)
-- **Schemas incomplete.** Missing schemas for `BigNumberReveal`, `AnimatedCounter`. Several schemas behind implementation (`SideBySide` beforeAfter, `BubbleCallout` collision). LLM validation depends on complete schemas. (-0.5)
+- ~~**Schemas incomplete.** Missing schemas for `BigNumberReveal`, `AnimatedCounter`. Several schemas behind implementation (`SideBySide` beforeAfter, `BubbleCallout` collision). LLM validation depends on complete schemas. (-0.5)~~ **✅ FIXED by S3** — All 10 mid-scenes now have complete JSON schemas. SideBySide beforeAfter mode, BubbleCallout collision/jitter, HeroText optional text all documented. (+0.5 recovered)
 - ~~**Transitions are hand-rolled.** Custom `SceneTransitionWrapper` instead of `@remotion/transitions`, missing spring physics and audio transition support. (-0.25)~~ **✅ FIXED by P1** — All compositions now use `@remotion/transitions` `TransitionSeries` with `springTiming()`. (+0.25 recovered)
 - **No captions/subtitles.** `@remotion/captions` is not used. Professional learning videos need subtitles. (-0.25)
 
@@ -544,14 +544,15 @@ export const VideoConfigSchema = z.object({
 
 ### S2: Generic Parameterized Composition
 
-**Priority:** CRITICAL
+**Priority:** CRITICAL — **STATUS: ✅ COMPLETE**
 **Impact:** Eliminates per-video composition files; enables the entire blue sky pipeline
+**Completed:** 2026-04-13
 
-#### S2a: Create `GenericVideoPlayer` component
+#### S2a: Create `GenericVideoPlayer` component ✅
 
-**What:** A single composition that takes a scene array as input props and renders any KnoMotion video.
+**What was done:** Created `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx` — a single composition that takes a `scenes` array and optional `format` as input props and renders any KnoMotion video.
 
-**File to create:** `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx`
+**File created:** `KnoMotion-Videos/src/compositions/GenericVideoPlayer.jsx`
 
 **Implementation detail:**
 ```jsx
@@ -593,60 +594,66 @@ export const GenericVideoPlayer = ({ scenes }) => {
 };
 ```
 
-#### S2b: Register with `calculateMetadata()`
+#### S2b: Register with `calculateMetadata()` ✅
 
-**What:** Dynamic composition registration in `Root.tsx`.
+**What was done:** Registered `KnoMotionVideo` composition in `Root.tsx` with a typed `calculateGenericMetadata` function that:
+- Computes `durationInFrames` via `calculateTransitionSeriesDuration(scenes, 20)`
+- Sets dimensions based on `format`: 1920×1080 (desktop) or 1080×1920 (mobile)
+- Handles empty scenes gracefully (minimum 1 frame)
 
-**Files to modify:**
-- `KnoMotion-Videos/src/remotion/Root.tsx`
+**Composition ID:** `KnoMotionVideo`
 
-**Implementation detail:**
-```tsx
-<Composition
-  id="KnoMotionVideo"
-  component={GenericVideoPlayer}
-  schema={VideoConfigSchema}
-  fps={30}
-  width={1920}
-  height={1080}
-  defaultProps={{ scenes: [] }}
-  calculateMetadata={({ props }) => {
-    const { calculateTransitionSeriesDuration } = require('../sdk/transitions');
-    const totalFrames = calculateTransitionSeriesDuration(props.scenes, 20);
-    const isMobile = props.format === 'mobile';
-    return {
-      durationInFrames: totalFrames,
-      width: isMobile ? 1080 : 1920,
-      height: isMobile ? 1920 : 1080,
-    };
-  }}
-/>
+**Input props interface:**
+```typescript
+interface GenericVideoProps {
+  scenes: Array<{
+    id: string;
+    durationInFrames: number;
+    transition?: { type: string; direction?: string; durationInFrames?: number };
+    config: Record<string, unknown>;
+  }>;
+  format?: 'desktop' | 'mobile';
+}
 ```
+
+**Note:** The `schema` prop (Zod schema for Studio visual editing) will be added in Chunk 4 (S1b) when the full Zod schema is defined.
+
+#### Learnings for Future Agent Sessions (Chunk 2)
+
+1. **`calculateMetadata` must be typed.** Used `CalculateMetadataFunction<GenericVideoProps>` from Remotion for proper type inference. The function returns `{ durationInFrames, width, height }`.
+2. **Empty scenes edge case.** `calculateMetadata` must handle `scenes: []` (the `defaultProps` case) — returns `durationInFrames: 1` to avoid Remotion validation errors.
+3. **Format passthrough.** The `format` prop is passed through to `SceneFromConfig` via the scene's `config` object, enabling mobile-aware layout adaptation (`columnSplit` → `rowStack` on mobile).
+4. **`defaultProps` must match the TypeScript interface.** Remotion validates that `defaultProps` shape matches the component props. Used `format: 'desktop' as const` for type narrowing.
+5. **All 10 mid-scene schemas are now in `schemas/` directory.** This unblocks S4 (capability manifest) and S1 (Zod schemas) which need to reference these schemas.
+6. **SideBySide `required` changed.** In beforeAfter mode, `left`/`right` are not used — so `required` was changed from `["left", "right", "beats"]` to just `["beats"]`. The standard mode still validates left/right at the component level.
 
 ---
 
 ### S3: Complete Mid-Scene Schemas
 
-**Priority:** HIGH
+**Priority:** HIGH — **STATUS: ✅ COMPLETE**
 **Impact:** LLM validation, Studio editing, agent self-checking
+**Completed:** 2026-04-13
 
-#### S3a: Add missing schemas
+#### S3a: Add missing schemas ✅
 
-**Files to create:**
-- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/BigNumberReveal.schema.json`
-- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/AnimatedCounter.schema.json`
+**Files created:**
+- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/BigNumberReveal.schema.json` — Documents `number`, `label`, `emphasis`, `animation`, `countFrom`, `color`, `beats`, `position`, `style`. Includes 3 examples and use-case/sizing metadata.
+- `KnoMotion-Videos/src/sdk/mid-scenes/schemas/AnimatedCounter.schema.json` — Documents `startValue`, `endValue`, `duration`, `prefix`, `suffix`, `label`, `color`, `beats`, `position`, `style`. Includes 2 examples.
 
-#### S3b: Update incomplete schemas
+#### S3b: Update incomplete schemas ✅
 
-**Files to modify:**
-- `SideBySideCompare.schema.json` — Add `mode`, `beforeAfter`, `slider` fields
-- `BubbleCalloutSequence.schema.json` — Add `collisionDetection`, `jitter` fields
-- `HeroTextEntranceExit.schema.json` — Mark `text` as optional (code allows it)
+**Files modified:**
+- `SideBySideCompare.schema.json` — Added `mode` (`'standard'` | `'beforeAfter'`), `before`/`after` objects (with `title` and `media` containing `image`/`lottie`), `slider` object (with `autoAnimate`, `from`, `to`, `initial`, `beats`). Added `hold` and `exit` to beats. Added beforeAfter example. Changed `required` from `["left", "right", "beats"]` to `["beats"]` since beforeAfter mode doesn't use left/right.
+- `BubbleCalloutSequence.schema.json` — Added `collisionDetection` (boolean, default true), `jitter` (object with `x`/`y` pixel offsets), per-callout `beats` and `animated` fields.
+- `HeroTextEntranceExit.schema.json` — Removed `text` from required array (code allows it to be omitted).
 
-#### S3c: Add `BigNumberReveal` to mid-scenes barrel
+#### S3c: Add `BigNumberReveal` to mid-scenes barrel ✅
 
-**Files to modify:**
-- `KnoMotion-Videos/src/sdk/mid-scenes/index.js` — Add `BigNumberReveal` export and `MID_SCENE_REGISTRY` entry.
+**Files modified:**
+- `KnoMotion-Videos/src/sdk/mid-scenes/index.js` — Added `BigNumberReveal` export and `MID_SCENE_REGISTRY` entries (`bigNumberReveal` and `bigNumber` aliases).
+
+**Note on Legacy Deletion Register S3c entry:** The direct import of `BigNumberReveal` in `SceneRenderer.jsx` is part of the `MID_SCENE_COMPONENTS` registry pattern (the canonical way components are registered for rendering). It's not "outside the registry pattern" — it IS the registry. No deletion needed.
 
 ---
 
@@ -991,13 +998,13 @@ This section tracks code that should be deleted after specific tasks are complet
 
 | Priority | Task ID | Description | Depends On | Status |
 |----------|---------|-------------|------------|--------|
-| CRITICAL | S2 | Generic parameterized composition | P1 | Ready (P1 done) |
+| CRITICAL | S2 | Generic parameterized composition | P1 | ✅ COMPLETE |
 | CRITICAL | P4 | Audio layer (narration, music, captions) | — | Pending |
 | HIGH | P1 | `@remotion/transitions` adoption | — | ✅ COMPLETE |
-| HIGH | S1 | Zod schemas for Studio visual editing | S3 | Pending |
-| HIGH | S3 | Complete mid-scene schemas | — | Pending |
-| HIGH | S4 | Capability manifest for agents | S3 | Pending |
-| HIGH | R1 | Player integration | S2 | Pending |
+| HIGH | S1 | Zod schemas for Studio visual editing | S3 | Ready (S3 done) |
+| HIGH | S3 | Complete mid-scene schemas | — | ✅ COMPLETE |
+| HIGH | S4 | Capability manifest for agents | S3 | Ready (S3 done) |
+| HIGH | R1 | Player integration | S2 | Ready (S2 done) |
 | MEDIUM | P2 | Standardize spring/easing | — | Pending |
 | MEDIUM | P3 | Animated emoji upgrade | — | Pending |
 | MEDIUM | R2 | Lambda rendering pipeline | S2 | Pending |
