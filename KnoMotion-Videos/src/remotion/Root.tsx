@@ -173,7 +173,86 @@ export const Root: React.FC = () => {
         width={1920}
         height={1080}
         defaultProps={{
-          scenes: [],
+          scenes: [
+            {
+              id: 'test-hook',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'sunriseGradient', layerNoise: true },
+                layout: { type: 'full', options: { padding: 80 } },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'playful',
+                    config: {
+                      lines: [
+                        { text: 'GenericVideoPlayer works!', emphasis: 'high', beats: { start: 0.3, exit: 4.5 } },
+                      ],
+                      revealType: 'typewriter',
+                      animationDuration: 1.2,
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: 'test-bignum',
+              durationInFrames: 180,
+              transition: { type: 'slide', direction: 'left' },
+              config: {
+                background: { preset: 'notebookSoft' },
+                layout: { type: 'rowStack', options: { rows: 2, padding: 50 } },
+                slots: {
+                  row1: {
+                    midScene: 'bigNumber',
+                    config: {
+                      number: '10',
+                      label: 'mid-scenes with complete schemas',
+                      animation: 'countUp',
+                      countFrom: 0,
+                      beats: { start: 0.5, exit: 5.0 },
+                    },
+                  },
+                  row2: {
+                    midScene: 'checklist',
+                    stylePreset: 'educational',
+                    config: {
+                      items: [
+                        { text: 'GenericVideoPlayer created', checked: true, beats: { start: 1.0 } },
+                        { text: 'calculateMetadata works', checked: true, beats: { start: 1.5 } },
+                        { text: 'All schemas complete', checked: true, beats: { start: 2.0 } },
+                      ],
+                      icon: 'check',
+                      revealType: 'pop',
+                      beats: { start: 0.8, exit: 5.5 },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: 'test-transition',
+              durationInFrames: 120,
+              transition: { type: 'clock-wipe' },
+              config: {
+                background: { preset: 'chalkboardGradient' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'mentor',
+                    config: {
+                      lines: [
+                        { text: 'Transitions work too.', emphasis: 'high', beats: { start: 0.5, exit: 3.0 } },
+                      ],
+                      revealType: 'fade',
+                    },
+                  },
+                },
+              },
+            },
+          ],
           format: 'desktop' as const,
         }}
         calculateMetadata={calculateGenericMetadata}
