@@ -258,10 +258,12 @@ The `resolvePresentation()` mapper in `sdk/transitions/index.ts` converts scene 
 - Duration computed via `calculateTransitionSeriesDuration(scenes, 20)`
 - Dimensions adapt based on `format`: 1920×1080 (desktop) or 1080×1920 (mobile)
 
-**Usage:**
+**Usage (CLI rendering):**
 ```bash
 npx remotion render KnoMotion-Videos/src/remotion/index.ts KnoMotionVideo --props='{"scenes":[...],"format":"desktop"}'
 ```
+
+**Studio preview:** The `KnoMotionVideo` composition has a 3-scene test payload as `defaultProps` in `Root.tsx`. Select it in Remotion Studio to preview immediately. Once Zod schemas are added (Chunk 4, S1b), the Studio Props panel will allow editing scenes visually.
 
 ---
 

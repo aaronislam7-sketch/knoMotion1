@@ -1136,6 +1136,8 @@ The `calculateMetadata()` function computes:
 - `durationInFrames` via `calculateTransitionSeriesDuration(scenes, 20)`
 - `width`/`height` based on format (1920×1080 desktop, 1080×1920 mobile)
 
+**Studio preview:** `KnoMotionVideo` has a 3-scene test payload as `defaultProps` in `Root.tsx`. Select it in Remotion Studio to preview immediately. Once Zod schemas are registered (Chunk 4, S1b), the Studio Props panel will allow editing scenes visually without requiring `defaultProps`.
+
 ### Module: `sdk/transitions/index.ts`
 
 Transition layer powered by `@remotion/transitions`. All compositions use `TransitionSeries` with spring-based timing.
