@@ -23,7 +23,8 @@
 14. [Overlap Guidance: Remotion MCP vs remotion-bits vs KnoMotion SDK](#14-overlap-guidance-remotion-mcp-vs-remotion-bits-vs-knomotion-sdk)
 15. [`@remotion/layout-utils` — Text Measurement & Fitting](#15-remotionlayout-utils--text-measurement--fitting)
 16. [Blue-Sky Pipeline Gaps — Final Sweep](#16-blue-sky-pipeline-gaps--final-sweep)
-17. [Implementation Kickstart Prompt](#17-implementation-kickstart-prompt)
+18. [End-to-End Pipeline Architecture — `pipeline/`](#18-end-to-end-pipeline-architecture--pipeline)
+19. [Implementation Kickstart Prompt](#19-implementation-kickstart-prompt)
 
 ---
 
@@ -2085,12 +2086,249 @@ With ALL items in this document implemented:
 
 ---
 
-## 17. Implementation Kickstart Prompt
+## 18. End-to-End Pipeline Architecture — `pipeline/`
+
+### Decision Context
+
+KnoMotion's value proposition is not "a rendering engine that accepts JSON" — it's **"content in, video out."** The orchestration layer that drives the pipeline (PDF parsing, agent dispatch, TTS calls, audio assembly, rendering) must live in this repo alongside the rendering engine. Reasons:
+
+1. **Single source of truth.** The pipeline imports types directly from `KnoMotion-Videos/src/sdk/` — audio schemas, `Caption` types, `alignTTSToBeats()`, Zod validation schemas. No cross-repo version drift.
+2. **Agentic deployment.** An agent-driven pipeline needs all stages accessible from one project. Splitting orchestration into a separate repo creates friction that blocks autonomous execution.
+3. **Tight coupling by design.** The `Caption[]` format, the `audio` schema shape, the beat alignment contract, the scene JSON structure — these are shared between rendering and orchestration. They evolve together.
+
+### Architecture Overview
+
+The pipeline is a **staged workflow** where an orchestrator dispatches handlers (agents or deterministic functions) against each stage in sequence, passing structured data between them.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         ORCHESTRATOR                             │
+│  Runs stages in sequence. Passes outputs → inputs.              │
+│  Handles retries, validation gates, and error reporting.        │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+    ┌────────────────────────┼────────────────────────────────┐
+    │                        │                                │
+    ▼                        ▼                                ▼
+┌──────────┐         ┌──────────────┐                ┌──────────────┐
+│  AGENT   │         │DETERMINISTIC │                │  EXTERNAL    │
+│  STAGES  │         │   STAGES     │                │  SERVICES    │
+│          │         │              │                │              │
+│ 2. Analyse│        │ 1. PDF parse │                │ • TTS APIs   │
+│ 3. Plan  │         │ 5. Validate  │                │   (ElevenLabs│
+│ 4. Gen   │         │ 9. Normalise │                │    Google,   │
+│ 6. Fix   │         │10. Align     │                │    OpenAI)   │
+│ 7. Script│         │11. Assemble  │                │ • LLM APIs   │
+│          │         │12. Render    │                │ • Storage    │
+│          │         │              │                │   (S3/CDN)   │
+└──────────┘         └──────────────┘                └──────────────┘
+```
+
+### Pipeline Stages
+
+| # | Stage | Handler | Input | Output | Implements |
+|---|-------|---------|-------|--------|------------|
+| 1 | **PDF Upload & Parse** | Deterministic | PDF file | Extracted text, structure, images, page refs | New |
+| 2 | **Content Analysis** | Agent (LLM) | Parsed content + capability manifest (S4) | Learning objectives, key concepts, visual opportunities | New |
+| 3 | **Video Planning** | Agent (LLM) | Content analysis | `VideoPlan` — how many videos, topics, duration, scene suggestions | BSG1 |
+| 4 | **Scene JSON Generation** | Agent (LLM) | Video plan + reference-llm-guide + schemas | Scene JSON array per video (visual structure only, no audio) | Existing guides |
+| 5 | **Validation** | Deterministic | Scene JSON | Validated JSON or structured error report | S6 |
+| 6 | **CI Feedback Loop** | Agent (LLM) | Validation errors + original JSON | Fixed JSON (iterates with stage 5 until clean) | New |
+| 7 | **Narration Script** | Agent (LLM) | Scene JSON + content analysis | `NarrationScript` — text keyed to scenes, emphasis words, tone | BSG2 |
+| 8 | **TTS Generation** | Deterministic (API) | Narration script + voice config | Audio files (URLs) + word-level timestamps per segment | BSG3 |
+| 9 | **Caption Normalisation** | Deterministic | Provider-specific timestamps | `Caption[]` in `@remotion/captions` format | BSG3 |
+| 10 | **Beat Alignment** | Deterministic | `Caption[]` + scene JSON | Scene JSON with synced beats | P4d |
+| 11 | **Assembly** | Deterministic | Visual JSON + audio URLs + captions + aligned beats | Final scene JSON with `audio` and `captions` populated | New |
+| 12 | **Render** | Deterministic (Remotion) | Final assembled JSON | MP4 video file | Existing (S2) |
+
+### Stage Detail: Agent vs Deterministic
+
+**Agent stages** (2, 3, 4, 6, 7) require LLM calls. The orchestrator constructs prompts using existing docs as context:
+- `reference-llm-guide.md` — JSON schema reference (system prompt for stages 4, 6)
+- `instructions-llm-guide.md` — Behavioral guidelines (system prompt for stages 4, 6)
+- `capability-manifest.json` (S4) — Machine-readable engine capabilities (context for stage 2)
+- `narrationScript.schema.ts` (BSG2) — Script format (output schema for stage 7)
+- `videoPlan.schema.ts` (BSG1) — Planning format (output schema for stage 3)
+
+**Deterministic stages** (1, 5, 8, 9, 10, 11, 12) are pure functions or API calls. No LLM needed.
+
+### Folder Structure
+
+```
+/workspace
+├── KnoMotion-Videos/              # Rendering engine (Remotion)
+│   └── src/
+│       ├── compositions/          # GenericVideoPlayer, SceneRenderer
+│       ├── sdk/
+│       │   ├── audio/             # AudioLayer, CaptionOverlay, audioSchema (P4)
+│       │   ├── mid-scenes/        # 10 mid-scene components + schemas
+│       │   ├── transitions/       # Transition resolution layer (P1)
+│       │   └── utils/             # alignTTSToBeats (P4d), beats, etc.
+│       └── remotion/              # Root.tsx, index.ts
+│
+├── pipeline/                      # Orchestration layer (NEW)
+│   ├── orchestrator.ts            # Main runner — executes stages in order
+│   ├── stages/
+│   │   ├── 01-parse/              # PDF parsing
+│   │   │   ├── parsePdf.ts
+│   │   │   └── types.ts           # ParsedContent
+│   │   ├── 02-analyse/            # Content analysis (agent)
+│   │   │   ├── prompt.ts          # System prompt for analysis agent
+│   │   │   └── types.ts           # ContentAnalysis
+│   │   ├── 03-plan/               # Video planning (agent)
+│   │   │   ├── prompt.ts
+│   │   │   └── videoPlan.schema.ts    # BSG1
+│   │   ├── 04-generate/           # Scene JSON generation (agent)
+│   │   │   ├── prompt.ts
+│   │   │   └── types.ts
+│   │   ├── 05-validate/           # Scene validation (deterministic)
+│   │   │   └── validateScenes.ts  # Uses Zod schemas from SDK
+│   │   ├── 06-fix/                # CI feedback loop (agent)
+│   │   │   └── prompt.ts
+│   │   ├── 07-script/             # Narration script generation (agent)
+│   │   │   ├── prompt.ts
+│   │   │   └── narrationScript.schema.ts  # BSG2
+│   │   ├── 08-tts/                # TTS generation (API call)
+│   │   │   ├── providers/
+│   │   │   │   ├── elevenlabs.ts
+│   │   │   │   ├── google.ts
+│   │   │   │   └── types.ts       # TTSProvider interface (BSG3)
+│   │   │   └── generate.ts
+│   │   ├── 09-captions/           # Caption normalisation
+│   │   │   └── normalise.ts       # Provider timestamps → Caption[]
+│   │   ├── 10-align/              # Beat alignment
+│   │   │   └── align.ts           # Calls alignTTSToBeats() from SDK
+│   │   ├── 11-assemble/           # Final JSON assembly
+│   │   │   └── assemble.ts        # Merges visuals + audio + captions
+│   │   └── 12-render/             # Remotion render
+│   │       └── render.ts          # npx remotion render with assembled props
+│   ├── config/
+│   │   └── pipeline.config.ts     # Provider keys, voice config, defaults
+│   └── index.ts                   # CLI entry point
+│
+├── docs/
+│   ├── ARCHITECTURE.md            # Also serves as context for agent stages
+│   ├── reference-llm-guide.md     # System prompt for stages 4, 6
+│   └── instructions-llm-guide.md  # System prompt for stages 4, 6
+│
+├── BUILD_STATUS.md
+└── package.json                   # Shared — one version for all deps
+```
+
+### Boundary Rules
+
+1. **`KnoMotion-Videos/`** is the Remotion bundle. Everything inside must be browser-safe React code. It gets bundled by `npx remotion bundle`. It knows nothing about the pipeline.
+2. **`pipeline/`** is Node-only. It makes HTTP calls to TTS/LLM APIs, reads/writes files, orchestrates the workflow. It *imports* shared types from `KnoMotion-Videos/src/sdk/` but never runs inside the Remotion render.
+3. **Shared types flow one direction:** `pipeline/` imports from `KnoMotion-Videos/src/sdk/`. Never the reverse. The SDK is the contract; the pipeline consumes it.
+4. **One `package.json`** at the repo root. Both `KnoMotion-Videos/` and `pipeline/` share dependencies. This ensures `@remotion/*` versions stay aligned.
+
+### End-to-End Walkthrough
+
+**User provides:** A PDF training guide about neural networks.
+
+**Stage 1 (parse):** `parsePdf.ts` extracts text, structure, headings, images → outputs `ParsedContent`.
+
+**Stage 2 (analyse):** LLM receives `ParsedContent` + capability manifest → identifies 5 learning objectives, 12 key concepts, 8 visual opportunities → outputs `ContentAnalysis`.
+
+**Stage 3 (plan):** LLM receives `ContentAnalysis` → decides: 5 videos, 30-60 seconds each, specific topics per video → outputs `VideoPlan` (BSG1 schema).
+
+**Stage 4 (generate):** For each video in the plan, LLM receives topic + reference guide + schemas → outputs scene JSON array (visual structure, no audio yet).
+
+**Stage 5 (validate):** Scene JSON runs through Zod schemas + business rules → either passes or returns structured errors.
+
+**Stage 6 (fix):** If validation failed, LLM receives errors + original JSON → fixes issues → loops back to stage 5. Max 3 iterations.
+
+**Stage 7 (script):** LLM receives validated scene JSON + content analysis → writes narration script keyed to scene IDs with emphasis words and tone → outputs `NarrationScript` (BSG2 schema).
+
+**Stage 8 (tts):** For each script segment, calls TTS API (ElevenLabs/Google/etc.) → receives audio MP3 file + word-level timestamps. Audio files are stored to configured storage (S3/local/CDN) → produces URLs.
+
+**Stage 9 (captions):** Normalises provider-specific timestamps to `@remotion/captions` `Caption[]` format.
+
+**Stage 10 (align):** Calls `alignTTSToBeats()` (from `KnoMotion-Videos/src/sdk/utils/`) with `Caption[]` + scene JSON → updates beat timings so visuals sync with narration.
+
+**Stage 11 (assemble):** Merges: original scene JSON + audio URLs + caption data + aligned beats → produces final scene JSON with `audio` and `captions` fields populated on each scene.
+
+**Stage 12 (render):** Calls `npx remotion render ... --props='<final JSON>'` using the `KnoMotionVideo` composition → outputs MP4 with synced audio, visuals, and animated captions.
+
+**Result:** Professional video with narrated audio, synchronized visual beats, and TikTok-style animated captions — all from a PDF upload.
+
+### Relationship to Existing BUILD_STATUS Items
+
+| Pipeline Stage | BUILD_STATUS Item | Status |
+|---------------|-------------------|--------|
+| Beat alignment (10) | P4d — `alignTTSToBeats()` | Chunk 3 (current) |
+| Audio rendering (12) | P4b — `AudioLayer`, P4c — `CaptionOverlay` | Chunk 3 (current) |
+| Audio schema (11) | P4a — Audio fields in schema | Chunk 3 (current) |
+| Video planning (3) | BSG1 — `VideoPlan` schema | Section 16 |
+| Narration script (7) | BSG2 — `NarrationScript` schema | Section 16 |
+| TTS providers (8, 9) | BSG3 — TTS provider abstraction | Section 16 |
+| Validation (5) | S6 — Scene validation CLI | Section 5 |
+| Capability manifest (2) | S4 — Capability manifest | Section 5 |
+| Scene duration calc | BSG5 — Auto scene duration | Section 16 |
+| Render artifacts | BSG10 — Artifact management | Section 16 |
+| Review feedback | BSG8 — Structured review format | Section 16 |
+
+### Pipeline Chunk Sequencing
+
+The pipeline is built incrementally across dedicated chunks. P4 (Chunk 3) establishes the rendering foundation. Pipeline chunks build on top of it.
+
+**Pipeline Chunk A: Scaffold + Render Stage**
+- Create `pipeline/` folder structure
+- Implement stage 12 (render) — thin wrapper around `npx remotion render`
+- Implement orchestrator skeleton with stage interface
+- Prove end-to-end wiring: hardcoded JSON → pipeline → MP4
+
+**Pipeline Chunk B: Audio Pipeline (Stages 8-11)**
+- Stage 8: TTS provider abstraction + ElevenLabs implementation (BSG3)
+- Stage 9: Caption normalisation
+- Stage 10: Beat alignment (calls P4d's `alignTTSToBeats()`)
+- Stage 11: Assembly function
+- Prove: narration script → audio → aligned video
+
+**Pipeline Chunk C: Content Pipeline (Stages 1-7)**
+- Stage 1: PDF parsing
+- Stage 2: Content analysis agent
+- Stage 3: Video planning agent (BSG1 schema)
+- Stage 4: Scene JSON generation agent
+- Stage 5: Validation (S6)
+- Stage 6: CI feedback loop agent
+- Stage 7: Narration script agent (BSG2 schema)
+- Prove: PDF → all stages → video
+
+**Pipeline Chunk D: Production Hardening**
+- Series continuity engine (BSG9)
+- Render artifact management (BSG10)
+- Structured review format (BSG8)
+- Multi-language support (BSG6)
+- Asset sourcing strategy (BSG4)
+
+### Dependencies
+
+The pipeline introduces Node-side dependencies not needed by the Remotion bundle:
+
+| Package | Purpose | Stage |
+|---------|---------|-------|
+| `pdf-parse` or `@langchain/community` | PDF text extraction | Stage 1 |
+| `openai` or `@anthropic-ai/sdk` | LLM API calls for agent stages | Stages 2-4, 6-7 |
+| `elevenlabs` | ElevenLabs TTS API | Stage 8 |
+| `@google-cloud/text-to-speech` | Google Cloud TTS | Stage 8 (alt provider) |
+| `@remotion/renderer` | Programmatic render API | Stage 12 |
+
+These are installed when pipeline chunks are built, not during P4. The Remotion bundle is unaffected.
+
+---
+
+## 19. Implementation Kickstart Prompt
 
 The following prompt is designed to be pasted into a Cursor agent session to continue
 actioning this plan. It is structured for iterative execution — each chunk completes,
 commits, and pushes before the next begins. The agent should not attempt to do
 everything in one session.
+
+> **Note:** Section numbers 17→18 (Pipeline Architecture) was added post-initial-plan
+> to document the `pipeline/` orchestration layer architecture decision. The kickstart
+> prompt below references the original section numbering — future agents should read
+> ALL sections including Section 18.
 
 ---
 
@@ -2101,9 +2339,9 @@ You are working in the KnoMotion repository — a JSON-first video engine built 
 
 ## Your Bible
 
-Read BUILD_STATUS.md at the repo root FIRST. It is a 2000+ line plan with 17 sections
-covering every aspect of this build. Do not deviate from it. If something isn't in the
-plan, ask me before implementing.
+Read BUILD_STATUS.md at the repo root FIRST. It is a 2000+ line plan with 19 sections
+covering every aspect of this build (including Section 18: Pipeline Architecture).
+Do not deviate from it. If something isn't in the plan, ask me before implementing.
 
 ## Completed Work
 
@@ -2268,10 +2506,44 @@ See Section 5 S2 and S3 for full completion notes. Score: 7.25 → 8.25.
 - Integrate CodeBlock from remotion-bits as new codeBlock mid-scene.
 - Commit and push. Update me.
 
-### Chunk 8+: Continue with remaining tasks in priority order
+### Chunk 8: Pipeline Chunk A — Scaffold + Render Stage
+See Section 18 for full pipeline architecture.
+- Create `pipeline/` folder structure with stage interface
+- Implement orchestrator skeleton (stage runner with typed I/O)
+- Implement stage 12 (render) — wrapper around `npx remotion render`
+- Prove end-to-end: hardcoded JSON → orchestrator → MP4
+- Commit and push. Update me.
+
+### Chunk 9: Pipeline Chunk B — Audio Pipeline (Stages 8-11)
+- Stage 8: TTS provider abstraction + ElevenLabs implementation (BSG3)
+- Stage 9: Caption normalisation (provider timestamps → Caption[])
+- Stage 10: Beat alignment (calls P4d's alignTTSToBeats())
+- Stage 11: Assembly function (merges visuals + audio + captions)
+- Prove: narration script → TTS → audio → aligned video
+- Commit and push. Update me.
+
+### Chunk 10: Pipeline Chunk C — Content Pipeline (Stages 1-7)
+- Stage 1: PDF parsing
+- Stage 2: Content analysis agent (LLM)
+- Stage 3: Video planning agent (BSG1 schema)
+- Stage 4: Scene JSON generation agent
+- Stage 5: Validation (S6 — Zod schemas + business rules)
+- Stage 6: CI feedback loop agent
+- Stage 7: Narration script agent (BSG2 schema)
+- Prove: PDF → all stages → video
+- Commit and push. Update me.
+
+### Chunk 11: Pipeline Chunk D — Production Hardening
+- Series continuity engine (BSG9)
+- Render artifact management (BSG10)
+- Structured review format (BSG8)
+- Multi-language support (BSG6)
+- Asset sourcing strategy (BSG4)
+- Commit and push. Update me.
+
+### Chunk 12+: Continue with remaining engine tasks
 - Section 11 new mid-scenes (progressTimeline, quoteReveal, flowDiagram, etc.)
 - Section 12 Tier 2 mid-scenes (carousel3D, mosaicGrid, etc.)
-- Section 16 blue-sky gaps (BSG1-BSG10)
 - Section 8 nice-to-haves (N1-N5)
 - Section 15 @remotion/layout-utils
 
