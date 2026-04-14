@@ -6,9 +6,11 @@
  *   JSON → GenericVideoPlayer → Remotion Player / Lambda render → MP4
  *
  * Uses the canonical TransitionSeries pattern established in P1.
+ * Audio layer (P4): renders AudioLayer + CaptionOverlay per scene when
+ * scene.audio / scene.captions fields are present.
  *
  * @usage Register in Root.tsx with calculateMetadata() for dynamic duration/dimensions.
- * @see BUILD_STATUS.md Section 5 — S2
+ * @see BUILD_STATUS.md Section 5 — S2, Section 4 — P4
  */
 
 import React from 'react';
@@ -19,6 +21,8 @@ import {
   resolvePresentation,
   resolveTransitionTiming,
 } from '../sdk/transitions';
+import { AudioLayer } from '../sdk/audio/AudioLayer';
+import { CaptionOverlay } from '../sdk/audio/CaptionOverlay';
 
 const TRANSITION_FRAMES = 20;
 
@@ -70,6 +74,15 @@ export const GenericVideoPlayer = ({ scenes = [], format }) => {
                 durationInFrames={scene.durationInFrames}
               >
                 <SceneFromConfig config={sceneConfig} />
+                {scene.audio && (
+                  <AudioLayer
+                    audio={scene.audio}
+                    durationInFrames={scene.durationInFrames}
+                  />
+                )}
+                {scene.captions && (
+                  <CaptionOverlay captions={scene.captions} />
+                )}
               </TransitionSeries.Sequence>
             </React.Fragment>
           );
