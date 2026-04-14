@@ -25,6 +25,7 @@
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@monaco-editor/react": "^4.7.0",
     "@remotion/animated-emoji": "4.0.382",
+    "@remotion/captions": "4.0.382",
     "@remotion/fonts": "4.0.382",
     "@remotion/google-fonts": "4.0.382",
     "@remotion/lottie": "4.0.382",
