@@ -33,7 +33,7 @@ You transform user requests (topics, scripts, learning objectives) into valid Kn
 
 ### Allowed Keys (Strict)
 
-**Scene-level keys**: `id`, `durationInFrames`, `transition`, `config`
+**Scene-level keys**: `id`, `durationInFrames`, `transition`, `config`, `audio`, `captions`
 
 **Transition keys**: `type`, `direction`
 
@@ -46,6 +46,10 @@ You transform user requests (topics, scripts, learning objectives) into valid Kn
 **Background keys**: `preset`, `layerNoise`, `particles`, `spotlight`
 
 **Slot keys**: `midScene`, `stylePreset`, `config`
+
+**Audio keys** (optional): `narration` (`src`, `startFromSeconds`, `volume`), `music` (`src`, `volume`, `fadeIn`, `fadeOut`, `loop`), `sfx` (array of `src`, `atSecond`, `volume`)
+
+**Captions keys** (optional): `enabled`, `style`, `data`, `combineTokensWithinMilliseconds`
 
 Any key not listed here will cause render failure.
 

@@ -369,6 +369,82 @@ See [`mid-scenes/README.md`](./src/sdk/mid-scenes/README.md) for:
 
 ---
 
+## 🔊 Audio Layer
+
+**Location:** `/workspace/KnoMotion-Videos/src/sdk/audio/`
+
+The audio layer adds narration, background music, sound effects, and animated captions to videos. Components are rendered inside `GenericVideoPlayer` when scene JSON includes `audio` and/or `captions` fields.
+
+### AudioLayer
+
+Renders three audio channels per scene (invisible — audio only).
+
+```javascript
+import { AudioLayer } from '../sdk/audio';
+
+// Rendered automatically by GenericVideoPlayer when scene.audio exists:
+<AudioLayer audio={scene.audio} durationInFrames={scene.durationInFrames} />
+```
+
+**Channels:**
+- **Narration** — `<Html5Audio>` in `<Sequence>` offset by `startFromSeconds`
+- **Background Music** — `<Html5Audio loop>` with fade-in/out volume curves via `interpolate()`
+- **Sound Effects** — Each SFX in its own `<Sequence from={atSecond * fps}>`
+
+### CaptionOverlay
+
+Renders word-level animated captions using `@remotion/captions`.
+
+```javascript
+import { CaptionOverlay } from '../sdk/audio';
+
+// Rendered automatically by GenericVideoPlayer when scene.captions exists:
+<CaptionOverlay captions={scene.captions} />
+```
+
+**Styles:**
+| Style | Visual | Active Word |
+|-------|--------|-------------|
+| `tiktok` | Bold centered text | Coral highlight + 1.12x scale |
+| `subtitle` | Dark bar at bottom | No per-word effect |
+| `karaoke` | Full text dimmed | Words turn white → coral |
+
+### Audio Schema (Zod)
+
+```typescript
+import {
+  AudioConfigSchema,
+  CaptionsConfigSchema,
+  type AudioConfig,
+  type CaptionsConfig,
+} from '../sdk/audio';
+
+// Validate audio config
+const audio = AudioConfigSchema.parse(sceneAudioData);
+const captions = CaptionsConfigSchema.parse(sceneCaptionsData);
+```
+
+### TTS-to-Beat Alignment
+
+Bridge function for the pipeline: converts TTS word-level timestamps to KnoMotion beats.
+
+```typescript
+import { alignTTSToBeats, computeSceneTimeline } from '../sdk/utils/ttsToBeatAlignment';
+import type { Caption } from '@remotion/captions';
+
+const alignment = alignTTSToBeats(captions, scenes, {
+  fps: 30,
+  bufferSeconds: 0.5,
+  emphasisWords: ['neural network', 'learning'],
+  wordsPerLine: 6,
+});
+
+// alignment.scenes[0].beats → { start: 0.2, exit: 3.7 }
+// alignment.scenes[0].lines → [{ text: '...', beats: { start, exit, emphasis? } }]
+```
+
+---
+
 ## 🎬 Animations
 
 ### Module: `animations.js`
@@ -1123,7 +1199,7 @@ import { SceneFromConfig } from '../compositions/SceneRenderer';
 
 ### Generic Parameterized Composition
 
-`GenericVideoPlayer` (`compositions/GenericVideoPlayer.jsx`) is the universal composition that accepts a `scenes` array and optional `format` as input props. Registered in `Root.tsx` as `KnoMotionVideo` with `calculateMetadata()` for dynamic duration and dimensions.
+`GenericVideoPlayer` (`compositions/GenericVideoPlayer.jsx`) is the universal composition that accepts a `scenes` array and optional `format` as input props. Registered in `Root.tsx` as `KnoMotionVideo` with `calculateMetadata()` for dynamic duration and dimensions. Renders `AudioLayer` and `CaptionOverlay` per scene when `scene.audio` / `scene.captions` fields are present.
 
 ```jsx
 import { GenericVideoPlayer } from '../compositions/GenericVideoPlayer';
@@ -1989,8 +2065,9 @@ The SDK provides **everything you need** to build professional video templates:
 - 🧩 **23 UI elements** (14 atoms + 9 compositions)
 - ✨ **15+ visual effects**
 - 📐 **Unified layout engine** (7 arrangement types: GRID, RADIAL, CASCADE, STACK, CIRCULAR, CENTERED)
+- 🔊 **Audio layer** (narration, music, SFX, 3 caption styles)
 - ✅ **Full validation suite**
-- 🛠️ **30+ utilities**
+- 🛠️ **30+ utilities** (incl. TTS-to-beat alignment)
 - 🎨 **Complete theme system** (KNODE_THEME)
 - 🎞️ **Lottie integration** (@remotion/lottie)
 
