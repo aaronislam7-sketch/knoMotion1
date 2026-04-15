@@ -178,6 +178,25 @@ export const Root: React.FC = () => {
               id: 'audio-test-tiktok',
               durationInFrames: 150,
               transition: { type: 'fade' },
+              audio: {
+                narration: {
+                  src: 'REPLACE_WITH_NARRATION_URL',
+                  volume: 1.0,
+                },
+                music: {
+                  src: 'REPLACE_WITH_MUSIC_URL',
+                  volume: 0.12,
+                  fadeIn: 1.0,
+                  fadeOut: 1.5,
+                },
+                sfx: [
+                  {
+                    src: 'REPLACE_WITH_SFX_URL',
+                    atSecond: 0.3,
+                    volume: 0.4,
+                  },
+                ],
+              },
               captions: {
                 enabled: true,
                 style: 'tiktok' as const,
@@ -218,6 +237,18 @@ export const Root: React.FC = () => {
               id: 'audio-test-subtitle',
               durationInFrames: 180,
               transition: { type: 'slide', direction: 'left' },
+              audio: {
+                narration: {
+                  src: 'REPLACE_WITH_NARRATION_URL',
+                  volume: 1.0,
+                },
+                music: {
+                  src: 'REPLACE_WITH_MUSIC_URL',
+                  volume: 0.1,
+                  fadeIn: 0.5,
+                  fadeOut: 2.0,
+                },
+              },
               captions: {
                 enabled: true,
                 style: 'subtitle' as const,
@@ -265,6 +296,14 @@ export const Root: React.FC = () => {
               id: 'audio-test-karaoke',
               durationInFrames: 150,
               transition: { type: 'clock-wipe' },
+              audio: {
+                music: {
+                  src: 'REPLACE_WITH_MUSIC_URL',
+                  volume: 0.2,
+                  fadeIn: 0.3,
+                  fadeOut: 1.0,
+                },
+              },
               captions: {
                 enabled: true,
                 style: 'karaoke' as const,
