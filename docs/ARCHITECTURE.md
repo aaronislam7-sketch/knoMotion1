@@ -267,6 +267,53 @@ npx remotion render KnoMotion-Videos/src/remotion/index.ts KnoMotionVideo --prop
 
 ---
 
+## Audio Layer
+
+The audio layer (P4) adds narration, background music, sound effects, and animated captions to videos. It is integrated into `GenericVideoPlayer` and activated when scene JSON includes `audio` and/or `captions` fields.
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `AudioLayer` | `sdk/audio/AudioLayer.jsx` | Renders three audio channels per scene |
+| `CaptionOverlay` | `sdk/audio/CaptionOverlay.jsx` | Renders animated word-level captions |
+| `audioSchema` | `sdk/audio/audioSchema.ts` | Zod schemas for audio/caption config |
+| `alignTTSToBeats` | `sdk/utils/ttsToBeatAlignment.ts` | Converts TTS timestamps to scene beats |
+
+### Audio Channels
+
+| Channel | Remotion Element | Config Field | Features |
+|---------|-----------------|--------------|----------|
+| Narration | `<Html5Audio>` in `<Sequence>` | `audio.narration` | Offset by `startFromSeconds`, static volume |
+| Background Music | `<Html5Audio loop>` | `audio.music` | Fade-in/out volume curves via `interpolate()` |
+| Sound Effects | `<Html5Audio>` in `<Sequence>` | `audio.sfx[]` | Each SFX at specific `atSecond` offset |
+
+### Caption Styles
+
+| Style | Visual | Active Word Effect |
+|-------|--------|-------------------|
+| `tiktok` | Bold centered text | Highlighted in coral + 1.12x scale |
+| `subtitle` | Semi-transparent bar at bottom | No per-word highlighting |
+| `karaoke` | Full text shown | Words change from dimmed → white → coral |
+
+### Data Flow with Audio
+
+```
+Scene JSON (with audio + captions)
+       │
+       ▼
+GenericVideoPlayer
+├── SceneFromConfig (visual layer)
+├── AudioLayer (audio layer — invisible)
+│   ├── Narration <Html5Audio>
+│   ├── Music <Html5Audio loop>
+│   └── SFX <Html5Audio> × N
+└── CaptionOverlay (caption layer — visual overlay)
+    └── createTikTokStyleCaptions() → pages → active word rendering
+```
+
+---
+
 ## File Structure
 
 ```
@@ -277,6 +324,7 @@ KnoMotion-Videos/src/
 │   ├── KnodoviaVideo*.jsx     # Canon video compositions
 │   └── TikTok_*.jsx           # TikTok format videos
 ├── sdk/
+│   ├── audio/                 # Audio layer (P4): AudioLayer, CaptionOverlay, schemas
 │   ├── mid-scenes/            # 10 mid-scene components + schemas
 │   ├── transitions/           # Transition resolution layer (P1)
 │   ├── elements/              # UI atoms and compositions
@@ -284,6 +332,7 @@ KnoMotion-Videos/src/
 │   ├── effects/               # Backgrounds, particles
 │   ├── lottie/                # Animation registry
 │   ├── scene-layout/          # Slot resolution
+│   ├── utils/                 # ttsToBeatAlignment, beats, etc.
 │   └── animations/            # Animation helpers
 ├── admin/                     # Preview tools
 └── remotion/                  # Remotion entry points

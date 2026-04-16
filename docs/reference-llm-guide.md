@@ -204,7 +204,93 @@ transition: {
 
 ---
 
-## 5. Mid-Scene Components (10 Available)
+## 5. Audio & Captions (Scene-Level)
+
+Scene JSON supports optional `audio` and `captions` fields for narration, background music, sound effects, and animated subtitles.
+
+### Audio Config
+
+```json
+{
+  "id": "narrated-scene",
+  "durationInFrames": 300,
+  "audio": {
+    "narration": {
+      "src": "https://cdn.example.com/narration.mp3",
+      "startFromSeconds": 0,
+      "volume": 1.0
+    },
+    "music": {
+      "src": "https://cdn.example.com/ambient.mp3",
+      "volume": 0.15,
+      "fadeIn": 1.0,
+      "fadeOut": 1.5,
+      "loop": true
+    },
+    "sfx": [
+      { "src": "https://cdn.example.com/whoosh.mp3", "atSecond": 0.3, "volume": 0.4 },
+      { "src": "https://cdn.example.com/chime.mp3", "atSecond": 3.0, "volume": 0.5 }
+    ]
+  },
+  "config": { ... }
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `audio.narration.src` | string (URL) | — | TTS audio file URL |
+| `audio.narration.startFromSeconds` | number | 0 | Offset to begin playback |
+| `audio.narration.volume` | number (0–1) | 1.0 | Narration volume |
+| `audio.music.src` | string (URL) | — | Background music file URL |
+| `audio.music.volume` | number (0–1) | 0.15 | Base music volume |
+| `audio.music.fadeIn` | number | 0 | Fade-in duration (seconds) |
+| `audio.music.fadeOut` | number | 0 | Fade-out duration (seconds) |
+| `audio.music.loop` | boolean | true | Whether to loop the music |
+| `audio.sfx[].src` | string (URL) | — | Sound effect file URL |
+| `audio.sfx[].atSecond` | number | — | When to trigger (scene-relative seconds) |
+| `audio.sfx[].volume` | number (0–1) | 0.5 | SFX volume |
+
+### Captions Config
+
+```json
+{
+  "id": "captioned-scene",
+  "durationInFrames": 150,
+  "captions": {
+    "enabled": true,
+    "style": "tiktok",
+    "combineTokensWithinMilliseconds": 800,
+    "data": [
+      { "text": "Your", "startMs": 200, "endMs": 420, "timestampMs": 310, "confidence": null },
+      { "text": " brain", "startMs": 420, "endMs": 680, "timestampMs": 550, "confidence": null },
+      { "text": " forgets", "startMs": 680, "endMs": 1050, "timestampMs": 865, "confidence": null }
+    ]
+  },
+  "config": { ... }
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `captions.enabled` | boolean | false | Whether to render captions |
+| `captions.style` | `'tiktok'` \| `'subtitle'` \| `'karaoke'` | `'tiktok'` | Caption visual style |
+| `captions.combineTokensWithinMilliseconds` | number | 800 | How aggressively to group words into pages |
+| `captions.data` | Caption[] | — | Word-level timestamps (from TTS) |
+
+**Caption styles:**
+- `tiktok` — Bold centered text, active word highlighted with coral color + slight scale
+- `subtitle` — Traditional semi-transparent bar at the bottom
+- `karaoke` — Words change from dimmed → white (active) → coral (spoken)
+
+**Caption data format** (per `@remotion/captions`):
+- `text` — Word text. Include leading space before each word (e.g., `" brain"`)
+- `startMs` / `endMs` — Absolute timestamps in milliseconds
+- `timestampMs` — Singular timestamp (nullable)
+- `confidence` — Transcription confidence (nullable)
+
+---
+
+## 6. Mid-Scene Components (10 Available)
 
 | Key | Component | Purpose |
 |-----|-----------|---------|
@@ -589,7 +675,7 @@ Animated number counting up/down.
 
 ---
 
-## 6. Slot Arrays (Sequenced Content)
+## 7. Slot Arrays (Sequenced Content)
 
 **KEY PATTERN**: A slot can be an **array of mid-scenes** instead of a single mid-scene. This creates natural-feeling sequences where content flows within the same visual space.
 
@@ -640,7 +726,7 @@ Each mid-scene in the array renders in the **same physical space**; beats contro
 
 ---
 
-## 7. Lottie Registry
+## 8. Lottie Registry
 
 ### Available Keys
 
@@ -670,7 +756,7 @@ heroRef: 'https://assets.lottiefiles.com/...'
 
 ---
 
-## 8. Theme Colors
+## 9. Theme Colors
 
 Available color keys for `color`, `iconColor`, `dividerColor`, etc:
 
@@ -712,7 +798,7 @@ dividerColor: 'secondary'
 
 ---
 
-## 9. Animation Presets
+## 10. Animation Presets
 
 Style presets include animation defaults. Available animation presets:
 
@@ -738,7 +824,7 @@ For advanced animation control:
 
 ---
 
-## 10. Complete Scene Example
+## 11. Complete Scene Example
 
 ```json
 [
@@ -806,7 +892,7 @@ For advanced animation control:
 
 ---
 
-## 11. Generic Parameterized Composition
+## 12. Generic Parameterized Composition
 
 The `KnoMotionVideo` composition accepts any scene array via input props and renders it dynamically. This is the composition used by the blue-sky pipeline.
 
@@ -835,7 +921,7 @@ npx remotion render KnoMotion-Videos/src/remotion/index.ts KnoMotionVideo \
 
 ---
 
-## 12. Validation Checklist
+## 13. Validation Checklist
 
 Before outputting JSON, verify:
 
@@ -857,7 +943,7 @@ Before outputting JSON, verify:
 
 ---
 
-## 13. Common Patterns
+## 14. Common Patterns
 
 ### Hook Scene (TikTok/Reels)
 
@@ -949,7 +1035,7 @@ Before outputting JSON, verify:
 
 ---
 
-## 14. Anti-Patterns (Avoid)
+## 15. Anti-Patterns (Avoid)
 
 ❌ **Beats in frames instead of seconds**
 ```json
