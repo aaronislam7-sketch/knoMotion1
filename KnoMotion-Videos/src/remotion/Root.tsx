@@ -27,7 +27,10 @@ import type { VideoConfig } from '../sdk/schemas/videoConfig.schema';
 const calculateGenericMetadata: CalculateMetadataFunction<VideoConfig> = ({
   props,
 }) => {
-  const scenes = props.scenes || [];
+  const scenes = (props.scenes || []) as Array<{
+    durationInFrames: number;
+    transition?: { type: string; direction?: string; durationInFrames?: number };
+  }>;
   const isMobile = props.format === 'mobile';
   const totalFrames =
     scenes.length > 0 ? calculateTransitionSeriesDuration(scenes, 20) : 1;
@@ -173,18 +176,18 @@ export const Root: React.FC = () => {
               transition: { type: 'fade' },
               audio: {
                 narration: {
-                  src: 'REPLACE_WITH_NARRATION_URL',
+                  src: 'https://example.com/narration.mp3',
                   volume: 1.0,
                 },
                 music: {
-                  src: 'REPLACE_WITH_MUSIC_URL',
+                  src: 'https://example.com/music.mp3',
                   volume: 0.12,
                   fadeIn: 1.0,
                   fadeOut: 1.5,
                 },
                 sfx: [
                   {
-                    src: 'REPLACE_WITH_SFX_URL',
+                    src: 'https://example.com/sfx.mp3',
                     atSecond: 0.3,
                     volume: 0.4,
                   },
@@ -232,11 +235,11 @@ export const Root: React.FC = () => {
               transition: { type: 'slide', direction: 'left' },
               audio: {
                 narration: {
-                  src: 'REPLACE_WITH_NARRATION_URL',
+                  src: 'https://example.com/narration.mp3',
                   volume: 1.0,
                 },
                 music: {
-                  src: 'REPLACE_WITH_MUSIC_URL',
+                  src: 'https://example.com/music.mp3',
                   volume: 0.1,
                   fadeIn: 0.5,
                   fadeOut: 2.0,
@@ -291,7 +294,7 @@ export const Root: React.FC = () => {
               transition: { type: 'clock-wipe' },
               audio: {
                 music: {
-                  src: 'REPLACE_WITH_MUSIC_URL',
+                  src: 'https://example.com/music.mp3',
                   volume: 0.2,
                   fadeIn: 0.3,
                   fadeOut: 1.0,
