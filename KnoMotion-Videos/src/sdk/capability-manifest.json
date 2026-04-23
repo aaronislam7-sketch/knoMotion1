@@ -1,0 +1,242 @@
+{
+  "version": "1.0",
+  "engine": "KnoMotion",
+  "remotionVersion": "4.0.382",
+
+  "midScenes": {
+    "textReveal": {
+      "supported": true,
+      "component": "TextRevealSequence",
+      "aliases": ["textRevealSequence"],
+      "requiredFields": ["lines", "beats"],
+      "keyConfig": {
+        "lines": "Array of { text, emphasis? } — minItems: 1",
+        "revealType": "typewriter | fade | slide | mask (default: fade)",
+        "direction": "up | down | left | right (default: up)",
+        "staggerDelay": "Seconds between lines (default: 0.2)",
+        "lineSpacing": "tight | normal | relaxed | loose (default: normal)"
+      }
+    },
+    "heroText": {
+      "supported": true,
+      "component": "HeroTextEntranceExit",
+      "aliases": ["heroTextEntranceExit"],
+      "requiredFields": ["heroType", "heroRef", "beats"],
+      "keyConfig": {
+        "heroType": "lottie | image | svg | roughSVG",
+        "heroRef": "URL or lottie registry key",
+        "text": "Optional hero title text",
+        "beats": "Requires entrance and exit sub-fields"
+      }
+    },
+    "gridCards": {
+      "supported": true,
+      "component": "GridCardReveal",
+      "aliases": ["gridCardReveal", "cardGrid"],
+      "requiredFields": ["cards", "beats"],
+      "keyConfig": {
+        "cards": "Array of card objects — minItems: 1",
+        "columns": "1–8 (default: 3)",
+        "animation": "fadeSlide | scaleIn | flipIn | cascade"
+      }
+    },
+    "checklist": {
+      "supported": true,
+      "component": "ChecklistReveal",
+      "aliases": ["checklistReveal"],
+      "requiredFields": ["items", "beats"],
+      "keyConfig": {
+        "items": "Array of { text, checked? } — minItems: 1",
+        "icon": "check | bullet | number | custom",
+        "revealType": "pop | slide | fade"
+      }
+    },
+    "bubbleCallout": {
+      "supported": true,
+      "component": "BubbleCalloutSequence",
+      "aliases": ["bubbleCalloutSequence", "callouts"],
+      "requiredFields": ["callouts", "beats"],
+      "keyConfig": {
+        "callouts": "Array of { text } — minItems: 1",
+        "shape": "circle | rounded | pill | cloud",
+        "pattern": "random | grid | spiral | cluster",
+        "collisionDetection": "Boolean — avoids overlapping callouts",
+        "jitter": "Number — random offset for organic feel"
+      }
+    },
+    "sideBySide": {
+      "supported": true,
+      "component": "SideBySideCompare",
+      "aliases": ["sideBySideCompare", "compare"],
+      "requiredFields": ["beats"],
+      "keyConfig": {
+        "left": "{ title?, items? } — left panel content",
+        "right": "{ title?, items? } — right panel content",
+        "mode": "compare | beforeAfter | slider",
+        "dividerType": "line | vs | arrow"
+      }
+    },
+    "iconGrid": {
+      "supported": true,
+      "component": "IconGrid",
+      "aliases": [],
+      "requiredFields": ["icons", "beats"],
+      "keyConfig": {
+        "icons": "Array of { iconRef, label?, color? } — minItems: 1",
+        "columns": "1–8 (default: 3)",
+        "iconSize": "sm | md | lg | xl",
+        "animation": "fadeIn | slideIn | scaleIn | bounceIn | cascade"
+      }
+    },
+    "cardSequence": {
+      "supported": true,
+      "component": "CardSequence",
+      "aliases": [],
+      "requiredFields": ["cards", "beats"],
+      "keyConfig": {
+        "cards": "Array of { title, content, variant? } — minItems: 1",
+        "layout": "stacked | grid",
+        "columns": "1–6 (for grid layout)",
+        "animation": "fadeSlide | scaleIn | flipIn"
+      }
+    },
+    "bigNumber": {
+      "supported": true,
+      "component": "BigNumberReveal",
+      "aliases": ["bigNumberReveal"],
+      "requiredFields": ["number", "beats"],
+      "keyConfig": {
+        "number": "String — the display number (pre-formatted)",
+        "label": "Description text below the number",
+        "animation": "countUp | pop | slide",
+        "countFrom": "Number — start value for countUp animation"
+      }
+    },
+    "animatedCounter": {
+      "supported": true,
+      "component": "AnimatedCounter",
+      "aliases": [],
+      "requiredFields": ["startValue", "endValue", "beats"],
+      "keyConfig": {
+        "startValue": "Number — count start",
+        "endValue": "Number — count end",
+        "duration": "Seconds for the count animation",
+        "prefix": "String — e.g. '$'",
+        "suffix": "String — e.g. '%'"
+      }
+    }
+  },
+
+  "layouts": [
+    {
+      "type": "full",
+      "description": "Single content area with optional header",
+      "slots": ["header", "full"]
+    },
+    {
+      "type": "rowStack",
+      "description": "Vertical sections stacked",
+      "slots": ["header", "row1", "row2", "..."],
+      "options": { "rows": "Number of rows (default: 2)" }
+    },
+    {
+      "type": "columnSplit",
+      "description": "Side-by-side columns (auto-converts to rowStack on mobile)",
+      "slots": ["header", "col1", "col2", "..."],
+      "options": { "columns": "Number of columns (default: 2)" }
+    },
+    {
+      "type": "headerRowColumns",
+      "description": "Complex layout: header + row + columns below",
+      "slots": ["header", "row", "col1", "col2", "..."]
+    },
+    {
+      "type": "gridSlots",
+      "description": "Grid layout with named cells",
+      "slots": ["header", "cellA", "cellB", "..."]
+    }
+  ],
+
+  "backgrounds": [
+    { "preset": "notebookSoft", "description": "Lined paper overlay" },
+    { "preset": "sunriseGradient", "description": "Warm diagonal gradient" },
+    { "preset": "cleanCard", "description": "Neutral white" },
+    { "preset": "chalkboardGradient", "description": "Dark blue-green gradient" },
+    { "preset": "spotlight", "description": "Vignette with configurable focus point" },
+    { "preset": "custom", "description": "Direct CSS style object" }
+  ],
+
+  "backgroundOptions": {
+    "layerNoise": "Boolean — adds subtle film grain overlay",
+    "particles": {
+      "enabled": "Boolean",
+      "style": "dots | chalk | snow | sparkle",
+      "count": "Number (default: 20)",
+      "color": "CSS color or theme key",
+      "opacity": "0–1"
+    }
+  },
+
+  "transitions": [
+    { "type": "fade", "status": "active", "description": "Opacity crossfade" },
+    { "type": "slide", "status": "active", "description": "Directional push with spring physics", "directions": ["up", "down", "left", "right"] },
+    { "type": "page-turn", "status": "active", "description": "3D flip with perspective", "directions": ["left", "right"] },
+    { "type": "clock-wipe", "status": "active", "description": "Circular reveal like a clock hand" },
+    { "type": "iris", "status": "active", "description": "Circular mask expanding from center" },
+    { "type": "doodle-wipe", "status": "legacy-fallback", "description": "Falls back to slide()" },
+    { "type": "eraser", "status": "legacy-fallback", "description": "Falls back to slide()" },
+    { "type": "spring", "status": "legacy-fallback", "description": "Falls back to slide()" }
+  ],
+
+  "stylePresets": ["educational", "playful", "minimal", "mentor", "focus"],
+
+  "emphasisLevels": ["high", "normal", "low"],
+
+  "captionStyles": ["tiktok", "subtitle", "karaoke"],
+
+  "audioChannels": {
+    "narration": "TTS audio file with optional startFromSeconds offset",
+    "music": "Background music with fade-in/out, loops by default",
+    "sfx": "Array of sound effects, each at a specific atSecond offset"
+  },
+
+  "lottieKeys": [
+    "success", "checkmark", "loading", "error",
+    "confetti", "celebration", "fireworks", "sparkles", "stars",
+    "lightbulb", "thinking", "question", "brain", "book",
+    "waving", "walking", "thumbs-up", "clapping",
+    "arrow-right", "arrow-down", "swipe",
+    "brain-active", "funnel-filter", "lightning-bolt", "target-focus",
+    "clock-delay", "signal-buffer",
+    "atom", "dna", "planet", "rocket",
+    "music-notes", "equalizer", "headphones",
+    "laptop", "phone", "wifi",
+    "sunny", "cloudy", "rainy", "snowy"
+  ],
+
+  "constraints": {
+    "fpsFixed": 30,
+    "beatsInSeconds": true,
+    "transitionFramesDefault": 20,
+    "maxScenesPerVideo": 20,
+    "maxCardsInGrid": 8,
+    "maxColumnsInGrid": 8,
+    "maxChecklistItems": 12,
+    "maxTextLines": 8,
+    "maxCallouts": 10,
+    "desktopDimensions": { "width": 1920, "height": 1080 },
+    "mobileDimensions": { "width": 1080, "height": 1920 }
+  },
+
+  "unsupported": [
+    "Embedded video playback (no <Video> inside scenes)",
+    "Interactive/branching elements (no user input)",
+    "Real-time data binding (all content must be static at render time)",
+    "3D scenes (no WebGL/Three.js integration)",
+    "Custom font loading from arbitrary URLs",
+    "Variable frame rates (fixed at 30fps)",
+    "Audio recording/microphone input",
+    "Screen recording/capture",
+    "Multi-track video overlays (only single visual layer per scene)"
+  ]
+}

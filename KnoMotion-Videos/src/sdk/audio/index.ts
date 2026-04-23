@@ -6,6 +6,7 @@
 
 export { AudioLayer } from './AudioLayer';
 export { CaptionOverlay } from './CaptionOverlay';
+export { SafeAudio } from './SafeAudio';
 
 export {
   AudioConfigSchema,

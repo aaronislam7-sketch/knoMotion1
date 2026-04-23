@@ -13,7 +13,8 @@
  */
 
 import React from 'react';
-import { Html5Audio, Sequence, useVideoConfig, interpolate } from 'remotion';
+import { Sequence, useVideoConfig, interpolate } from 'remotion';
+import { SafeAudio } from './SafeAudio';
 
 /**
  * Build a volume callback for background music with fade-in and fade-out.
@@ -60,7 +61,7 @@ export const AudioLayer = ({ audio, durationInFrames }) => {
           from={Math.round((audio.narration.startFromSeconds || 0) * fps)}
           name="Narration"
         >
-          <Html5Audio
+          <SafeAudio
             src={audio.narration.src}
             volume={audio.narration.volume ?? 1}
             pauseWhenBuffering
@@ -70,7 +71,7 @@ export const AudioLayer = ({ audio, durationInFrames }) => {
 
       {/* Background music track */}
       {audio.music?.src && (
-        <Html5Audio
+        <SafeAudio
           src={audio.music.src}
           volume={buildMusicVolumeFn(audio.music, durationInFrames, fps)}
           loop={audio.music.loop !== false}
@@ -86,7 +87,7 @@ export const AudioLayer = ({ audio, durationInFrames }) => {
           from={Math.round(sfx.atSecond * fps)}
           name={`SFX ${i + 1}`}
         >
-          <Html5Audio
+          <SafeAudio
             src={sfx.src}
             volume={sfx.volume ?? 0.5}
             pauseWhenBuffering

@@ -263,7 +263,35 @@ The `resolvePresentation()` mapper in `sdk/transitions/index.ts` converts scene 
 npx remotion render KnoMotion-Videos/src/remotion/index.ts KnoMotionVideo --props='{"scenes":[...],"format":"desktop"}'
 ```
 
-**Studio preview:** The `KnoMotionVideo` composition has a 3-scene test payload as `defaultProps` in `Root.tsx`. Select it in Remotion Studio to preview immediately. Once Zod schemas are added (Chunk 4, S1b), the Studio Props panel will allow editing scenes visually.
+**Studio preview:** The `KnoMotionVideo` composition has a 3-scene test payload as `defaultProps` in `Root.tsx`. Select it in Remotion Studio to preview immediately. A Zod schema (`VideoConfigSchema`) is registered on the composition, enabling the Studio Props panel for structured visual editing.
+
+> **Note on audio in `defaultProps`:** The `audio` field is optional. If `defaultProps` include audio blocks with unreachable URLs, the composition will stall for up to 5 seconds per scene while `SafeAudio` waits for the `delayRender` timeout. For instant Studio preview, omit `audio` blocks when no real audio files are available.
+
+---
+
+## Zod Schema & Visual Editing
+
+The `KnoMotionVideo` composition has a complete Zod schema registered via the `schema` prop on `<Composition>`. This enables Remotion Studio's visual Props editor — non-developers can build videos through the Studio UI with typed fields, dropdowns for enums, and inline validation.
+
+**Schema file:** `sdk/schemas/videoConfig.schema.ts`
+
+**Structure:**
+- `VideoConfigSchema` — Top-level: `{ scenes, format? }`
+- `SceneItemSchema` — Per scene: `{ id, durationInFrames, transition?, config, audio?, captions? }`
+- Sub-schemas for transitions (8 types), backgrounds (6 presets), layouts (5 types), slots (10 mid-scene keys + aliases)
+- Audio/caption schemas composed from `sdk/audio/audioSchema.ts`
+
+**Design decision:** Mid-scene inner `config` uses `z.record(z.unknown())`. Per-mid-scene validation is handled by JSON schemas in `sdk/mid-scenes/schemas/`, which remain the source of truth.
+
+---
+
+## Capability Manifest
+
+A machine-readable JSON manifest (`sdk/capability-manifest.json`) declares what the engine can and cannot do. LLM agents use this for self-validation when generating scene JSON.
+
+**Contents:** 10 mid-scenes (required fields, config options, aliases), 5 layouts, 6 backgrounds, 8 transitions, 40 lottie keys, 3 caption styles, constraints, and explicit unsupported declarations.
+
+> **Note:** The manifest is currently a static file, hand-curated from schemas and registry. If new mid-scenes or capabilities are added frequently, consider building a generation script to keep it in sync automatically. See BUILD_STATUS.md Section 5 — S4a for details on when to upgrade.
 
 ---
 
@@ -277,16 +305,19 @@ The audio layer (P4) adds narration, background music, sound effects, and animat
 |-----------|------|---------|
 | `AudioLayer` | `sdk/audio/AudioLayer.jsx` | Renders three audio channels per scene |
 | `CaptionOverlay` | `sdk/audio/CaptionOverlay.jsx` | Renders animated word-level captions |
+| `SafeAudio` | `sdk/audio/SafeAudio.jsx` | Graceful `<Html5Audio>` wrapper (P4e) |
 | `audioSchema` | `sdk/audio/audioSchema.ts` | Zod schemas for audio/caption config |
 | `alignTTSToBeats` | `sdk/utils/ttsToBeatAlignment.ts` | Converts TTS timestamps to scene beats |
 
 ### Audio Channels
 
+All audio channels use `<SafeAudio>` (a graceful wrapper around `<Html5Audio>`) which catches broken audio URLs with `onError`, a 5-second timeout, and 1 retry — logging a warning and continuing without audio instead of crashing the composition.
+
 | Channel | Remotion Element | Config Field | Features |
 |---------|-----------------|--------------|----------|
-| Narration | `<Html5Audio>` in `<Sequence>` | `audio.narration` | Offset by `startFromSeconds`, static volume |
-| Background Music | `<Html5Audio loop>` | `audio.music` | Fade-in/out volume curves via `interpolate()` |
-| Sound Effects | `<Html5Audio>` in `<Sequence>` | `audio.sfx[]` | Each SFX at specific `atSecond` offset |
+| Narration | `<SafeAudio>` in `<Sequence>` | `audio.narration` | Offset by `startFromSeconds`, static volume |
+| Background Music | `<SafeAudio loop>` | `audio.music` | Fade-in/out volume curves via `interpolate()` |
+| Sound Effects | `<SafeAudio>` in `<Sequence>` | `audio.sfx[]` | Each SFX at specific `atSecond` offset |
 
 ### Caption Styles
 
@@ -305,9 +336,9 @@ Scene JSON (with audio + captions)
 GenericVideoPlayer
 ├── SceneFromConfig (visual layer)
 ├── AudioLayer (audio layer — invisible)
-│   ├── Narration <Html5Audio>
-│   ├── Music <Html5Audio loop>
-│   └── SFX <Html5Audio> × N
+│   ├── Narration <SafeAudio>
+│   ├── Music <SafeAudio loop>
+│   └── SFX <SafeAudio> × N
 └── CaptionOverlay (caption layer — visual overlay)
     └── createTikTokStyleCaptions() → pages → active word rendering
 ```
@@ -324,8 +355,9 @@ KnoMotion-Videos/src/
 │   ├── KnodoviaVideo*.jsx     # Canon video compositions
 │   └── TikTok_*.jsx           # TikTok format videos
 ├── sdk/
-│   ├── audio/                 # Audio layer (P4): AudioLayer, CaptionOverlay, schemas
-│   ├── mid-scenes/            # 10 mid-scene components + schemas
+│   ├── audio/                 # Audio layer (P4): AudioLayer, CaptionOverlay, SafeAudio, schemas
+│   ├── schemas/               # Zod schemas (S1): VideoConfigSchema, tests
+│   ├── mid-scenes/            # 10 mid-scene components + JSON schemas
 │   ├── transitions/           # Transition resolution layer (P1)
 │   ├── elements/              # UI atoms and compositions
 │   ├── theme/                 # Presets, emphasis, colors
@@ -333,7 +365,8 @@ KnoMotion-Videos/src/
 │   ├── lottie/                # Animation registry
 │   ├── scene-layout/          # Slot resolution
 │   ├── utils/                 # ttsToBeatAlignment, beats, etc.
-│   └── animations/            # Animation helpers
+│   ├── animations/            # Animation helpers
+│   └── capability-manifest.json  # Machine-readable engine capabilities (S4)
 ├── admin/                     # Preview tools
 └── remotion/                  # Remotion entry points
 ```
@@ -349,5 +382,8 @@ KnoMotion-Videos/src/
 5. **Style presets** provide consistent theming
 6. **Backgrounds** set the visual context
 7. **Transitions** connect scenes
+8. **Zod schema** enables Studio visual editing and runtime validation
+9. **Capability manifest** enables LLM agent self-validation
+10. **SafeAudio** ensures production resilience for audio playback
 
 For detailed JSON schemas and examples, see the [LLM Reference Guide](./reference-llm-guide.md).
