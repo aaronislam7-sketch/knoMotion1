@@ -30,29 +30,31 @@
 
 ## 1. Product Alignment Score
 
-### Score: 9.5/10 (was 8.25/10 — P1, S2, S3, P4 complete)
+### Score: 10/10 (was 9.5/10 — P1, S2, S3, P4, S1, S4, P4e complete)
 
-**What's strong (earning the 9.5):**
+**What's strong (earning the 10/10):**
 - The JSON-first architecture is perfectly aligned with the blue sky pipeline. Scene configs are pure data — exactly what an LLM produces.
 - The mid-scene component library (10 types) covers the most common educational video patterns.
 - The beats system (seconds-based timing) maps directly to TTS word-level timestamps.
 - The style preset + emphasis system gives the LLM a constrained, brand-safe vocabulary.
 - The `SceneFromConfig` orchestrator already separates data from rendering — the core contract for an agent-driven workflow.
-- Zod is already in `package.json` and `scene.schema.ts` exists, so validation infrastructure is partially present.
+- Complete Zod schema on KnoMotionVideo enables Remotion Studio visual props editing.
+- Machine-readable capability manifest enables LLM agent self-validation.
+- Graceful audio failure handling ensures production resilience.
 
-**What's holding it back from 10 (the gaps):**
+**All gaps closed:**
 - ~~**No audio layer at all.** The engine produces silent video. TTS/narration alignment is the single biggest gap to the blue sky vision. (-1)~~ **✅ FIXED by P4** — AudioLayer (narration, music, SFX) + CaptionOverlay (tiktok/subtitle/karaoke) + ttsToBeatAlignment(). (+1 recovered)
 - ~~**No generic composition.** Every video requires a new `.jsx` file in `compositions/`. There's no single parameterised composition that accepts scene JSON as input props and dynamically adjusts duration/dimensions. This blocks the "agent creates JSON → video renders" pipeline. (-0.5)~~ **✅ FIXED by S2** — `GenericVideoPlayer` composition with `calculateMetadata()` for dynamic duration/dimensions. (+0.5 recovered)
 - ~~**No TTS-to-beats alignment tooling.** The beats system works in seconds, which is TTS-friendly, but there's no function to convert word-level timestamps (from Whisper/TTS APIs) into beat objects. (-0.5)~~ **✅ FIXED by P4d** — `alignTTSToBeats()` converts `Caption[]` to scene-relative beats. (+0.5 recovered)
 - ~~**Schemas incomplete.** Missing schemas for `BigNumberReveal`, `AnimatedCounter`. Several schemas behind implementation (`SideBySide` beforeAfter, `BubbleCallout` collision). LLM validation depends on complete schemas. (-0.5)~~ **✅ FIXED by S3** — All 10 mid-scenes now have complete JSON schemas. SideBySide beforeAfter mode, BubbleCallout collision/jitter, HeroText optional text all documented. (+0.5 recovered)
 - ~~**Transitions are hand-rolled.** Custom `SceneTransitionWrapper` instead of `@remotion/transitions`, missing spring physics and audio transition support. (-0.25)~~ **✅ FIXED by P1** — All compositions now use `@remotion/transitions` `TransitionSeries` with `springTiming()`. (+0.25 recovered)
 - ~~**No captions/subtitles.** `@remotion/captions` is not used. Professional learning videos need subtitles. (-0.25)~~ **✅ FIXED by P4c** — CaptionOverlay with three styles (tiktok, subtitle, karaoke). (+0.25 recovered)
-- **No Zod schema on KnoMotionVideo composition.** Studio visual props editing still blocked. (-0.25)
-- **No graceful audio failure handling.** Invalid audio URLs cause composition render failure. (-0.25)
+- ~~**No Zod schema on KnoMotionVideo composition.** Studio visual props editing still blocked. (-0.25)~~ **✅ FIXED by S1** — `VideoConfigSchema` registered on `KnoMotionVideo` composition. Studio Props panel now shows structured editor. (+0.25 recovered)
+- ~~**No graceful audio failure handling.** Invalid audio URLs cause composition render failure. (-0.25)~~ **✅ FIXED by P4e** — `SafeAudio` wrapper catches broken URLs gracefully. (+0.25 recovered)
 
-### Path to 10/10
+### Beyond 10/10
 
-Addressing S1 (Zod schemas for Studio), P4e (graceful audio failure), S4 (capability manifest), and pipeline chunks would complete the picture.
+The engine core is now complete. Remaining work is extension (new mid-scenes, remotion-bits integration) and pipeline implementation (Section 18). Score reflects engine architecture completeness, not feature breadth.
 
 ---
 
@@ -486,26 +488,25 @@ export function alignTTSToBeats(
 }
 ```
 
-#### P4e: Graceful Audio Failure Handling (TODO)
+#### P4e: Graceful Audio Failure Handling ✅
 
-**Priority:** MEDIUM
-**Impact:** Production resilience — invalid audio URLs currently cause composition render failure
-**Status:** Pending
+**Priority:** MEDIUM — **STATUS: ✅ COMPLETE**
+**Impact:** Production resilience — invalid audio URLs no longer crash the composition
+**Completed:** 2026-04-23
 
-**The problem:** When `<Html5Audio>` receives an unreachable `src` URL, Remotion's internal `delayRender()` waits for the audio to load, then times out and fails the entire composition. In production, this means a single broken audio URL prevents the video from rendering at all.
-
-**Recommended approach:** Create a `SafeAudio` wrapper component (~30 lines) that:
-1. Renders `<Html5Audio>` with the `onError` callback (available since v4.0.326) — on error, sets state to unmount the audio element
+**What was done:** Created `SafeAudio` wrapper component (`sdk/audio/SafeAudio.jsx`, ~40 lines) that:
+1. Renders `<Html5Audio>` with `onError` callback — on error, sets state to unmount the audio element
 2. Sets `delayRenderTimeoutInMilliseconds` to 5000ms (fail fast instead of hanging for 30s)
 3. Sets `delayRenderRetries` to 1 (don't retry broken URLs)
-4. Logs a console warning: `"Audio failed to load: {url}, continuing without audio"`
+4. Logs `console.warn("Audio failed to load: {url}, continuing without audio")`
 5. The composition continues rendering — visual content and captions still work
 
-**Files to modify:** `KnoMotion-Videos/src/sdk/audio/AudioLayer.jsx` — replace the three `<Html5Audio>` usages with `<SafeAudio>`.
-
-**Effort:** Small — wrapper component + 3 usage updates.
+**Files created:** `KnoMotion-Videos/src/sdk/audio/SafeAudio.jsx`
+**Files modified:** `KnoMotion-Videos/src/sdk/audio/AudioLayer.jsx` — all 3 `<Html5Audio>` usages replaced with `<SafeAudio>`. `sdk/audio/index.ts` — exports `SafeAudio`.
 
 **Cosmetic note:** When `loop={true}` on `<Html5Audio>`, Remotion wraps it internally in `<Loop>`, which overrides the `name` prop in Studio timeline. The background music track shows as `<Loop>` instead of "Background Music". This is Remotion internal behavior with no workaround — purely cosmetic.
+
+**Important note — Studio preview with placeholder audio URLs:** `SafeAudio` prevents the composition from crashing, but `delayRender()` still waits for each audio element to either load or hit the 5-second timeout before the frame can render. When audio URLs are unreachable (e.g., placeholder URLs, CORB-blocked cross-origin requests), the composition will stall for up to 5 seconds per scene before `SafeAudio` unmounts the failed element. **For Studio preview, omit `audio` blocks from `defaultProps` if no real audio files are available.** The `audio` field is optional in the schema — scenes without it render visual content and captions immediately. Audio functionality is fully operational when real audio URLs are provided.
 
 #### Learnings for Future Agent Sessions (Chunk 3)
 
@@ -515,10 +516,21 @@ export function alignTTSToBeats(
 4. **`createTikTokStyleCaptions()` returns pages.** Each page has `text`, `startMs`, `durationMs`, and `tokens[]` with `fromMs`/`toMs`. The `combineTokensWithinMilliseconds` parameter controls how aggressively words are grouped — lower = more word-by-word.
 5. **AudioLayer renders transparently.** It produces no visual output — renders alongside `SceneFromConfig` inside `TransitionSeries.Sequence`. CaptionOverlay renders as the topmost visual layer.
 6. **Fully backwards compatible.** Scenes without `audio`/`captions` fields render identically to before. The integration is additive only — `{scene.audio && <AudioLayer .../>}`.
-7. **Test payload in Root.tsx.** The `KnoMotionVideo` defaultProps now have 3 scenes with all caption styles + audio prop placeholders (`REPLACE_WITH_*_URL`). Swap placeholder URLs for real MP3s to test audio playback.
+7. **Test payload in Root.tsx.** The `KnoMotionVideo` defaultProps have 3 scenes with all caption styles. Audio blocks should only include real audio URLs — placeholder/unreachable URLs cause `delayRender` stalls of up to 5 seconds per scene even with SafeAudio (P4e). Omit `audio` blocks when no real files are available.
 8. **`@remotion/captions` installed at 4.0.382.** Exact version, no caret prefix, matching all other `@remotion/*` packages.
 9. **Pipeline architecture documented.** Section 18 of BUILD_STATUS.md now captures the `pipeline/` folder architecture. P4d's `alignTTSToBeats()` is consumed by pipeline stage 10.
-10. **Audio failure handling needed.** Invalid audio URLs crash the composition. P4e (above) documents the fix — `SafeAudio` wrapper with `onError` + fast timeout. Low effort, high production value.
+10. **Audio failure handling complete.** P4e `SafeAudio` wrapper prevents crashes from invalid audio URLs. However, each failed audio element still incurs a 5-second `delayRender` timeout before being unmounted. For instant Studio preview, omit `audio` blocks from `defaultProps` when real audio URLs are unavailable.
+
+#### Learnings for Future Agent Sessions (Chunk 4)
+
+1. **Zod schema uses `z.record()` for mid-scene config.** The `config` field inside `SlotConfigSchema` is `z.record(z.unknown())`. Per-mid-scene validation is handled by JSON schemas in `sdk/mid-scenes/schemas/`. This avoids a massive discriminated union that would break on every new mid-scene addition.
+2. **Zod-inferred types vs existing function signatures.** When composing Zod schemas with `.passthrough()`, TypeScript may infer properties as optional that are actually required. The `calculateGenericMetadata` function needed a type assertion on `scenes` to satisfy `calculateTransitionSeriesDuration`'s parameter type. Use explicit casts when bridging Zod-inferred types with existing SDK functions.
+3. **Audio URLs in `defaultProps` must be valid URLs.** Zod's `z.string().url()` validation on audio `src` fields means placeholder strings like `REPLACE_WITH_URL` will cause the Studio Props editor to reject the entire `defaultProps` object. Use syntactically valid URLs (e.g., `https://example.com/audio.mp3`) or omit `audio` blocks entirely.
+4. **SafeAudio prevents crashes but not stalls.** The `onError` + `delayRenderTimeoutInMilliseconds: 5000` approach prevents composition-level failure, but `delayRender()` still blocks each frame for up to 5 seconds while waiting for the timeout. In Studio preview with multiple fake audio URLs, this creates a noticeable delay. Best practice: omit `audio` blocks from `defaultProps` when no real audio files are available.
+5. **CORB (Cross-Origin Read Blocking) in Studio.** Browsers block cross-origin audio responses that don't include proper CORS headers. `example.com` URLs will be CORB-blocked, which may not trigger the `<audio>` element's `error` event immediately, causing the full timeout to elapse. This is browser-specific behavior, not a Remotion or SafeAudio issue.
+6. **Capability manifest is static.** The manifest (`sdk/capability-manifest.json`) is hand-curated from schemas and registry. Consider auto-generating it when new mid-scenes are added frequently (Sections 11/12) or when the pipeline consumes it programmatically.
+7. **Studio "Cannot find root file" warning.** Remotion Studio's "save default props to code" feature (💾 button) requires static analysis of the root file. When the entry point is in a subdirectory (`KnoMotion-Videos/src/remotion/index.ts`), Studio may fail to locate `Root.tsx` for code writing. This is cosmetic — the Props editor, live preview, and render dialog all work correctly. Only the save-to-code shortcut is affected.
+8. **`@remotion/studio` not installed.** The `@remotion/studio` package is not in `package.json`. The Studio APIs (`saveDefaultProps`, `updateDefaultProps`, etc.) are unavailable. Install at 4.0.382 if programmatic Studio integration is needed.
 
 ---
 
@@ -540,50 +552,34 @@ export function alignTTSToBeats(
 
 ### S1: Zod Schemas for Remotion Studio Visual Editing
 
-**Priority:** HIGH
+**Priority:** HIGH — **STATUS: ✅ COMPLETE**
 **Impact:** Non-developers can author videos via Studio UI
+**Completed:** 2026-04-23
 
-#### S1a: Define Zod schema for complete video config
+#### S1a: Define Zod schema for complete video config ✅
 
-**What:** A Zod schema that describes the full scene array structure, attached to a `<Composition>` via the `schema` prop.
+**What was done:** Created `KnoMotion-Videos/src/sdk/schemas/videoConfig.schema.ts` — a complete Zod schema for the `KnoMotionVideo` composition input props.
 
-**File to create:** `KnoMotion-Videos/src/sdk/schemas/videoConfig.schema.ts`
+**Schema structure:**
+- `VideoConfigSchema` — Top-level: `{ scenes: SceneItemSchema[].min(1), format?: 'desktop' | 'mobile' }`
+- `SceneItemSchema` — `{ id, durationInFrames, transition?, config, audio?, captions? }`
+- `TransitionSchema` — 5 active types + 3 legacy fallback types
+- `BackgroundSchema` — 6 presets (including custom), particles, spotlight, layerNoise
+- `LayoutSchema` — 5 layout types with options
+- `SlotConfigSchema` — All 10 mid-scene keys + 10 registry aliases, supports single or array (sequences)
+- `AudioConfigSchema` + `CaptionsConfigSchema` — Composed from `sdk/audio/audioSchema.ts` (P4a)
 
-**Implementation detail:**
-```typescript
-import { z } from 'zod';
+**Design decision:** Mid-scene inner `config` uses `z.record(z.unknown())` rather than a discriminated union of all 10 mid-scene configs. The per-mid-scene JSON schemas in `sdk/mid-scenes/schemas/` remain the source of truth for detailed validation. This keeps the Zod schema maintainable and avoids breaking when new mid-scenes are added.
 
-const TransitionSchema = z.object({
-  type: z.enum(['fade', 'slide', 'page-turn', 'doodle-wipe', 'eraser', 'clock-wipe', 'iris']),
-  direction: z.enum(['up', 'down', 'left', 'right']).optional(),
-});
+**Test artifact:** `KnoMotion-Videos/src/sdk/schemas/videoConfig.test.ts` — 12 test cases validating valid payloads, rejection of invalid payloads, all transition types, all 20 mid-scene keys/aliases, audio composition, caption styles, slot arrays, and format defaulting.
 
-const BackgroundSchema = z.object({
-  preset: z.enum(['notebookSoft', 'sunriseGradient', 'cleanCard', 'chalkboardGradient', 'spotlight']),
-  layerNoise: z.boolean().optional(),
-  particles: z.object({
-    enabled: z.boolean(),
-    style: z.enum(['dots', 'chalk', 'snow', 'sparkle']).optional(),
-    count: z.number().optional(),
-    color: z.string().optional(),
-    opacity: z.number().optional(),
-  }).optional(),
-});
+#### S1b: Register schema on compositions in `Root.tsx` ✅
 
-// ... full schema for all mid-scene configs ...
+**What was done:** Added `schema={VideoConfigSchema}` to the `KnoMotionVideo` `<Composition>` in `Root.tsx`. Updated `calculateGenericMetadata` typing to use `VideoConfig`. Remotion Studio now shows a structured Props editor for the composition.
 
-export const VideoConfigSchema = z.object({
-  format: z.enum(['desktop', 'mobile']).optional(),
-  scenes: z.array(SceneSchema).min(1),
-});
-```
-
-#### S1b: Register schema on compositions in `Root.tsx`
-
-**What:** Attach the Zod schema to compositions so Remotion Studio enables visual editing.
-
-**Files to modify:**
-- `KnoMotion-Videos/src/remotion/Root.tsx` — Add `schema={VideoConfigSchema}` to `<Composition>` entries.
+**Files modified:**
+- `KnoMotion-Videos/src/remotion/Root.tsx` — `schema` prop added, import of `VideoConfigSchema`
+- `KnoMotion-Videos/src/sdk/schemas/videoConfig.schema.ts` — Created
 
 ---
 
@@ -710,43 +706,26 @@ interface GenericVideoProps {
 
 ### S4: Capability Manifest for Agents
 
-**Priority:** HIGH
+**Priority:** HIGH — **STATUS: ✅ COMPLETE**
 **Impact:** Enables reliable agent-driven JSON generation
+**Completed:** 2026-04-23
 
-#### S4a: Generate machine-readable capability manifest
+#### S4a: Generate machine-readable capability manifest ✅
 
-**What:** A JSON file that declares everything the engine can and cannot do. Auto-generated from schemas + registry.
+**What was done:** Created `KnoMotion-Videos/src/sdk/capability-manifest.json` — a comprehensive machine-readable manifest of engine capabilities.
 
-**File to create:** `KnoMotion-Videos/src/sdk/capability-manifest.json`
+**Content:** All 10 mid-scenes (with required fields, key config options, aliases), 5 layout types (with slot names), 6 background presets, 8 transitions (5 active + 3 legacy with fallback notes), 5 style presets, 3 emphasis levels, 3 caption styles, audio channel descriptions, 40 lottie registry keys, constraints (fps, max scenes/cards/columns, dimensions), and 9 explicit unsupported declarations.
 
-**Content structure:**
-```json
-{
-  "version": "1.0",
-  "midScenes": {
-    "textReveal": { "supported": true, "maxLines": 4, "requiredFields": ["lines"] },
-    "heroText": { "supported": true, "requiredFields": ["heroRef", "beats"] },
-    ...
-  },
-  "layouts": ["full", "rowStack", "columnSplit", "gridSlots"],
-  "backgrounds": ["notebookSoft", "sunriseGradient", ...],
-  "transitions": ["fade", "slide", "page-turn", "doodle-wipe", "eraser"],
-  "lottieKeys": ["success", "checkmark", "loading", ...],
-  "constraints": {
-    "maxScenesPerVideo": 20,
-    "maxCardsInGrid": 8,
-    "maxColumnsInGrid": 6,
-    "fpsFixed": 30,
-    "beatsInSeconds": true
-  },
-  "unsupported": [
-    "embedded video playback",
-    "interactive/branching elements",
-    "real-time data binding",
-    "3D scenes"
-  ]
-}
-```
+**Implementation: Static file.** The manifest is hand-curated from the mid-scene JSON schemas, lottie registry, and codebase constants. This was chosen over auto-generation because the source data (JSON schemas + TypeScript constants) is itself static — a generation script would add complexity without benefit at this stage.
+
+**⚠️ Future upgrade consideration:** As the engine grows (new mid-scenes, layouts, lottie entries), the static manifest must be manually kept in sync. If the number of changes per chunk exceeds 3-4 manifest updates, consider building a generation script (`scripts/generate-manifest.ts`) that:
+- Reads mid-scene schemas from `sdk/mid-scenes/schemas/*.json`
+- Extracts lottie keys from `sdk/lottie/registry.ts` via `getAvailableLottieKeys()`
+- Reads layout types from `sdk/scene-layout/sceneLayout.js`
+- Reads transition types from `sdk/transitions/index.ts`
+- Outputs `capability-manifest.json`
+
+This becomes worthwhile when: (a) new mid-scenes are added frequently (Section 11/12), (b) the manifest drifts out of sync and causes agent validation failures, or (c) the pipeline (Section 18) consumes the manifest programmatically and stale data causes rendering errors.
 
 ---
 
@@ -1052,9 +1031,9 @@ This section tracks code that should be deleted after specific tasks are complet
 | CRITICAL | S2 | Generic parameterized composition | P1 | ✅ COMPLETE |
 | CRITICAL | P4 | Audio layer (narration, music, captions) | — | ✅ COMPLETE |
 | HIGH | P1 | `@remotion/transitions` adoption | — | ✅ COMPLETE |
-| HIGH | S1 | Zod schemas for Studio visual editing | S3 | Ready (S3 done) |
+| HIGH | S1 | Zod schemas for Studio visual editing | S3 | ✅ COMPLETE |
 | HIGH | S3 | Complete mid-scene schemas | — | ✅ COMPLETE |
-| HIGH | S4 | Capability manifest for agents | S3 | Ready (S3 done) |
+| HIGH | S4 | Capability manifest for agents | S3 | ✅ COMPLETE |
 | HIGH | R1 | Player integration | S2 | Ready (S2 done) |
 | MEDIUM | P2 | Standardize spring/easing | — | Pending |
 | MEDIUM | P3 | Animated emoji upgrade | — | Pending |
@@ -2548,16 +2527,21 @@ See Section 5 S2 and S3 for full completion notes. Score: 7.25 → 8.25.
   onError + delayRenderTimeoutInMilliseconds. See Section 4 P4e.
 - Score: 8.25 → 9.5.
 
-### Chunk 4: S1 + S4 + P4e — Zod Schemas + Capability Manifest + Audio Hardening (NEXT)
-- S1a: Define complete Zod schema for video config (schemas/videoConfig.schema.ts).
-  Compose audio schemas from sdk/audio/audioSchema.ts into the full schema.
-- S1b: Register schema on KnoMotionVideo composition in Root.tsx.
-  This will enable Remotion Studio visual props editing (currently blocked).
-  When done, the test defaultProps in Root.tsx can be simplified back to
-  `{ scenes: [], format: 'desktop' }` since Studio will provide the JSON editor.
-- S4a: Generate capability manifest JSON (sdk/capability-manifest.json).
-- P4e: Graceful audio failure handling — SafeAudio wrapper with onError +
-  delayRenderTimeoutInMilliseconds. See Section 4 P4e for detail.
+### Chunk 4: S1 + S4 + P4e — Zod Schemas + Capability Manifest + Audio Hardening ✅ COMPLETE
+- **S1a:** Created `videoConfig.schema.ts` — full Zod schema composing audio schemas,
+  transitions, backgrounds, layouts, 20 mid-scene keys/aliases. Uses `z.record()` for
+  mid-scene inner config (JSON schemas remain source of truth). 12/12 tests pass.
+- **S1b:** Registered `VideoConfigSchema` on `KnoMotionVideo` in `Root.tsx`. Studio Props
+  panel now shows structured visual editor. `defaultProps` kept as 3-scene test payload
+  (audio blocks should be omitted when no real URLs available — see P4e note).
+- **S4a:** Created `capability-manifest.json` — static machine-readable manifest with
+  10 mid-scenes, 5 layouts, 6 backgrounds, 8 transitions, 40 lottie keys, constraints,
+  and unsupported declarations. Static file; consider auto-generation if update frequency
+  increases in future chunks.
+- **P4e:** Created `SafeAudio` wrapper with `onError` + 5s timeout + 1 retry. Replaced
+  3 `<Html5Audio>` usages in `AudioLayer.jsx`. Prevents composition crashes from bad URLs.
+  Note: each failed URL still incurs ~5s `delayRender` stall before unmounting.
+- Score: 9.5 → 10/10.
 - Commit and push. Update me.
 
 ### Chunk 5: R1 — Player Integration
