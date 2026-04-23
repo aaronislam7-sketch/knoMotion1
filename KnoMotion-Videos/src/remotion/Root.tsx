@@ -18,21 +18,13 @@ loadCabinSketch();
 loadPermanentMarker();
 loadInter();
 
-// Generic Parameterized Composition (S2)
+// Generic Parameterized Composition (S2) + Zod Schema (S1)
 import { GenericVideoPlayer } from '../compositions/GenericVideoPlayer';
 import { calculateTransitionSeriesDuration } from '../sdk/transitions';
+import { VideoConfigSchema } from '../sdk/schemas/videoConfig.schema';
+import type { VideoConfig } from '../sdk/schemas/videoConfig.schema';
 
-interface GenericVideoProps {
-  scenes: Array<{
-    id: string;
-    durationInFrames: number;
-    transition?: { type: string; direction?: string; durationInFrames?: number };
-    config: Record<string, unknown>;
-  }>;
-  format?: 'desktop' | 'mobile';
-}
-
-const calculateGenericMetadata: CalculateMetadataFunction<GenericVideoProps> = ({
+const calculateGenericMetadata: CalculateMetadataFunction<VideoConfig> = ({
   props,
 }) => {
   const scenes = props.scenes || [];
@@ -168,6 +160,7 @@ export const Root: React.FC = () => {
       <Composition
         id="KnoMotionVideo"
         component={GenericVideoPlayer}
+        schema={VideoConfigSchema}
         durationInFrames={1}
         fps={FPS}
         width={1920}
