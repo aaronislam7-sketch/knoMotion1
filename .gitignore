@@ -2,6 +2,7 @@ node_modules/
 .remotion/
 out/
 dist/
+build/
 *.pack
 node_modules/.vite/deps/@remotion_google-fonts_NotoColorEmoji.js
 node_modules/.vite/deps/@remotion_google-fonts_NotoColorEmoji.js.map

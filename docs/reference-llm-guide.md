@@ -8,11 +8,13 @@
 
 ⚠️ **OUTPUT JSON ONLY** — Never output React/JSX code. Only valid JSON scene configurations.
 
-⚠️ **DO NOT INVENT KEYS** — Only use documented keys. Unknown keys will cause render failure. If unsure, omit the property rather than guess.
+⚠️ **DO NOT INVENT KEYS** — Only use documented keys. Unknown keys will cause render failure. If unsure, omit the property rather than guess. Refer to the machine-readable capability manifest (`sdk/capability-manifest.json`) for the complete list of supported mid-scenes, layouts, backgrounds, transitions, lottie keys, and constraints.
 
 ⚠️ **DO NOT DEFINE `animationPreset`** — Animation presets are implied by `stylePreset`. Do not add `animationPreset` to scene JSON. Use explicit `animation` fields on mid-scenes only if overriding defaults.
 
 ⚠️ **`sideBySide` MUST USE `layout: full`** — The `sideBySide` mid-scene creates its own internal left/right columns. NEVER put it inside `columnSplit`. This is a common mistake that wastes half the viewport.
+
+⚠️ **AUDIO URLs MUST BE VALID** — All `src` fields in `audio.narration`, `audio.music`, and `audio.sfx[]` must be valid URLs. Placeholder strings will fail Zod schema validation. If no real audio file is available, omit the `audio` block entirely (it is optional).
 
 ```json
 // ❌ WRONG - sideBySide squished into half the screen
@@ -249,6 +251,8 @@ Scene JSON supports optional `audio` and `captions` fields for narration, backgr
 | `audio.sfx[].src` | string (URL) | — | Sound effect file URL |
 | `audio.sfx[].atSecond` | number | — | When to trigger (scene-relative seconds) |
 | `audio.sfx[].volume` | number (0–1) | 0.5 | SFX volume |
+
+**Audio failure handling:** All audio channels use `SafeAudio`, a graceful wrapper around `<Html5Audio>`. If an audio URL is unreachable, the composition continues rendering visual content and captions normally — a console warning is logged and the failed audio element is unmounted. However, each failed URL incurs a ~5-second delay while waiting for the timeout. For this reason, only include `audio` blocks when real audio URLs are available.
 
 ### Captions Config
 
@@ -1125,3 +1129,20 @@ const scenes = [{ id: 'test' }];  // WRONG
   "full": { ... }
 }
 ```
+
+---
+
+## Capability Manifest
+
+A machine-readable capability manifest is available at `sdk/capability-manifest.json`. It declares all supported mid-scenes (with required fields, config options, and aliases), layouts, backgrounds, transitions, lottie keys, caption styles, constraints, and explicit unsupported capabilities.
+
+Use this manifest for programmatic self-validation before submitting scene JSON. It includes:
+- **10 mid-scenes** with required fields and key config options
+- **5 layout types** with slot names
+- **6 background presets**
+- **8 transition types** (5 active + 3 legacy fallback)
+- **40 lottie registry keys**
+- **Constraints** (fps, max scenes, max grid cards, dimensions)
+- **Unsupported capabilities** (no embedded video, no interactivity, no 3D, etc.)
+
+> **Note:** This manifest is a static file. It may not reflect very recent additions. When in doubt, defer to this reference guide and the JSON schemas in `sdk/mid-scenes/schemas/`.

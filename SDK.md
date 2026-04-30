@@ -377,7 +377,7 @@ The audio layer adds narration, background music, sound effects, and animated ca
 
 ### AudioLayer
 
-Renders three audio channels per scene (invisible — audio only).
+Renders three audio channels per scene (invisible — audio only). All channels use `SafeAudio` for graceful failure handling.
 
 ```javascript
 import { AudioLayer } from '../sdk/audio';
@@ -387,9 +387,29 @@ import { AudioLayer } from '../sdk/audio';
 ```
 
 **Channels:**
-- **Narration** — `<Html5Audio>` in `<Sequence>` offset by `startFromSeconds`
-- **Background Music** — `<Html5Audio loop>` with fade-in/out volume curves via `interpolate()`
+- **Narration** — `<SafeAudio>` in `<Sequence>` offset by `startFromSeconds`
+- **Background Music** — `<SafeAudio loop>` with fade-in/out volume curves via `interpolate()`
 - **Sound Effects** — Each SFX in its own `<Sequence from={atSecond * fps}>`
+
+### SafeAudio (P4e)
+
+Drop-in wrapper around `<Html5Audio>` that handles broken audio URLs gracefully. When an audio source fails to load, the component unmounts the audio element and logs a warning instead of crashing the composition.
+
+```javascript
+import { SafeAudio } from '../sdk/audio';
+
+// All <Html5Audio> props are forwarded transparently:
+<SafeAudio src="https://cdn.example.com/audio.mp3" volume={0.8} />
+```
+
+**Behaviour on failure:**
+1. `onError` fires → sets state to unmount the `<Html5Audio>` element
+2. `delayRenderTimeoutInMilliseconds: 5000` — fails fast (5s instead of default 30s)
+3. `delayRenderRetries: 1` — no retry on broken URLs
+4. Logs `console.warn("Audio failed to load: {url}, continuing without audio")`
+5. Visual content and captions continue rendering normally
+
+> **Note:** SafeAudio prevents crashes but each failed URL still incurs a ~5-second `delayRender` wait while the timeout elapses. For instant Studio preview, omit `audio` blocks from `defaultProps` when no real audio files are available.
 
 ### CaptionOverlay
 
@@ -442,6 +462,80 @@ const alignment = alignTTSToBeats(captions, scenes, {
 // alignment.scenes[0].beats → { start: 0.2, exit: 3.7 }
 // alignment.scenes[0].lines → [{ text: '...', beats: { start, exit, emphasis? } }]
 ```
+
+---
+
+## 📋 Zod Schema (Video Config)
+
+**Location:** `/workspace/KnoMotion-Videos/src/sdk/schemas/videoConfig.schema.ts`
+
+The complete Zod schema for `KnoMotionVideo` composition input props. Registered on the composition via the `schema` prop, enabling Remotion Studio's visual Props editor.
+
+```typescript
+import { VideoConfigSchema } from '../sdk/schemas/videoConfig.schema';
+import type { VideoConfig, SceneItem } from '../sdk/schemas/videoConfig.schema';
+
+// Validate a full video config
+const result = VideoConfigSchema.safeParse(inputJson);
+if (!result.success) {
+  console.error(result.error.issues);
+}
+
+// Parse with defaults applied
+const config: VideoConfig = VideoConfigSchema.parse(inputJson);
+```
+
+**Schema structure:**
+
+| Schema | Description |
+|--------|-------------|
+| `VideoConfigSchema` | Top-level: `{ scenes: SceneItemSchema[].min(1), format?: 'desktop' \| 'mobile' }` |
+| `SceneItemSchema` | `{ id, durationInFrames, transition?, config, audio?, captions? }` |
+| `TransitionSchema` | 8 types: fade, slide, page-turn, clock-wipe, iris + 3 legacy (fall back to slide) |
+| `BackgroundSchema` | 6 presets + particles, spotlight, layerNoise options |
+| `LayoutSchema` | 5 types: full, rowStack, columnSplit, headerRowColumns, gridSlots |
+| `SlotConfigSchema` | 10 mid-scene keys + 10 aliases. Supports single config or array (sequences) |
+| `AudioConfigSchema` | Composed from `sdk/audio/audioSchema.ts` — narration, music, sfx |
+| `CaptionsConfigSchema` | Composed from `sdk/audio/audioSchema.ts` — style, data, combineTokens |
+
+**Design decision:** Mid-scene inner `config` uses `z.record(z.unknown())`. Per-mid-scene validation is handled by JSON schemas in `sdk/mid-scenes/schemas/`, which remain the source of truth for detailed config validation.
+
+**Exported types:** `VideoConfig`, `SceneItem`, `SceneContentConfig`
+
+---
+
+## 📦 Capability Manifest
+
+**Location:** `/workspace/KnoMotion-Videos/src/sdk/capability-manifest.json`
+
+A machine-readable JSON manifest of all engine capabilities, designed for LLM agent self-validation during scene JSON generation.
+
+```typescript
+import manifest from '../sdk/capability-manifest.json';
+
+// Check if a mid-scene is supported
+const isSupported = manifest.midScenes['textReveal']?.supported; // true
+
+// Get available lottie keys
+const lottieKeys = manifest.lottieKeys; // ['success', 'checkmark', ...]
+
+// Check constraints
+const maxCards = manifest.constraints.maxCardsInGrid; // 8
+```
+
+**Contents:**
+- `midScenes` — 10 mid-scenes with required fields, key config options, aliases
+- `layouts` — 5 layout types with slot names
+- `backgrounds` — 6 presets with descriptions
+- `transitions` — 8 types (5 active + 3 legacy with fallback notes)
+- `stylePresets` — 5 style presets
+- `captionStyles` — 3 caption styles
+- `audioChannels` — narration, music, sfx descriptions
+- `lottieKeys` — 40 available lottie registry keys
+- `constraints` — fps, max scenes/cards/columns, dimensions
+- `unsupported` — 9 explicit declarations of unsupported capabilities
+
+> **Note:** This manifest is a **static file**, hand-curated from the mid-scene JSON schemas, lottie registry, and codebase constants. It must be manually updated when new mid-scenes, layouts, or other capabilities are added. If the engine grows significantly (many new mid-scenes per chunk), consider building a generation script to keep it in sync automatically. Risks of the static approach: (1) manifest drifts out of sync with actual capabilities, (2) LLM agents may generate JSON for unsupported features or miss newly added ones, (3) stale constraints could cause silent rendering issues. See BUILD_STATUS.md Section 5 — S4a for upgrade guidance.
 
 ---
 
@@ -1212,7 +1306,7 @@ The `calculateMetadata()` function computes:
 - `durationInFrames` via `calculateTransitionSeriesDuration(scenes, 20)`
 - `width`/`height` based on format (1920×1080 desktop, 1080×1920 mobile)
 
-**Studio preview:** `KnoMotionVideo` has a 3-scene test payload as `defaultProps` in `Root.tsx`. Select it in Remotion Studio to preview immediately. Once Zod schemas are registered (Chunk 4, S1b), the Studio Props panel will allow editing scenes visually without requiring `defaultProps`.
+**Studio preview:** `KnoMotionVideo` has a 3-scene test payload as `defaultProps` in `Root.tsx`. A Zod schema (`VideoConfigSchema`) is registered on the composition, enabling the Studio Props panel for structured visual editing with typed fields, enum dropdowns, and inline validation.
 
 ### Module: `sdk/transitions/index.ts`
 
