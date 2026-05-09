@@ -12,6 +12,7 @@
 
 import React, { useMemo } from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
+import { StaggeredMotion } from 'remotion-bits';
 import { Text } from '../elements/atoms/Text';
 import { Icon } from '../elements/atoms/Icon';
 import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
@@ -369,169 +370,195 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
     return KNODE_THEME.colors[colorKey] || KNODE_THEME.colors.accentGreen;
   };
 
-  return (
-    <AbsoluteFill>
-      {positions.map((pos, index) => {
-        const item = items[index];
-        if (!item) return null;
+  const useListReveal = revealType === 'listReveal';
+  const listRevealStartFrame = toFrames(sequenceBeats.start, fps);
 
-        const itemText = typeof item === 'string' ? item : item.text;
-        const itemChecked = typeof item === 'object' ? (item.checked !== false) : true;
-        const itemIcon = getIcon(item.icon || icon, itemChecked);
-        const itemIconColor = resolveColor(item.color || iconColor);
+  const renderItemContent = (item, pos, index, applyAnimStyle = true) => {
+    const itemText = typeof item === 'string' ? item : item.text;
+    const itemChecked = typeof item === 'object' ? (item.checked !== false) : true;
+    const itemIcon = getIcon(item.icon || icon, itemChecked);
+    const itemIconColor = resolveColor(item.color || iconColor);
 
-        // Calculate auto-fit font size
-        const fontSize = autoFitText 
-          ? calculateAutoFitFontSize(itemText, textWidth, baseFontSize)
-          : baseFontSize;
+    const fontSize = autoFitText
+      ? calculateAutoFitFontSize(itemText, textWidth, baseFontSize)
+      : baseFontSize;
 
-        // Calculate animation timing for this item
-        const itemBeats = resolveBeats(item.beats, {
-          start: sequenceBeats.start + index * staggerDelay,
-          holdDuration: animationDuration,
-          exit: sequenceBeats.exit, // Ensure items persist until scene exit
-        });
-        const itemStartFrame = toFrames(itemBeats.start, fps);
-        const animStyle = getRevealAnimationStyle(
-          revealType,
-          frame,
-          itemStartFrame,
-          durationFrames,
-          fps,
-          true
-        );
-        // Exit animation - much slower for smooth fade out (0.8 seconds)
-        const exitFrame = toFrames(itemBeats.exit, fps);
-        const exitDuration = toFrames(0.8, fps);
-        const exitProgress =
-          frame > exitFrame
-            ? Math.min(1, (frame - exitFrame) / exitDuration)
-            : 0;
+    const itemBeats = resolveBeats(item.beats, {
+      start: sequenceBeats.start + index * staggerDelay,
+      holdDuration: animationDuration,
+      exit: sequenceBeats.exit,
+    });
+    const itemStartFrame = toFrames(itemBeats.start, fps);
 
-        // Separate icon animation with pop effect
-        const iconAnimStyle = getIconAnimationStyle(frame, itemStartFrame, durationFrames, fps);
+    const exitFrame = toFrames(itemBeats.exit, fps);
+    const exitDuration = toFrames(0.8, fps);
+    const exitProgress =
+      frame > exitFrame
+        ? Math.min(1, (frame - exitFrame) / exitDuration)
+        : 0;
 
-        // Position the item within the slot
-        // Note: Don't add slotLeft/slotTop here - parent SceneFromConfig handles slot positioning
-        const itemPosition = positionToCSSWithTransform(pos, 'center');
+    const iconAnimStyle = getIconAnimationStyle(frame, itemStartFrame, durationFrames, fps);
+    const itemPosition = positionToCSSWithTransform(pos, 'center');
 
-        return (
-          <div
-            key={index}
-            style={{
-              ...itemPosition,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: alignment === 'center' ? 'center' : 'flex-start',
-              width: slotWidth,
-              paddingLeft: alignment === 'left' ? 20 : 0,
-              paddingRight: 20,
-              boxSizing: 'border-box',
-              ...style.itemContainer,
-            }}
-          >
-            {/* Icon container with separate animation */}
+    let textAnimStyle = {};
+    if (applyAnimStyle) {
+      const animStyle = getRevealAnimationStyle(
+        revealType,
+        frame,
+        itemStartFrame,
+        durationFrames,
+        fps,
+        true
+      );
+      textAnimStyle = {
+        opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
+        transform: animStyle.transform,
+      };
+    } else {
+      textAnimStyle = { opacity: 1 - exitProgress };
+    }
+
+    return (
+      <div
+        key={index}
+        style={{
+          ...itemPosition,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: alignment === 'center' ? 'center' : 'flex-start',
+          width: slotWidth,
+          paddingLeft: alignment === 'left' ? 20 : 0,
+          paddingRight: 20,
+          boxSizing: 'border-box',
+          ...style.itemContainer,
+        }}
+      >
+        <div
+          style={{
+            opacity: (iconAnimStyle.opacity ?? 1) * (1 - exitProgress),
+            transform: iconAnimStyle.transform,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: iconWidth,
+            height: iconWidth,
+            marginRight: 16,
+            fontSize: baseFontSize * iconSize,
+            color: itemIconColor,
+            flexShrink: 0,
+            ...style.iconContainer,
+          }}
+        >
+          {isLottieIcon(itemIcon) ? (
             <div
               style={{
-                opacity: (iconAnimStyle.opacity ?? 1) * (1 - exitProgress),
-                transform: iconAnimStyle.transform,
+                width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: iconWidth,
-                height: iconWidth,
-                marginRight: 16,
-                fontSize: baseFontSize * iconSize,
-                color: itemIconColor,
-                flexShrink: 0,
-                ...style.iconContainer,
+                backgroundColor: itemChecked ? `${itemIconColor}15` : 'transparent',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                ...style.icon,
               }}
             >
-              {isLottieIcon(itemIcon) ? (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: itemChecked ? `${itemIconColor}15` : 'transparent',
-                    borderRadius: '50%',
-                    overflow: 'hidden',
-                    ...style.icon,
-                  }}
-                >
-                  <RemotionLottie
-                    lottieRef={itemIcon.ref}
-                    loop={itemIcon.loop !== undefined ? itemIcon.loop : false}
-                    startFrame={itemStartFrame}
-                    style={{
-                      width: iconWidth * 0.85,
-                      height: iconWidth * 0.85,
-                    }}
-                  />
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%',
-                    position: 'relative',
-                    ...style.icon,
-                  }}
-                >
-                  {/* Rough box background */}
-                  <RoughBox 
-                    size={iconWidth} 
-                    color={itemIconColor} 
-                    style={{ position: 'absolute', inset: 0, opacity: 0.5 }} 
-                  />
-                  
-                  <Icon
-                    iconRef={itemIcon === 'check' ? <RoughCheckmark size={baseFontSize * iconSize * 0.6} color={itemIconColor} /> : itemIcon}
-                    size="md"
-                    color={itemChecked ? 'textMain' : 'textSoft'}
-                    animated={typeof item === 'object' ? item.animated : false}
-                    style={{ fontSize: baseFontSize * iconSize * 0.7, position: 'relative', zIndex: 1 }}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Text container with main animation */}
-            <div
-              style={{
-                opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
-                transform: animStyle.transform,
-                flex: 1,
-                maxWidth: textWidth,
-                borderBottom: `2px dashed ${KNODE_THEME.colors.ruleLine}`,
-                paddingBottom: 8,
-                marginBottom: 8,
-                ...style.textContainer,
-              }}
-            >
-              <Text
-                text={itemText}
-                variant="title" // Force title variant for Cabin Sketch font
-                size="lg"
-                weight={itemChecked ? 600 : 400}
-                color={preset.textColor}
+              <RemotionLottie
+                lottieRef={itemIcon.ref}
+                loop={itemIcon.loop !== undefined ? itemIcon.loop : false}
+                startFrame={itemStartFrame}
                 style={{
-                  fontSize,
-                  lineHeight: `${lineHeight}px`,
-                  textDecoration: itemChecked === false ? 'line-through' : 'none',
-                  color: itemChecked === false ? KNODE_THEME.colors.textMuted : KNODE_THEME.colors.textMain,
-                  ...style.text,
+                  width: iconWidth * 0.85,
+                  height: iconWidth * 0.85,
                 }}
               />
             </div>
-          </div>
-        );
-      })}
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                ...style.icon,
+              }}
+            >
+              <RoughBox
+                size={iconWidth}
+                color={itemIconColor}
+                style={{ position: 'absolute', inset: 0, opacity: 0.5 }}
+              />
+              <Icon
+                iconRef={itemIcon === 'check' ? <RoughCheckmark size={baseFontSize * iconSize * 0.6} color={itemIconColor} /> : itemIcon}
+                size="md"
+                color={itemChecked ? 'textMain' : 'textSoft'}
+                animated={typeof item === 'object' ? item.animated : false}
+                style={{ fontSize: baseFontSize * iconSize * 0.7, position: 'relative', zIndex: 1 }}
+              />
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            ...textAnimStyle,
+            flex: 1,
+            maxWidth: textWidth,
+            borderBottom: `2px dashed ${KNODE_THEME.colors.ruleLine}`,
+            paddingBottom: 8,
+            marginBottom: 8,
+            ...style.textContainer,
+          }}
+        >
+          <Text
+            text={itemText}
+            variant="title"
+            size="lg"
+            weight={itemChecked ? 600 : 400}
+            color={preset.textColor}
+            style={{
+              fontSize,
+              lineHeight: `${lineHeight}px`,
+              textDecoration: itemChecked === false ? 'line-through' : 'none',
+              color: itemChecked === false ? KNODE_THEME.colors.textMuted : KNODE_THEME.colors.textMain,
+              ...style.text,
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <AbsoluteFill>
+      {useListReveal ? (
+        <StaggeredMotion
+          transition={{
+            y: [30, 0],
+            opacity: [0, 1],
+            scale: [0.92, 1],
+            duration: durationFrames,
+            delay: listRevealStartFrame,
+            stagger: Math.round(staggerDelay * fps),
+            staggerDirection: 'forward',
+            easing: 'easeOutCubic',
+          }}
+        >
+          {positions.map((pos, index) => {
+            const item = items[index];
+            if (!item) return null;
+            return renderItemContent(item, pos, index, false);
+          })}
+        </StaggeredMotion>
+      ) : (
+        positions.map((pos, index) => {
+          const item = items[index];
+          if (!item) return null;
+          return renderItemContent(item, pos, index, true);
+        })
+      )}
     </AbsoluteFill>
   );
 };

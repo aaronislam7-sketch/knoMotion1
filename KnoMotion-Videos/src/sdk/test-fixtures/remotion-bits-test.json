@@ -1,0 +1,178 @@
+{
+  "description": "Test fixture for Chunk 7 remotion-bits integration. Contains scenes demonstrating all new features: 5 new textReveal types, centerRipple gridCards, listReveal checklist, and codeBlock mid-scene.",
+  "scenes": [
+    {
+      "id": "bits-blurSlide",
+      "durationInFrames": 120,
+      "transition": { "type": "fade" },
+      "config": {
+        "background": { "preset": "sunriseGradient" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "textReveal",
+            "stylePreset": "playful",
+            "config": {
+              "lines": [
+                { "text": "Blur Slide Reveal", "emphasis": "high", "beats": { "start": 0.3 } },
+                { "text": "Words unblur and slide into place", "emphasis": "normal", "beats": { "start": 0.8 } }
+              ],
+              "revealType": "blurSlide",
+              "staggerDelay": 0.5,
+              "beats": { "start": 0.3, "exit": 3.5 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "bits-charByChar",
+      "durationInFrames": 120,
+      "transition": { "type": "slide", "direction": "left" },
+      "config": {
+        "background": { "preset": "chalkboardGradient" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "textReveal",
+            "stylePreset": "mentor",
+            "config": {
+              "lines": [
+                { "text": "Character by character", "emphasis": "high", "beats": { "start": 0.3 } },
+                { "text": "Each letter appears individually", "emphasis": "normal", "beats": { "start": 1.0 } }
+              ],
+              "revealType": "charByChar",
+              "staggerDelay": 0.7,
+              "beats": { "start": 0.3, "exit": 3.5 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "bits-glitchIn",
+      "durationInFrames": 120,
+      "transition": { "type": "iris" },
+      "config": {
+        "background": { "preset": "spotlight" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "textReveal",
+            "stylePreset": "focus",
+            "config": {
+              "lines": [
+                { "text": "Glitch Into Reality", "emphasis": "high", "beats": { "start": 0.3 } }
+              ],
+              "revealType": "glitchIn",
+              "beats": { "start": 0.3, "exit": 3.5 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "bits-centerRipple",
+      "durationInFrames": 150,
+      "transition": { "type": "slide", "direction": "up" },
+      "config": {
+        "background": { "preset": "notebookSoft" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "gridCards",
+            "stylePreset": "educational",
+            "config": {
+              "cards": [
+                { "icon": "🧠", "label": "Brain" },
+                { "icon": "🔬", "label": "Research" },
+                { "icon": "📊", "label": "Data" },
+                { "icon": "💡", "label": "Ideas" },
+                { "icon": "🎯", "label": "Focus" },
+                { "icon": "🚀", "label": "Launch" }
+              ],
+              "columns": 3,
+              "animation": "centerRipple",
+              "staggerDelay": 0.12,
+              "beats": { "start": 0.5 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "bits-listReveal",
+      "durationInFrames": 150,
+      "transition": { "type": "fade" },
+      "config": {
+        "background": { "preset": "cleanCard" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "checklist",
+            "stylePreset": "educational",
+            "config": {
+              "items": [
+                { "text": "Install remotion-bits", "checked": true },
+                { "text": "Enhance textReveal", "checked": true },
+                { "text": "Add centerRipple to gridCards", "checked": true },
+                { "text": "Create codeBlock mid-scene", "checked": true }
+              ],
+              "revealType": "listReveal",
+              "icon": "check",
+              "staggerDelay": 0.25,
+              "beats": { "start": 0.5, "exit": 4.5 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "bits-codeBlock-lineByLine",
+      "durationInFrames": 180,
+      "transition": { "type": "clock-wipe" },
+      "config": {
+        "background": { "preset": "chalkboardGradient" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "codeBlock",
+            "config": {
+              "code": "function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1)\n       + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));",
+              "language": "javascript",
+              "revealType": "lineByLine",
+              "highlightLines": [3, 4],
+              "title": "Recursive Fibonacci",
+              "theme": "dark",
+              "beats": { "start": 0.5, "exit": 5.0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "bits-codeBlock-typing",
+      "durationInFrames": 180,
+      "transition": { "type": "slide", "direction": "left" },
+      "config": {
+        "background": { "preset": "spotlight" },
+        "layout": { "type": "full" },
+        "slots": {
+          "full": {
+            "midScene": "codeBlock",
+            "config": {
+              "code": "git init\ngit add .\ngit commit -m \"first commit\"\ngit push origin main",
+              "language": "bash",
+              "revealType": "typing",
+              "title": "Git Quickstart",
+              "theme": "dark",
+              "typingSpeed": 1.5,
+              "beats": { "start": 0.3, "exit": 5.0 }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "format": "desktop"
+}

@@ -18,6 +18,7 @@ import { CardSequence } from '../sdk/mid-scenes/CardSequence';
 import { HeroTextEntranceExit } from '../sdk/mid-scenes/HeroTextEntranceExit';
 import { BigNumberReveal } from '../sdk/mid-scenes/BigNumberReveal';
 import { AnimatedCounter } from '../sdk/mid-scenes/AnimatedCounter';
+import { CodeBlockScene } from '../sdk/mid-scenes/CodeBlockScene';
 
 const MID_SCENE_COMPONENTS = {
   textReveal: TextRevealSequence,
@@ -30,6 +31,7 @@ const MID_SCENE_COMPONENTS = {
   heroText: HeroTextEntranceExit,
   bigNumber: BigNumberReveal,
   animatedCounter: AnimatedCounter,
+  codeBlock: CodeBlockScene,
 };
 
 /**

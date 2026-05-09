@@ -171,158 +171,76 @@ export const Root: React.FC = () => {
         defaultProps={{
           scenes: [
             {
-              id: 'audio-test-tiktok',
-              durationInFrames: 150,
+              id: 'bits-blurSlide',
+              durationInFrames: 120,
               transition: { type: 'fade' },
-              audio: {
-                narration: {
-                  src: 'https://example.com/narration.mp3',
-                  volume: 1.0,
-                },
-                music: {
-                  src: 'https://example.com/music.mp3',
-                  volume: 0.12,
-                  fadeIn: 1.0,
-                  fadeOut: 1.5,
-                },
-                sfx: [
-                  {
-                    src: 'https://example.com/sfx.mp3',
-                    atSecond: 0.3,
-                    volume: 0.4,
-                  },
-                ],
-              },
-              captions: {
-                enabled: true,
-                style: 'tiktok' as const,
-                data: [
-                  { text: 'Your', startMs: 200, endMs: 420, timestampMs: 310, confidence: null },
-                  { text: ' brain', startMs: 420, endMs: 680, timestampMs: 550, confidence: null },
-                  { text: ' forgets', startMs: 680, endMs: 1050, timestampMs: 865, confidence: null },
-                  { text: ' eighty', startMs: 1050, endMs: 1380, timestampMs: 1215, confidence: null },
-                  { text: ' percent', startMs: 1380, endMs: 1720, timestampMs: 1550, confidence: null },
-                  { text: ' of', startMs: 1720, endMs: 1850, timestampMs: 1785, confidence: null },
-                  { text: ' what', startMs: 1850, endMs: 2050, timestampMs: 1950, confidence: null },
-                  { text: ' you', startMs: 2050, endMs: 2200, timestampMs: 2125, confidence: null },
-                  { text: ' learn', startMs: 2200, endMs: 2550, timestampMs: 2375, confidence: null },
-                  { text: ' within', startMs: 2550, endMs: 2850, timestampMs: 2700, confidence: null },
-                  { text: ' twenty-four', startMs: 2850, endMs: 3300, timestampMs: 3075, confidence: null },
-                  { text: ' hours.', startMs: 3300, endMs: 3700, timestampMs: 3500, confidence: null },
-                ],
-              },
               config: {
-                background: { preset: 'sunriseGradient', layerNoise: true },
-                layout: { type: 'full', options: { padding: 80 } },
+                background: { preset: 'sunriseGradient' },
+                layout: { type: 'full' },
                 slots: {
                   full: {
                     midScene: 'textReveal',
                     stylePreset: 'playful',
                     config: {
                       lines: [
-                        { text: 'Your brain forgets 80% in 24 hours', emphasis: 'high', beats: { start: 0.3, exit: 4.5 } },
+                        { text: 'Blur Slide Reveal', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                        { text: 'Words unblur into place', emphasis: 'normal', beats: { start: 0.8, exit: 3.5 } },
                       ],
-                      revealType: 'typewriter',
-                      animationDuration: 1.2,
+                      revealType: 'blurSlide',
+                      staggerDelay: 0.5,
+                      beats: { start: 0.3, exit: 3.5 },
                     },
                   },
                 },
               },
             },
             {
-              id: 'audio-test-subtitle',
-              durationInFrames: 180,
-              transition: { type: 'slide', direction: 'left' },
-              audio: {
-                narration: {
-                  src: 'https://example.com/narration.mp3',
-                  volume: 1.0,
-                },
-                music: {
-                  src: 'https://example.com/music.mp3',
-                  volume: 0.1,
-                  fadeIn: 0.5,
-                  fadeOut: 2.0,
-                },
-              },
-              captions: {
-                enabled: true,
-                style: 'subtitle' as const,
-                data: [
-                  { text: 'Spaced', startMs: 200, endMs: 550, timestampMs: 375, confidence: null },
-                  { text: ' repetition', startMs: 550, endMs: 1050, timestampMs: 800, confidence: null },
-                  { text: ' fights', startMs: 1050, endMs: 1350, timestampMs: 1200, confidence: null },
-                  { text: ' the', startMs: 1350, endMs: 1480, timestampMs: 1415, confidence: null },
-                  { text: ' forgetting', startMs: 1480, endMs: 1950, timestampMs: 1715, confidence: null },
-                  { text: ' curve.', startMs: 1950, endMs: 2400, timestampMs: 2175, confidence: null },
-                ],
-              },
+              id: 'bits-centerRipple',
+              durationInFrames: 150,
+              transition: { type: 'slide', direction: 'up' },
               config: {
                 background: { preset: 'notebookSoft' },
-                layout: { type: 'rowStack', options: { rows: 2, padding: 50 } },
+                layout: { type: 'full' },
                 slots: {
-                  row1: {
-                    midScene: 'bigNumber',
-                    config: {
-                      number: '10',
-                      label: 'mid-scenes with complete schemas',
-                      animation: 'countUp',
-                      countFrom: 0,
-                      beats: { start: 0.5, exit: 5.0 },
-                    },
-                  },
-                  row2: {
-                    midScene: 'checklist',
+                  full: {
+                    midScene: 'gridCards',
                     stylePreset: 'educational',
                     config: {
-                      items: [
-                        { text: 'AudioLayer created', checked: true, beats: { start: 1.0 } },
-                        { text: 'CaptionOverlay works', checked: true, beats: { start: 1.5 } },
-                        { text: 'Three caption styles', checked: true, beats: { start: 2.0 } },
+                      cards: [
+                        { icon: '🧠', label: 'Brain' },
+                        { icon: '🔬', label: 'Research' },
+                        { icon: '📊', label: 'Data' },
+                        { icon: '💡', label: 'Ideas' },
+                        { icon: '🎯', label: 'Focus' },
+                        { icon: '🚀', label: 'Launch' },
                       ],
-                      icon: 'check',
-                      revealType: 'pop',
-                      beats: { start: 0.8, exit: 5.5 },
+                      columns: 3,
+                      animation: 'centerRipple',
+                      staggerDelay: 0.12,
+                      beats: { start: 0.5 },
                     },
                   },
                 },
               },
             },
             {
-              id: 'audio-test-karaoke',
-              durationInFrames: 150,
+              id: 'bits-codeBlock',
+              durationInFrames: 180,
               transition: { type: 'clock-wipe' },
-              audio: {
-                music: {
-                  src: 'https://example.com/music.mp3',
-                  volume: 0.2,
-                  fadeIn: 0.3,
-                  fadeOut: 1.0,
-                },
-              },
-              captions: {
-                enabled: true,
-                style: 'karaoke' as const,
-                data: [
-                  { text: 'Question', startMs: 500, endMs: 950, timestampMs: 725, confidence: null },
-                  { text: ' everything.', startMs: 950, endMs: 1500, timestampMs: 1225, confidence: null },
-                  { text: ' Even', startMs: 1800, endMs: 2100, timestampMs: 1950, confidence: null },
-                  { text: ' this', startMs: 2100, endMs: 2400, timestampMs: 2250, confidence: null },
-                  { text: ' video.', startMs: 2400, endMs: 2900, timestampMs: 2650, confidence: null },
-                ],
-              },
               config: {
                 background: { preset: 'chalkboardGradient' },
                 layout: { type: 'full' },
                 slots: {
                   full: {
-                    midScene: 'textReveal',
-                    stylePreset: 'mentor',
+                    midScene: 'codeBlock',
                     config: {
-                      lines: [
-                        { text: 'Karaoke captions demo', emphasis: 'high', beats: { start: 0.5, exit: 3.0 } },
-                      ],
-                      revealType: 'fade',
+                      code: 'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1)\n       + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));',
+                      language: 'javascript',
+                      revealType: 'lineByLine',
+                      highlightLines: [3, 4],
+                      title: 'Recursive Fibonacci',
+                      theme: 'dark',
+                      beats: { start: 0.5, exit: 5.0 },
                     },
                   },
                 },
