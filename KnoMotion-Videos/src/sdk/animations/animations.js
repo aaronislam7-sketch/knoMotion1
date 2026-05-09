@@ -1,30 +1,13 @@
 import { interpolate, spring } from 'remotion';
+import { SPRING_PRESETS } from '../theme/animationPresets';
 
 /**
  * Template SDK - Animation Utilities
- * Centralized animation helpers for all templates
+ * @deprecated Use animations/index.js instead. This file is kept for backward compat.
  */
 
-// Easing functions
-export const EASING = {
-  SMOOTH: [0.4, 0.0, 0.2, 1],
-  BOUNCE: [0.68, -0.55, 0.265, 1.55],
-  SPRING: [0.43, 0.13, 0.23, 0.96],
-  ELASTIC: [0.68, -0.55, 0.265, 1.55],
-  SHARP: [0.4, 0, 0.6, 1],
-  EASE_IN_OUT: [0.42, 0, 0.58, 1],
-  EASE_OUT: [0.0, 0.0, 0.2, 1],
-  EASE_IN: [0.4, 0.0, 1, 1]
-};
-
-// Spring configurations
-export const SPRING_CONFIGS = {
-  gentle: { damping: 15, mass: 1, stiffness: 100 },
-  smooth: { damping: 12, mass: 1, stiffness: 120 },
-  bouncy: { damping: 8, mass: 1, stiffness: 150 },
-  snappy: { damping: 20, mass: 0.8, stiffness: 180 },
-  wobbly: { damping: 5, mass: 1, stiffness: 100 }
-};
+/** @deprecated Use SPRING_PRESETS from theme/animationPresets */
+export const SPRING_CONFIGS = SPRING_PRESETS;
 
 /**
  * Calculate animation progress based on timeline action

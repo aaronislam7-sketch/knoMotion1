@@ -88,16 +88,21 @@ export interface AnimationPreset {
 }
 
 // ============================================================================
-// SPRING CONFIGS (matches SDK animations/index.js)
+// SPRING PRESETS — Single source of truth for all spring configs
+// All spring() calls across the SDK should reference these presets.
 // ============================================================================
 
-export const SPRING_CONFIGS = {
-  gentle: { damping: 15, mass: 1, stiffness: 100 },
-  smooth: { damping: 12, mass: 1, stiffness: 120 },
-  bouncy: { damping: 8, mass: 1, stiffness: 150 },
-  snappy: { damping: 20, mass: 0.8, stiffness: 180 },
-  wobbly: { damping: 5, mass: 1, stiffness: 100 },
+export const SPRING_PRESETS = {
+  gentle: { damping: 20, mass: 1, stiffness: 100 },
+  smooth: { damping: 15, mass: 1, stiffness: 120 },
+  bouncy: { damping: 10, mass: 1, stiffness: 150 },
+  snappy: { damping: 20, mass: 0.8, stiffness: 200 },
+  wobbly: { damping: 8, mass: 1, stiffness: 100 },
+  broadcast: { damping: 200, mass: 1, stiffness: 100 },
 } as const;
+
+/** @deprecated Use SPRING_PRESETS instead */
+export const SPRING_CONFIGS = SPRING_PRESETS;
 
 // ============================================================================
 // ANIMATION PRESETS
@@ -281,7 +286,7 @@ export const resolveAnimationPreset = (
  * Get spring config object from name
  */
 export const getSpringConfig = (name?: SpringConfigName) => {
-  return SPRING_CONFIGS[name || 'smooth'];
+  return SPRING_PRESETS[name || 'smooth'];
 };
 
 /**
@@ -292,7 +297,7 @@ export const getEntranceParams = (entrance: EntranceConfig) => ({
   duration: entrance.duration,
   direction: entrance.direction || 'up',
   distance: entrance.distance || 40,
-  springConfig: entrance.springConfig ? SPRING_CONFIGS[entrance.springConfig] : undefined,
+  springConfig: entrance.springConfig ? SPRING_PRESETS[entrance.springConfig] : undefined,
 });
 
 /**

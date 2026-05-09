@@ -72,7 +72,6 @@ export * from './core/time';
 export * from './core/motion';
 export * from './core/transitions';
 export * from './core/typography';
-export { EZ, getEasing } from './core/easing';
 
 // ==================== MID-SCENES ====================
 // Composed components that glue elements, animations, and effects together
