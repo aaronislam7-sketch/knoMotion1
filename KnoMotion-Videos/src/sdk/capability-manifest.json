@@ -11,7 +11,7 @@
       "requiredFields": ["lines", "beats"],
       "keyConfig": {
         "lines": "Array of { text, emphasis? } — minItems: 1",
-        "revealType": "typewriter | fade | slide | mask (default: fade)",
+        "revealType": "typewriter | fade | slide | mask | blurSlide | charByChar | glitchIn | variableTypewriter | glitchCycle (default: fade)",
         "direction": "up | down | left | right (default: up)",
         "staggerDelay": "Seconds between lines (default: 0.2)",
         "lineSpacing": "tight | normal | relaxed | loose (default: normal)"
@@ -37,7 +37,7 @@
       "keyConfig": {
         "cards": "Array of card objects — minItems: 1",
         "columns": "1–8 (default: 3)",
-        "animation": "fadeSlide | scaleIn | flipIn | cascade"
+        "animation": "fadeSlide | scaleIn | flipIn | cascade | centerRipple"
       }
     },
     "checklist": {
@@ -47,6 +47,7 @@
       "requiredFields": ["items", "beats"],
       "keyConfig": {
         "items": "Array of { text, checked? } — minItems: 1",
+        "revealType": "pop | slide | fade | scale | spring | listReveal (default: pop)",
         "icon": "check | bullet | number | custom",
         "revealType": "pop | slide | fade"
       }
@@ -123,6 +124,23 @@
         "duration": "Seconds for the count animation",
         "prefix": "String — e.g. '$'",
         "suffix": "String — e.g. '%'"
+      }
+    },
+    "codeBlock": {
+      "supported": true,
+      "component": "CodeBlockScene",
+      "aliases": ["codeBlockScene", "code"],
+      "requiredFields": ["code"],
+      "keyConfig": {
+        "code": "String — source code with \\n line breaks",
+        "language": "javascript | typescript | python | bash | html | css | json | ... (default: javascript)",
+        "revealType": "lineByLine | typing | highlight | fade (default: lineByLine)",
+        "theme": "dark | light (default: dark)",
+        "highlightLines": "Array of line numbers to highlight (1-indexed)",
+        "focusLines": "Array of line numbers to focus (dims others)",
+        "typingSpeed": "Speed multiplier 0.1–5.0 (default: 1.0)",
+        "showLineNumbers": "Boolean (default: true)",
+        "title": "Optional title above the code block"
       }
     }
   },

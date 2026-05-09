@@ -294,7 +294,7 @@ Scene JSON supports optional `audio` and `captions` fields for narration, backgr
 
 ---
 
-## 6. Mid-Scene Components (10 Available)
+## 6. Mid-Scene Components (11 Available)
 
 | Key | Component | Purpose |
 |-----|-----------|---------|
@@ -308,6 +308,7 @@ Scene JSON supports optional `audio` and `captions` fields for narration, backgr
 | `cardSequence` | CardSequence | Card stack/grid |
 | `bigNumber` | BigNumberReveal | Large stat display |
 | `animatedCounter` | AnimatedCounter | Counting animation |
+| `codeBlock` | CodeBlockScene | Syntax-highlighted code |
 
 ### Beats Rules
 
@@ -327,6 +328,7 @@ Scene JSON supports optional `audio` and `captions` fields for narration, backgr
 | `cardSequence` | ⚠️ Container level | Uses container `beats.start` for stagger |
 | `bigNumber` | ✅ Yes | `beats.start` and optionally `beats.exit` |
 | `animatedCounter` | ✅ Yes | `beats.start` required |
+| `codeBlock` | ⚠️ Optional | `beats.start` for reveal timing, `beats.exit` for fade out |
 
 **`textReveal` Beats Rule**: Always define beats per-line for precise timing control. Container-level beats should only be used as a default offset when all lines share the same timing pattern.
 
@@ -342,6 +344,7 @@ Scene JSON supports optional `audio` and `captions` fields for narration, backgr
 | `bubbleCallout` | ✅ Good for annotations |
 | `bigNumber` | ✅ Good for statistics |
 | `animatedCounter` | ✅ Good for counting effects |
+| `codeBlock` | ✅ Primary choice for code examples |
 | `iconGrid` | ⚠️ Prefer `gridCards` instead |
 | `cardSequence` | ⚠️ Prefer `gridCards` instead |
 
@@ -370,7 +373,7 @@ Animated text lines with staggered reveals.
         beats: { start: 1.5, exit: 4.0 }
       }
     ],
-    revealType: 'typewriter',  // 'typewriter' | 'fade' | 'slide' | 'mask'
+    revealType: 'typewriter',  // 'typewriter' | 'fade' | 'slide' | 'mask' | 'blurSlide' | 'charByChar' | 'glitchIn' | 'variableTypewriter' | 'glitchCycle'
     direction: 'up',  // for slide/mask: 'up' | 'down' | 'left' | 'right'
     staggerDelay: 0.4,  // seconds between lines
     animationDuration: 1.5,  // seconds per line
@@ -383,6 +386,13 @@ Animated text lines with staggered reveals.
 - `high`: Bold coral, background highlight, pulse animation
 - `normal`: Semi-bold, main color, subtle breathe
 - `low`: Regular weight, muted color
+
+**Reveal Types (remotion-bits powered):**
+- `blurSlide`: Words unblur and slide up word-by-word
+- `charByChar`: Characters appear one at a time with scale effect
+- `glitchIn`: Text glitches in from random characters
+- `variableTypewriter`: Variable-speed typing with natural rhythm
+- `glitchCycle`: Words glitch in sequentially
 
 ---
 
@@ -676,6 +686,39 @@ Animated number counting up/down.
   }
 }
 ```
+
+---
+
+### 5.11 `codeBlock`
+
+Syntax-highlighted code with animated reveal. Powered by remotion-bits.
+
+```javascript
+{
+  midScene: 'codeBlock',
+  config: {
+    code: 'function hello() {\n  console.log("Hello World");\n  return true;\n}',
+    language: 'javascript',  // javascript | typescript | python | bash | html | css | json | ...
+    revealType: 'lineByLine',  // 'lineByLine' | 'typing' | 'highlight' | 'fade'
+    theme: 'dark',  // 'dark' | 'light'
+    highlightLines: [2],  // 1-indexed line numbers to highlight
+    focusLines: [],  // 1-indexed lines to focus (dims others)
+    typingSpeed: 1.0,  // speed multiplier (0.1–5.0)
+    showLineNumbers: true,
+    title: 'Hello World',  // optional title above code block
+    fontSize: 24,  // optional, auto-calculated if omitted
+    beats: { start: 0.5, exit: 5.0 }
+  }
+}
+```
+
+**Reveal Types:**
+- `lineByLine`: Lines reveal sequentially with staggered timing (default)
+- `typing`: Typewriter effect — characters appear as if being typed
+- `highlight`: All code visible immediately, highlighted lines animate in sequence
+- `fade`: Simple fade-in of the entire block
+
+**Best for:** Teaching programming, demonstrating CLI commands, showing config files, explaining algorithms with line-by-line highlighting.
 
 ---
 
