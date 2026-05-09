@@ -170,8 +170,9 @@ export const Root: React.FC = () => {
         height={1080}
         defaultProps={{
           scenes: [
+            // --- Scene 1: blurSlide textReveal ---
             {
-              id: 'bits-blurSlide',
+              id: 'test-blurSlide',
               durationInFrames: 120,
               transition: { type: 'fade' },
               config: {
@@ -184,7 +185,7 @@ export const Root: React.FC = () => {
                     config: {
                       lines: [
                         { text: 'Blur Slide Reveal', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
-                        { text: 'Words unblur into place', emphasis: 'normal', beats: { start: 0.8, exit: 3.5 } },
+                        { text: 'Words unblur and slide into place', emphasis: 'normal', beats: { start: 0.8, exit: 3.5 } },
                       ],
                       revealType: 'blurSlide',
                       staggerDelay: 0.5,
@@ -194,8 +195,105 @@ export const Root: React.FC = () => {
                 },
               },
             },
+            // --- Scene 2: charByChar textReveal ---
             {
-              id: 'bits-centerRipple',
+              id: 'test-charByChar',
+              durationInFrames: 120,
+              transition: { type: 'slide', direction: 'left' },
+              config: {
+                background: { preset: 'chalkboardGradient' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'mentor',
+                    config: {
+                      lines: [
+                        { text: 'Character by Character', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                        { text: 'Each letter appears one at a time', emphasis: 'normal', beats: { start: 1.0, exit: 3.5 } },
+                      ],
+                      revealType: 'charByChar',
+                      staggerDelay: 0.7,
+                      beats: { start: 0.3, exit: 3.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 3: glitchIn textReveal ---
+            {
+              id: 'test-glitchIn',
+              durationInFrames: 120,
+              transition: { type: 'iris' },
+              config: {
+                background: { preset: 'spotlight' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'focus',
+                    config: {
+                      lines: [
+                        { text: 'Glitch Into Reality', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                      ],
+                      revealType: 'glitchIn',
+                      beats: { start: 0.3, exit: 3.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 4: variableTypewriter textReveal ---
+            {
+              id: 'test-variableTypewriter',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'cleanCard' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'minimal',
+                    config: {
+                      lines: [
+                        { text: 'Variable speed typing with natural rhythm', emphasis: 'normal', beats: { start: 0.3, exit: 4.5 } },
+                      ],
+                      revealType: 'variableTypewriter',
+                      beats: { start: 0.3, exit: 4.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 5: glitchCycle textReveal ---
+            {
+              id: 'test-glitchCycle',
+              durationInFrames: 120,
+              transition: { type: 'slide', direction: 'right' },
+              config: {
+                background: { preset: 'chalkboardGradient' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'mentor',
+                    config: {
+                      lines: [
+                        { text: 'Glitch Cycle Effect', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                        { text: 'Words glitch in one by one', emphasis: 'normal', beats: { start: 0.8, exit: 3.5 } },
+                      ],
+                      revealType: 'glitchCycle',
+                      staggerDelay: 0.5,
+                      beats: { start: 0.3, exit: 3.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 6: centerRipple gridCards ---
+            {
+              id: 'test-centerRipple',
               durationInFrames: 150,
               transition: { type: 'slide', direction: 'up' },
               config: {
@@ -223,8 +321,38 @@ export const Root: React.FC = () => {
                 },
               },
             },
+            // --- Scene 7: listReveal checklist ---
             {
-              id: 'bits-codeBlock',
+              id: 'test-listReveal',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'cleanCard' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'checklist',
+                    stylePreset: 'educational',
+                    config: {
+                      items: [
+                        { text: 'Install remotion-bits', checked: true },
+                        { text: 'Five new text reveal types', checked: true },
+                        { text: 'Center ripple grid animation', checked: true },
+                        { text: 'List reveal checklist', checked: true },
+                        { text: 'Code block mid-scene', checked: true },
+                      ],
+                      revealType: 'listReveal',
+                      icon: 'check',
+                      staggerDelay: 0.25,
+                      beats: { start: 0.5, exit: 4.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 8: codeBlock lineByLine ---
+            {
+              id: 'test-codeBlock-lineByLine',
               durationInFrames: 180,
               transition: { type: 'clock-wipe' },
               config: {
@@ -241,6 +369,54 @@ export const Root: React.FC = () => {
                       title: 'Recursive Fibonacci',
                       theme: 'dark',
                       beats: { start: 0.5, exit: 5.0 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 9: codeBlock typing ---
+            {
+              id: 'test-codeBlock-typing',
+              durationInFrames: 180,
+              transition: { type: 'slide', direction: 'left' },
+              config: {
+                background: { preset: 'spotlight' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'codeBlock',
+                    config: {
+                      code: 'git init\ngit add .\ngit commit -m "first commit"\ngit push origin main',
+                      language: 'bash',
+                      revealType: 'typing',
+                      title: 'Git Quickstart',
+                      theme: 'dark',
+                      typingSpeed: 1.5,
+                      beats: { start: 0.3, exit: 5.0 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 10: codeBlock light theme + focus ---
+            {
+              id: 'test-codeBlock-light',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'cleanCard' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'codeBlock',
+                    config: {
+                      code: 'import React from "react";\n\nconst App = () => {\n  return (\n    <div className="app">\n      <h1>Hello World</h1>\n    </div>\n  );\n};\n\nexport default App;',
+                      language: 'typescript',
+                      revealType: 'lineByLine',
+                      focusLines: [4, 5, 6, 7],
+                      title: 'React Component',
+                      theme: 'light',
+                      beats: { start: 0.5, exit: 4.5 },
                     },
                   },
                 },
