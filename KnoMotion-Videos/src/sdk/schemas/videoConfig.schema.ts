@@ -122,6 +122,7 @@ const MidSceneKeys = z.enum([
   'cardSequence',
   'bigNumber',
   'animatedCounter',
+  'codeBlock',
   // Registry aliases
   'textRevealSequence',
   'heroTextEntranceExit',
@@ -133,6 +134,8 @@ const MidSceneKeys = z.enum([
   'gridCardReveal',
   'cardGrid',
   'bigNumberReveal',
+  'codeBlockScene',
+  'code',
 ]);
 
 const StylePresetSchema = z
