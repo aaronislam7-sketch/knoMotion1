@@ -170,147 +170,36 @@ export const Root: React.FC = () => {
         height={1080}
         defaultProps={{
           scenes: [
+            // --- Scene 1: blurSlide textReveal ---
             {
-              id: 'audio-test-tiktok',
-              durationInFrames: 150,
+              id: 'test-blurSlide',
+              durationInFrames: 120,
               transition: { type: 'fade' },
-              audio: {
-                narration: {
-                  src: 'https://example.com/narration.mp3',
-                  volume: 1.0,
-                },
-                music: {
-                  src: 'https://example.com/music.mp3',
-                  volume: 0.12,
-                  fadeIn: 1.0,
-                  fadeOut: 1.5,
-                },
-                sfx: [
-                  {
-                    src: 'https://example.com/sfx.mp3',
-                    atSecond: 0.3,
-                    volume: 0.4,
-                  },
-                ],
-              },
-              captions: {
-                enabled: true,
-                style: 'tiktok' as const,
-                data: [
-                  { text: 'Your', startMs: 200, endMs: 420, timestampMs: 310, confidence: null },
-                  { text: ' brain', startMs: 420, endMs: 680, timestampMs: 550, confidence: null },
-                  { text: ' forgets', startMs: 680, endMs: 1050, timestampMs: 865, confidence: null },
-                  { text: ' eighty', startMs: 1050, endMs: 1380, timestampMs: 1215, confidence: null },
-                  { text: ' percent', startMs: 1380, endMs: 1720, timestampMs: 1550, confidence: null },
-                  { text: ' of', startMs: 1720, endMs: 1850, timestampMs: 1785, confidence: null },
-                  { text: ' what', startMs: 1850, endMs: 2050, timestampMs: 1950, confidence: null },
-                  { text: ' you', startMs: 2050, endMs: 2200, timestampMs: 2125, confidence: null },
-                  { text: ' learn', startMs: 2200, endMs: 2550, timestampMs: 2375, confidence: null },
-                  { text: ' within', startMs: 2550, endMs: 2850, timestampMs: 2700, confidence: null },
-                  { text: ' twenty-four', startMs: 2850, endMs: 3300, timestampMs: 3075, confidence: null },
-                  { text: ' hours.', startMs: 3300, endMs: 3700, timestampMs: 3500, confidence: null },
-                ],
-              },
               config: {
-                background: { preset: 'sunriseGradient', layerNoise: true },
-                layout: { type: 'full', options: { padding: 80 } },
+                background: { preset: 'sunriseGradient' },
+                layout: { type: 'full' },
                 slots: {
                   full: {
                     midScene: 'textReveal',
                     stylePreset: 'playful',
                     config: {
                       lines: [
-                        { text: 'Your brain forgets 80% in 24 hours', emphasis: 'high', beats: { start: 0.3, exit: 4.5 } },
+                        { text: 'Blur Slide Reveal', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                        { text: 'Words unblur and slide into place', emphasis: 'normal', beats: { start: 0.8, exit: 3.5 } },
                       ],
-                      revealType: 'typewriter',
-                      animationDuration: 1.2,
+                      revealType: 'blurSlide',
+                      staggerDelay: 0.5,
+                      beats: { start: 0.3, exit: 3.5 },
                     },
                   },
                 },
               },
             },
+            // --- Scene 2: charByChar textReveal ---
             {
-              id: 'audio-test-subtitle',
-              durationInFrames: 180,
+              id: 'test-charByChar',
+              durationInFrames: 120,
               transition: { type: 'slide', direction: 'left' },
-              audio: {
-                narration: {
-                  src: 'https://example.com/narration.mp3',
-                  volume: 1.0,
-                },
-                music: {
-                  src: 'https://example.com/music.mp3',
-                  volume: 0.1,
-                  fadeIn: 0.5,
-                  fadeOut: 2.0,
-                },
-              },
-              captions: {
-                enabled: true,
-                style: 'subtitle' as const,
-                data: [
-                  { text: 'Spaced', startMs: 200, endMs: 550, timestampMs: 375, confidence: null },
-                  { text: ' repetition', startMs: 550, endMs: 1050, timestampMs: 800, confidence: null },
-                  { text: ' fights', startMs: 1050, endMs: 1350, timestampMs: 1200, confidence: null },
-                  { text: ' the', startMs: 1350, endMs: 1480, timestampMs: 1415, confidence: null },
-                  { text: ' forgetting', startMs: 1480, endMs: 1950, timestampMs: 1715, confidence: null },
-                  { text: ' curve.', startMs: 1950, endMs: 2400, timestampMs: 2175, confidence: null },
-                ],
-              },
-              config: {
-                background: { preset: 'notebookSoft' },
-                layout: { type: 'rowStack', options: { rows: 2, padding: 50 } },
-                slots: {
-                  row1: {
-                    midScene: 'bigNumber',
-                    config: {
-                      number: '10',
-                      label: 'mid-scenes with complete schemas',
-                      animation: 'countUp',
-                      countFrom: 0,
-                      beats: { start: 0.5, exit: 5.0 },
-                    },
-                  },
-                  row2: {
-                    midScene: 'checklist',
-                    stylePreset: 'educational',
-                    config: {
-                      items: [
-                        { text: 'AudioLayer created', checked: true, beats: { start: 1.0 } },
-                        { text: 'CaptionOverlay works', checked: true, beats: { start: 1.5 } },
-                        { text: 'Three caption styles', checked: true, beats: { start: 2.0 } },
-                      ],
-                      icon: 'check',
-                      revealType: 'pop',
-                      beats: { start: 0.8, exit: 5.5 },
-                    },
-                  },
-                },
-              },
-            },
-            {
-              id: 'audio-test-karaoke',
-              durationInFrames: 150,
-              transition: { type: 'clock-wipe' },
-              audio: {
-                music: {
-                  src: 'https://example.com/music.mp3',
-                  volume: 0.2,
-                  fadeIn: 0.3,
-                  fadeOut: 1.0,
-                },
-              },
-              captions: {
-                enabled: true,
-                style: 'karaoke' as const,
-                data: [
-                  { text: 'Question', startMs: 500, endMs: 950, timestampMs: 725, confidence: null },
-                  { text: ' everything.', startMs: 950, endMs: 1500, timestampMs: 1225, confidence: null },
-                  { text: ' Even', startMs: 1800, endMs: 2100, timestampMs: 1950, confidence: null },
-                  { text: ' this', startMs: 2100, endMs: 2400, timestampMs: 2250, confidence: null },
-                  { text: ' video.', startMs: 2400, endMs: 2900, timestampMs: 2650, confidence: null },
-                ],
-              },
               config: {
                 background: { preset: 'chalkboardGradient' },
                 layout: { type: 'full' },
@@ -320,9 +209,214 @@ export const Root: React.FC = () => {
                     stylePreset: 'mentor',
                     config: {
                       lines: [
-                        { text: 'Karaoke captions demo', emphasis: 'high', beats: { start: 0.5, exit: 3.0 } },
+                        { text: 'Character by Character', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                        { text: 'Each letter appears one at a time', emphasis: 'normal', beats: { start: 1.0, exit: 3.5 } },
                       ],
-                      revealType: 'fade',
+                      revealType: 'charByChar',
+                      staggerDelay: 0.7,
+                      beats: { start: 0.3, exit: 3.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 3: glitchIn textReveal ---
+            {
+              id: 'test-glitchIn',
+              durationInFrames: 120,
+              transition: { type: 'iris' },
+              config: {
+                background: { preset: 'spotlight' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'focus',
+                    config: {
+                      lines: [
+                        { text: 'Glitch Into Reality', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                      ],
+                      revealType: 'glitchIn',
+                      beats: { start: 0.3, exit: 3.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 4: variableTypewriter textReveal ---
+            {
+              id: 'test-variableTypewriter',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'cleanCard' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'minimal',
+                    config: {
+                      lines: [
+                        { text: 'Variable speed typing with natural rhythm', emphasis: 'normal', beats: { start: 0.3, exit: 4.5 } },
+                      ],
+                      revealType: 'variableTypewriter',
+                      beats: { start: 0.3, exit: 4.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 5: glitchCycle textReveal ---
+            {
+              id: 'test-glitchCycle',
+              durationInFrames: 120,
+              transition: { type: 'slide', direction: 'right' },
+              config: {
+                background: { preset: 'chalkboardGradient' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'textReveal',
+                    stylePreset: 'mentor',
+                    config: {
+                      lines: [
+                        { text: 'Glitch Cycle Effect', emphasis: 'high', beats: { start: 0.3, exit: 3.5 } },
+                        { text: 'Words glitch in one by one', emphasis: 'normal', beats: { start: 0.8, exit: 3.5 } },
+                      ],
+                      revealType: 'glitchCycle',
+                      staggerDelay: 0.5,
+                      beats: { start: 0.3, exit: 3.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 6: centerRipple gridCards ---
+            {
+              id: 'test-centerRipple',
+              durationInFrames: 150,
+              transition: { type: 'slide', direction: 'up' },
+              config: {
+                background: { preset: 'notebookSoft' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'gridCards',
+                    stylePreset: 'educational',
+                    config: {
+                      cards: [
+                        { icon: '🧠', label: 'Brain' },
+                        { icon: '🔬', label: 'Research' },
+                        { icon: '📊', label: 'Data' },
+                        { icon: '💡', label: 'Ideas' },
+                        { icon: '🎯', label: 'Focus' },
+                        { icon: '🚀', label: 'Launch' },
+                      ],
+                      columns: 3,
+                      animation: 'centerRipple',
+                      staggerDelay: 0.12,
+                      beats: { start: 0.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 7: listReveal checklist ---
+            {
+              id: 'test-listReveal',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'cleanCard' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'checklist',
+                    stylePreset: 'educational',
+                    config: {
+                      items: [
+                        { text: 'Install remotion-bits', checked: true },
+                        { text: 'Five new text reveal types', checked: true },
+                        { text: 'Center ripple grid animation', checked: true },
+                        { text: 'List reveal checklist', checked: true },
+                        { text: 'Code block mid-scene', checked: true },
+                      ],
+                      revealType: 'listReveal',
+                      icon: 'check',
+                      staggerDelay: 0.25,
+                      beats: { start: 0.5, exit: 4.5 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 8: codeBlock lineByLine ---
+            {
+              id: 'test-codeBlock-lineByLine',
+              durationInFrames: 180,
+              transition: { type: 'clock-wipe' },
+              config: {
+                background: { preset: 'chalkboardGradient' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'codeBlock',
+                    config: {
+                      code: 'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1)\n       + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));',
+                      language: 'javascript',
+                      revealType: 'lineByLine',
+                      highlightLines: [3, 4],
+                      title: 'Recursive Fibonacci',
+                      theme: 'dark',
+                      beats: { start: 0.5, exit: 5.0 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 9: codeBlock typing ---
+            {
+              id: 'test-codeBlock-typing',
+              durationInFrames: 180,
+              transition: { type: 'slide', direction: 'left' },
+              config: {
+                background: { preset: 'spotlight' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'codeBlock',
+                    config: {
+                      code: 'git init\ngit add .\ngit commit -m "first commit"\ngit push origin main',
+                      language: 'bash',
+                      revealType: 'typing',
+                      title: 'Git Quickstart',
+                      theme: 'dark',
+                      typingSpeed: 1.5,
+                      beats: { start: 0.3, exit: 5.0 },
+                    },
+                  },
+                },
+              },
+            },
+            // --- Scene 10: codeBlock light theme + focus ---
+            {
+              id: 'test-codeBlock-light',
+              durationInFrames: 150,
+              transition: { type: 'fade' },
+              config: {
+                background: { preset: 'cleanCard' },
+                layout: { type: 'full' },
+                slots: {
+                  full: {
+                    midScene: 'codeBlock',
+                    config: {
+                      code: 'import React from "react";\n\nconst App = () => {\n  return (\n    <div className="app">\n      <h1>Hello World</h1>\n    </div>\n  );\n};\n\nexport default App;',
+                      language: 'typescript',
+                      revealType: 'lineByLine',
+                      focusLines: [4, 5, 6, 7],
+                      title: 'React Component',
+                      theme: 'light',
+                      beats: { start: 0.5, exit: 4.5 },
                     },
                   },
                 },

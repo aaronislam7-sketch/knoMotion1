@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring } from 'remotion';
+import { StaggeredMotion } from 'remotion-bits';
 import { InfoCard } from '../elements/compositions/InfoCard';
 import { ARRANGEMENT_TYPES, calculateItemPositions, positionToCSS } from '../layout/layoutEngine';
 import { fadeIn, slideIn, scaleIn, bounceIn } from '../animations/index';
@@ -253,6 +254,47 @@ export const GridCardReveal = ({ config, stylePreset }) => {
   const totalGridHeight = rows * cardHeight + (rows - 1) * gap;
   const verticalOffset = Math.max(0, (slot.height - totalGridHeight) / 2);
 
+  const renderCard = (card, pos, index) => {
+    const currentCardWidth = pos.width || cardWidth;
+    const currentCardHeight = pos.height || cardHeight;
+    const cardSize = getCardSize(currentCardWidth, currentCardHeight);
+    const cardPosition = positionToCSS(pos);
+
+    return (
+      <div
+        key={index}
+        style={{
+          ...cardPosition,
+          ...style.cardWrapper,
+        }}
+      >
+        <InfoCard
+          icon={card.icon}
+          image={card.image}
+          imageRounded={card.imageRounded}
+          label={showLabels ? card.label : undefined}
+          sublabel={showLabels ? card.sublabel : undefined}
+          animated={card.animated !== false}
+          accentColor={card.color}
+          layout={card.layout}
+          variant={card.variant || resolvedCardVariant}
+          size={cardSize}
+          cardWidth={currentCardWidth}
+          cardHeight={currentCardHeight}
+          stylePreset={stylePreset}
+          style={{
+            width: '100%',
+            height: '100%',
+            ...style.card,
+          }}
+        />
+      </div>
+    );
+  };
+
+  const useCenterRipple = animation === 'centerRipple';
+  const staggerStartFrame = toFrames(sequenceBeats.start, fps);
+
   return (
     <AbsoluteFill>
       <div
@@ -265,99 +307,111 @@ export const GridCardReveal = ({ config, stylePreset }) => {
           ...style.container,
         }}
       >
-        {positions.map((pos, index) => {
-          const card = cards[index];
-          if (!card) return null;
+        {useCenterRipple ? (
+          <StaggeredMotion
+            transition={{
+              opacity: [0, 1],
+              scale: [0.7, 1],
+              y: [15, 0],
+              duration: durationFrames,
+              delay: staggerStartFrame,
+              stagger: Math.round(staggerDelay * fps),
+              staggerDirection: 'center',
+              easing: 'easeOutCubic',
+            }}
+          >
+            {positions.map((pos, index) => {
+              const card = cards[index];
+              if (!card) return null;
+              return renderCard(card, pos, index);
+            })}
+          </StaggeredMotion>
+        ) : (
+          positions.map((pos, index) => {
+            const card = cards[index];
+            if (!card) return null;
 
-          // Get row/column for cascade effect
-          const row = pos.row ?? Math.floor(index / columns);
-          const col = pos.column ?? index % columns;
+            const row = pos.row ?? Math.floor(index / columns);
+            const col = pos.column ?? index % columns;
 
-          // Calculate animation timing for this card
-          const itemBeats = resolveBeats(card.beats, {
-            start: sequenceBeats.start + index * staggerDelay,
-            holdDuration: animationDuration,
-          });
-          const baseStartFrame = toFrames(itemBeats.start, fps);
-          const cardStartFrame = animation === 'cascade'
-            ? baseStartFrame
-            : baseStartFrame;
+            const itemBeats = resolveBeats(card.beats, {
+              start: sequenceBeats.start + index * staggerDelay,
+              holdDuration: animationDuration,
+            });
+            const baseStartFrame = toFrames(itemBeats.start, fps);
 
-          const animStyle = getCardAnimationStyle(
-            animation,
-            frame,
-            cardStartFrame,
-            durationFrames,
-            fps,
-            direction,
-            { row, col }
-          );
-          
-          // Only apply exit animation if explicitly configured with an exit beat
-          // Cards should persist by default (stay visible after appearing)
-          const hasExplicitExit = card.beats?.exit !== undefined || beats?.exit !== undefined;
-          let mergedAnimStyle = animStyle;
-          
-          if (hasExplicitExit) {
-            const exitFrame = toFrames(itemBeats.exit, fps);
-            const exitProgress =
-              frame > exitFrame
-                ? Math.min(1, (frame - exitFrame) / toFrames(0.8, fps)) // Slower exit (0.8s)
-                : 0;
-            mergedAnimStyle = {
-              ...animStyle,
-              opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
-            };
-          }
-          
-          // Convert position to CSS (layout engine returns center coordinates)
-          const cardPosition = positionToCSS(pos);
-          const currentCardWidth = pos.width || cardWidth;
-          const currentCardHeight = pos.height || cardHeight;
-          const cardSize = getCardSize(currentCardWidth, currentCardHeight);
+            const animStyle = getCardAnimationStyle(
+              animation,
+              frame,
+              baseStartFrame,
+              durationFrames,
+              fps,
+              direction,
+              { row, col }
+            );
 
-          return (
-            <div
-              key={index}
-              style={{
-                ...cardPosition,
-                ...style.cardWrapper,
-              }}
-            >
+            const hasExplicitExit = card.beats?.exit !== undefined || beats?.exit !== undefined;
+            let mergedAnimStyle = animStyle;
+
+            if (hasExplicitExit) {
+              const exitFrame = toFrames(itemBeats.exit, fps);
+              const exitProgress =
+                frame > exitFrame
+                  ? Math.min(1, (frame - exitFrame) / toFrames(0.8, fps))
+                  : 0;
+              mergedAnimStyle = {
+                ...animStyle,
+                opacity: (animStyle.opacity ?? 1) * (1 - exitProgress),
+              };
+            }
+
+            const cardPosition = positionToCSS(pos);
+            const currentCardWidth = pos.width || cardWidth;
+            const currentCardHeight = pos.height || cardHeight;
+            const cardSize = getCardSize(currentCardWidth, currentCardHeight);
+
+            return (
               <div
+                key={index}
                 style={{
-                  opacity: mergedAnimStyle.opacity,
-                  transform: mergedAnimStyle.transform,
-                  clipPath: mergedAnimStyle.clipPath || 'none',
-                  width: '100%',
-                  height: '100%',
+                  ...cardPosition,
+                  ...style.cardWrapper,
                 }}
               >
-                <InfoCard
-                  icon={card.icon}
-                  image={card.image}
-                  imageRounded={card.imageRounded}
-                  label={showLabels ? card.label : undefined}
-                  sublabel={showLabels ? card.sublabel : undefined}
-                  animated={card.animated !== false} // Always animate icons unless explicitly disabled
-                  accentColor={card.color}
-                  // Let InfoCard auto-detect layout: horizontal for icons (side-by-side), vertical for images
-                  layout={card.layout}
-                  variant={card.variant || resolvedCardVariant}
-                  size={cardSize}
-                  cardWidth={currentCardWidth}
-                  cardHeight={currentCardHeight}
-                  stylePreset={stylePreset}
+                <div
                   style={{
+                    opacity: mergedAnimStyle.opacity,
+                    transform: mergedAnimStyle.transform,
+                    clipPath: mergedAnimStyle.clipPath || 'none',
                     width: '100%',
                     height: '100%',
-                    ...style.card,
                   }}
-                />
+                >
+                  <InfoCard
+                    icon={card.icon}
+                    image={card.image}
+                    imageRounded={card.imageRounded}
+                    label={showLabels ? card.label : undefined}
+                    sublabel={showLabels ? card.sublabel : undefined}
+                    animated={card.animated !== false}
+                    accentColor={card.color}
+                    layout={card.layout}
+                    variant={card.variant || resolvedCardVariant}
+                    size={cardSize}
+                    cardWidth={currentCardWidth}
+                    cardHeight={currentCardHeight}
+                    stylePreset={stylePreset}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      ...style.card,
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </AbsoluteFill>
   );

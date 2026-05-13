@@ -14,29 +14,12 @@
 import { interpolate, spring, Easing } from 'remotion';
 import { EZ } from '../core/easing';
 import { toFrames } from '../core/time';
+import { SPRING_PRESETS } from '../theme/animationPresets';
 
-// ==================== EASING & SPRING CONFIGS ====================
-
-export const EASING = {
-  SMOOTH: [0.4, 0.0, 0.2, 1],
-  BOUNCE: [0.68, -0.55, 0.265, 1.55],
-  SPRING: [0.43, 0.13, 0.23, 0.96],
-  ELASTIC: [0.68, -0.55, 0.265, 1.55],
-  SHARP: [0.4, 0, 0.6, 1],
-  EASE_IN_OUT: [0.42, 0, 0.58, 1],
-  EASE_OUT: [0.0, 0.0, 0.2, 1],
-  EASE_IN: [0.4, 0.0, 1, 1]
-};
-
-export const SPRING_CONFIGS = {
-  gentle: { damping: 15, mass: 1, stiffness: 100 },
-  smooth: { damping: 12, mass: 1, stiffness: 120 },
-  bouncy: { damping: 8, mass: 1, stiffness: 150 },
-  snappy: { damping: 20, mass: 0.8, stiffness: 180 },
-  wobbly: { damping: 5, mass: 1, stiffness: 100 },
-  // Broadcast-grade configs (from broadcastAnimations)
-  broadcast: { damping: 200, mass: 1, stiffness: 100 }
-};
+// Re-export for backward compatibility
+export { SPRING_PRESETS };
+/** @deprecated Use SPRING_PRESETS from theme/animationPresets instead */
+export const SPRING_CONFIGS = SPRING_PRESETS;
 
 // ==================== CORE ANIMATIONS (from animations.js) ====================
 
@@ -177,7 +160,7 @@ export const scaleOut = (frame, startFrame, duration = 30, toScale = 0.3) => {
  * Spring-based animation
  */
 export const springAnimation = (frame, fps, startFrame, config = 'smooth') => {
-  const springConfig = SPRING_CONFIGS[config] || SPRING_CONFIGS.smooth;
+  const springConfig = SPRING_PRESETS[config] || SPRING_PRESETS.smooth;
   
   return spring({
     frame: frame - startFrame,
@@ -770,7 +753,7 @@ export const createSVGFilter = (filterId, effect = 'glow', config = {}) => {
 /**
  * Smooth fade and scale entrance
  */
-export const fadeInScale = (frame, fps, delay = 0, config = SPRING_CONFIGS.broadcast) => {
+export const fadeInScale = (frame, fps, delay = 0, config = SPRING_PRESETS.broadcast) => {
   const progress = spring({
     frame: Math.max(0, frame - delay),
     fps,
@@ -790,7 +773,7 @@ export const slideInWithOvershoot = (frame, fps, from = 'bottom', delay = 0, dis
   const progress = spring({
     frame: Math.max(0, frame - delay),
     fps,
-    config: SPRING_CONFIGS.bouncy,
+    config: SPRING_PRESETS.bouncy,
   });
 
   const transforms = {
@@ -814,7 +797,7 @@ export const staggeredEntrance = (frame, fps, index, staggerDelay = 5, baseDelay
   const progress = spring({
     frame: Math.max(0, frame - delay),
     fps,
-    config: SPRING_CONFIGS.gentle,
+    config: SPRING_PRESETS.gentle,
   });
 
   return {

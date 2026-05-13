@@ -68,8 +68,9 @@ Mid-scenes are **composed components** that render specific content patterns:
 | `cardSequence` | Card stack/grid | `cards`, `layout`, `animation` |
 | `bigNumber` | Large stat display | `number`, `label`, `animation` |
 | `animatedCounter` | Number animation | `startValue`, `endValue`, `duration` |
+| `codeBlock` | Syntax-highlighted code | `code`, `language`, `revealType`, `highlightLines` |
 
-All 10 mid-scenes are registered in `MID_SCENE_COMPONENTS` (SceneRenderer.jsx) and exported from the barrel (`sdk/mid-scenes/index.js`).
+All 11 mid-scenes are registered in `MID_SCENE_COMPONENTS` (SceneRenderer.jsx) and exported from the barrel (`sdk/mid-scenes/index.js`).
 
 Each mid-scene:
 - Receives a **slot position** (left, top, width, height)
@@ -247,6 +248,42 @@ The `resolvePresentation()` mapper in `sdk/transitions/index.ts` converts scene 
 
 ---
 
+## remotion-bits Integration
+
+`remotion-bits` (v0.2.0) provides higher-level animation primitives used by several mid-scenes:
+
+- **`StaggeredMotion`** — Declarative animation wrapper for staggered group entrances. Used by `gridCards` (`centerRipple` animation) and `checklist` (`listReveal`).
+- **`AnimatedText`** — Text effects with word/character splitting, blur, glitch. Used by `textReveal` for `blurSlide`, `charByChar`, `glitchIn`, `glitchCycle` reveal types.
+- **`TypeWriter`** — Variable-speed typing with cursor. Used by `textReveal` (`variableTypewriter`) and `codeBlock` (`typing` reveal).
+- **`CodeBlock`** — Syntax-highlighted code with line reveal, highlighting, and focus mode. Powers the `codeBlock` mid-scene.
+
+**Overlap rule:** remotion-bits components are used as rendering primitives inside KnoMotion's JSON-driven mid-scenes. The JSON interface stays KnoMotion's; the visual rendering delegates to remotion-bits where appropriate. See BUILD_STATUS.md overlap resolution matrix.
+
+---
+
+## Spring & Easing System
+
+### Spring Presets
+
+All spring physics use presets from `theme/animationPresets.ts` (`SPRING_PRESETS`):
+
+| Name | Damping | Mass | Stiffness | Use Case |
+|------|---------|------|-----------|----------|
+| `gentle` | 20 | 1 | 100 | Soft, slow entrances |
+| `smooth` | 15 | 1 | 120 | Default for most motion |
+| `bouncy` | 10 | 1 | 150 | Playful, energetic |
+| `snappy` | 20 | 0.8 | 200 | Quick, decisive |
+| `wobbly` | 8 | 1 | 100 | Elastic, rubber-band |
+| `broadcast` | 200 | 1 | 100 | Scene transitions |
+
+### Easing
+
+Named easing curves are in `core/easing.ts` (`EZ` map), all wrapping Remotion's `Easing.bezier()`. For standard curves, use Remotion's `Easing` module directly.
+
+Organic motion utilities (`jitter`, `wobble`, `imperfectDelay`) provide deterministic pseudo-random values for hand-drawn effects.
+
+---
+
 ## Generic Parameterized Composition
 
 `GenericVideoPlayer` (`compositions/GenericVideoPlayer.jsx`) is the universal composition that accepts any scene array via input props. It eliminates the need for per-video composition files and powers the entire blue-sky pipeline.
@@ -357,7 +394,7 @@ KnoMotion-Videos/src/
 ├── sdk/
 │   ├── audio/                 # Audio layer (P4): AudioLayer, CaptionOverlay, SafeAudio, schemas
 │   ├── schemas/               # Zod schemas (S1): VideoConfigSchema, tests
-│   ├── mid-scenes/            # 10 mid-scene components + JSON schemas
+│   ├── mid-scenes/            # 11 mid-scene components + JSON schemas (incl. codeBlock)
 │   ├── transitions/           # Transition resolution layer (P1)
 │   ├── elements/              # UI atoms and compositions
 │   ├── theme/                 # Presets, emphasis, colors

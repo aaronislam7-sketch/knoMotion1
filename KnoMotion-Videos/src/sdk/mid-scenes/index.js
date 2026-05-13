@@ -22,6 +22,9 @@ export { GridCardReveal } from './GridCardReveal';
 export { AnimatedCounter } from './AnimatedCounter';
 export { BigNumberReveal } from './BigNumberReveal';
 
+// remotion-bits powered mid-scenes (Chunk 7)
+export { CodeBlockScene } from './CodeBlockScene';
+
 /**
  * Mid-Scene Registry for dynamic rendering
  * Maps type strings to component references
@@ -49,4 +52,9 @@ export const MID_SCENE_REGISTRY = {
   animatedCounter: 'AnimatedCounter',
   bigNumberReveal: 'BigNumberReveal',
   bigNumber: 'BigNumberReveal',
+  
+  // remotion-bits powered (Chunk 7)
+  codeBlockScene: 'CodeBlockScene',
+  codeBlock: 'CodeBlockScene',
+  code: 'CodeBlockScene',
 };

@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CodeBlockScene",
+  "description": "Syntax-highlighted code with animated reveal, line highlighting, and focus mode. Powered by remotion-bits CodeBlock.",
+  "type": "object",
+  "required": ["code"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Source code to display. Multi-line strings with \\n line breaks."
+    },
+    "language": {
+      "type": "string",
+      "default": "javascript",
+      "description": "Programming language for syntax highlighting.",
+      "enum": [
+        "javascript", "typescript", "python", "java", "c", "cpp", "csharp",
+        "go", "rust", "ruby", "php", "swift", "kotlin", "html", "css",
+        "json", "yaml", "sql", "bash", "markdown", "plaintext"
+      ]
+    },
+    "theme": {
+      "type": "string",
+      "enum": ["dark", "light"],
+      "default": "dark",
+      "description": "Color theme for the code block."
+    },
+    "revealType": {
+      "type": "string",
+      "enum": ["lineByLine", "typing", "highlight", "fade"],
+      "default": "lineByLine",
+      "description": "How the code appears. lineByLine: lines reveal sequentially. typing: typewriter effect. highlight: all visible, lines highlight in sequence. fade: simple fade in."
+    },
+    "highlightLines": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 },
+      "default": [],
+      "description": "Line numbers to highlight (1-indexed). Highlighted lines get a subtle background color."
+    },
+    "focusLines": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 },
+      "default": [],
+      "description": "Line numbers to focus on (1-indexed). Non-focused lines are dimmed and blurred."
+    },
+    "typingSpeed": {
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 5.0,
+      "default": 1.0,
+      "description": "Typing/reveal speed multiplier. Higher = faster."
+    },
+    "showLineNumbers": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to show line numbers."
+    },
+    "fontSize": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 48,
+      "description": "Font size in pixels. Auto-calculated if omitted."
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional title displayed above the code block."
+    },
+    "beats": {
+      "type": "object",
+      "properties": {
+        "start": { "type": "number", "description": "When the code starts appearing (seconds)" },
+        "exit": { "type": "number", "description": "When the code starts exiting (seconds)" },
+        "hold": { "type": "number", "description": "How long to hold before exit (seconds)" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "code": "function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}",
+      "language": "javascript",
+      "revealType": "lineByLine",
+      "highlightLines": [3],
+      "title": "Recursive Fibonacci",
+      "beats": { "start": 0.5 }
+    },
+    {
+      "code": "git add .\ngit commit -m \"initial commit\"\ngit push origin main",
+      "language": "bash",
+      "revealType": "typing",
+      "theme": "dark",
+      "typingSpeed": 1.5,
+      "beats": { "start": 0.3 }
+    }
+  ],
+  "useCase": "Teaching programming concepts, showing code examples, demonstrating CLI commands, explaining algorithms step-by-step with line highlighting."
+}

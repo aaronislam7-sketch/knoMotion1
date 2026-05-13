@@ -11,7 +11,7 @@
  */
 
 import React from 'react';
-import { useCurrentFrame, useVideoConfig, AbsoluteFill } from 'remotion';
+import { useCurrentFrame, useVideoConfig, AbsoluteFill, spring, interpolate } from 'remotion';
 import { Text } from '../elements/atoms/Text';
 import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
 import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
@@ -21,6 +21,7 @@ import { KNODE_THEME } from '../theme/knodeTheme';
 import { resolveStylePreset } from '../theme/stylePresets';
 import { resolveEmphasisEffect } from '../theme/emphasisEffects';
 import { resolveBeats } from '../utils/beats';
+import { AnimatedText, TypeWriter } from 'remotion-bits';
 
 /**
  * Get line spacing value from theme based on spacing type
@@ -100,16 +101,14 @@ const getEmphasisMotion = (effect, frame, beats, fps) => {
   return {};
 };
 
+const BITS_REVEAL_TYPES = new Set([
+  'blurSlide', 'charByChar', 'glitchIn', 'variableTypewriter', 'glitchCycle'
+]);
+
+const isBitsRevealType = (revealType) => BITS_REVEAL_TYPES.has(revealType);
+
 /**
- * Get animation style based on reveal type
- * 
- * @param {string} revealType - Type of reveal animation
- * @param {number} frame - Current frame
- * @param {number} startFrame - Start frame for animation
- * @param {number} durationFrames - Duration in frames
- * @param {string} direction - Direction for slide/mask animations
- * @param {string} text - Text content (for typewriter)
- * @returns {Object} Style object with opacity, transform, and/or visible text
+ * Get animation style based on reveal type (standard KnoMotion reveals)
  */
 const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, direction = 'up', text = '', showCursor = true) => {
   switch (revealType) {
@@ -135,7 +134,7 @@ const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, 
     
     case 'mask':
       const maskReveal = getMaskReveal(frame, {
-        start: startFrame / 30, // Convert to seconds
+        start: startFrame / 30,
         duration: durationFrames / 30,
         direction,
         textBounds: { x: 0, y: 0, width: 800, height: 100 },
@@ -152,6 +151,110 @@ const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, 
         ...fadeIn(frame, startFrame, durationFrames),
         isTypewriter: false,
       };
+  }
+};
+
+/**
+ * Render a line using remotion-bits text components.
+ * Returns a React element that replaces the standard Text rendering.
+ */
+const renderBitsLine = (revealType, text, startFrame, durationFrames, fps, textStyle) => {
+  const baseStyle = {
+    ...textStyle,
+    display: 'inline-block',
+    whiteSpace: 'pre-wrap',
+  };
+
+  switch (revealType) {
+    case 'blurSlide':
+      return (
+        <AnimatedText
+          transition={{
+            y: [20, 0],
+            opacity: [0, 1],
+            blur: [8, 0],
+            delay: startFrame,
+            duration: durationFrames,
+            split: 'word',
+            splitStagger: 3,
+            easing: 'easeOutCubic',
+          }}
+          style={baseStyle}
+        >
+          {text}
+        </AnimatedText>
+      );
+
+    case 'charByChar':
+      return (
+        <AnimatedText
+          transition={{
+            opacity: [0, 1],
+            scale: [0.6, 1],
+            y: [8, 0],
+            delay: startFrame,
+            duration: durationFrames,
+            split: 'character',
+            splitStagger: 2,
+            easing: 'easeOutCubic',
+          }}
+          style={baseStyle}
+        >
+          {text}
+        </AnimatedText>
+      );
+
+    case 'glitchIn':
+      return (
+        <AnimatedText
+          transition={{
+            opacity: [0, 1],
+            delay: startFrame,
+            duration: durationFrames,
+            split: 'character',
+            splitStagger: 1,
+            glitch: [1, 0],
+            easing: 'easeOutCubic',
+          }}
+          style={baseStyle}
+        >
+          {text}
+        </AnimatedText>
+      );
+
+    case 'variableTypewriter':
+      return (
+        <TypeWriter
+          text={text}
+          typeSpeed={[4, 2, 5, 2, 3]}
+          delay={startFrame}
+          cursor={true}
+          showCursorAfterComplete={false}
+          errorRate={0}
+          style={baseStyle}
+        />
+      );
+
+    case 'glitchCycle':
+      return (
+        <AnimatedText
+          transition={{
+            opacity: [0, 1],
+            delay: startFrame,
+            duration: durationFrames,
+            split: 'word',
+            splitStagger: 4,
+            glitch: [1, 0],
+            easing: 'easeOutQuart',
+          }}
+          style={baseStyle}
+        >
+          {text}
+        </AnimatedText>
+      );
+
+    default:
+      return null;
   }
 };
 
@@ -267,6 +370,51 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
           holdDuration: animationDuration,
         });
         const lineStartFrame = toFrames(itemBeats.start, fps);
+
+        const exitFrame = toFrames(itemBeats.exit, fps);
+        const exitDuration = toFrames(0.3, fps);
+        const exitProgress = frame > exitFrame
+          ? Math.min(1, (frame - exitFrame) / exitDuration)
+          : 0;
+
+        const emphasisEffect = getEmphasisStyle(line.emphasis);
+        const linePosition = positionToCSSWithTransform(pos, 'center');
+        const weightValue = emphasisEffect.textStyle.fontWeight || 600;
+        const textWeight =
+          weightValue >= 700 ? 'bold' : weightValue <= 400 ? 'normal' : 'medium';
+
+        const textColor = line.emphasis === 'high'
+          ? KNODE_THEME.colors.primary
+          : (KNODE_THEME.colors[preset.textColor] || KNODE_THEME.colors.textMain);
+
+        // remotion-bits reveal types: delegate rendering to bits components
+        if (isBitsRevealType(revealType)) {
+          const bitsTextStyle = {
+            fontSize: baseFontSize,
+            lineHeight: `${lineHeight}px`,
+            textAlign: 'center',
+            fontFamily: KNODE_THEME.fonts.body,
+            fontWeight: weightValue,
+            color: textColor,
+            ...(line.emphasis === 'high' ? emphasisEffect.textStyle : {}),
+            ...style.text,
+          };
+
+          return (
+            <div
+              key={index}
+              style={{
+                ...linePosition,
+                opacity: 1 - exitProgress,
+                ...style.lineContainer,
+              }}
+            >
+              {renderBitsLine(revealType, line.text, lineStartFrame, durationFrames, fps, bitsTextStyle)}
+            </div>
+          );
+        }
+
+        // Standard KnoMotion reveal types
         const animStyle = getRevealAnimationStyle(
           revealType,
           frame,
@@ -277,25 +425,11 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
           showCursor
         );
 
-        // Calculate exit animation
-        const exitFrame = toFrames(itemBeats.exit, fps);
-        const exitDuration = toFrames(0.3, fps);
-        const exitProgress = frame > exitFrame
-          ? Math.min(1, (frame - exitFrame) / exitDuration)
-          : 0;
-
-        const emphasisEffect = getEmphasisStyle(line.emphasis);
         const emphasisMotion = getEmphasisMotion(emphasisEffect, frame, itemBeats, fps);
-        // Use positionSystem's positionToCSS which uses transforms for center coords
-        const linePosition = positionToCSSWithTransform(pos, 'center');
 
-        // Handle typewriter vs. other animations
         const displayText = animStyle.isTypewriter ? animStyle.visibleText : line.text;
         const cursorVisible = animStyle.isTypewriter && animStyle.showCursor;
 
-        // Combine centering transform with animation transform properly
-        // The linePosition.transform handles centering (-50%, -50%)
-        // The animStyle.transform handles animation (e.g., translateY for slide)
         const transforms = [linePosition.transform];
         if (animStyle.transform && animStyle.transform !== 'none') {
           transforms.push(animStyle.transform);
@@ -305,16 +439,10 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
         }
         const combinedTransform = transforms.filter(Boolean).join(' ');
 
-        const weightValue = emphasisEffect.textStyle.fontWeight || 600;
-        const textWeight =
-          weightValue >= 700 ? 'bold' : weightValue <= 400 ? 'normal' : 'medium';
-
-        // Calculate final opacity including exit
         const entranceOpacity = animStyle.opacity ?? 1;
         const exitOpacity = 1 - exitProgress;
         const finalOpacity = entranceOpacity * exitOpacity;
 
-        // Parse for inline emphasis
         const textParts = parseEmphasizedText(displayText);
 
         return (
@@ -322,7 +450,6 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
             key={index}
             style={{
               ...linePosition,
-              // Override transform to include animation
               transform: combinedTransform,
               opacity: finalOpacity,
               clipPath: animStyle.clipPath || 'none',
@@ -343,7 +470,7 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
                     fontSize: baseFontSize,
                     lineHeight: `${lineHeight}px`,
                     textAlign: 'center',
-                    whiteSpace: 'pre', // Preserve spaces
+                    whiteSpace: 'pre',
                     ...(part.emphasis ? emphasisEffect.textStyle : {}),
                     ...(part.emphasis ? presetDecorationStyle : {}),
                     ...style.text,

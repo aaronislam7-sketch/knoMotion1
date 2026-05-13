@@ -6,7 +6,6 @@
  */
 
 import {spring, interpolate} from 'remotion';
-import {easeOutSoft, easeOutBounce, easePencil, jitter, wobble} from './easing';
 
 // ==================== ENTRANCE ANIMATIONS ====================
 
