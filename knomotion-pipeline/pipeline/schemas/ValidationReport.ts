@@ -23,6 +23,7 @@ export const ValidationRuleSchema = z.enum([
   'slot_names', // slot names match the declared layout
   'slots_filled', // all declared slots are filled
   'sidebyside_layout', // sideBySide must use layout: full
+  'midscene_config', // per-mid-scene config validates against its JSON schema (ajv)
   'duration_bounds', // durationInFrames within sane bounds
   'beat_timing', // beats in seconds, start < exit, within duration
   'text_length', // text/line/item counts within manifest limits
