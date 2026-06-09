@@ -12,7 +12,15 @@ export const scriptGenerationPrompt = {
     '- `emphasisPhrases`: the 1–3 phrases to stress (visually/vocally).',
     '- `estimatedDurationSeconds`: your refined estimate from the narration length.',
     '',
-    'Optionally set a `voice` (style/tone/pace). Do not write scene JSON. Output a single JSON object only.',
+    '',
+    'Output a single JSON object with EXACTLY these keys (verbatim field names):',
+    '{',
+    '  "videoId": string, "title": string,',
+    '  "voice": { "style": string, "tone": string, "pace": "slow"|"medium"|"fast" },',
+    '  "scenes": [{ "sceneId": string, "order": integer from 0, "narration": string,',
+    '              "onScreenText": string[], "emphasisPhrases": string[], "estimatedDurationSeconds": number }]',
+    '}',
+    'Align scenes 1:1 with the plan by sceneId. Use [] for empty lists (never null). Do not write scene JSON.',
   ].join('\n'),
   buildUser(input: { videoPlan: unknown }): string {
     return `VideoPlan:\n${JSON.stringify(input.videoPlan, null, 2)}`;

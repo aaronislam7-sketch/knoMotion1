@@ -14,7 +14,7 @@
  */
 
 import { z } from 'zod';
-import { withMeta } from './common';
+import { renameKeys, withMeta } from './common';
 
 /** Voicing intent for TTS. Scaffold only — consumed by Stage 8 later. */
 export const VoiceProfileSchema = z.object({
@@ -29,7 +29,9 @@ export const VoiceProfileSchema = z.object({
 export type VoiceProfile = z.infer<typeof VoiceProfileSchema>;
 
 /** Narration and on-screen language for a single scene. */
-export const SceneNarrationSchema = z.object({
+export const SceneNarrationSchema = z.preprocess(
+  (v) => renameKeys(v, { id: 'sceneId', scene: 'sceneId', script: 'narration', text: 'narration' }),
+  z.object({
   sceneId: z.string().min(1).describe('Matches the ScenePlan.id this narration belongs to'),
   order: z.number().int().min(0).describe('Position within the video (mirrors ScenePlan.order)'),
   narration: z
@@ -49,7 +51,8 @@ export const SceneNarrationSchema = z.object({
     .min(0.5)
     .describe('Estimated spoken duration; reconciled with real TTS audio in Stage 10'),
   notes: z.string().optional().describe('Direction notes for scene JSON generation'),
-});
+  }),
+);
 export type SceneNarration = z.infer<typeof SceneNarrationSchema>;
 
 export const NarrationScriptSchema = withMeta({

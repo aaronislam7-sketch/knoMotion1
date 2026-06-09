@@ -86,6 +86,23 @@ export const withMeta = <T extends z.ZodRawShape>(shape: T) =>
 // ---------------------------------------------------------------------------
 
 /**
+ * Renames object keys (alias -> canonical) when the canonical key is absent.
+ * Used to absorb common LLM field-name drift (e.g. `problem` -> `description`)
+ * inside a z.preprocess() before validation.
+ */
+export const renameKeys = (v: unknown, map: Record<string, string>): unknown => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return v;
+  const o = { ...(v as Record<string, unknown>) };
+  for (const [from, to] of Object.entries(map)) {
+    if (from in o && !(to in o)) {
+      o[to] = o[from];
+      delete o[from];
+    }
+  }
+  return o;
+};
+
+/**
  * Difficulty tag applied to concepts, briefs, and scene plans.
  * Tolerant of common LLM variants (case + synonyms like easy/medium/hard).
  */

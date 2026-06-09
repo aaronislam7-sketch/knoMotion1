@@ -14,7 +14,17 @@ export const modulePlanningPrompt = {
     '- Sequence for learning: prerequisites before dependents; hook early; build up difficulty.',
     '- Prefer fewer, well-scoped videos. Reference concepts by id — do not restate their content.',
     '',
-    'Output a single JSON object only. Do not write any video/scene JSON.',
+    '',
+    'Output a single JSON object with EXACTLY these keys (verbatim field names):',
+    '{',
+    '  "moduleTitle": string, "moduleSummary": string, "targetAudience": string,',
+    '  "objectives": [{ "id": string, "statement": string, "conceptIds": string[] }],',
+    '  "videos": [{ "id": kebab-case string, "order": integer from 0, "title": string, "summary": string,',
+    '              "objectiveIds": string[], "conceptIds": string[],',
+    '              "difficulty": "beginner"|"intermediate"|"advanced", "estimatedDurationSeconds": number }],',
+    '  "sequenceRationale": string',
+    '}',
+    'Use [] for empty lists (never null). Do not write any video/scene JSON.',
   ].join('\n'),
   buildUser(contentMap: unknown): string {
     return `ContentMap (analysis):\n${JSON.stringify(contentMap, null, 2)}`;
