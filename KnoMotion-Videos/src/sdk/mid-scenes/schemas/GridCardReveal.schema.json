@@ -28,27 +28,35 @@
             "type": "string",
             "description": "Label text below icon/image"
           },
+          "sublabel": {
+            "type": "string",
+            "description": "Optional secondary label below the label"
+          },
           "color": {
             "type": "string",
-            "description": "Custom icon color"
-          },
-          "backgroundColor": {
-            "type": "string",
-            "description": "Custom card background color"
-          },
-          "borderColor": {
-            "type": "string",
-            "description": "Custom border color (for bordered variant)"
+            "description": "Custom icon color (theme key or CSS color)"
           },
           "variant": {
             "type": "string",
-            "enum": ["default", "bordered", "glass", "flat", "elevated"],
-            "description": "Card variant override"
+            "enum": ["default", "bordered", "glass", "elevated", "gradient", "flat"],
+            "description": "Card variant override. 'flat' is accepted but renders as 'default'."
           },
-          "wrapLabel": {
+          "layout": {
+            "type": "string",
+            "enum": ["vertical", "horizontal"],
+            "description": "Internal card layout (icon/image relative to label)"
+          },
+          "animated": {
             "type": "boolean",
-            "default": false,
-            "description": "Allow label text to wrap to multiple lines"
+            "description": "Continuous icon/emoji animation (defaults to true unless set false)"
+          },
+          "beats": {
+            "type": "object",
+            "description": "Per-card timing overrides. Values in seconds.",
+            "properties": {
+              "start": { "type": "number" },
+              "exit": { "type": "number" }
+            }
           }
         }
       },
@@ -60,16 +68,11 @@
       "maximum": 8,
       "description": "Number of columns (auto-calculated if not provided)"
     },
-    "rows": {
-      "type": "number",
-      "minimum": 1,
-      "description": "Number of rows (calculated from cards and columns)"
-    },
     "animation": {
       "type": "string",
-      "enum": ["fade", "slide", "scale", "bounce", "flip", "mask", "cascade", "fadeIn", "slideIn", "scaleIn", "bounceIn"],
+      "enum": ["fade", "slide", "scale", "bounce", "flip", "mask", "cascade", "centerRipple", "fadeIn", "slideIn", "scaleIn", "bounceIn"],
       "default": "cascade",
-      "description": "Animation type for card reveals"
+      "description": "Animation type for card reveals. 'centerRipple' is powered by remotion-bits."
     },
     "direction": {
       "type": "string",
@@ -94,17 +97,11 @@
       "default": true,
       "description": "Show labels on cards"
     },
-    "labelPosition": {
-      "type": "string",
-      "enum": ["bottom", "top"],
-      "default": "bottom",
-      "description": "Position of labels relative to icon/image"
-    },
     "cardVariant": {
       "type": "string",
-      "enum": ["default", "bordered", "glass", "flat", "elevated"],
+      "enum": ["default", "bordered", "glass", "elevated", "gradient", "flat"],
       "default": "default",
-      "description": "Default card variant for all cards"
+      "description": "Default card variant for all cards. 'flat' is accepted but renders as 'default'."
     },
     "gap": {
       "type": "number",
@@ -117,7 +114,11 @@
       "properties": {
         "start": {
           "type": "number",
-          "description": "Start time in seconds"
+          "description": "Grid-level start time in seconds (default offset for cards without their own beats)"
+        },
+        "exit": {
+          "type": "number",
+          "description": "Grid-level exit time in seconds"
         }
       }
     },
@@ -137,12 +138,7 @@
       "properties": {
         "container": { "type": "object" },
         "cardWrapper": { "type": "object" },
-        "card": { "type": "object" },
-        "cardStyle": { "type": "object" },
-        "imageWrapper": { "type": "object" },
-        "image": { "type": "object" },
-        "icon": { "type": "object" },
-        "label": { "type": "object" }
+        "card": { "type": "object" }
       }
     }
   },

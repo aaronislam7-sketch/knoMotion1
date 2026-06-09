@@ -25,6 +25,18 @@
             "type": "string",
             "description": "Icon color from theme or hex value"
           },
+          "animated": {
+            "type": "boolean",
+            "description": "Continuous animation for emoji icons"
+          },
+          "beats": {
+            "type": "object",
+            "description": "Per-icon timing overrides. Values in seconds.",
+            "properties": {
+              "start": { "type": "number" },
+              "exit": { "type": "number" }
+            }
+          },
           "style": {
             "type": "object",
             "description": "Icon style overrides"

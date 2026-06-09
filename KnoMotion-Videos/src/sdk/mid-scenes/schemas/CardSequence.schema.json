@@ -46,6 +46,14 @@
           },
           "children": {
             "description": "Custom React children (not in JSON, for programmatic use)"
+          },
+          "beats": {
+            "type": "object",
+            "description": "Per-card timing overrides. Values in seconds.",
+            "properties": {
+              "start": { "type": "number" },
+              "exit": { "type": "number" }
+            }
           }
         }
       }

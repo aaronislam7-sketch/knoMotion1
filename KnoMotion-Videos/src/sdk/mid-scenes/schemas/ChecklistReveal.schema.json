@@ -28,12 +28,27 @@
                 "description": "Whether the item is checked"
               },
               "icon": {
-                "type": "string",
-                "description": "Custom icon for this item (preset name or emoji)"
+                "description": "Custom icon for this item. A preset name / emoji string, or an object: { checked, unchecked } or { type: 'lottie', ref, loop }.",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "object" }
+                ]
               },
               "color": {
                 "type": "string",
                 "description": "Custom color for this item's icon"
+              },
+              "animated": {
+                "type": "boolean",
+                "description": "Continuous icon animation for this item"
+              },
+              "beats": {
+                "type": "object",
+                "description": "Per-item timing overrides. Values in seconds.",
+                "properties": {
+                  "start": { "type": "number" },
+                  "exit": { "type": "number" }
+                }
               }
             }
           }
@@ -43,9 +58,9 @@
     },
     "revealType": {
       "type": "string",
-      "enum": ["pop", "slide", "fade", "scale", "spring", "bounceIn", "slideIn", "scaleIn", "fadeIn"],
+      "enum": ["pop", "slide", "fade", "scale", "spring", "bounceIn", "slideIn", "scaleIn", "fadeIn", "listReveal"],
       "default": "pop",
-      "description": "Animation type for revealing items"
+      "description": "Animation type for revealing items. 'listReveal' is powered by remotion-bits (StaggeredMotion)."
     },
     "staggerDelay": {
       "type": "number",
@@ -97,7 +112,11 @@
       "properties": {
         "start": {
           "type": "number",
-          "description": "Start time in seconds"
+          "description": "Container start time in seconds (default offset for items without their own beats)"
+        },
+        "exit": {
+          "type": "number",
+          "description": "Container exit time in seconds (propagated to items without their own exit)"
         }
       }
     },
