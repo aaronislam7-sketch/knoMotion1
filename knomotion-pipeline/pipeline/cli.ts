@@ -19,15 +19,20 @@
  */
 
 import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { runPipeline } from './orchestrator';
 import type { PipelineStage } from './schemas/common';
 import type { PipelineConfig } from './core/config';
 
+const SOURCES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'sources');
+
 const main = async () => {
   const { values } = parseArgs({
     options: {
       input: { type: 'string' },
+      source: { type: 'string' },
       text: { type: 'string' },
       title: { type: 'string' },
       format: { type: 'string' },
@@ -38,13 +43,31 @@ const main = async () => {
     },
   });
 
-  if (!values.input && !values.text) {
-    console.error('Provide source material with --input <file> or --text "..."');
+  if (!values.input && !values.text && !values.source) {
+    console.error('Provide source material with one of:\n  --source <name>   (a file in pipeline/sources/, e.g. --source worldcup)\n  --input <path>    (any file path)\n  --text "..."      (inline text)');
     process.exit(1);
   }
 
-  const text = values.text ?? (await fs.readFile(values.input as string, 'utf8'));
-  const inputType = values.input && values.input.endsWith('.md') ? 'markdown' : 'text';
+  // Resolve the source: --source <name> -> pipeline/sources/<name>.md
+  let inputPath: string | undefined = values.input;
+  if (values.source) {
+    const name = values.source.endsWith('.md') ? values.source : `${values.source}.md`;
+    inputPath = path.join(SOURCES_DIR, name);
+  }
+
+  let text: string;
+  if (values.text) {
+    text = values.text;
+  } else {
+    try {
+      text = await fs.readFile(inputPath as string, 'utf8');
+    } catch {
+      console.error(`Could not read source file: ${inputPath}`);
+      if (values.source) console.error(`(expected a file at ${SOURCES_DIR}/${values.source}.md)`);
+      process.exit(1);
+    }
+  }
+  const inputType = inputPath && inputPath.endsWith('.md') ? 'markdown' : 'text';
 
   const config: Partial<PipelineConfig> = {};
   if (values.provider) config.provider = values.provider as PipelineConfig['provider'];
