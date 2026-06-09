@@ -88,20 +88,24 @@ const SpotlightSchema = z
   .optional();
 
 export const BackgroundSchema = z
-  .object({
-    preset: z.enum([
-      'notebookSoft',
-      'sunriseGradient',
-      'cleanCard',
-      'chalkboardGradient',
-      'spotlight',
-      'custom',
-    ]),
-    layerNoise: z.boolean().optional(),
-    particles: ParticlesSchema,
-    spotlight: SpotlightSchema,
-    style: z.record(z.unknown()).optional(),
-  })
+  .preprocess(
+    // Tolerate `background: "sunriseGradient"` → `{ preset: "sunriseGradient" }`.
+    (v) => (typeof v === 'string' ? { preset: v } : v),
+    z.object({
+      preset: z.enum([
+        'notebookSoft',
+        'sunriseGradient',
+        'cleanCard',
+        'chalkboardGradient',
+        'spotlight',
+        'custom',
+      ]),
+      layerNoise: z.boolean().optional(),
+      particles: ParticlesSchema,
+      spotlight: SpotlightSchema,
+      style: z.record(z.unknown()).optional(),
+    }),
+  )
   .optional();
 
 // ---------------------------------------------------------------------------
@@ -122,10 +126,14 @@ const LayoutOptionsSchema = z
   .optional();
 
 export const LayoutSchema = z
-  .object({
-    type: LayoutTypeSchema,
-    options: LayoutOptionsSchema,
-  })
+  .preprocess(
+    // Tolerate `layout: "full"` → `{ type: "full" }`.
+    (v) => (typeof v === 'string' ? { type: v } : v),
+    z.object({
+      type: LayoutTypeSchema,
+      options: LayoutOptionsSchema,
+    }),
+  )
   .optional();
 
 // ---------------------------------------------------------------------------
@@ -224,18 +232,37 @@ export const CaptionsConfigSchema = z.object({
 // Scene item & top-level config
 // ---------------------------------------------------------------------------
 
-export const SceneItemSchema = z.object({
-  id: z.string().min(1).describe('Unique scene identifier (kebab-case)'),
-  durationInFrames: z
-    .number()
-    .int()
-    .min(1)
-    .describe('Scene duration in frames at 30fps (e.g. 150 = 5 seconds)'),
-  transition: TransitionSchema.optional().describe('Transition into this scene (ignored for first scene)'),
-  config: SceneContentConfigSchema.describe('Scene visual configuration'),
-  audio: AudioConfigSchema.optional().describe('Audio channels: narration, music, sfx'),
-  captions: CaptionsConfigSchema.optional().describe('Word-level animated captions overlay'),
-});
+export const SceneItemSchema = z.preprocess(
+  (v) => {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return v;
+    const o = { ...(v as Record<string, unknown>) };
+    // Lift flat scene fields into `config` if the model forgot the wrapper.
+    if (o.config == null && (o.background != null || o.layout != null || o.slots != null)) {
+      o.config = { background: o.background, layout: o.layout, slots: o.slots };
+      delete o.background;
+      delete o.layout;
+      delete o.slots;
+    }
+    // Coerce a seconds-based duration into frames if durationInFrames is absent.
+    if (o.durationInFrames == null) {
+      const secs = o.durationSeconds ?? o.durationInSeconds ?? o.duration;
+      if (typeof secs === 'number') o.durationInFrames = Math.max(1, Math.round(secs * 30));
+    }
+    return o;
+  },
+  z.object({
+    id: z.string().min(1).describe('Unique scene identifier (kebab-case)'),
+    durationInFrames: z
+      .number()
+      .int()
+      .min(1)
+      .describe('Scene duration in frames at 30fps (e.g. 150 = 5 seconds)'),
+    transition: TransitionSchema.optional().describe('Transition into this scene (ignored for first scene)'),
+    config: SceneContentConfigSchema.describe('Scene visual configuration'),
+    audio: AudioConfigSchema.optional().describe('Audio channels: narration, music, sfx'),
+    captions: CaptionsConfigSchema.optional().describe('Word-level animated captions overlay'),
+  }),
+);
 export type SceneItem = z.infer<typeof SceneItemSchema>;
 
 /**
