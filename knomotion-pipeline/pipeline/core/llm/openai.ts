@@ -12,6 +12,20 @@ import type { LLMClient, LLMRequest, LLMResult } from './client';
 import { LLMResponseError } from '../errors';
 import type { Logger } from '../logger';
 
+/** Recursively delete object properties whose value is `null`. */
+const pruneNullProps = (v: unknown): unknown => {
+  if (Array.isArray(v)) return v.map(pruneNullProps);
+  if (v && typeof v === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+      if (val === null) continue;
+      out[k] = pruneNullProps(val);
+    }
+    return out;
+  }
+  return v;
+};
+
 export interface OpenAIClientOptions {
   apiKey: string;
   defaultModel: string;
@@ -72,7 +86,9 @@ export class OpenAIClient implements LLMClient {
 
       let json: unknown;
       try {
-        json = JSON.parse(raw);
+        // Prune null-valued properties: LLMs often emit `null` for "none", which
+        // breaks optional/defaulted fields. Removing them lets defaults/optionals apply.
+        json = pruneNullProps(JSON.parse(raw));
       } catch {
         lastError = new LLMResponseError(`"${req.schemaName}" response was not valid JSON`);
         messages.push({ role: 'assistant', content: raw });
@@ -85,12 +101,16 @@ export class OpenAIClient implements LLMClient {
         return { data: parsed.data, raw, model, usage };
       }
 
-      lastError = new LLMResponseError(`"${req.schemaName}" response failed schema validation`, parsed.error.flatten());
-      this.opts.logger.warn(`LLM output for "${req.schemaName}" failed validation (attempt ${attempt + 1}/${maxRetries + 1}); retrying`);
+      const issues = parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message }));
+      lastError = new LLMResponseError(`"${req.schemaName}" response failed schema validation`, issues);
+      this.opts.logger.warn(
+        `LLM output for "${req.schemaName}" failed validation (attempt ${attempt + 1}/${maxRetries + 1})`,
+        { issues },
+      );
       messages.push({ role: 'assistant', content: raw });
       messages.push({
         role: 'user',
-        content: `Your JSON failed validation:\n${JSON.stringify(parsed.error.flatten())}\nFix ONLY these issues and return the corrected JSON object.`,
+        content: `Your JSON failed validation at these paths:\n${JSON.stringify(issues, null, 2)}\nFix ONLY these issues and return the corrected, complete JSON object.`,
       });
     }
 

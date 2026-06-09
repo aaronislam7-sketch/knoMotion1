@@ -85,8 +85,27 @@ export const withMeta = <T extends z.ZodRawShape>(shape: T) =>
 // Shared content vocabulary (reused across content/planning stages)
 // ---------------------------------------------------------------------------
 
-/** Difficulty tag applied to concepts, briefs, and scene plans. */
-export const DifficultySchema = z.enum(['beginner', 'intermediate', 'advanced']);
+/**
+ * Difficulty tag applied to concepts, briefs, and scene plans.
+ * Tolerant of common LLM variants (case + synonyms like easy/medium/hard).
+ */
+export const DifficultySchema = z.preprocess((v) => {
+  if (typeof v !== 'string') return v;
+  const k = v.toLowerCase().trim();
+  const map: Record<string, string> = {
+    easy: 'beginner',
+    basic: 'beginner',
+    beginner: 'beginner',
+    medium: 'intermediate',
+    moderate: 'intermediate',
+    intermediate: 'intermediate',
+    hard: 'advanced',
+    difficult: 'advanced',
+    expert: 'advanced',
+    advanced: 'advanced',
+  };
+  return map[k] ?? k;
+}, z.enum(['beginner', 'intermediate', 'advanced']));
 export type Difficulty = z.infer<typeof DifficultySchema>;
 
 /**

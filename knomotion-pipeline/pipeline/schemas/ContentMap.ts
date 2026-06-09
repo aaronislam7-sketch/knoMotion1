@@ -21,9 +21,8 @@ export const ConceptSchema = z.object({
   importance: z
     .number()
     .min(0)
-    .max(1)
     .optional()
-    .describe('Relative importance to the overall material (0–1) for sequencing/pruning'),
+    .describe('Relative importance to the overall material (ideally 0–1) for sequencing/pruning'),
   keywords: z.array(z.string()).optional().describe('Salient terms associated with the concept'),
   prerequisiteIds: z
     .array(z.string())

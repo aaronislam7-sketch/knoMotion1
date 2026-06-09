@@ -14,7 +14,7 @@ export const PipelineConfigSchema = z.object({
   stageModels: z.record(PipelineStageSchema, z.string()).default(STAGE_MODELS),
   temperature: z.number().min(0).max(2).default(0.4),
   maxRepairAttempts: z.number().int().min(0).max(2).default(2).describe('Stage 7 cap before needs_review'),
-  llmMaxRetries: z.number().int().min(0).max(3).default(1).describe('Corrective retries on invalid LLM JSON'),
+  llmMaxRetries: z.number().int().min(0).max(3).default(2).describe('Corrective retries on invalid LLM JSON (so 3 attempts total)'),
   artifactsDir: z.string().default('pipeline/artifacts').describe('Root directory for job artifact output'),
   logLevel: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   openaiApiKey: z.string().optional().describe('OpenAI API key (from env OPENAI_API_KEY)'),
