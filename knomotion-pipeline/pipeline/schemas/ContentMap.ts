@@ -10,10 +10,21 @@
  */
 
 import { z } from 'zod';
-import { DifficultySchema, withMeta } from './common';
+import { DifficultySchema, renameKeys, withMeta } from './common';
 
 /** A single teachable idea extracted from the source. */
-export const ConceptSchema = z.object({
+export const ConceptSchema = z.preprocess(
+  (v) =>
+    renameKeys(v, {
+      name: 'title',
+      label: 'title',
+      description: 'summary',
+      explanation: 'summary',
+      level: 'difficulty',
+      prerequisites: 'prerequisiteIds',
+      prereqs: 'prerequisiteIds',
+    }),
+  z.object({
   id: z.string().min(1).describe('Stable concept id (kebab-case), referenced by later stages'),
   title: z.string().min(1).describe('Short concept name'),
   summary: z.string().min(1).describe('1–3 sentence explanation of the concept'),
@@ -32,26 +43,31 @@ export const ConceptSchema = z.object({
     .array(z.string())
     .optional()
     .describe('Pointers back into the source (document id, heading, quote) for traceability'),
-});
+  }),
+);
 export type Concept = z.infer<typeof ConceptSchema>;
 
 /** A difficulty or pain point a learner is likely to hit. */
-export const LearnerProblemSchema = z.object({
-  id: z.string().min(1).describe('Stable problem id'),
-  description: z.string().min(1).describe('What the learner struggles with'),
-  relatedConceptIds: z
-    .array(z.string())
-    .describe('Concepts this problem relates to'),
-});
+export const LearnerProblemSchema = z.preprocess(
+  (v) => renameKeys(v, { problem: 'description', text: 'description', issue: 'description', summary: 'description', conceptIds: 'relatedConceptIds', concepts: 'relatedConceptIds', relatedConcepts: 'relatedConceptIds' }),
+  z.object({
+    id: z.string().min(1).describe('Stable problem id'),
+    description: z.string().min(1).describe('What the learner struggles with'),
+    relatedConceptIds: z.array(z.string()).default([]).describe('Concepts this problem relates to'),
+  }),
+);
 export type LearnerProblem = z.infer<typeof LearnerProblemSchema>;
 
 /** A common false belief, paired with its correction. */
-export const MisconceptionSchema = z.object({
-  id: z.string().min(1).describe('Stable misconception id'),
-  statement: z.string().min(1).describe('The incorrect belief, stated plainly'),
-  correction: z.string().min(1).describe('The accurate replacement understanding'),
-  relatedConceptIds: z.array(z.string()).describe('Concepts this misconception touches'),
-});
+export const MisconceptionSchema = z.preprocess(
+  (v) => renameKeys(v, { misconception: 'statement', belief: 'statement', myth: 'statement', text: 'statement', fix: 'correction', reality: 'correction', truth: 'correction', conceptIds: 'relatedConceptIds', concepts: 'relatedConceptIds', relatedConcepts: 'relatedConceptIds' }),
+  z.object({
+    id: z.string().min(1).describe('Stable misconception id'),
+    statement: z.string().min(1).describe('The incorrect belief, stated plainly'),
+    correction: z.string().min(1).describe('The accurate replacement understanding'),
+    relatedConceptIds: z.array(z.string()).default([]).describe('Concepts this misconception touches'),
+  }),
+);
 export type Misconception = z.infer<typeof MisconceptionSchema>;
 
 export const ContentMapSchema = withMeta({
