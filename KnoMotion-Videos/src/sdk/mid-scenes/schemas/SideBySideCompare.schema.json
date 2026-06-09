@@ -60,7 +60,22 @@
         "title": { "type": "string" },
         "subtitle": { "type": "string" },
         "icon": { "type": "string" },
-        "items": { "type": "array" },
+        "items": {
+          "type": "array",
+          "description": "List of bullet points (same shape as left.items)",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "text": { "type": "string" },
+                  "icon": { "type": "string" }
+                }
+              }
+            ]
+          }
+        },
         "color": { "type": "string" },
         "backgroundColor": { "type": "string" }
       }
@@ -133,7 +148,12 @@
                 }
               ]
             },
-            "lottie": { "type": "string", "description": "Lottie registry key or URL" }
+            "lottie": { "type": "string", "description": "Lottie registry key or URL" },
+            "loop": { "type": "boolean", "description": "Loop the lottie (default true)" },
+            "playbackRate": { "type": "number", "description": "Lottie playback speed (default 1)" },
+            "alt": { "type": "string", "description": "Image alt text (used when image is a string URL)" },
+            "fit": { "type": "string", "enum": ["cover", "contain"], "description": "Image object-fit (used when image is a string URL)" },
+            "borderRadius": { "type": "number", "description": "Image border radius (used when image is a string URL)" }
           }
         }
       }
@@ -166,7 +186,12 @@
                 }
               ]
             },
-            "lottie": { "type": "string", "description": "Lottie registry key or URL" }
+            "lottie": { "type": "string", "description": "Lottie registry key or URL" },
+            "loop": { "type": "boolean", "description": "Loop the lottie (default true)" },
+            "playbackRate": { "type": "number", "description": "Lottie playback speed (default 1)" },
+            "alt": { "type": "string", "description": "Image alt text (used when image is a string URL)" },
+            "fit": { "type": "string", "enum": ["cover", "contain"], "description": "Image object-fit (used when image is a string URL)" },
+            "borderRadius": { "type": "number", "description": "Image border radius (used when image is a string URL)" }
           }
         }
       }
@@ -182,23 +207,30 @@
         },
         "from": {
           "type": "number",
-          "default": 0.05,
+          "default": 0.2,
           "minimum": 0,
           "maximum": 1,
           "description": "Starting position of the slider (0-1)"
         },
         "to": {
           "type": "number",
-          "default": 1.0,
+          "default": 0.8,
           "minimum": 0,
           "maximum": 1,
           "description": "Ending position of the slider (0-1)"
         },
         "initial": {
           "type": "number",
+          "default": 0.5,
           "minimum": 0,
           "maximum": 1,
-          "description": "Initial slider position before animation starts"
+          "description": "Static slider position when autoAnimate is false"
+        },
+        "duration": {
+          "type": "number",
+          "default": 2,
+          "minimum": 0.1,
+          "description": "Slider animation duration in seconds"
         },
         "beats": {
           "type": "object",
@@ -242,6 +274,7 @@
       "description": "Optional style overrides",
       "properties": {
         "container": { "type": "object" },
+        "beforeAfterWrapper": { "type": "object" },
         "sideWrapper": { "type": "object" },
         "sideContent": { "type": "object" },
         "icon": { "type": "object" },
