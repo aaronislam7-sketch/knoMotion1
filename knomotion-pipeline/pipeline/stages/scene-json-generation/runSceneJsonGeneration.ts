@@ -12,6 +12,8 @@ import { modelForStage } from '../../core/config';
 import { VideoPlanSchema } from '../../schemas/VideoPlan';
 import { NarrationScriptSchema } from '../../schemas/NarrationScript';
 import { KnoMotionVideoConfigSchema } from '../../schemas/KnoMotionVideoConfig';
+import { loadRendererCapabilities } from '../../core/capabilities/renderer-capabilities';
+import { sceneJsonGenerationPrompt as prompt, summariseCapabilities } from '../../prompts/scene-json-generation';
 
 export const SceneJsonInputSchema = z.object({
   videoPlan: VideoPlanSchema,
@@ -25,17 +27,16 @@ export const sceneJsonGenerationStage = defineStage({
   outputSchema: KnoMotionVideoConfigSchema,
   async run(input, ctx) {
     const model = modelForStage(ctx.config, 'scene-json-generation');
+    const caps = await loadRendererCapabilities();
+    const system = prompt.buildSystem(summariseCapabilities(caps));
 
     const { data } = await ctx.llm.complete({
       schemaName: 'KnoMotionVideoConfig',
       schema: KnoMotionVideoConfigSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
-      system:
-        'You are a COMPILER, not a writer. Translate the approved scene plans + narration into valid ' +
-        'KnoMotion scene JSON using ONLY the 11 canonical mid-scenes and documented keys. Do not invent ' +
-        'components, add content, or rewrite the lesson. Output a single { scenes, format } object.',
-      user: `VideoPlan:\n${JSON.stringify(input.videoPlan, null, 2)}\n\nNarrationScript:\n${JSON.stringify(input.narrationScript, null, 2)}`,
+      system,
+      user: prompt.buildUser(input),
       input,
     });
 

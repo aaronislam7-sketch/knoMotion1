@@ -10,6 +10,7 @@ import { defineStage } from '../../core/stage';
 import { modelForStage } from '../../core/config';
 import { SourceBundleSchema } from '../../schemas/SourceBundle';
 import { ContentMapSchema } from '../../schemas/ContentMap';
+import { contentAnalysisPrompt as prompt } from '../../prompts/content-analysis';
 
 const ContentMapPayloadSchema = ContentMapSchema.omit({ meta: true });
 
@@ -28,15 +29,13 @@ export const contentAnalysisStage = defineStage({
       schema: ContentMapPayloadSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
-      system:
-        'You analyse source material for a learning-video pipeline. Extract concepts, learner problems, ' +
-        'difficulty, and misconceptions. Do NOT plan videos or write any video JSON.',
-      user: `Analyse this source material${title ? ` titled "${title}"` : ''}:\n\n${text}`,
-      input: { title, text, userPrompt: bundle.userPrompt, audienceHint: undefined },
+      system: prompt.system,
+      user: prompt.buildUser({ title, text, userPrompt: bundle.userPrompt }),
+      input: { title, text, userPrompt: bundle.userPrompt },
     });
 
     return {
-      meta: ctx.makeMeta('content-analysis', 'ContentMap', { producedBy: 'llm', model: usedModel, inputs: ['SourceBundle'] }),
+      meta: ctx.makeMeta('content-analysis', 'ContentMap', { producedBy: 'llm', model: usedModel, promptVersion: prompt.version, inputs: ['SourceBundle'] }),
       ...data,
     };
   },

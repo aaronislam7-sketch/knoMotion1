@@ -9,6 +9,7 @@ import { modelForStage } from '../../core/config';
 import { ConceptSchema } from '../../schemas/ContentMap';
 import { VideoBriefSchema } from '../../schemas/ModulePlan';
 import { VideoPlanSchema } from '../../schemas/VideoPlan';
+import { videoPlanningPrompt as prompt } from '../../prompts/video-planning';
 
 export const VideoPlanningInputSchema = z.object({
   brief: VideoBriefSchema,
@@ -30,15 +31,13 @@ export const videoPlanningStage = defineStage({
       schema: VideoPlanPayloadSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
-      system:
-        'You design the teaching flow for ONE video: narrative arc and an ordered scene sequence with ' +
-        'visual intent and suggested mid-scene types. Suggestions are advisory; do not emit KnoMotion JSON.',
-      user: `Plan video "${input.brief.title}".\nBrief:\n${JSON.stringify(input.brief, null, 2)}\nConcepts:\n${JSON.stringify(input.concepts, null, 2)}`,
+      system: prompt.system,
+      user: prompt.buildUser(input),
       input,
     });
 
     return {
-      meta: ctx.makeMeta('video-planning', 'VideoPlan', { producedBy: 'llm', model: usedModel, inputs: ['ModulePlan.VideoBrief', 'ContentMap.concepts'] }),
+      meta: ctx.makeMeta('video-planning', 'VideoPlan', { producedBy: 'llm', model: usedModel, promptVersion: prompt.version, inputs: ['ModulePlan.VideoBrief', 'ContentMap.concepts'] }),
       ...data,
     };
   },

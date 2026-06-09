@@ -51,6 +51,8 @@ export interface RendererCapabilities {
   midSceneValidators: Record<string, ValidateFunction>;
   /** Raw mid-scene schemas (for shallow unknown-key checks), keyed by canonical key. */
   midSceneSchemas: Record<string, any>;
+  /** The raw capability manifest (used to build the scene-JSON compiler prompt). */
+  raw: any;
 }
 
 const defaultSdkDir = (): string => {
@@ -97,6 +99,7 @@ export const loadRendererCapabilities = async (sdkDir = defaultSdkDir(), useCach
     },
     midSceneValidators,
     midSceneSchemas,
+    raw: manifest,
   };
   return cached;
 };

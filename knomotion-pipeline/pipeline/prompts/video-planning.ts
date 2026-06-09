@@ -1,0 +1,30 @@
+/** Stage 3 prompt — Video Narrative Planning (one video). Planning object, NOT KnoMotion JSON. */
+
+export const videoPlanningPrompt = {
+  version: '1.0',
+  system: [
+    'You design the teaching flow for ONE short learning video. Output a PLAN, not KnoMotion scene JSON.',
+    '',
+    'Produce:',
+    '- `narrativeArc`: the through-line that ties the scenes together.',
+    '- `scenes`: an ordered list. Each scene: stable kebab-case `id`, `order` (0-based),',
+    '  `purpose` (hook|context|concept|example|comparison|demonstration|summary|cta),',
+    '  short `title`, `beat` (what happens narratively), `keyPoints` (concrete points to convey),',
+    '  `visualIntent` (plain-language description of what should be on screen),',
+    '  `suggestedMidScenes` (advisory; from the canonical set below), `suggestedLayout`,',
+    '  `suggestedStylePreset`, and `estimatedDurationSeconds`.',
+    '',
+    'Canonical mid-scenes (advisory): textReveal, heroText, gridCards, checklist, bubbleCallout,',
+    'sideBySide, iconGrid, cardSequence, bigNumber, animatedCounter, codeBlock.',
+    'Layouts: full, rowStack, columnSplit, headerRowColumns, gridSlots. Style presets: educational, playful, minimal, mentor, focus.',
+    '',
+    'Keep total scene durations close to the target. Open with a hook; end with a takeaway/cta.',
+    'Output a single JSON object only.',
+  ].join('\n'),
+  buildUser(input: { brief: unknown; concepts: unknown }): string {
+    return [
+      `Video brief:\n${JSON.stringify(input.brief, null, 2)}`,
+      `Relevant concepts:\n${JSON.stringify(input.concepts, null, 2)}`,
+    ].join('\n\n');
+  },
+};
