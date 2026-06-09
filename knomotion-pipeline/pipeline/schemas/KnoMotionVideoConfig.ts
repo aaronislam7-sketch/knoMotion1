@@ -131,30 +131,18 @@ export const LayoutSchema = z
 // ---------------------------------------------------------------------------
 // Slots
 // ---------------------------------------------------------------------------
-// The renderer accepts both canonical mid-scene keys and registry aliases.
-// Stage 5 should prefer canonical keys (from common.MidSceneKeySchema); the
-// aliases are accepted for renderer compatibility.
-
-const MidSceneKeyWithAliasesSchema = z.union([
-  MidSceneKeySchema,
-  z.enum([
-    'textRevealSequence',
-    'heroTextEntranceExit',
-    'checklistReveal',
-    'bubbleCalloutSequence',
-    'callouts',
-    'sideBySideCompare',
-    'compare',
-    'gridCardReveal',
-    'cardGrid',
-    'bigNumberReveal',
-    'codeBlockScene',
-    'code',
-  ]),
-]);
+// IMPORTANT: only the 11 canonical mid-scene keys are accepted.
+//
+// The renderer's own Zod schema (videoConfig.schema.ts MidSceneKeys) also lists
+// registry aliases (e.g. 'textRevealSequence', 'gridCardReveal', 'codeBlockScene',
+// 'code'), but SceneRenderer.jsx resolves midScene via a direct
+// MID_SCENE_COMPONENTS[midScene] lookup with NO alias normalisation — so those
+// aliases pass validation yet render an EMPTY slot. To guarantee renderable
+// output, the pipeline restricts Stage 5 to canonical keys only.
+// See capability-manifest.json -> knownIssues: "midscene-aliases-not-resolved".
 
 export const SlotConfigSchema = z.object({
-  midScene: MidSceneKeyWithAliasesSchema.describe('Mid-scene component key'),
+  midScene: MidSceneKeySchema.describe('Mid-scene component key (canonical keys only — aliases are not rendered)'),
   stylePreset: StylePresetSchema.optional(),
   config: z
     .record(z.unknown())
