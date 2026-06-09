@@ -2,15 +2,16 @@
 
 import { z } from 'zod';
 import { PipelineStageSchema } from '../schemas/common';
+import { DEFAULT_MODEL, STAGE_MODELS } from '../config/models';
 
 export const LLMProviderSchema = z.enum(['openai', 'mock']);
 export type LLMProvider = z.infer<typeof LLMProviderSchema>;
 
 export const PipelineConfigSchema = z.object({
   provider: LLMProviderSchema.default('mock').describe('LLM provider. "mock" runs the chain deterministically without API calls.'),
-  defaultModel: z.string().default('gpt-4o').describe('Default model for LLM stages'),
-  /** Per-stage model overrides — lets us route stages to different models/providers later. */
-  stageModels: z.record(PipelineStageSchema, z.string()).default({}),
+  defaultModel: z.string().default(DEFAULT_MODEL).describe('Default model for LLM stages (see pipeline/config/models.ts)'),
+  /** Per-stage model overrides — see pipeline/config/models.ts for the defaults and rationale. */
+  stageModels: z.record(PipelineStageSchema, z.string()).default(STAGE_MODELS),
   temperature: z.number().min(0).max(2).default(0.4),
   maxRepairAttempts: z.number().int().min(0).max(2).default(2).describe('Stage 7 cap before needs_review'),
   llmMaxRetries: z.number().int().min(0).max(3).default(1).describe('Corrective retries on invalid LLM JSON'),

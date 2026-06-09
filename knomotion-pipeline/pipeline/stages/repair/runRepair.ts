@@ -10,6 +10,7 @@ import { modelForStage } from '../../core/config';
 import { SceneItemSchema } from '../../schemas/KnoMotionVideoConfig';
 import { ValidationIssueSchema } from '../../schemas/ValidationReport';
 import { RepairPatchSchema } from '../../schemas/RepairPatch';
+import { repairPrompt as prompt } from '../../prompts/repair';
 
 export const RepairInputSchema = z.object({
   videoId: z.string().min(1),
@@ -34,15 +35,13 @@ export const repairStage = defineStage({
       schema: RepairPatchPayloadSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
-      system:
-        'You are repairing invalid KnoMotion JSON. Only fix the listed validation errors. Do not change ' +
-        'educational meaning. Do not change unrelated scenes. Return the patched scene only.',
-      user: `Scene (index ${input.sceneIndex}):\n${JSON.stringify(input.scene, null, 2)}\n\nValidation errors:\n${JSON.stringify(input.issues, null, 2)}`,
+      system: prompt.system,
+      user: prompt.buildUser({ videoId: input.videoId, sceneId: input.scene.id, sceneIndex: input.sceneIndex, attempt: input.attempt, scene: input.scene, issues: input.issues }),
       input,
     });
 
     return {
-      meta: ctx.makeMeta('repair', 'RepairPatch', { producedBy: 'llm', model: usedModel, inputs: ['SceneItem', 'ValidationReport.issues'] }),
+      meta: ctx.makeMeta('repair', 'RepairPatch', { producedBy: 'llm', model: usedModel, promptVersion: prompt.version, inputs: ['SceneItem', 'ValidationReport.issues'] }),
       ...data,
     };
   },

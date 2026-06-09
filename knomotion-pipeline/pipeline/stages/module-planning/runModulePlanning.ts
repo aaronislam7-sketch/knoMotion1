@@ -7,6 +7,7 @@ import { defineStage } from '../../core/stage';
 import { modelForStage } from '../../core/config';
 import { ContentMapSchema } from '../../schemas/ContentMap';
 import { ModulePlanSchema } from '../../schemas/ModulePlan';
+import { modulePlanningPrompt as prompt } from '../../prompts/module-planning';
 
 const ModulePlanPayloadSchema = ModulePlanSchema.omit({ meta: true });
 
@@ -29,15 +30,13 @@ export const modulePlanningStage = defineStage({
       schema: ModulePlanPayloadSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
-      system:
-        'You plan a learning module from analysed content. Group concepts into videos, define learning ' +
-        'objectives, and sequence the journey. Output only ids/summaries — no video JSON.',
-      user: `Plan a module from this ContentMap:\n\n${JSON.stringify(compressed, null, 2)}`,
+      system: prompt.system,
+      user: prompt.buildUser(compressed),
       input: compressed,
     });
 
     return {
-      meta: ctx.makeMeta('module-planning', 'ModulePlan', { producedBy: 'llm', model: usedModel, inputs: ['ContentMap'] }),
+      meta: ctx.makeMeta('module-planning', 'ModulePlan', { producedBy: 'llm', model: usedModel, promptVersion: prompt.version, inputs: ['ContentMap'] }),
       ...data,
     };
   },

@@ -8,6 +8,7 @@ import { defineStage } from '../../core/stage';
 import { modelForStage } from '../../core/config';
 import { VideoPlanSchema } from '../../schemas/VideoPlan';
 import { NarrationScriptSchema } from '../../schemas/NarrationScript';
+import { scriptGenerationPrompt as prompt } from '../../prompts/script-generation';
 
 export const ScriptGenerationInputSchema = z.object({ videoPlan: VideoPlanSchema });
 
@@ -26,15 +27,13 @@ export const scriptGenerationStage = defineStage({
       schema: NarrationScriptPayloadSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
-      system:
-        'You write per-scene narration BEFORE any scene JSON exists. Produce the spoken script plus the ' +
-        'on-screen text and emphasis phrases. One narration block per planned scene, aligned by sceneId.',
-      user: `Write narration for this VideoPlan:\n${JSON.stringify(input.videoPlan, null, 2)}`,
+      system: prompt.system,
+      user: prompt.buildUser(input),
       input,
     });
 
     return {
-      meta: ctx.makeMeta('script-generation', 'NarrationScript', { producedBy: 'llm', model: usedModel, inputs: ['VideoPlan'] }),
+      meta: ctx.makeMeta('script-generation', 'NarrationScript', { producedBy: 'llm', model: usedModel, promptVersion: prompt.version, inputs: ['VideoPlan'] }),
       ...data,
     };
   },

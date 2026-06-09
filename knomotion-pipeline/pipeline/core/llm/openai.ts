@@ -22,9 +22,34 @@ export interface OpenAIClientOptions {
 export class OpenAIClient implements LLMClient {
   readonly name = 'openai';
   private readonly client: OpenAI;
+  /** Some newer models only allow the default temperature; once detected we stop sending it. */
+  private omitTemperature = false;
 
   constructor(private readonly opts: OpenAIClientOptions) {
     this.client = new OpenAI({ apiKey: opts.apiKey });
+  }
+
+  private async createCompletion(
+    model: string,
+    temperature: number,
+    messages: OpenAI.Chat.ChatCompletionMessageParam[],
+  ) {
+    const params = (): OpenAI.Chat.ChatCompletionCreateParamsNonStreaming => ({
+      model,
+      response_format: { type: 'json_object' },
+      messages,
+      ...(this.omitTemperature ? {} : { temperature }),
+    });
+    try {
+      return await this.client.chat.completions.create(params());
+    } catch (e: any) {
+      if (!this.omitTemperature && /temperature/i.test(String(e?.message ?? ''))) {
+        this.omitTemperature = true;
+        this.opts.logger.warn(`model "${model}" rejected a custom temperature; retrying without it`);
+        return await this.client.chat.completions.create(params());
+      }
+      throw e;
+    }
   }
 
   async complete<T>(req: LLMRequest<T>): Promise<LLMResult<T>> {
@@ -39,12 +64,7 @@ export class OpenAIClient implements LLMClient {
 
     let lastError: unknown;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      const completion = await this.client.chat.completions.create({
-        model,
-        temperature,
-        response_format: { type: 'json_object' },
-        messages,
-      });
+      const completion = await this.createCompletion(model, temperature, messages);
       const raw = completion.choices[0]?.message?.content ?? '';
       const usage = completion.usage
         ? { promptTokens: completion.usage.prompt_tokens, completionTokens: completion.usage.completion_tokens, totalTokens: completion.usage.total_tokens }
