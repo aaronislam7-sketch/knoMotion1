@@ -20,7 +20,12 @@ export const RepairInputSchema = z.object({
   attempt: z.number().int().min(1).max(2),
 });
 
-const RepairPatchPayloadSchema = RepairPatchSchema.omit({ meta: true });
+// The repair model returns ONLY the patched scene (+ notes). We assemble the
+// full RepairPatch envelope ourselves so the model can't mangle meta/targetIssues.
+const RepairLLMOutputSchema = z.object({
+  patchedScene: SceneItemSchema,
+  notes: z.string().optional(),
+});
 
 export const repairStage = defineStage({
   name: 'repair',
@@ -32,7 +37,7 @@ export const repairStage = defineStage({
 
     const { data, model: usedModel } = await ctx.llm.complete({
       schemaName: 'RepairPatch',
-      schema: RepairPatchPayloadSchema,
+      schema: RepairLLMOutputSchema,
       model,
       maxRetries: ctx.config.llmMaxRetries,
       system: prompt.system,
@@ -42,7 +47,15 @@ export const repairStage = defineStage({
 
     return {
       meta: ctx.makeMeta('repair', 'RepairPatch', { producedBy: 'llm', model: usedModel, promptVersion: prompt.version, inputs: ['SceneItem', 'ValidationReport.issues'] }),
-      ...data,
+      videoId: input.videoId,
+      sceneId: input.scene.id,
+      sceneIndex: input.sceneIndex,
+      attempt: input.attempt,
+      targetIssues: input.issues,
+      patchedScene: data.patchedScene,
+      status: 'repaired' as const,
+      unchangedGuarantee: true,
+      notes: data.notes,
     };
   },
 });

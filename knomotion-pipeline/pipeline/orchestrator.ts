@@ -178,19 +178,28 @@ async function validateAndRepair(
 
   while (!report.valid && attempts < ctx.config.maxRepairAttempts) {
     attempts++;
-    const target = report.errors.find((e) => typeof e.sceneIndex === 'number');
-    if (!target || target.sceneIndex === undefined) break;
-    const sceneIndex = target.sceneIndex;
-    const sceneErrors = report.errors.filter((e) => e.sceneIndex === sceneIndex);
+    // Repair EVERY scene that has errors this round (not just the first), so a
+    // video with many broken scenes can actually be cleared within the cap.
+    const sceneIndexes = [...new Set(
+      report.errors.map((e) => e.sceneIndex).filter((i): i is number => typeof i === 'number'),
+    )].sort((a, b) => a - b);
+    if (sceneIndexes.length === 0) break; // errors not tied to a scene — repair can't help
 
-    ctx.logger.warn('Repairing scene', { videoId, sceneIndex, attempt: attempts });
-    const patch = await execute(
-      ctx, repairStage,
-      { videoId, sceneIndex, scene: working.scenes[sceneIndex], issues: sceneErrors, attempt: attempts },
-      path.join(dir, `07-repair-${sceneIndex}-${attempts}.json`),
-    );
+    ctx.logger.warn('Repairing scenes', { videoId, sceneIndexes, attempt: attempts });
+    for (const sceneIndex of sceneIndexes) {
+      const sceneErrors = report.errors.filter((e) => e.sceneIndex === sceneIndex);
+      try {
+        const patch = await execute(
+          ctx, repairStage,
+          { videoId, sceneIndex, scene: working.scenes[sceneIndex], issues: sceneErrors, attempt: attempts },
+          path.join(dir, `07-repair-${sceneIndex}-${attempts}.json`),
+        );
+        working = { ...working, scenes: working.scenes.map((s, i) => (i === sceneIndex ? patch.patchedScene : s)) };
+      } catch (err) {
+        ctx.logger.warn('Repair attempt errored for scene; leaving it for review', { videoId, sceneIndex, error: (err as Error).message });
+      }
+    }
 
-    working = { ...working, scenes: working.scenes.map((s, i) => (i === sceneIndex ? patch.patchedScene : s)) };
     report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
     report = { ...report, repairAttempts: attempts };
   }
