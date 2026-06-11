@@ -19,6 +19,7 @@ export const videoPlanningPrompt = {
     'Layouts: full, rowStack, columnSplit, headerRowColumns, gridSlots. Style presets: educational, playful, minimal, mentor, focus.',
     '',
     'Keep total scene durations close to the target. Open with a hook; end with a takeaway/cta.',
+    'Keep it tight: produce 3–6 scenes (never more than 8). Each scene is one clear beat.',
     '',
     'Output a single JSON object with EXACTLY these keys (verbatim field names):',
     '{',

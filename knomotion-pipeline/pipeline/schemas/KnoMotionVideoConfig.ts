@@ -28,6 +28,66 @@ import { z } from 'zod';
 import { LayoutTypeSchema, MidSceneKeySchema, StylePresetSchema, VideoFormatSchema } from './common';
 
 // ---------------------------------------------------------------------------
+// Controlled-vocabulary coercions
+// ---------------------------------------------------------------------------
+// LLMs frequently confuse the engine's separate vocabularies (background presets
+// vs style presets vs layout types vs mid-scenes) or invent near-miss values.
+// These maps fold the common confusions back onto valid values so a near-miss
+// renders rather than hard-failing. Genuinely meaningful mistakes still surface
+// elsewhere (e.g. an unsupported mid-scene is caught by Stage 6).
+
+const BACKGROUND_PRESETS = ['notebookSoft', 'sunriseGradient', 'cleanCard', 'chalkboardGradient', 'spotlight', 'custom'];
+const BACKGROUND_ALIASES: Record<string, string> = {
+  // style-preset names the model wrongly puts in background.preset → their default background
+  focus: 'spotlight',
+  minimal: 'cleanCard',
+  playful: 'sunriseGradient',
+  educational: 'notebookSoft',
+  mentor: 'chalkboardGradient',
+  // common synonyms
+  clean: 'cleanCard',
+  white: 'cleanCard',
+  plain: 'cleanCard',
+  dark: 'chalkboardGradient',
+  chalkboard: 'chalkboardGradient',
+  notebook: 'notebookSoft',
+  paper: 'notebookSoft',
+  gradient: 'sunriseGradient',
+  sunrise: 'sunriseGradient',
+  none: 'cleanCard',
+};
+const coerceBackgroundPreset = (p: string): string => {
+  if (BACKGROUND_PRESETS.includes(p)) return p;
+  return BACKGROUND_ALIASES[p.toLowerCase().trim()] ?? 'cleanCard';
+};
+
+const LAYOUT_TYPES = ['full', 'rowStack', 'columnSplit', 'headerRowColumns', 'gridSlots'];
+const LAYOUT_ALIASES: Record<string, string> = {
+  twocolumn: 'columnSplit',
+  'two-column': 'columnSplit',
+  twocolumns: 'columnSplit',
+  columns: 'columnSplit',
+  column: 'columnSplit',
+  columnsplit: 'columnSplit',
+  sidebyside: 'full', // sideBySide is a mid-scene used with layout:full
+  'side-by-side': 'full',
+  rows: 'rowStack',
+  row: 'rowStack',
+  rowstack: 'rowStack',
+  stack: 'rowStack',
+  stacked: 'rowStack',
+  grid: 'gridSlots',
+  gridslots: 'gridSlots',
+  single: 'full',
+  fullscreen: 'full',
+  centered: 'full',
+};
+const coerceLayoutType = (t: string): string => {
+  if (LAYOUT_TYPES.includes(t)) return t;
+  return LAYOUT_ALIASES[t.toLowerCase().trim()] ?? 'full';
+};
+
+// ---------------------------------------------------------------------------
 // Beats
 // ---------------------------------------------------------------------------
 
@@ -89,8 +149,15 @@ const SpotlightSchema = z
 
 export const BackgroundSchema = z
   .preprocess(
-    // Tolerate `background: "sunriseGradient"` → `{ preset: "sunriseGradient" }`.
-    (v) => (typeof v === 'string' ? { preset: v } : v),
+    // Tolerate `background: "sunriseGradient"` → `{ preset: "sunriseGradient" }`,
+    // and fold style-preset / synonym values onto a valid background preset.
+    (v) => {
+      let obj: any = typeof v === 'string' ? { preset: v } : v;
+      if (obj && typeof obj === 'object' && typeof obj.preset === 'string') {
+        obj = { ...obj, preset: coerceBackgroundPreset(obj.preset) };
+      }
+      return obj;
+    },
     z.object({
       preset: z.enum([
         'notebookSoft',
@@ -127,8 +194,15 @@ const LayoutOptionsSchema = z
 
 export const LayoutSchema = z
   .preprocess(
-    // Tolerate `layout: "full"` → `{ type: "full" }`.
-    (v) => (typeof v === 'string' ? { type: v } : v),
+    // Tolerate `layout: "full"` → `{ type: "full" }`, and fold layout synonyms /
+    // mis-used mid-scene names (e.g. "sideBySide", "twoColumn") onto a valid type.
+    (v) => {
+      let obj: any = typeof v === 'string' ? { type: v } : v;
+      if (obj && typeof obj === 'object' && typeof obj.type === 'string') {
+        obj = { ...obj, type: coerceLayoutType(obj.type) };
+      }
+      return obj;
+    },
     z.object({
       type: LayoutTypeSchema,
       options: LayoutOptionsSchema,
@@ -271,8 +345,12 @@ export type SceneItem = z.infer<typeof SceneItemSchema>;
  */
 export const KnoMotionVideoConfigSchema = z.object({
   scenes: z
-    .array(SceneItemSchema)
-    .min(1)
+    .preprocess(
+      // Drop non-object junk (bare strings/numbers) the model sometimes mixes into
+      // the scenes array, so one stray element can't fail the whole video.
+      (v) => (Array.isArray(v) ? v.filter((s) => s && typeof s === 'object' && !Array.isArray(s)) : v),
+      z.array(SceneItemSchema).min(1),
+    )
     .describe('Array of scene configurations in playback order'),
   format: VideoFormatSchema.optional().default('desktop').describe('desktop (1920×1080) or mobile (1080×1920)'),
 });
