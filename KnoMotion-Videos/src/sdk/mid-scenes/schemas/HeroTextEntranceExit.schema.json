@@ -11,12 +11,13 @@
     },
     "heroType": {
       "type": "string",
-      "enum": ["image", "lottie", "svg"],
-      "description": "Type of hero visual"
+      "enum": ["image", "lottie", "svg", "roughSVG", "emoji", "custom"],
+      "default": "image",
+      "description": "Type of hero visual (resolved via the hero registry)"
     },
     "heroRef": {
       "type": "string",
-      "description": "Path or reference to hero asset"
+      "description": "Path, URL, lottie registry key, or emoji depending on heroType"
     },
     "animationEntrance": {
       "type": "string",
@@ -32,11 +33,20 @@
     },
     "beats": {
       "type": "object",
-      "required": ["entrance", "exit"],
+      "description": "Timing in seconds. Requires exit and one of entrance/start (start is accepted as an alias for entrance).",
+      "required": ["exit"],
+      "anyOf": [
+        { "required": ["entrance"] },
+        { "required": ["start"] }
+      ],
       "properties": {
         "entrance": {
           "type": "number",
           "description": "Entrance beat in seconds"
+        },
+        "start": {
+          "type": "number",
+          "description": "Alias for entrance (used if entrance is omitted)"
         },
         "exit": {
           "type": "number",

@@ -1,7 +1,21 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "engine": "KnoMotion",
   "remotionVersion": "4.0.382",
+
+  "canonicalMidSceneKeys": [
+    "textReveal", "heroText", "gridCards", "checklist", "bubbleCallout",
+    "sideBySide", "iconGrid", "cardSequence", "bigNumber", "animatedCounter", "codeBlock"
+  ],
+
+  "knownIssues": [
+    {
+      "id": "midscene-aliases-not-resolved",
+      "severity": "warning",
+      "summary": "Only the 11 canonicalMidSceneKeys are resolved at render time by SceneRenderer.jsx (MID_SCENE_COMPONENTS). The per-mid-scene 'aliases' listed below — and the alias entries in the renderer Zod schema (sdk/schemas/videoConfig.schema.ts MidSceneKeys, e.g. 'textRevealSequence', 'gridCardReveal', 'bigNumberReveal', 'codeBlockScene', 'code') — pass schema validation but are NOT mapped to a component, so they render an empty slot.",
+      "guidance": "Generators MUST emit only canonical keys. Either tighten the renderer Zod MidSceneKeys to the 11 canonical keys, or add alias normalisation in SceneRenderer. Until then, treat aliases as unsupported."
+    }
+  ],
 
   "midScenes": {
     "textReveal": {
@@ -11,10 +25,12 @@
       "requiredFields": ["lines", "beats"],
       "keyConfig": {
         "lines": "Array of { text, emphasis? } — minItems: 1",
-        "revealType": "typewriter | fade | slide | mask | blurSlide | charByChar | glitchIn | variableTypewriter | glitchCycle (default: fade)",
-        "direction": "up | down | left | right (default: up)",
+        "revealType": "typewriter | fade | slide | mask | blurSlide | charByChar | glitchIn | variableTypewriter | glitchCycle (default: fade). blurSlide/charByChar/glitchIn/variableTypewriter/glitchCycle are remotion-bits powered.",
+        "direction": "For slide: up | down | left | right (default: up). For mask: left | right | top | bottom | center (up/down produce no clip-path).",
+        "showCursor": "Boolean — blinking cursor during typewriter reveal (default: true)",
         "staggerDelay": "Seconds between lines (default: 0.2)",
-        "lineSpacing": "tight | normal | relaxed | loose (default: normal)"
+        "lineSpacing": "tight | normal | relaxed | loose (default: normal)",
+        "linesBeats": "Per-line beats { start, hold, exit, emphasis } preferred over container beats"
       }
     },
     "heroText": {
@@ -23,10 +39,10 @@
       "aliases": ["heroTextEntranceExit"],
       "requiredFields": ["heroType", "heroRef", "beats"],
       "keyConfig": {
-        "heroType": "lottie | image | svg | roughSVG",
-        "heroRef": "URL or lottie registry key",
+        "heroType": "image | lottie | svg | roughSVG | emoji | custom (default: image)",
+        "heroRef": "URL, asset path, lottie registry key, or emoji depending on heroType",
         "text": "Optional hero title text",
-        "beats": "Requires entrance and exit sub-fields"
+        "beats": "Requires exit and one of entrance/start (start is an alias for entrance)"
       }
     },
     "gridCards": {
@@ -35,9 +51,10 @@
       "aliases": ["gridCardReveal", "cardGrid"],
       "requiredFields": ["cards", "beats"],
       "keyConfig": {
-        "cards": "Array of card objects — minItems: 1",
-        "columns": "1–8 (default: 3)",
-        "animation": "fadeSlide | scaleIn | flipIn | cascade | centerRipple"
+        "cards": "Array of card objects { icon?, image?, label?, sublabel?, color?, variant?, layout?, animated?, beats? } — minItems: 1",
+        "columns": "1–8 (default: auto from card count)",
+        "animation": "fade | slide | scale | bounce | flip | mask | cascade | centerRipple (+ fadeIn/slideIn/scaleIn/bounceIn aliases) (default: cascade)",
+        "cardVariant": "default | bordered | glass | elevated | gradient | flat (flat renders as default) (default: default)"
       }
     },
     "checklist": {
@@ -46,10 +63,10 @@
       "aliases": ["checklistReveal"],
       "requiredFields": ["items", "beats"],
       "keyConfig": {
-        "items": "Array of { text, checked? } — minItems: 1",
-        "revealType": "pop | slide | fade | scale | spring | listReveal (default: pop)",
-        "icon": "check | bullet | number | custom",
-        "revealType": "pop | slide | fade"
+        "items": "Array of { text, checked?, icon?, color?, animated?, beats? } or plain strings — minItems: 1",
+        "revealType": "pop | slide | fade | scale | spring | bounceIn | slideIn | scaleIn | fadeIn | listReveal (default: pop). listReveal is remotion-bits powered.",
+        "icon": "Static presets: check | checkmark | tick | bullet | dot | arrow | star | diamond | circle | square | plus | minus. Lottie presets: lottieCheck | lottieTick | lottieSuccess | lottieStar. Or a custom emoji string. (default: check)",
+        "iconColor": "Theme key (primary, secondary, accentGreen, accentBlue, doodle) or hex/rgb (default: accentGreen)"
       }
     },
     "bubbleCallout": {
@@ -58,11 +75,12 @@
       "aliases": ["bubbleCalloutSequence", "callouts"],
       "requiredFields": ["callouts", "beats"],
       "keyConfig": {
-        "callouts": "Array of { text } — minItems: 1",
-        "shape": "circle | rounded | pill | cloud",
-        "pattern": "random | grid | spiral | cluster",
-        "collisionDetection": "Boolean — avoids overlapping callouts",
-        "jitter": "Number — random offset for organic feel"
+        "callouts": "Array of { text, icon?, color?, shape?, animated?, beats? } or plain strings — minItems: 1",
+        "shape": "speech | rounded | notebook | pill (default: speech)",
+        "pattern": "scattered | zigzag | diagonal (default: scattered)",
+        "animation": "pop | float | slide | scale | fade (default: float)",
+        "collisionDetection": "Boolean — avoids overlapping callouts (default: true)",
+        "jitter": "{ x, y } pixel offsets for organic placement"
       }
     },
     "sideBySide": {
@@ -71,10 +89,12 @@
       "aliases": ["sideBySideCompare", "compare"],
       "requiredFields": ["beats"],
       "keyConfig": {
-        "left": "{ title?, items? } — left panel content",
-        "right": "{ title?, items? } — right panel content",
-        "mode": "compare | beforeAfter | slider",
-        "dividerType": "line | vs | arrow"
+        "left": "{ title?, subtitle?, icon?, items?, color?, backgroundColor? } — left panel content",
+        "right": "{ title?, subtitle?, icon?, items?, color?, backgroundColor? } — right panel content",
+        "mode": "standard | beforeAfter (default: standard). 'beforeAfter' uses before/after media + slider.",
+        "animation": "slide | fade | scale | bounce | reveal (default: slide)",
+        "dividerType": "none | line | dashed | vs (default: vs)",
+        "alignment": "center | inner (default: center)"
       }
     },
     "iconGrid": {
@@ -83,10 +103,10 @@
       "aliases": [],
       "requiredFields": ["icons", "beats"],
       "keyConfig": {
-        "icons": "Array of { iconRef, label?, color? } — minItems: 1",
-        "columns": "1–8 (default: 3)",
-        "iconSize": "sm | md | lg | xl",
-        "animation": "fadeIn | slideIn | scaleIn | bounceIn | cascade"
+        "icons": "Array of { iconRef, label?, color?, animated?, beats? } — minItems: 1",
+        "columns": "1–8 (default: 4)",
+        "iconSize": "sm | md | lg | xl (default: lg)",
+        "animation": "fadeIn | slideIn | scaleIn | bounceIn | cascade (default: scaleIn)"
       }
     },
     "cardSequence": {
@@ -95,10 +115,12 @@
       "aliases": [],
       "requiredFields": ["cards", "beats"],
       "keyConfig": {
-        "cards": "Array of { title, content, variant? } — minItems: 1",
-        "layout": "stacked | grid",
-        "columns": "1–6 (for grid layout)",
-        "animation": "fadeSlide | scaleIn | flipIn"
+        "cards": "Array of { title?, content?, variant?, size?, beats? } — minItems: 1",
+        "layout": "stacked | grid (default: stacked)",
+        "columns": "1–6 (for grid layout) (default: 3)",
+        "animation": "fadeIn | slideIn | scaleIn | fadeSlide (default: fadeSlide)",
+        "variant": "default | bordered | glass",
+        "size": "sm | md | lg (default: md)"
       }
     },
     "bigNumber": {
@@ -109,8 +131,10 @@
       "keyConfig": {
         "number": "String — the display number (pre-formatted)",
         "label": "Description text below the number",
-        "animation": "countUp | pop | slide",
-        "countFrom": "Number — start value for countUp animation"
+        "emphasis": "high | normal | low (default: high) — selects number color tier",
+        "animation": "pop | countUp | typewriter | fade (default: pop)",
+        "countFrom": "Number — start value for countUp animation",
+        "color": "Literal CSS color only (hex/rgb/hsl). Does NOT resolve theme keys."
       }
     },
     "animatedCounter": {
@@ -123,17 +147,18 @@
         "endValue": "Number — count end",
         "duration": "Seconds for the count animation",
         "prefix": "String — e.g. '$'",
-        "suffix": "String — e.g. '%'"
+        "suffix": "String — e.g. '%'",
+        "color": "Literal CSS color only (hex/rgb/hsl). Does NOT resolve theme keys."
       }
     },
     "codeBlock": {
       "supported": true,
       "component": "CodeBlockScene",
       "aliases": ["codeBlockScene", "code"],
-      "requiredFields": ["code"],
+      "requiredFields": ["code", "beats"],
       "keyConfig": {
         "code": "String — source code with \\n line breaks",
-        "language": "javascript | typescript | python | bash | html | css | json | ... (default: javascript)",
+        "language": "Any string, passed through to the remotion-bits highlighter (default: javascript). Highlightable set depends on the bundle; not validated. Common: javascript, typescript, jsx, tsx, python, bash, json, html, css, markdown, go, rust, cpp.",
         "revealType": "lineByLine | typing | highlight | fade (default: lineByLine)",
         "theme": "dark | light (default: dark)",
         "highlightLines": "Array of line numbers to highlight (1-indexed)",

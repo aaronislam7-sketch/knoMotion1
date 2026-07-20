@@ -17,7 +17,7 @@
       "type": "string",
       "enum": ["high", "normal", "low"],
       "default": "high",
-      "description": "Emphasis level — controls color and animation intensity"
+      "description": "Emphasis level — selects the number color tier (high=primary, normal=textMain, low=textSoft) and adds a text shadow on 'high'. Does not change the entrance animation."
     },
     "animation": {
       "type": "string",
@@ -32,7 +32,8 @@
     },
     "color": {
       "type": "string",
-      "description": "Optional color override. Theme keys (primary, secondary, accentGreen, etc.) or hex/rgb."
+      "pattern": "^(#[0-9a-fA-F]{3,8}|(rgb|rgba|hsl|hsla)\\([^)]*\\))$",
+      "description": "Optional color override. Must be a literal CSS color (hex like #FF6B35, or rgb()/rgba()/hsl()/hsla()). NOTE: unlike other mid-scenes, this component does NOT resolve theme keys (e.g. 'primary') — those will not apply. Prefer leaving this unset and relying on global theming."
     },
     "beats": {
       "type": "object",
@@ -81,7 +82,7 @@
       "number": "99%",
       "label": "accuracy rate",
       "animation": "pop",
-      "color": "accentGreen",
+      "color": "#27AE60",
       "beats": { "start": 0.3 }
     },
     {
