@@ -1,0 +1,37 @@
+{
+  "name": "knomotion-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Structured compiler that turns source material into validated, renderable KnoMotion learning videos. Runs as a standalone Node service/CLI within the KnoMotion monorepo.",
+  "type": "module",
+  "main": "pipeline/orchestrator.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "schemas:check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "run": "tsx pipeline/cli.ts",
+    "dev": "tsx pipeline/cli.ts"
+  },
+  "keywords": [
+    "knomotion",
+    "pipeline",
+    "compiler",
+    "video",
+    "remotion",
+    "llm"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "openai": "^4.67.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.8"
+  }
+}

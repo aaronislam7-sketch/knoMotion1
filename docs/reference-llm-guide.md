@@ -406,7 +406,7 @@ Hero visual (image/lottie) with accompanying text.
   stylePreset: 'focus',
   config: {
     text: 'Description text here',
-    heroType: 'lottie',  // 'image' | 'lottie' | 'svg'
+    heroType: 'lottie',  // 'image' | 'lottie' | 'svg' | 'roughSVG' | 'emoji' | 'custom'
     heroRef: 'lightbulb',  // Lottie key or image URL
     animationEntrance: 'fadeSlide',  // 'fadeIn' | 'slideIn' | 'scaleIn' | 'fadeSlide'
     animationExit: 'fadeOut',  // 'fadeOut' | 'slideOut' | 'scaleOut'
@@ -445,13 +445,12 @@ Icon/image cards in a grid layout.
       }
     ],
     columns: 2,  // 1-8
-    animation: 'cascade',  // 'fade' | 'slide' | 'scale' | 'bounce' | 'flip' | 'mask' | 'cascade'
+    animation: 'cascade',  // 'fade' | 'slide' | 'scale' | 'bounce' | 'flip' | 'mask' | 'cascade' | 'centerRipple'
     direction: 'up',  // for slide animation
     staggerDelay: 0.15,  // seconds between cards
     animationDuration: 0.4,
     showLabels: true,
-    labelPosition: 'bottom',  // 'bottom' | 'top'
-    cardVariant: 'default',  // 'default' | 'bordered' | 'glass' | 'flat' | 'elevated'
+    cardVariant: 'default',  // 'default' | 'bordered' | 'glass' | 'elevated' | 'gradient' ('flat' accepted but renders as 'default')
     beats: { start: 1.0 }  // grid-level start time
   }
 }
@@ -473,7 +472,7 @@ Bullet/tick list with pop animations.
       { text: 'Pending task', checked: false, beats: { start: 1.5 } },
       'Simple text item'  // shorthand
     ],
-    revealType: 'pop',  // 'pop' | 'slide' | 'fade' | 'scale' | 'spring' | 'bounceIn'
+    revealType: 'pop',  // 'pop' | 'slide' | 'fade' | 'scale' | 'spring' | 'bounceIn' | 'listReveal'
     staggerDelay: 0.25,
     animationDuration: 0.5,
     icon: 'check',  // 'check' | 'bullet' | 'dot' | 'arrow' | 'star' | 'lottieCheck'
@@ -501,7 +500,7 @@ Floating speech-bubble callouts.
       { text: 'Break into small steps', icon: '📝' },
       'Simple callout text'  // shorthand
     ],
-    shape: 'speech',  // 'speech' | 'rounded' | 'notebook'
+    shape: 'speech',  // 'speech' | 'rounded' | 'notebook' | 'pill'
     pattern: 'diagonal',  // 'scattered' | 'zigzag' | 'diagonal'
     animation: 'float',  // 'pop' | 'float' | 'slide' | 'scale' | 'fade'
     staggerDelay: 0.4,
@@ -653,7 +652,7 @@ Dramatic reveal of large statistics.
     emphasis: 'high',  // 'high' | 'normal' | 'low'
     animation: 'countUp',  // 'pop' | 'countUp' | 'typewriter' | 'fade'
     countFrom: 0,  // starting value for countUp
-    color: 'primary',  // optional color override
+    color: '#FF6B35',  // optional. CSS color only (hex/rgb/hsl) — theme keys are NOT resolved for bigNumber
     beats: { start: 0.5, exit: 5.0 }
   }
 }
@@ -681,7 +680,7 @@ Animated number counting up/down.
     prefix: '$',  // e.g., "$100"
     suffix: '%',  // e.g., "100%"
     label: 'completion rate',  // label below number
-    color: 'primary',  // optional color
+    color: '#FF6B35',  // optional. CSS color only (hex/rgb/hsl) — theme keys are NOT resolved for animatedCounter
     beats: { start: 0.5 }
   }
 }

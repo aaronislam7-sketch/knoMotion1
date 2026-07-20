@@ -1,0 +1,3 @@
+# Runtime job output directory.
+# Each pipeline run writes its typed artifacts to a job subdirectory here
+# (e.g. artifacts/<jobId>/01-source-bundle.json). Contents are gitignored.

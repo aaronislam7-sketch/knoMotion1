@@ -32,7 +32,7 @@
               },
               "shape": {
                 "type": "string",
-                "enum": ["speech", "rounded", "notebook"],
+                "enum": ["speech", "rounded", "notebook", "pill"],
                 "description": "Bubble shape override"
               },
               "animated": {
@@ -56,9 +56,9 @@
     },
     "shape": {
       "type": "string",
-      "enum": ["speech", "rounded", "notebook"],
+      "enum": ["speech", "rounded", "notebook", "pill"],
       "default": "speech",
-      "description": "Default bubble shape. 'speech': with tail. 'rounded': pill-like. 'notebook': dashed Knode style."
+      "description": "Default bubble shape. 'speech': with tail. 'rounded': pill-like. 'notebook': dashed Knode style. 'pill': fully rounded."
     },
     "pattern": {
       "type": "string",

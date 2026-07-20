@@ -1,0 +1,12 @@
+# Dependencies / build output
+node_modules/
+dist/
+
+# Runtime job output — artifacts are produced per run, never committed
+pipeline/artifacts/*
+!pipeline/artifacts/.gitkeep
+
+# The repo root .gitignore ignores package.json / package-lock.json globally.
+# Re-include this package's manifests so the standalone package is tracked.
+!package.json
+!package-lock.json

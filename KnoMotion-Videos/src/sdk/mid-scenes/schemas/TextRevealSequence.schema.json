@@ -22,21 +22,39 @@
             "enum": ["normal", "high", "low"],
             "default": "normal",
             "description": "Emphasis level (affects weight, color, highlighting)"
+          },
+          "beats": {
+            "type": "object",
+            "description": "Per-line timing (preferred over container beats). All values in seconds.",
+            "properties": {
+              "start": { "type": "number", "description": "When this line enters" },
+              "hold": { "type": "number", "description": "Duration to stay visible" },
+              "exit": { "type": "number", "description": "When this line exits" },
+              "emphasis": { "type": "number", "description": "When to trigger the emphasis animation" }
+            }
           }
         }
       }
     },
     "revealType": {
       "type": "string",
-      "enum": ["typewriter", "fade", "slide", "mask"],
+      "enum": [
+        "typewriter", "fade", "slide", "mask",
+        "blurSlide", "charByChar", "glitchIn", "variableTypewriter", "glitchCycle"
+      ],
       "default": "fade",
-      "description": "Type of reveal animation"
+      "description": "Type of reveal animation. typewriter/fade/slide/mask are native; blurSlide/charByChar/glitchIn/variableTypewriter/glitchCycle are powered by remotion-bits."
+    },
+    "showCursor": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show a blinking cursor during the typewriter reveal."
     },
     "direction": {
       "type": "string",
-      "enum": ["up", "down", "left", "right"],
+      "enum": ["up", "down", "left", "right", "top", "bottom", "center"],
       "default": "up",
-      "description": "Direction for slide and mask reveals"
+      "description": "Reveal direction. For revealType 'slide' use up/down/left/right. For revealType 'mask' use left/right/top/bottom/center (up/down do not map to a mask direction and produce no clip-path)."
     },
     "staggerDelay": {
       "type": "number",
@@ -81,7 +99,8 @@
       "description": "Optional style overrides",
       "properties": {
         "lineContainer": { "type": "object" },
-        "text": { "type": "object" }
+        "text": { "type": "object" },
+        "cursor": { "type": "object" }
       }
     }
   }
