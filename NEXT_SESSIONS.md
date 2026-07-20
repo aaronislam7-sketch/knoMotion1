@@ -521,4 +521,3 @@ These sessions are intentionally not part of the immediate implementation sequen
 - Canon/showcase role after the generic pipeline is complete.
 - Archive and KnoSlides ownership.
 - Personalisation dimensions that create learner value versus superficial variation.
-
