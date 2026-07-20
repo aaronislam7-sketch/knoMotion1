@@ -1,523 +1,310 @@
 # KnoMotion Next Sessions
 
-> A session-sized roadmap for moving from source content to deterministic, high-quality video while keeping the engine understandable and maintainable.
+> A consolidated, outcome-led roadmap for reaching “content in, deterministic quality video out”.
 >
-> Created: 2026-07-20
+> Updated: 2026-07-20
 
 ## How to use this list
 
-- Treat each numbered checkbox as one focused development session and one reviewable change.
-- Complete the items in order unless a dependency or new evidence changes the priority.
-- Update this file at the end of each session with the outcome, validation evidence, and links to any replacement documentation.
-- Do not execute old plans such as `auditPlan.md` or `deletion-plan.md` without re-verifying their claims against the current branch.
-- A task is not complete because JSON validates. Visual work requires render evidence from both desktop and mobile where applicable.
+- Each numbered item is one focused session.
+- Work in order unless evidence from testing changes the priority.
+- Update this file with the outcome and validation evidence after each session.
+- Test visual changes directly in Remotion Studio and through representative pipeline output.
+- Do not execute old audit or deletion plans without re-verifying their claims against the current implementation.
 
-## Direction and guardrails
+## Value test
 
-The target is:
+Engine work must achieve at least one of these outcomes:
+
+1. **More useful video functionality** — a visible capability that improves how learning content can be presented.
+2. **A simpler authoring model** — fewer concepts, choices, exceptions, or failure modes for users and pipeline-invoked LLMs.
+
+Work should not proceed when its main benefit is theoretical completeness, additional enforcement, or automation without a proportionate improvement to output or usability.
+
+Structural validation remains useful for preventing configurations that cannot render. It should support the authoring experience, not become a second product.
+
+## Current direction
 
 ```text
 source content
-  -> structured, inspectable pipeline artifacts
-  -> valid and semantically correct scene JSON
-  -> deterministic audio/visual assembly
-  -> quality-gated MP4
+  -> structured planning and script
+  -> LLM chooses from a clear visual capability menu
+  -> simple scene configuration
+  -> deterministic audio and assembly
+  -> tester previews and approves
+  -> MP4
 ```
 
-Principles:
-
-1. **Rendered quality is the acceptance gate.** Schema validity is necessary but not sufficient.
-2. **Measure before expanding.** Add a mid-scene only when benchmark outputs show a recurring learning or visual pattern that the existing 11 cannot express well.
-3. **Keep the boundary clean.** `KnoMotion-Videos/` stays browser-safe; `knomotion-pipeline/` stays Node-only. Renderer capability data may flow to the pipeline, never pipeline runtime code into the renderer.
-4. **Prefer deterministic checks.** Use LLM or vision judgement only for quality decisions that cannot be made reliably with code.
-5. **Preserve personalisation options.** Avoid decisions that collapse useful content, pacing, format, learner, or brand variation into one static output.
-6. **Clean up only from evidence.** Imports, runtime entry points, tests, Studio usage, and external consumers must be checked before deleting code.
+The immediate visual feedback loop is Remotion Studio plus human review. Automated screenshot capture, vision review, pixel-level visual scoring, and similar QA infrastructure are not current priorities.
 
 ## Recommended first focus
 
-Start with **Session 01: pipeline-to-Studio preview**. It shortens the feedback loop for every later quality task and gives developers a consistent way to inspect generated output. Follow it with a fixed quality benchmark before changing validation or engine behaviour.
+Start with **Session 01: pipeline-to-Studio preview**. It makes pipeline output easy to inspect without introducing a new QA system. Then simplify the two areas most likely to confuse the LLM and produce broken visuals: layouts/slots and beats.
 
 ---
 
-## Track A — Make quality observable and enforceable
+## Track A — Improve output capability and simplify the engine
 
-### [ ] Session 01 — Add pipeline-to-Remotion Studio preview
+### [ ] Session 01 — Add a pipeline-to-Studio preview workflow
 
-**Goal:** Preview any generated `KnoMotionVideoConfig` without copying props manually.
+**Outcome:** A tester can open generated pipeline output in Remotion Studio with one clear command.
 
-**Deliverable:**
-- Add the pipeline preview composition/harness using `GenericVideoPlayer`.
-- Add a CLI command or documented command that opens a selected job/video config in Studio.
-- Keep normal `KnoMotionVideo` rendering unchanged.
+**Why it is valuable:**
+- Shortens the feedback loop for every engine and pipeline change.
+- Keeps visual judgement with the tester.
+- Removes manual prop copying and path discovery.
 
-**Done when:**
-- A mock pipeline job can be opened in Studio by job/video identifier.
-- Desktop and mobile configs load.
-- Invalid or missing job/config paths produce useful errors.
-- Remotion bundle and composition checks pass.
-
-### [ ] Session 02 — Establish the visual quality benchmark
-
-**Goal:** Create a stable baseline against which pipeline and engine changes can be judged.
-
-**Deliverable:**
-- Select representative configs covering all 11 mid-scenes, all layouts, desktop/mobile, short/long text, and key beat patterns.
-- Render stills at entrance, settled, emphasis, and exit points.
-- Record current failures and define a concise acceptance rubric for visibility, legibility, completeness, timing, contrast, overflow, and visual variety.
+**Scope:**
+- Add an additive preview entry or composition that loads a selected generated config.
+- Add a CLI command or documented invocation using job and video identifiers.
+- Support desktop and mobile.
+- Preserve the existing `KnoMotionVideo` composition and normal render path.
 
 **Done when:**
-- Benchmark inputs and expected checkpoints are versioned.
-- Current failures are reproducible.
-- Quality criteria are objective where possible and clearly marked subjective where not.
+- A mock pipeline run can be opened in Studio without editing source files.
+- Missing jobs, videos, or invalid configs produce useful errors.
+- The Remotion bundle and composition checks pass.
 
-### [ ] Session 03 — Populate `QualityReport` with render evidence
+### [ ] Session 02 — Simplify layouts and content placement
 
-**Goal:** Introduce render-in-the-loop QA after structural validation.
+**Outcome:** A user or LLM can choose a scene arrangement and place content without understanding fragile slot-name rules.
 
-**Deliverable:**
-- Render deterministic stills at selected frames for every scene.
-- Save frame paths, render metadata, and check results into `QualityReport.json`.
-- Record render failures as blocking quality issues.
+**Why it is valuable:**
+- Layout/slot mismatch is a direct cause of blank scenes.
+- A smaller, clearer choice set improves generation quality more than adding repair rules.
+- Compatibility can remain internal while the public authoring model becomes simpler.
 
-**Done when:**
-- The mock pipeline produces a quality report and stills.
-- Artifacts are linked in `job.json`.
-- Failed still rendering cannot be reported as a passed job.
-
-### [ ] Session 04 — Add deterministic visual quality checks
-
-**Goal:** Automatically catch obvious visual failures without paying for a vision model.
-
-**Deliverable:**
-- Detect near-empty/blank frames and unexpectedly empty regions.
-- Add text overflow or out-of-bounds detection where measurable.
-- Define thresholds from the benchmark rather than arbitrary single examples.
+**Scope:**
+- Review the five current layouts against real desktop/mobile output and pipeline usage.
+- Define the smallest useful public layout vocabulary.
+- Remove redundant choices or present them as simple aliases/presets.
+- Make content placement predictable; where possible derive slot names from the layout rather than asking the LLM to invent them.
+- Add a compatibility adapter if the renderer needs to retain its existing internal shape.
+- Update schemas, capability data, examples, prompts, and pipeline types together.
 
 **Done when:**
-- Known blank-slot and invisible-text fixtures fail.
-- Valid sparse scenes do not produce unacceptable false positives.
-- Results use exact scene/frame paths and can enter the repair workflow.
+- Representative single-area, stacked, comparison, and grid scenes are straightforward to express.
+- The same public model adapts predictably to mobile.
+- Old supported configs either continue to work or have a documented migration.
+- A tester confirms representative scenes in Studio.
 
-### [ ] Session 05 — Make layout and slot handling semantics-safe
+### [ ] Session 03 — Simplify beats and timing ownership
 
-**Goal:** Stop syntactic coercion from silently creating blank scenes.
+**Outcome:** The LLM describes narrative order and emphasis without having to calculate fragile timestamps for every visible element.
 
-**Deliverable:**
-- Audit all scene-config coercions.
-- Retain harmless shape/key normalization.
-- Reject or fully reconcile layout changes that invalidate slot names, especially `sideBySide`/`columnSplit` to `full`.
-- Make missing required slots and unfilled content slots blocking errors.
+**Why it is valuable:**
+- Poor beat values are a primary cause of missing or flashing content.
+- Deterministic defaults reduce prompt complexity and token usage.
+- Timing remains configurable when a scene genuinely needs precise choreography.
 
-**Done when:**
-- Every accepted slot resolves in the selected layout.
-- Regression tests cover current layout/slot mismatch failures.
-- Repair receives semantic errors instead of cosmetically valid JSON.
-
-### [ ] Session 06 — Enforce readable beat timing
-
-**Goal:** Ensure visible content appears long enough to be understood.
-
-**Deliverable:**
-- Validate scene-level and item-level beats against duration.
-- Enforce minimum readable visibility, late-start, early-exit, and near-zero-window rules.
-- Require appropriate per-item/per-line timing where a mid-scene needs it.
-- Scale warnings or limits by text length where practical.
+**Scope:**
+- Identify which beats should be authored, derived, defaulted, or aligned later from narration.
+- Introduce simple timing presets or sequence semantics for common cases.
+- Let mid-scenes generate safe entrance, hold, stagger, and exit timings from scene duration.
+- Preserve explicit beat overrides for advanced use.
+- Reconcile the model with Stage 10 narration alignment.
 
 **Done when:**
-- Known flashing, premature-exit, and after-scene fixtures fail.
-- Reasonable short and long scenes pass.
-- Repair prompts receive exact timing paths and constraints.
+- Common scenes require little or no per-item timestamp generation.
+- Content remains visible for a sensible reading window by default.
+- Explicit timing still supports advanced choreography.
+- Existing representative scenes migrate cleanly and render correctly.
 
-### [ ] Session 07 — Fix invisible or inconsistent engine behaviour
+### [ ] Session 04 — Fix visible engine defects and text fitting
 
-**Goal:** Resolve the confirmed renderer defects that directly reduce output quality.
+**Outcome:** Existing capabilities render reliably and handle realistic content lengths.
 
-**Deliverable:**
+**Why it is valuable:**
+- Directly fixes invisible, misplaced, low-contrast, wrapped, and overflowing content.
+- Improves every future pipeline run without adding authoring concepts.
+
+**Scope:**
 - Fix TD-002 mask direction handling.
-- Fix TD-001 `heroText` position contract across renderer, component, and schema.
-- Fix TD-003 theme color resolution in `bigNumber` and `animatedCounter`, then reconcile schemas and guides.
+- Fix TD-001 `heroText` positioning consistently across component, renderer, and schema.
+- Fix TD-003 theme colors in `bigNumber` and `animatedCounter`.
+- Add layout-aware text measurement/fitting to the highest-impact text mid-scenes.
+- Set sensible minimum sizes and truncation/failure behaviour when content cannot fit.
+- Reconcile schemas and reference examples after implementation.
 
 **Done when:**
-- Each defect has a focused regression test or render fixture.
-- Desktop and mobile render checks pass.
-- `TECH_DEBT.md` records the resolution.
+- The known defects no longer reproduce in Studio.
+- Long and multiline content remains legible in desktop and mobile examples.
+- Existing short-content scenes do not regress.
+- Resolved items are updated in `TECH_DEBT.md`.
 
-### [ ] Session 08 — Add text measurement and fitting
+### [ ] Session 05 — Expand the visual capability menu where it adds clear value
 
-**Goal:** Prevent wrapping, clipping, and unreadably oversized content.
+**Outcome:** The pipeline gains one or two high-value ways to display learning content that the existing 11 mid-scenes cannot express well.
 
-**Deliverable:**
-- Integrate the exact repository-compatible `@remotion/layout-utils` version.
-- Apply fitting to `textReveal`, `checklist`, and `bigNumber`.
-- Define minimum font sizes and fail or warn when content cannot fit legibly.
+**Why it is valuable:**
+- Increases visual and instructional variety.
+- Reduces misuse of generic text/checklist scenes for unsuitable content.
+- Gives the LLM clear purpose-built choices instead of more styling permutations.
 
-**Done when:**
-- Benchmark overflow cases fit or fail clearly.
-- `charByChar` multiline behaviour is visually checked.
-- Desktop/mobile output remains deterministic.
-
-### [ ] Session 09 — Reconcile and automate renderer contracts
-
-**Goal:** Make accepted JSON match what the renderer can actually display.
-
-**Deliverable:**
-- Audit Zod config, 11 mid-scene schemas, `SceneRenderer`, registry, capability manifest, and pipeline mirror.
-- Resolve aliases that validate but render nothing.
-- Generate or mechanically verify the capability manifest from canonical sources.
-- Add a CI/test drift check.
+**Scope:**
+- Use representative learning content and current pipeline output to identify the most frequent capability gaps.
+- Prefer distinct content structures such as timeline/progression, process/flow, quote/evidence, or before/after—not cosmetic variants.
+- Select only the highest-value addition or tightly related pair that fits the session.
+- Implement the component, flat schema, registry/renderer entry, capability data, pipeline support, examples, and documentation together.
+- Do not expand the library if existing mid-scenes can express the need cleanly after Sessions 02–04.
 
 **Done when:**
-- Every accepted mid-scene key renders.
-- Pipeline-valid configs are renderer-valid.
-- Manifest drift fails automatically.
+- The new capability has a clear “use when / do not use when” description.
+- The LLM can select it from a concise capability menu.
+- Desktop and mobile examples render correctly in Studio.
+- The addition demonstrably replaces an awkward or repetitive existing pattern.
 
-### [ ] Session 10 — Audit mid-scene adequacy using real outputs
+### [ ] Session 06 — Simplify scene generation for the pipeline LLM
 
-**Goal:** Decide whether the existing 11 mid-scenes can produce sufficient instructional and visual variety.
+**Outcome:** The scene compiler receives a concise, accurate menu of visual choices and produces useful configs with less repair.
 
-**Deliverable:**
-- Map benchmark learning patterns to current mid-scenes.
-- Measure overuse, awkward configuration, missing content structures, and mobile limitations.
-- Rank gaps by learning value, frequency, quality impact, schema simplicity, and render cost.
+**Why it is valuable:**
+- Converts engine improvements into better pipeline output.
+- Reduces model improvisation, prompt size, and corrective retries.
+- Keeps optionality while making valid choices easier than invalid ones.
 
-**Done when:**
-- The audit recommends either no additions or a ranked, evidence-backed shortlist.
-- Each proposed addition has a distinct flat content contract and is not merely a style variant.
-
-### [ ] Session 11 — Implement one approved priority mid-scene
-
-**Goal:** Add the highest-value pattern selected in Session 10.
-
-**Deliverable:**
-- One component, JSON schema, registry entry, `SceneRenderer` entry, capability entry, pipeline contract support, examples, and tests.
-- Repeat this session item separately for later approved mid-scenes; do not batch multiple new contracts.
+**Scope:**
+- Rework the scene-generation prompt around the simplified layout and timing models.
+- Provide a small set of complete examples showing when and how to use each common mid-scene.
+- Make capability descriptions task-oriented rather than exposing raw implementation detail.
+- Reconcile renderer schemas, pipeline schema, capability manifest, and canonical keys.
+- Use structured output where it simplifies generation without forcing a more complex renderer contract.
+- Keep deterministic validation focused on render-breaking shapes, unsupported capabilities, and impossible references.
 
 **Done when:**
-- Valid examples render in desktop and mobile.
-- Invalid examples fail at exact paths.
-- The benchmark demonstrates a material quality or variety gain.
+- Representative sources generate visibly complete and varied scenes with the mock and production LLM paths.
+- Fewer schema coercions and repair attempts are needed.
+- Every option offered to the LLM is supported by the renderer.
+- A tester can understand why each generated scene chose its layout and mid-scene.
 
 ---
 
 ## Track B — Complete the deterministic pipeline
 
-### [ ] Session 12 — Adopt structured outputs for planning stages
+### [ ] Session 07 — Complete the narration-to-assembly path
 
-**Goal:** Reduce model drift before scene compilation.
+**Outcome:** A narration script becomes reusable audio, captions, aligned visuals, and final render props.
 
-**Deliverable:**
-- Use provider-supported JSON Schema structured output for content analysis, module planning, video planning, and script generation.
-- Preserve provider abstraction and actionable fallback errors.
-- Leave dynamic scene slot output on the current path until its contract supports strict output safely.
+**Why it is valuable:**
+- Delivers the missing audio half of the product.
+- Makes visual timing derive from spoken content.
+- Caching limits repeated provider cost.
 
-**Done when:**
-- Planning artifacts require fewer parse retries/coercions.
-- Mock and OpenAI tests pass.
-- Provider/model limitations are documented.
-
-### [ ] Session 13 — Implement Stage 8 TTS
-
-**Goal:** Turn narration scripts into deterministic, reusable audio artifacts.
-
-**Deliverable:**
-- Define a provider interface, one production adapter, and a deterministic test adapter.
-- Persist audio, duration, word timestamps when available, provenance, and cost metadata.
-- Add caching keyed by normalized script, voice, model, and settings.
+**Scope:**
+- Implement Stage 8 TTS behind a provider interface with one production adapter and deterministic test adapter.
+- Persist audio, duration, timestamps, provenance, settings, and cost metadata.
+- Cache identical script/voice/model requests.
+- Implement Stage 9 caption normalization.
+- Implement Stage 10 beat alignment using the simplified timing model from Session 03.
+- Implement Stage 11 deterministic assembly and final contract validation.
 
 **Done when:**
-- Re-running identical input reuses the artifact.
-- Provider failures are recoverable and auditable.
-- Secrets never enter artifacts or logs.
+- A script produces assembled renderer props with narration and captions.
+- Repeated identical TTS input reuses the existing artifact.
+- Caption and beat timing is monotonic and visibly aligned in Studio.
+- Provider failures are resumable and secrets never enter logs or artifacts.
 
-**Decision needed:** production TTS provider, approved voices, and target cost/quality envelope.
+**Decision required before starting:** production TTS provider, approved voices, and acceptable cost/quality range.
 
-### [ ] Session 14 — Implement Stage 9 caption normalization
+### [ ] Session 08 — Complete render, resume, and end-to-end operation
 
-**Goal:** Produce renderer-ready word captions independently of provider quirks.
+**Outcome:** Source content can run through the complete pipeline to an MP4 without repeating successful expensive work.
 
-**Deliverable:**
-- Normalize TTS timestamps into the caption contract.
-- Handle punctuation, token joins, missing timestamps, and scene boundaries.
-- Add deterministic fixtures.
+**Why it is valuable:**
+- Completes the core business workflow.
+- Makes failed or interrupted jobs practical to operate.
+- Produces auditable outputs without adding a separate orchestration product.
 
-**Done when:**
-- Captions validate and render in all three supported styles.
-- Word order and timing remain monotonic.
-
-### [ ] Session 15 — Implement Stage 10 beat alignment
-
-**Goal:** Derive visual timing from narration rather than asking the LLM to guess final timings.
-
-**Deliverable:**
-- Align captions/scripts to scene and per-item beats using the existing engine utility where suitable.
-- Respect readable-duration rules from Session 06.
-- Persist alignment decisions and warnings.
+**Scope:**
+- Implement Stage 12 Remotion rendering and `RenderManifest`.
+- Add `--resume` and `--from` using validated artifacts.
+- Define straightforward invalidation rules for changed source, models, prompts, schemas, or settings.
+- Record output checksum, dimensions, duration, render settings, and source artifact IDs.
+- Run end-to-end human UAT on representative desktop and mobile content.
+- Fix only material blockers or confusing workflow discovered during UAT.
 
 **Done when:**
-- Spoken concepts and visual emphasis align in benchmark scenes.
-- Output is deterministic for the same timestamps and config.
-
-### [ ] Session 16 — Implement Stage 11 assembly
-
-**Goal:** Combine validated visuals, audio, captions, and aligned beats into final render props.
-
-**Deliverable:**
-- Build renderer-ready props from prior artifacts without LLM calls.
-- Verify asset URLs/paths and duration consistency.
-- Revalidate the assembled config against renderer contracts.
-
-**Done when:**
-- Assembly is deterministic and replayable.
-- Missing or inconsistent assets block rendering with precise errors.
-
-### [ ] Session 17 — Implement Stage 12 rendering
-
-**Goal:** Produce the final MP4 and render manifest.
-
-**Deliverable:**
-- Bundle/select `KnoMotionVideo`, render with controlled codec/settings, and capture progress/errors.
-- Record output checksum, dimensions, duration, settings, and source artifact IDs.
-- Make local output storage replaceable by a future remote adapter.
-
-**Done when:**
-- A mock-provider source runs from text to MP4.
-- A failed render can be retried without rerunning successful upstream stages.
-
-### [ ] Session 18 — Add resume, replay, and idempotency
-
-**Goal:** Make expensive jobs operable and safe to retry.
-
-**Deliverable:**
-- Implement `--resume`, `--from`, and artifact compatibility checks.
-- Define invalidation rules when prompts, models, schemas, or source inputs change.
-- Avoid duplicate external calls after successful artifacts exist.
-
-**Done when:**
-- Interrupted jobs resume from the correct boundary.
-- Stale artifacts are rejected with an explanation.
-
-### [ ] Session 19 — Add end-to-end production acceptance
-
-**Goal:** Define one trustworthy gate for “content in, quality video out.”
-
-**Deliverable:**
-- Exercise mock and one production-provider path.
-- Gate on contracts, quality report, audio/caption alignment, render success, and artifact completeness.
-- Capture runtime and provider cost telemetry without making nondeterministic assertions.
-
-**Done when:**
-- A single documented command proves the complete flow.
-- CI runs the deterministic subset.
-- Production smoke testing is explicit and opt-in.
+- One documented command runs mock source to MP4.
+- One opt-in production-provider run completes.
+- Failed rendering can resume without rerunning successful LLM or TTS stages.
+- A tester approves representative output in Studio and as rendered MP4.
 
 ---
 
-## Track C — Audit and remove repository fluff safely
+## Track C — Clarify and simplify the repository
 
-### [ ] Session 20 — Map the active runtime architecture
+### [ ] Session 09 — Audit the active implementation and remove verified fluff
 
-**Goal:** Establish what is fundamental before classifying anything as fluff.
+**Outcome:** The repository clearly separates the live engine/pipeline from examples, historical material, and dead code.
 
-**Deliverable:**
-- Trace root app, Remotion entry, Studio compositions, generic renderer, pipeline CLI, schemas, assets, and KnoSlides boundaries.
-- Produce an import/entry-point map and identify externally exposed APIs.
-- Classify each top-level directory as core, supporting, example/canon, historical, generated, or unknown.
+**Why it is valuable:**
+- Reduces setup and comprehension cost for every future session.
+- Prevents agents from following stale plans or changing inactive systems.
+- Removes maintenance burden without speculative architecture work.
 
-**Done when:**
-- Every active entry point and package boundary has an owner and purpose.
-- Unknown items remain explicitly unresolved rather than assumed dead.
-
-### [ ] Session 21 — Audit code, dependencies, tests, and tooling
-
-**Goal:** Revalidate old cleanup claims against current code.
-
-**Deliverable:**
-- Identify unreachable code, duplicate implementations, re-export shims, unused dependencies, manual tests, and unreferenced admin tools.
-- Include dynamic imports, Remotion registration, scripts, and external-consumer risk.
-- Mark candidates by confidence and migration requirement.
+**Scope:**
+- Trace active app, Remotion/Studio entries, generic renderer, pipeline CLI, schemas, assets, tests, and package boundaries.
+- Revalidate prior `auditPlan.md` and `deletion-plan.md` findings.
+- Classify top-level directories and significant documents as core, supporting, example/canon, historical, generated, or unresolved.
+- Remove only high-confidence dead code, dependencies, duplicate files, and misleading documents.
+- Produce a short decision list for ambiguous product-owned items such as `Archive/`, KnoSlides, and canon compositions rather than deleting them.
+- Run root, pipeline, Studio, bundle, composition, and representative render checks.
 
 **Done when:**
-- Every deletion candidate has reproducible evidence.
-- Essential Studio preview and rendering paths are protected.
+- Every retained top-level area has a clear purpose.
+- High-confidence fluff is removed with evidence.
+- Ambiguous items have an explicit owner/decision request.
+- All active preview and render paths continue to work.
 
-### [ ] Session 22 — Audit documentation and historical artifacts
+### [ ] Session 10 — Create the canonical documentation suite
 
-**Goal:** Separate current guidance from stale or historical narrative.
+**Outcome:** Agents and developers can understand the business, engine, pipeline, testing workflow, and current status without reading historical plans.
 
-**Deliverable:**
-- Inventory Markdown, examples, plans, audit reports, generated outputs, and `Archive/`.
-- Classify each as canonical, supporting, historical, superseded, or misleading.
-- Identify contradictions and the document that should replace each stale source.
+**Why it is valuable:**
+- Reduces repeated orientation sessions and incorrect assumptions.
+- Makes future implementation cheaper and safer.
+- Connects technical choices to the personalisation-led business model.
 
-**Done when:**
-- Agents can distinguish current truth from historical context.
-- No files are deleted during this audit session.
-
-### [ ] Session 23 — Approve the cleanup plan
-
-**Goal:** Turn audit evidence into explicit, reversible decisions.
-
-**Deliverable:**
-- Create a deletion/migration plan grouped into safe deletion, migration first, archive/product decision, and keep.
-- Record package-boundary and canon/showcase decisions.
-- Define build, test, Studio, and render checks for every cleanup batch.
-
-**Done when:**
-- Product decisions are confirmed before destructive changes.
-- Each cleanup batch has rollback and validation criteria.
-
-**Decisions needed:** treatment of `Archive/`, KnoSlides ownership, and whether canon compositions remain active references.
-
-### [ ] Session 24 — Execute approved code and dependency cleanup
-
-**Goal:** Remove verified dead code and dependencies without changing product behaviour.
-
-**Deliverable:**
-- Apply only the approved safe/migrate-first batch.
-- Update imports, package manifests, scripts, and tests.
-- Record removed compatibility surfaces.
+**Scope:**
+- Create a concise documentation index and precedence rule.
+- Consolidate the canonical suite:
+  - business and product context;
+  - current engine architecture and extension guide;
+  - scene-authoring capability guide for people and LLMs;
+  - pipeline architecture and operation guide;
+  - Studio/UAT and testing guide;
+  - agent/developer setup and contribution guide.
+- Refresh the root README as the business-oriented landing page.
+- Replace or clearly mark superseded status, audit, SDK, and architecture documents.
+- Verify every command, path, capability count, and example against the implementation.
 
 **Done when:**
-- Root and pipeline checks pass.
-- Remotion Studio, bundle, compositions, benchmark stills, and one MP4 render pass.
-
-### [ ] Session 25 — Execute approved documentation/archive cleanup
-
-**Goal:** Remove misleading navigation and historical clutter while preserving useful history.
-
-**Deliverable:**
-- Apply the approved archive/delete/move decisions.
-- Replace stale inbound links.
-- Keep Git history as the recovery mechanism unless another archive location was approved.
-
-**Done when:**
-- No canonical document links to deleted material.
-- A repository-wide link check passes.
+- A new contributor can explain the product value and run the system from source to preview.
+- Each concept has one canonical home.
+- The README routes readers to detail instead of duplicating it.
+- Historical documents cannot be mistaken for current instructions.
 
 ---
 
-## Track D — Build the canonical knowledge suite
+## Deferred — Personalisation and cost
 
-### [ ] Session 26 — Define documentation information architecture
+Personalisation is not part of the immediate ten-session sequence, but current changes must preserve it as a first-class capability.
 
-**Goal:** Establish a small, explicit source-of-truth set before rewriting documents.
+Future work should:
 
-**Deliverable:**
-- Define document names, audiences, ownership, scope, and update triggers.
-- Add a documentation index and precedence rules.
-- Map existing useful content into the new structure.
+- Define which learner attributes can alter examples, explanation depth, language, pace, modality, assessment, and visual treatment.
+- Separate reusable shared artifacts from learner-specific late-bound choices.
+- Reuse plans, scene variants, assets, narration, and renders where they remain instructionally appropriate.
+- Measure marginal generation cost against learner value.
+- Prove one constrained personalisation use case before generalising the architecture.
 
-**Done when:**
-- Every core concept has exactly one canonical home.
-- Historical/status documents cannot override current contracts.
+Avoid near-term decisions that hard-code one static script, scene sequence, format, or visual treatment as the only supported output.
 
-### [ ] Session 27 — Write the business and product context guide
+## Decisions to capture when relevant
 
-**Goal:** Explain why KnoMotion exists and what differentiates it.
-
-**Deliverable:**
-- Cover the learning-video problem, content-in/video-out proposition, personalisation USP, quality expectations, cost sensitivity, and non-goals.
-- Clearly separate current capabilities from end-state vision.
-
-**Done when:**
-- A new developer can explain the customer value and major product trade-offs without reading implementation files.
-
-### [ ] Session 28 — Write the core engine guide
-
-**Goal:** Teach the current renderer architecture from JSON to pixels.
-
-**Deliverable:**
-- Cover composition, `SceneRenderer`, layouts/slots, mid-scenes, SDK elements, beats, themes, transitions, audio/captions, schemas, capabilities, and Studio.
-- Include extension checklists and common failure modes.
-
-**Done when:**
-- Examples validate against current contracts.
-- Every referenced path and capability is verified against code.
-
-### [ ] Session 29 — Write the pipeline guide
-
-**Goal:** Teach the compiler workflow and operational model.
-
-**Deliverable:**
-- Cover stages, artifacts, metadata, provider boundaries, fan-out, validation/repair, quality reports, resume/replay, CLI usage, and failure handling.
-- Include local mock and production-provider walkthroughs.
-
-**Done when:**
-- A developer can trace any output back to its inputs and stage decisions.
-
-### [ ] Session 30 — Write the quality and testing playbook
-
-**Goal:** Make visual quality repeatable rather than subjective handoff knowledge.
-
-**Deliverable:**
-- Document benchmark fixtures, structural/semantic/visual checks, Studio review, still/clip inspection, desktop/mobile coverage, and acceptance gates.
-- Define when deterministic checks, human review, and optional vision review apply.
-
-**Done when:**
-- Every visual change has a clear minimum evidence standard.
-
-### [ ] Session 31 — Write agent and contributor onboarding
-
-**Goal:** Let agents and developers work safely without reading historical plans.
-
-**Deliverable:**
-- Add setup, package boundaries, canonical commands, dependency-version rules, change checklists, documentation precedence, and task handoff format.
-- Explain how to choose between engine, pipeline, schema, and documentation changes.
-
-**Done when:**
-- A fresh environment can run the documented checks without hidden steps.
-
-### [ ] Session 32 — Refresh the root README and documentation index
-
-**Goal:** Make the repository landing page accurately represent the business and implementation.
-
-**Deliverable:**
-- Update the README with current product framing, architecture, pipeline status, quick starts, and links to the canonical suite.
-- Remove stale counts, transitions, composition instructions, and roadmap claims.
-
-**Done when:**
-- The README is concise, accurate, and routes readers to detail rather than duplicating it.
-
-### [ ] Session 33 — Add documentation drift checks
-
-**Goal:** Keep the new suite trustworthy.
-
-**Deliverable:**
-- Check internal links, referenced paths, mid-scene counts/keys, schema examples, command validity, and generated capability sections where practical.
-- Add the checks to the normal validation workflow.
-
-**Done when:**
-- Known stale-count and broken-link fixtures fail automatically.
-
----
-
-## Deferred track — Personalisation and cost
-
-These sessions are intentionally not part of the immediate implementation sequence. Earlier architecture work must preserve their feasibility.
-
-### [ ] Future Session P1 — Define the personalisation product contract
-
-**Goal:** Decide which aspects of content may vary by learner and which must remain instructionally stable.
-
-**Topics:** prior knowledge, goals, role/context, examples, language, accessibility, pace, format, assessment evidence, brand, and consent/privacy.
-
-### [ ] Future Session P2 — Design cost-aware personalisation architecture
-
-**Goal:** Maximize perceived individual relevance without regenerating every artifact for every learner.
-
-**Topics:** reusable content modules, late-binding variables, scene variants, cache keys, cohort-level generation, deterministic assembly, TTS reuse, asset reuse, model routing, quality gates, and cost telemetry.
-
-### [ ] Future Session P3 — Build and evaluate one personalisation slice
-
-**Goal:** Prove measurable learner value and acceptable marginal cost with one constrained use case before generalizing.
-
----
-
-## Decisions to capture as work progresses
-
-- Target output formats and minimum quality bar for each.
-- Whether optional vision QA is permitted, and its privacy/cost budget.
-- Production LLM and TTS providers, fallback policy, and cost ceilings.
-- Canon/showcase role after the generic pipeline is complete.
-- Archive and KnoSlides ownership.
-- Personalisation dimensions that create learner value versus superficial variation.
+- Minimum acceptable output quality for desktop and mobile.
+- Production LLM and TTS providers and cost ceilings.
+- Which new content structures deserve dedicated mid-scenes.
+- Whether canon/showcase compositions remain active references.
+- Ownership and treatment of `Archive/` and KnoSlides.
+- Which personalisation dimensions provide genuine learner value rather than superficial variation.
