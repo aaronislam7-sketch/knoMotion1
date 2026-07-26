@@ -24,6 +24,9 @@ import { calculateTransitionSeriesDuration } from '../sdk/transitions';
 import { VideoConfigSchema } from '../sdk/schemas/videoConfig.schema';
 import type { VideoConfig } from '../sdk/schemas/videoConfig.schema';
 
+// Pipeline preview harness (P4) — loads public/pipeline-preview/config.json
+import { calculatePipelinePreviewMetadata } from './PipelinePreview';
+
 const calculateGenericMetadata: CalculateMetadataFunction<VideoConfig> = ({
   props,
 }) => {
@@ -426,6 +429,23 @@ export const Root: React.FC = () => {
           format: 'desktop' as const,
         }}
         calculateMetadata={calculateGenericMetadata}
+      />
+
+      {/* ================================================================= */}
+      {/* PIPELINE PREVIEW (P4) */}
+      {/* Renders the config staged by `npm run run -- preview <jobId>` */}
+      {/* (from knomotion-pipeline/) via public/pipeline-preview/config.json. */}
+      {/* Shows an instructional placeholder when nothing is staged. */}
+      {/* ================================================================= */}
+      <Composition
+        id="PipelinePreview"
+        component={GenericVideoPlayer}
+        durationInFrames={1}
+        fps={FPS}
+        width={1920}
+        height={1080}
+        defaultProps={{ scenes: [], format: 'desktop' as const }}
+        calculateMetadata={calculatePipelinePreviewMetadata}
       />
     </>
   );

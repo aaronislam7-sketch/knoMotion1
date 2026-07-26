@@ -13,3 +13,6 @@ node_modules
 dist/index.html
 package.json
 package-lock.json
+
+# Staged pipeline preview config (written by `npm run run -- preview <jobId>`)
+public/pipeline-preview/
