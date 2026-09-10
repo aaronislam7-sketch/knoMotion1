@@ -139,10 +139,10 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 
 | Branch | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `origin/cursor/pipeline-integration-8c94` and all other `origin/cursor/*-8c94` | REMOVE | Two-dot diff against `main` differs only in `knomotion-pipeline/package-lock.json`; no files exist on the branch that are absent from `main`. | 2026-09-10 | — |
-| `origin/cursor/phase0-preview-repair-8e6a` (PR #72) | KEEP → merge | Implements July A1 + A2; M0 item 1. | 2026-09-10 | — |
+| `origin/cursor/*-8c94` (9 branches: schemas, midscene-schema-reconciliation, build-doc, consolidated, integration, p0-infra, p3-prompts, validation-engine, tech-debt-register) | REMOVED | Deleted 2026-09-10 after owner go-ahead. Pre-check: integration branch's only non-lockfile lines vs `main` were the pre-#72 orchestrator/CLI; the stacked branches held only older versions of files the integration branch superseded. No open PRs. | 2026-09-10 | (remote op, no PR) |
+| `origin/cursor/phase0-preview-repair-8e6a` (PR #72) | MERGED | On `main` as `f4cb348a`. Branch can be deleted with the other merged branches below. | 2026-09-10 | #72 |
 | `origin/cursor/session-roadmap-todo-7cfc` (PR #70) | DECIDE | Third roadmap (`NEXT_SESSIONS.md`); recommend close in favour of `Sept_DevPlan.md`. | 2026-09-10 | — |
-| `origin/cursor/july-devplan-8e6a`, `origin/cursor/pipeline-consolidated-8c94` | REMOVE | Merged (PRs #71, #69). | 2026-09-10 | — |
+| `origin/cursor/july-devplan-8e6a`, `origin/cursor/phase0-preview-repair-8e6a` | REMOVE | Merged (PRs #71, #72). Not yet deleted — batch with the Feb–Jun sweep below. | 2026-09-10 | — |
 | `origin/Builder_And_Polish` and the remaining ~20 `origin/cursor/*` branches from Feb–Jun | VERIFY | One `git log main..origin/<branch> --oneline` each; delete any with zero unique commits or whose PR is closed/merged. | 2026-09-10 | — |
 
 ---

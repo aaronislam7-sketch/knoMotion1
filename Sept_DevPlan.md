@@ -80,9 +80,9 @@ Each milestone ends with a runnable command and a visible result. Do not start t
 ### M0 — Land what exists, make output visible
 *Principles: Pipeline, Documentation*
 
-1. Review and merge **PR #72** (repair write-back + `preview <jobId>` harness). Do not rebuild these. — *owner*
-2. Close **PR #70** or fold any unique point into this file. — *owner*
-3. Delete the `origin/cursor/*-8c94` branches (verified fully merged). — *awaiting go-ahead (destructive)*
+1. Review and merge **PR #72** (repair write-back + `preview <jobId>` harness). Do not rebuild these. — **done (merged to `main` as `f4cb348a`)**
+2. Close **PR #70** or fold any unique point into this file. — *owner, pending*
+3. Delete the `origin/cursor/*-8c94` branches (verified fully merged). — **done (9 remotes deleted 2026-09-10)**
 4. Docs truth pass on the two load-bearing docs only: `pipeline_build.md` (§1 run from `main`; §6 branch map is history) and `README.md` (mid-scene table shows 6 of 11, no mention of the pipeline). — **done, PR #74**
 5. Start `RETAIN_ARTIFACTS.md` (PR #73) and add the "every PR updates it" rule to `pipeline_build.md` (PR #74). — **done**
 
