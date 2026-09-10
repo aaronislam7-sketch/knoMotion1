@@ -22,12 +22,12 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 
 | Path | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `README.md` | KEEP | Entry point; mid-scene table stale (6 of 11), no pipeline section — fix in M0. | 2026-09-10 | — |
+| `README.md` | KEEP | Entry point. Truth pass done: 11 mid-scenes, pipeline quick start, doc index, all `Root.tsx` composition IDs, transition statuses from the manifest, file tree with pipeline. | 2026-09-10 | M0 docs PR |
 | `Sept_DevPlan.md` | KEEP | Current plan. | 2026-09-10 | — |
 | `RETAIN_ARTIFACTS.md` | KEEP | This file. | 2026-09-10 | — |
-| `pipeline_build.md` | KEEP | Single pipeline handoff doc; §1 branch instructions stale — fix in M0. | 2026-09-10 | — |
+| `pipeline_build.md` | KEEP | Single pipeline handoff doc. Truth pass done: runs from `main`, §6 marked historical, Sept plan + retain-register rule added to §4/§5, §7.3/§10 point at the Sept plan for sequencing. PR #72 separately updates the write-back and P4 lines. | 2026-09-10 | M0 docs PR |
 | `TECH_DEBT.md` | KEEP | TD-001…TD-008 all still open; M2 consumes it. Delete items as they resolve. | 2026-09-10 | — |
-| `July_DevPlan.md` | KEEP (historical) | Superseded by `Sept_DevPlan.md`; keep for the §3 root-cause analysis it contains. Add an "ARCHIVED" header in M0. Move to `Archive/docs/` during the archiving activity (D6). | 2026-09-10 | — |
+| `July_DevPlan.md` | KEEP (historical) | Superseded by `Sept_DevPlan.md`; keep for the §3 root-cause analysis it contains. "SUPERSEDED" header added. Move to `Archive/docs/` during the archiving activity (D6). | 2026-09-10 | M0 docs PR |
 | `BUILD_STATUS.md` | VERIFY | Renderer roadmap through Chunk 7 (May). Useful for the architecture-decisions section only; the "10/10 engine alignment" claim is contradicted by TD-001…004. Check: does anything other than the kickstart prompt reference it? Likely fold decisions into `docs/ARCHITECTURE.md` and archive. | 2026-09-10 | — |
 | `deletion-plan.md` | REMOVE (after M0) | Analysis-only; every item is carried into this file below. | 2026-09-10 | — |
 | `SDK.md` (2183 lines) | VERIFY | Developer SDK reference; counts wrong (10 mid-scenes, 23 elements); documents the `positionToCSS` ambiguity rather than fixing it. Check what `docs/ARCHITECTURE.md` already covers; likely trim to what is not duplicated. | 2026-09-10 | — |
@@ -42,7 +42,9 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `public/` (blush video, 4 lotties) | KEEP | Static assets served to the renderer; `public/pipeline-preview/` will be added (gitignored) by PR #72. | 2026-09-10 | — |
 | `scripts/download-animated-emojis.sh`, `scripts/install-render-deps.sh` | VERIFY | Not referenced by `.devcontainer/setup.sh` or any doc (grep 2026-09-10). Read each; `install-render-deps.sh` may be worth folding into TD-008's env setup, otherwise `REMOVE`. | 2026-09-10 | — |
 | `.devcontainer/` | KEEP | Codespaces setup; installs Chrome headless deps needed for render-check (M2) and render (M4). M1 needs an `ELEVENLABS_API_KEY` secret (D1) — document in `pipeline_build.md`, not here. | 2026-09-10 | — |
-| `index.html`, `vite.config.js`, `tailwind.config.js`, `postcss.config.cjs`, `remotion.config.ts`, `tsconfig.json` | KEEP | Root build config for the admin app and Remotion. | 2026-09-10 | — |
+| `index.html`, `vite.config.js`, `tailwind.config.js`, `postcss.config.cjs`, `remotion.config.ts`, `tsconfig.json` | KEEP | Root build config for the admin app and Remotion. `remotion.config.ts` sets the entry point to `KnoMotion-Videos/src/remotion/index.ts`. | 2026-09-10 | — |
+| `package.json` scripts `render:tiktok-brain`, `render:tiktok-adhd`, `render:tiktok-80ms` | VERIFY → likely REMOVE | Each passes `src/remotion/index.ts`, which does not exist at the repo root (entry is `KnoMotion-Videos/src/remotion/index.ts`). Either fix the path or drop them; README now documents the working command instead. | 2026-09-10 | M0 docs PR |
+| `docs/instructions-llm-guide.md` | (see §4) | Removed from the README doc index in the M0 truth pass; file untouched pending M3. | 2026-09-10 | M0 docs PR |
 
 ## 2. Root `package.json` dependencies
 
@@ -137,10 +139,10 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 
 | Branch | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `origin/cursor/pipeline-integration-8c94` and all other `origin/cursor/*-8c94` | REMOVE | Two-dot diff against `main` differs only in `knomotion-pipeline/package-lock.json`; no files exist on the branch that are absent from `main`. | 2026-09-10 | — |
-| `origin/cursor/phase0-preview-repair-8e6a` (PR #72) | KEEP → merge | Implements July A1 + A2; M0 item 1. | 2026-09-10 | — |
+| `origin/cursor/*-8c94` (9 branches: schemas, midscene-schema-reconciliation, build-doc, consolidated, integration, p0-infra, p3-prompts, validation-engine, tech-debt-register) | REMOVED | Deleted 2026-09-10 after owner go-ahead. Pre-check: integration branch's only non-lockfile lines vs `main` were the pre-#72 orchestrator/CLI; the stacked branches held only older versions of files the integration branch superseded. No open PRs. | 2026-09-10 | (remote op, no PR) |
+| `origin/cursor/phase0-preview-repair-8e6a` (PR #72) | MERGED | On `main` as `f4cb348a`. Branch can be deleted with the other merged branches below. | 2026-09-10 | #72 |
 | `origin/cursor/session-roadmap-todo-7cfc` (PR #70) | DECIDE | Third roadmap (`NEXT_SESSIONS.md`); recommend close in favour of `Sept_DevPlan.md`. | 2026-09-10 | — |
-| `origin/cursor/july-devplan-8e6a`, `origin/cursor/pipeline-consolidated-8c94` | REMOVE | Merged (PRs #71, #69). | 2026-09-10 | — |
+| `origin/cursor/july-devplan-8e6a`, `origin/cursor/phase0-preview-repair-8e6a` | REMOVE | Merged (PRs #71, #72). Not yet deleted — batch with the Feb–Jun sweep below. | 2026-09-10 | — |
 | `origin/Builder_And_Polish` and the remaining ~20 `origin/cursor/*` branches from Feb–Jun | VERIFY | One `git log main..origin/<branch> --oneline` each; delete any with zero unique commits or whose PR is closed/merged. | 2026-09-10 | — |
 
 ---
