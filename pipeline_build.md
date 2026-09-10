@@ -1,8 +1,8 @@
 # KnoMotion Pipeline — Build Progress & Handoff
 
 > Handoff for the next agent continuing the KnoMotion content pipeline.
-> Read this top-to-bottom, then `TECH_DEBT.md` (engine issues) before coding.
-> Last updated: 2026‑07‑20.
+> Read this top-to-bottom, then `Sept_DevPlan.md` (the current plan and milestone order) and `TECH_DEBT.md` (engine issues) before coding.
+> Last updated: 2026‑09‑10 (docs truth pass — Sept plan M0). The pipeline is on `main`; §6 is kept as history only.
 
 ---
 
@@ -12,7 +12,7 @@
 - It is a **structured compiler**, not a chatbot: one orchestrator, many typed stages, LLM only where judgement is needed, a Zod contract + artifact on disk at every step, and a deterministic validation + surgical-repair safety net.
 - **Stages 0–7 are implemented** (intake → content-analysis → module-planning → video-planning → script-generation → scene-json-generation → validation → repair). **Stages 8–12** (TTS, captions, beat-alignment, assembly, render) are **scaffolded stubs**.
 - It runs **end-to-end** with a `mock` provider (offline, deterministic) and against **OpenAI** (`--provider openai`).
-- **The open problem to prioritise: output video QUALITY.** Configs can pass validation yet render poorly (text not showing, mid-scenes blank). See **§7 — this is the headline ask.**
+- **The open problem to prioritise: output video QUALITY.** Configs can pass validation yet render poorly (text not showing, mid-scenes blank). §7 describes the failure modes; **the sequenced plan for fixing them is `Sept_DevPlan.md`** (deterministic timing driven by TTS, guardrails, then render/PDF).
 
 ---
 
@@ -44,8 +44,8 @@ knomotion-pipeline/                 ← standalone package (own package.json, ts
 ### Run it
 
 ```bash
-# 1) get everything in one branch (see §6 for the branch map)
-git checkout cursor/pipeline-integration-8c94 && git pull
+# 1) everything is on main — no special branch needed
+git checkout main && git pull
 cd knomotion-pipeline && npm install
 
 # 2) offline, deterministic (no API key) — proves the machinery:
@@ -54,8 +54,8 @@ npm run run -- --source worldcup
 # 3) real LLM run (needs OPENAI_API_KEY in env / Cloud Agents secret):
 npm run run -- --source worldcup --provider openai
 
-# tests:
-npm test                    # 17 pass, 2 skip (drift guardrail skips until renderer deps installed)
+# tests (must stay green; the pass/skip counts grow as rules are added):
+npm test                    # 2 skips are expected until the root `npm install` has run (drift guardrail needs renderer deps)
 
 # render proof (needs one-time root `npm install` for Remotion):
 CFG=$(ls knomotion-pipeline/pipeline/artifacts/*/videos/*/05-knomotion-video-config.json | head -1)
@@ -117,13 +117,16 @@ source text
 - **Validation engine (`validate.ts`)** — rules: `midscene_name`, `midscene_config` (deep ajv), `layout_type`, `transition_type`, `slot_names`, `slots_filled`, `sidebyside_layout`, `duration_bounds`, `beat_timing`, `text_length`, `audio_url`, `lottie_key`. Severity policy: **error** = renders broken → blocks + triggers repair; **warning** = quality/uncertain.
 - **LLM-drift coercions (in the schemas)** — self-heal common model mistakes at parse time: `null`→absent, difficulty synonyms/case, key aliases (`problem`→`description`, `misconception`→`statement`, `id`→`sceneId`, …), `background:"x"`→`{preset:"x"}`, `layout:"x"`→`{type:"x"}`, background/layout **vocabulary folding** (`focus`→`spotlight`, `twoColumn`→`columnSplit`, `sideBySide`→`full`), flat-scene → `config` lifting, `durationSeconds`→`durationInFrames`, and dropping non-object junk in `scenes[]`.
 - **CLI** — `--source <name>` (from `sources/`), `--input <path>`, `--text "…"`, `--title`, `--format`, `--provider`, `--out`, `--stop-after`, `--log-level`.
-- **Tests (vitest)** — `validation.test.ts` (one broken fixture per rule + baseline), `artifact-store.test.ts`, `orchestrator.test.ts` (full mock run), `contract-drift.test.ts` (pipeline‑valid ⇒ renderer‑valid guardrail). 17 pass / 2 skip.
+- **Tests (vitest)** — `validation.test.ts` (one broken fixture per rule + baseline), `artifact-store.test.ts`, `orchestrator.test.ts` (full mock run), `contract-drift.test.ts` (pipeline‑valid ⇒ renderer‑valid guardrail). All must pass; the 2 drift skips clear once root renderer deps are installed.
 
 ---
 
 ## 4. Reference documents to read
 
+- **`Sept_DevPlan.md`** (repo root) — the current plan: milestones M0–M5, the revised stage order (TTS before scene JSON, deterministic timing, render-check), scope decisions D1–D6. Start here for *what to do next*.
+- **`RETAIN_ARTIFACTS.md`** (repo root) — the living keep/remove register. Every PR that touches a directory must add or update rows for what it confirmed live or dead (see §5).
 - **`TECH_DEBT.md`** (repo root) — pre-investigated engine issues, several of which directly cause video-quality problems (see §7).
+- `July_DevPlan.md` — superseded by `Sept_DevPlan.md`; still the fullest root-cause analysis (§3 there) of why generated videos are weak.
 - `BUILD_STATUS.md` — renderer roadmap; note the `@remotion/layout-utils` text-fitting item and the `charByChar` line-spacing known issue.
 - `docs/reference-llm-guide.md` — the scene-JSON authoring contract (kept in sync via PR #62).
 - `KnoMotion-Videos/src/sdk/capability-manifest.json` — machine-readable engine capabilities (reconciled with the code in PR #62; includes `knownIssues`).
@@ -138,12 +141,16 @@ source text
 - **Node ESM caveats:** run TS via `tsx`/`vitest` (extensionless imports are fine there). `npm run run -- …` passes flags through.
 - **Terminal gotchas users hit:** curly/"smart" quotes break arg parsing (use straight quotes or `--source`); a fresh machine needs a **root `npm install`** for Remotion/renderer deps (see `TECH_DEBT.md` TD‑008).
 - **Model ids** live only in `pipeline/config/models.ts`.
+- **Retain register:** every PR that touches a directory adds or updates rows in `RETAIN_ARTIFACTS.md` for the files it confirmed live, dead, or shimmed (path · status · one-line evidence · date · PR). Nothing is deleted until its row says `REMOVE` with evidence and any replacement is on `main`. There is no separate cleanup phase — the register is the cleanup.
+- **This doc is updated in the same PR** that changes behaviour it describes.
 
 ---
 
-## 6. Branch & PR map
+## 6. Branch & PR map (historical)
 
-Stacked pipeline PRs (merge in order): **#61 → #64 → #65 → #67**, plus independent **#62** and **#63**.
+> **Everything below was consolidated into `main` by PR #69** (`cursor/pipeline-consolidated-8c94`). The `cursor/pipeline-integration-8c94` branch was verified on 2026-09-10 to differ from `main` only in `package-lock.json`; the `*-8c94` remotes are safe to delete (tracked in `RETAIN_ARTIFACTS.md` §8). Do not check out any of these branches to run the pipeline — run from `main` (§1).
+
+Stacked pipeline PRs (merged in order): **#61 → #64 → #65 → #67**, plus independent **#62** and **#63**.
 
 | PR | Branch | Contents |
 |----|--------|----------|
@@ -153,9 +160,11 @@ Stacked pipeline PRs (merge in order): **#61 → #64 → #65 → #67**, plus ind
 | #64 | `cursor/pipeline-p0-infra-8c94` | P0: orchestrator, stage interface, artifact store, LLM client, CLI (base #61) |
 | #65 | `cursor/pipeline-validation-engine-8c94` | P1+P2: ajv capability bridge, Stage-6 rule engine, tests (base #64) |
 | #67 | `cursor/pipeline-p3-prompts-8c94` | P3: real prompts, model routing, LLM-drift hardening (base #65) |
-| #66 | `cursor/pipeline-integration-8c94` | **RUN-ONLY, DO NOT MERGE** — everything above (incl. #62) merged for running/UAT |
-
-`cursor/pipeline-integration-8c94` is the single **"run from here"** branch. Keep it updated (merge new work into it) as the convenience run target; do the real review/merge via the stacked PRs.
+| #66 | `cursor/pipeline-integration-8c94` | Was the run-only UAT branch (closed, superseded by #69) |
+| #69 | `cursor/pipeline-consolidated-8c94` | **Merged** — all of the above, consolidated onto `main` |
+| #71 | `cursor/july-devplan-8e6a` | **Merged** — `July_DevPlan.md` |
+| #72 | `cursor/phase0-preview-repair-8e6a` | Repair write-back fix + `preview <jobId>` harness (Sept plan M0 item 1) |
+| #73 | `cursor/sept-devplan-retain-list-25fd` | `Sept_DevPlan.md` + `RETAIN_ARTIFACTS.md` |
 
 ---
 
@@ -188,6 +197,8 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 
 ### 7.3 Recommended plan to raise quality (in priority order)
 
+> **Superseded in sequencing by `Sept_DevPlan.md`.** The items below are still the right ingredients, but the order and a few choices changed: TTS now runs *before* scene JSON so real audio duration drives timing (Sept M1); timing rules, slot/layout reconciliation, text budget and a *deterministic* render-check are grouped as guardrails (Sept M2); the optional LLM-vision pass in item 1 and the structured-outputs refactor in item 7 are explicitly deferred. Read this section for the *why*; read the Sept plan for the *what next*.
+
 1. **Add a render-in-the-loop QA stage (highest leverage).** After validation, render **stills at key frames** (`@remotion/renderer` `renderStill()` against the `KnoMotionVideo` composition) for each scene, and check them:
    - deterministic checks first: detect near-empty frames (blank slot = a mid-scene rendered nothing), detect text bounding boxes overflowing the slot;
    - optionally an LLM **vision** pass ("is the text visible and legible? is any region empty?") that feeds issues back into the repair loop.
@@ -216,7 +227,7 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 
 ## 9. How to validate your changes (UAT recap)
 
-- `npm test` (offline) — must stay green (17/2). Add a fixture/test for every new rule or coercion.
+- `npm test` (offline) — must stay green. Add a fixture/test for every new rule, guardrail or coercion; each guardrail ships with a deliberately broken fixture that proves it fires.
 - `npm run run -- --source worldcup` (mock) — full chain, all `passed`.
 - `npm run run -- --source worldcup --provider openai` — real content; watch the `WARN … { issues: [...] }` lines (exact failing JSON paths) to spot new LLM drift.
 - Render proof — `npx remotion still … KnoMotionVideo --props=<05-…config.json>`; **inspect the image** (this is where quality regressions show up).
@@ -230,4 +241,4 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 3. **Structured outputs** for planning stages (adherence).
 4. Then resume + the out-of-scope stages (TTS → captions → beat-alignment → assembly → render) as the audio/render track.
 
-Keep the run branch `cursor/pipeline-integration-8c94` updated so the user always has a single command to try your work.
+> This list predates `Sept_DevPlan.md`; where they disagree, the Sept plan wins (it moves TTS ahead of the quality pass and defers structured outputs). Work from `main`; there is no longer a separate run branch.
