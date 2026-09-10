@@ -10,3 +10,6 @@ pipeline/artifacts/*
 # Re-include this package's manifests so the standalone package is tracked.
 !package.json
 !package-lock.json
+
+# TTS cache (content-addressed provider responses)
+pipeline/cache/
