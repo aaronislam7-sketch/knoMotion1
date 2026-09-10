@@ -1,5 +1,5 @@
 /**
- * Stage 6 — Deterministic Validation.
+ * Stage 8 — Deterministic Validation.
  *
  * Input:  KnoMotionVideoConfig.json
  * Output: ValidationReport.json
@@ -14,7 +14,7 @@
 import { z } from 'zod';
 import { withMeta } from './common';
 
-/** Canonical rule identifiers checked by Stage 6. Extensible over time. */
+/** Canonical rule identifiers checked by Stage 8. Extensible over time. */
 export const ValidationRuleSchema = z.enum([
   'schema', // structural Zod validation against KnoMotionVideoConfigSchema
   'unknown_keys', // no undocumented keys (strict)

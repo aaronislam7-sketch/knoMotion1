@@ -1,5 +1,5 @@
 /**
- * Stage 9 — Caption Generation & Alignment (deterministic). OUT OF SCOPE — STUB.
+ * Captions (deferred to M5, deterministic). STUB.
  *
  * Input:  TTS audio + narration text
  * Output: CaptionsManifest.json

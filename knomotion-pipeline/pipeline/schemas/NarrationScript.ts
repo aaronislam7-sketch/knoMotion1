@@ -8,7 +8,7 @@
  * support the narration, not the other way around. Produces on-screen text and
  * emphasis phrases alongside the spoken script.
  *
- * The `voice` block is scaffolding for Stage 8 (TTS) — it carries no audio
+ * The `voice` block is consumed by Stage 5 (TTS) — it carries no audio
  * URLs (none exist yet) and is purely a request for how narration should be
  * voiced.
  */
@@ -16,7 +16,7 @@
 import { z } from 'zod';
 import { renameKeys, withMeta } from './common';
 
-/** Voicing intent for TTS. Scaffold only — consumed by Stage 8 later. */
+/** Voicing intent for TTS. Consumed by Stage 5 (TTS). */
 export const VoiceProfileSchema = z.object({
   voiceId: z.string().optional().describe('Provider voice identifier (resolved at TTS time)'),
   style: z.string().optional().describe('Delivery style, e.g. "warm", "energetic", "calm"'),
@@ -49,7 +49,7 @@ export const SceneNarrationSchema = z.preprocess(
   estimatedDurationSeconds: z
     .number()
     .min(0.5)
-    .describe('Estimated spoken duration; reconciled with real TTS audio in Stage 10'),
+    .describe('Estimated spoken duration; reconciled with real TTS audio by Stage 6 (timing)'),
   notes: z.string().optional().describe('Direction notes for scene JSON generation'),
   }),
 );
@@ -58,7 +58,7 @@ export type SceneNarration = z.infer<typeof SceneNarrationSchema>;
 export const NarrationScriptSchema = withMeta({
   videoId: z.string().min(1).describe('Matches the VideoPlan.videoId'),
   title: z.string().min(1).describe('Video title'),
-  voice: VoiceProfileSchema.optional().describe('Requested voicing for TTS (scaffold for Stage 8)'),
+  voice: VoiceProfileSchema.optional().describe('Requested voicing for TTS (consumed by Stage 5)'),
   scenes: z
     .array(SceneNarrationSchema)
     .min(1)

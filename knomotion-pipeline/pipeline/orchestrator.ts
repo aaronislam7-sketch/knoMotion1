@@ -8,8 +8,9 @@
  * Flow:
  *   intake -> content-analysis -> module-planning
  *   then, per VideoBrief (fan-out):
- *     video-planning -> script-generation -> scene-json-generation
- *       -> validation -> (repair -> re-validate)*<=maxRepairAttempts
+ *     video-planning -> script-generation -> tts -> timing -> scene-json-generation
+ *       -> validation -> (repair -> re-time -> re-validate)*<=maxRepairAttempts
+ *       -> assembly (audio merged into the config)
  */
 
 import path from 'node:path';
@@ -21,20 +22,25 @@ import { createContext, type PipelineContext } from './core/context';
 import { createLLMClient } from './core/llm';
 import { runStage, type Stage } from './core/stage';
 import { makeJobId } from './core/ids';
+import { applySceneTiming } from './core/timing';
 import type { PipelineStage } from './schemas/common';
 import type { ContentMap } from './schemas/ContentMap';
 import type { ModulePlan } from './schemas/ModulePlan';
 import { KnoMotionVideoConfigSchema, type KnoMotionVideoConfig } from './schemas/KnoMotionVideoConfig';
 import type { ValidationReport } from './schemas/ValidationReport';
+import type { SceneTimingArtifact } from './schemas/SceneTiming';
 import {
   intakeStage,
   contentAnalysisStage,
   modulePlanningStage,
   videoPlanningStage,
   scriptGenerationStage,
+  ttsStage,
+  timingStage,
   sceneJsonGenerationStage,
   validationStage,
   repairStage,
+  assemblyStage,
 } from './stages';
 import type { IntakeInput } from './stages/intake/runIntake';
 
@@ -53,6 +59,10 @@ export interface VideoResult {
   configPath: string;
   validationPath: string;
   repairAttempts: number;
+  /** Scenes with narration audio attached by assembly (0 for the mock TTS provider). */
+  narrationClips: number;
+  /** Total video length after transition overlap is ignored (sum of scene durations). */
+  durationInFrames: number;
 }
 
 export interface RunResult {
@@ -64,11 +74,14 @@ export interface RunResult {
 
 const STAGE_ORDER: PipelineStage[] = [
   'intake', 'content-analysis', 'module-planning', 'video-planning',
-  'script-generation', 'scene-json-generation', 'validation', 'repair',
+  'script-generation', 'tts', 'timing', 'scene-json-generation', 'validation', 'repair', 'assembly',
 ];
 
-/** The renderable deliverable for a video. Repair writes back to this file. */
+/** The renderable deliverable for a video. Repair and assembly write back to this file. */
 const CONFIG_ARTIFACT = '05-knomotion-video-config.json';
+const TTS_ARTIFACT = '04a-tts-manifest.json';
+const TIMING_ARTIFACT = '04b-scene-timing.json';
+const RENDER_MANIFEST_ARTIFACT = '08-render-manifest.json';
 
 export const runPipeline = async (input: IntakeInput, options: RunOptions = {}): Promise<RunResult> => {
   const config = loadConfig(options.config);
@@ -115,8 +128,17 @@ export const runPipeline = async (input: IntakeInput, options: RunOptions = {}):
     );
     if (shouldStop('script-generation')) continue;
 
-    let config0 = await execute(
-      ctx, sceneJsonGenerationStage, { videoPlan, narrationScript },
+    // Audio first: real narration durations drive scene timing, not LLM guesses.
+    const ttsManifest = await execute(ctx, ttsStage, { narrationScript }, path.join(dir, TTS_ARTIFACT));
+    if (shouldStop('tts')) continue;
+
+    const sceneTiming = await execute(
+      ctx, timingStage, { narrationScript, ttsManifest }, path.join(dir, TIMING_ARTIFACT),
+    );
+    if (shouldStop('timing')) continue;
+
+    const config0 = await execute(
+      ctx, sceneJsonGenerationStage, { videoPlan, narrationScript, sceneTiming },
       path.join(dir, CONFIG_ARTIFACT),
     );
     if (shouldStop('scene-json-generation')) continue;
@@ -124,16 +146,26 @@ export const runPipeline = async (input: IntakeInput, options: RunOptions = {}):
     // Validate, then surgically repair failing scenes up to the cap. When any
     // repair patch is applied, validateAndRepair persists the repaired config
     // back to CONFIG_ARTIFACT so configPath always points at the final config.
-    const { report, repairAttempts } = await validateAndRepair(ctx, brief.id, config0, dir);
+    const { report, repairAttempts, config: validated } = await validateAndRepair(ctx, brief.id, config0, dir, sceneTiming);
+    if (shouldStop('validation') || shouldStop('repair')) {
+      videos.push(videoResult(store.jobDir, dir, brief.id, report, repairAttempts, 0, sceneTiming.totalDurationInFrames));
+      continue;
+    }
 
-    videos.push({
-      videoId: brief.id,
-      status: report.status,
-      valid: report.valid,
-      configPath: path.join(store.jobDir, dir, CONFIG_ARTIFACT),
-      validationPath: path.join(store.jobDir, dir, '06-validation-report.json'),
-      repairAttempts,
+    // Assembly attaches narration audio and writes the assembled config back
+    // over CONFIG_ARTIFACT so preview/render see the same deliverable.
+    const renderManifest = await execute(
+      ctx, assemblyStage, { videoId: brief.id, config: validated, ttsManifest, sceneTiming },
+      path.join(dir, RENDER_MANIFEST_ARTIFACT),
+    );
+    await store.writeArtifact(path.join(dir, CONFIG_ARTIFACT), KnoMotionVideoConfigSchema, renderManifest.props);
+    await store.appendManifest({
+      stage: 'assembly', artifact: CONFIG_ARTIFACT, path: path.join(dir, CONFIG_ARTIFACT), status: 'ok',
+      producedBy: 'deterministic', at: ctx.now().toISOString(), videoId: brief.id,
     });
+    const narrationClips = renderManifest.props.scenes.filter((s) => s.audio?.narration?.src).length;
+
+    videos.push(videoResult(store.jobDir, dir, brief.id, report, repairAttempts, narrationClips, sceneTiming.totalDurationInFrames));
   }
 
   logger.info('Pipeline run complete', { videos: videos.length });
@@ -171,11 +203,18 @@ async function execute<In extends z.ZodTypeAny, Out extends z.ZodTypeAny>(
   }
 }
 
+/**
+ * Validates `config`, repairing failing scenes up to the cap. When `timing` is
+ * supplied, every repaired scene has its computed timing re-applied before
+ * re-validation, so the repair LLM can never re-introduce timing drift.
+ */
 export async function validateAndRepair(
-  ctx: PipelineContext, videoId: string, config: KnoMotionVideoConfig, dir: string,
+  ctx: PipelineContext, videoId: string, config: KnoMotionVideoConfig, dir: string, timing?: SceneTimingArtifact,
 ): Promise<{ report: ValidationReport; config: KnoMotionVideoConfig; repairAttempts: number }> {
   let working = config;
   let anyScenePatched = false;
+  const timingFor = (sceneId: string, index: number) =>
+    timing?.scenes.find((t) => t.sceneId === sceneId) ?? timing?.scenes[index];
   let report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
   let attempts = 0;
 
@@ -197,7 +236,9 @@ export async function validateAndRepair(
           { videoId, sceneIndex, scene: working.scenes[sceneIndex], issues: sceneErrors, attempt: attempts },
           path.join(dir, `07-repair-${sceneIndex}-${attempts}.json`),
         );
-        working = { ...working, scenes: working.scenes.map((s, i) => (i === sceneIndex ? patch.patchedScene : s)) };
+        const t = timingFor(patch.patchedScene.id, sceneIndex);
+        const patched = t ? applySceneTiming(patch.patchedScene, t, { fps: timing?.fps }) : patch.patchedScene;
+        working = { ...working, scenes: working.scenes.map((s, i) => (i === sceneIndex ? patched : s)) };
         anyScenePatched = true;
       } catch (err) {
         ctx.logger.warn('Repair attempt errored for scene; leaving it for review', { videoId, sceneIndex, error: (err as Error).message });
@@ -230,6 +271,20 @@ export async function validateAndRepair(
 
   return { report, config: working, repairAttempts: attempts };
 }
+
+const videoResult = (
+  jobDir: string, dir: string, videoId: string, report: ValidationReport, repairAttempts: number,
+  narrationClips: number, durationInFrames: number,
+): VideoResult => ({
+  videoId,
+  status: report.status,
+  valid: report.valid,
+  configPath: path.join(jobDir, dir, CONFIG_ARTIFACT),
+  validationPath: path.join(jobDir, dir, '06-validation-report.json'),
+  repairAttempts,
+  narrationClips,
+  durationInFrames,
+});
 
 const selectConcepts = (contentMap: ContentMap, conceptIds: string[]) => {
   const wanted = new Set(conceptIds);

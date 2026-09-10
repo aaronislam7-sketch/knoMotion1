@@ -1,4 +1,4 @@
-/** Stage 7 prompt — Targeted Repair. Surgical: fix only the listed errors. */
+/** Stage 10 prompt — Targeted Repair. Surgical: fix only the listed errors. */
 
 export const repairPrompt = {
   version: '1.0',

@@ -1,13 +1,13 @@
 /**
- * Stage 11 — Assembly (deterministic). OUT OF SCOPE — STUB.
+ * Stage 11 — Assembly (deterministic).
  *
- * Input:  KnoMotionVideoConfig.json + TTSManifest.json + CaptionsManifest.json
- * Output: RenderManifest.json
+ * Input:  KnoMotionVideoConfig.json + TTSManifest.json + SceneTiming.json
+ * Output: 08-render-manifest.json
  *
- * Pure merge — no LLM. Combines validated scene JSON, audio paths, and captions
- * into the final render props handed to Stage 12 (render). Stage 10 (beat
- * alignment) has already reconciled scene beat timings against real audio
- * durations by this point, so the embedded config here is render-ready.
+ * Pure merge — no LLM. Combines the validated scene JSON with narration audio
+ * paths into the final render props handed to Stage 12 (render). Timing was
+ * already applied at Stage 7 from the same audio, so the embedded config is
+ * render-ready. Captions (deferred) will merge here too.
  */
 
 import { z } from 'zod';
@@ -21,10 +21,7 @@ export const RenderManifestSchema = withMeta({
     .literal('KnoMotionVideo')
     .describe('The Remotion composition id — the sole renderer entry point'),
   format: VideoFormatSchema.describe('Output format (drives dimensions)'),
-  /**
-   * The exact props object passed to the renderer. Beat timings here are the
-   * post-alignment values; audio/captions have been merged into each scene.
-   */
+  /** The exact props object passed to the renderer, with narration audio merged into each scene. */
   props: KnoMotionVideoConfigSchema.describe('Final, assembled renderer input props'),
   outputPath: z.string().optional().describe('Target path for the rendered MP4'),
 });

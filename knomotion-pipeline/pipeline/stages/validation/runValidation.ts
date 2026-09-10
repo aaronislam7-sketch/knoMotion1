@@ -1,5 +1,5 @@
 /**
- * Stage 6 — Deterministic Validation.
+ * Stage 8 — Deterministic Validation.
  * { videoId, KnoMotionVideoConfig } -> ValidationReport.
  *
  * Delegates to the rule engine (validate.ts), which runs the deterministic
