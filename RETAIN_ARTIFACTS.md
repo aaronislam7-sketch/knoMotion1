@@ -27,7 +27,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `RETAIN_ARTIFACTS.md` | KEEP | This file. | 2026-09-10 | — |
 | `pipeline_build.md` | KEEP | Single pipeline handoff doc; §1 branch instructions stale — fix in M0. | 2026-09-10 | — |
 | `TECH_DEBT.md` | KEEP | TD-001…TD-008 all still open; M2 consumes it. Delete items as they resolve. | 2026-09-10 | — |
-| `July_DevPlan.md` | KEEP (historical) | Superseded by `Sept_DevPlan.md`; keep for the §3 root-cause analysis it contains. Add an "ARCHIVED" header in M0. Move to `Archive/docs/` after M4. | 2026-09-10 | — |
+| `July_DevPlan.md` | KEEP (historical) | Superseded by `Sept_DevPlan.md`; keep for the §3 root-cause analysis it contains. Add an "ARCHIVED" header in M0. Move to `Archive/docs/` during the archiving activity (D6). | 2026-09-10 | — |
 | `BUILD_STATUS.md` | VERIFY | Renderer roadmap through Chunk 7 (May). Useful for the architecture-decisions section only; the "10/10 engine alignment" claim is contradicted by TD-001…004. Check: does anything other than the kickstart prompt reference it? Likely fold decisions into `docs/ARCHITECTURE.md` and archive. | 2026-09-10 | — |
 | `deletion-plan.md` | REMOVE (after M0) | Analysis-only; every item is carried into this file below. | 2026-09-10 | — |
 | `SDK.md` (2183 lines) | VERIFY | Developer SDK reference; counts wrong (10 mid-scenes, 23 elements); documents the `positionToCSS` ambiguity rather than fixing it. Check what `docs/ARCHITECTURE.md` already covers; likely trim to what is not duplicated. | 2026-09-10 | — |
@@ -41,7 +41,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `.gitignore` lines `package.json`, `package-lock.json`, `node_modules/.vite/...` | REMOVE (lines) | Nonsensical for a Node repo; currently inert because the files are tracked, but a trap for any future re-add. | 2026-09-10 | — |
 | `public/` (blush video, 4 lotties) | KEEP | Static assets served to the renderer; `public/pipeline-preview/` will be added (gitignored) by PR #72. | 2026-09-10 | — |
 | `scripts/download-animated-emojis.sh`, `scripts/install-render-deps.sh` | VERIFY | Not referenced by `.devcontainer/setup.sh` or any doc (grep 2026-09-10). Read each; `install-render-deps.sh` may be worth folding into TD-008's env setup, otherwise `REMOVE`. | 2026-09-10 | — |
-| `.devcontainer/` | KEEP | Codespaces setup; installs Chrome headless deps needed for render-check (M2) and render (M4). | 2026-09-10 | — |
+| `.devcontainer/` | KEEP | Codespaces setup; installs Chrome headless deps needed for render-check (M2) and render (M4). M1 needs an `ELEVENLABS_API_KEY` secret (D1) — document in `pipeline_build.md`, not here. | 2026-09-10 | — |
 | `index.html`, `vite.config.js`, `tailwind.config.js`, `postcss.config.cjs`, `remotion.config.ts`, `tsconfig.json` | KEEP | Root build config for the admin app and Remotion. | 2026-09-10 | — |
 
 ## 2. Root `package.json` dependencies
@@ -53,7 +53,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `@remotion/animated-emoji` | VERIFY | `AnimatedEmojiLottie.jsx` uses the Google Noto CDN directly per `BUILD_STATUS.md`; check for an import before removing. | 2026-09-10 | — |
 | `@remotion/fonts`, `@remotion/tailwind` | VERIFY | Grep for imports; `@remotion/tailwind` may be referenced only in `remotion.config.ts`. | 2026-09-10 | — |
 | `@dnd-kit/sortable` | REMOVE | Zero imports (July §8). | 2026-09-10 | — |
-| `framer-motion`, `@xyflow/react`, `@tanstack/react-table`, `@dnd-kit/core`, `lottie-react` | DECIDE | Used only by `KnoSlides/` but needed at root while the root Vite app bundles KnoSlides source. Resolves with Q2. | 2026-09-10 | — |
+| `framer-motion`, `@xyflow/react`, `@tanstack/react-table`, `@dnd-kit/core`, `lottie-react` | REMOVE (with KnoSlides exit) | Used only by `KnoSlides/` (deletion-plan §9). KnoSlides is backlogged and leaving the repo (Sept plan D2). Grep each for a video-side importer in the removal PR before deleting. | 2026-09-10 | — |
 | `remotion`, `@remotion/{transitions,captions,lottie,google-fonts,player,bundler,cli,renderer}` @ 4.0.382, `remotion-bits`, `zod`, `roughjs`, `daisyui`, `tailwindcss` | KEEP | Live renderer/admin dependencies. `@remotion/renderer` becomes load-bearing for M2 render-check and M4 render. | 2026-09-10 | — |
 | `@remotion/layout-utils@4.0.382` | KEEP (to add) | Required by M2 text fitting. Not yet installed. | 2026-09-10 | — |
 
@@ -63,7 +63,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 |---|---|---|---|---|
 | `remotion/Root.tsx`, `remotion/index.ts` | KEEP | Composition registry. `COMPOSITION_ID_MAP` references `CanonShowerVideo` which is not registered — fix in M0 docs pass or M2 engine PR. | 2026-09-10 | — |
 | `compositions/GenericVideoPlayer.jsx`, `compositions/SceneRenderer.jsx` | KEEP | The renderer. Only path pipeline output uses. | 2026-09-10 | — |
-| `compositions/Knodovia*.jsx` (6), `compositions/TikTok_*.jsx` (3) | DECIDE | Hand-built canon videos, registered in `Root.tsx`, referenced by README. Q3: convert to JSON fixtures or delete after M4 references exist. | 2026-09-10 | — |
+| `compositions/Knodovia*.jsx` (6), `compositions/TikTok_*.jsx` (3) | KEEP (until M4 accepted) → convert to JSON | Hand-built canon videos, registered in `Root.tsx`, referenced by README. Decision D3: leave untouched until a pipeline-created video is judged satisfactory, then convert to JSON fixtures under `GenericVideoPlayer` and remove the `.jsx` files. | 2026-09-10 | — |
 | `compositions/CanonShowerVideo.jsx` | KEEP (for now) | Imported by `admin/ShowcasePreview.jsx`; unregistered in `Root.tsx`. Candidate source for a reference video. | 2026-09-10 | — |
 | `sdk/mid-scenes/*.jsx` (11) + `sdk/mid-scenes/schemas/*.json` (11) + `sdk/mid-scenes/index.js` | KEEP | The visual vocabulary; schemas are loaded by the pipeline at runtime. | 2026-09-10 | — |
 | `sdk/mid-scenes/README.md` | KEEP | Contains the "future mid-scene ideas" list used to choose M5 additions. | 2026-09-10 | — |
@@ -92,7 +92,8 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `sdk/theme/*`, `sdk/effects/*`, `sdk/lottie/*`, `sdk/fonts/*`, `sdk/core/*`, `sdk/decorations/doodleEffects.jsx` | KEEP | Theme, backgrounds, lottie registry (41 keys read by the pipeline), fonts, easing/motion. Individual files inside `effects/` (`connectingLines`, `flowLines`, `handwritingEffects`) — VERIFY importers when M2 touches the area. | 2026-09-10 | — |
 | `sdk/utils/{presets.jsx, rough-utils.js, useWriteOn.ts}` | VERIFY | Grep for importers. | 2026-09-10 | — |
 | `sdk/test-fixtures/remotion-bits-test.json` | KEEP | Studio test fixture for the remotion-bits reveal types. | 2026-09-10 | — |
-| `admin/App.jsx` routes: `ShowcasePreview`, `builder/*` (SceneBuilder), `SlidesPreview`, `slides-builder/SlideBuilder` | KEEP | Wired in `App.jsx`. Slides views depend on Q2. | 2026-09-10 | — |
+| `admin/App.jsx` routes: `ShowcasePreview`, `builder/*` (SceneBuilder) | KEEP | Wired in `App.jsx`; video-side preview and builder. | 2026-09-10 | — |
+| `admin/SlidesPreview.jsx`, `admin/slides-builder/SlideBuilder.jsx`, the `dev:slides-preview` / `dev:slide-builder` / `dev:knoslides-standalone` / `build:knoslides` npm scripts | REMOVE (with KnoSlides exit) | KnoSlides-only views and scripts (D2). Remove in the same PR as `KnoSlides/`. | 2026-09-10 | — |
 | `admin/ElementShowcase.jsx`, `admin/UnifiedAdminConfig.jsx`, `admin/README.md` | REMOVE | Not imported by `App.jsx`; only referenced by `admin/README.md`, which documents them. Grep 2026-09-10. | 2026-09-10 | — |
 | `components/DebugOverlay.jsx` | VERIFY | Only importer is the `sdk/index.js` barrel (grep 2026-09-10). Either becomes the base for the M2 `debugSafeZones` overlay or is removed with the barrel prune. | 2026-09-10 | — |
 | `main.jsx`, `App.jsx`, `global.css`, `tailwind.css` | KEEP | Admin app entry. | 2026-09-10 | — |
@@ -102,7 +103,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | Path | Status | Evidence | Date | PR |
 |---|---|---|---|---|
 | `docs/ARCHITECTURE.md` | KEEP | Engine architecture; counts inconsistent (10 vs 11 mid-scenes, 40 vs 41 lottie keys) — fix in M0/M3. | 2026-09-10 | — |
-| `docs/reference-llm-guide.md` (1190 lines) | DECIDE (Q5) | Not read by the pipeline; human authoring guide. M3 either generates it from the manifest + examples or retires it. | 2026-09-10 | — |
+| `docs/reference-llm-guide.md` (1190 lines) | KEEP (conditional, D5) | Not read by the pipeline. Stays only with one stated purpose: the authoring guide for humans/agents working on the repo, generated from the manifest + example fixtures in M3. Retire in M3 if no reader remains that the generated sources don't already serve. | 2026-09-10 | — |
 | `docs/instructions-llm-guide.md` | REMOVE (after M3) | Not read by the pipeline; its content is superseded by `prompts/scene-json-generation.ts`. | 2026-09-10 | — |
 | `KnoMotion-Videos/docs/BLUEPRINT_V5.md`, `template-content-blueprints/*` (10 files) | REMOVE | Document v5 templates that exist only in `Archive/` (July §8). | 2026-09-10 | — |
 | `KnoMotion-Videos/docs/agnosticTemplatePrincipals.md`, `API_REFERENCE.md`, `GETTING_STARTED.md`, `SCENE_LAYOUT_TEST_SCENARIOS.md`, `COLLISION_DETECTION.md` | VERIFY | Read each header; expect template-era docs → `REMOVE`, except `COLLISION_DETECTION.md` if it documents the live `collision-detection.js`. | 2026-09-10 | — |
@@ -124,13 +125,13 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 
 | Path | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `KnoSlides/**` | DECIDE (Q2) | Separate slide product with its own `package.json`, bundled into the root admin app for preview. Not part of the video pipeline. Retain untouched until decided. | 2026-09-10 | — |
+| `KnoSlides/**` | REMOVE (after owner snapshots locally) | Backlogged product (D2). It lived here on the assumption that slides and videos would share components; they don't. Owner keeps a local copy; then one PR removes `KnoSlides/`, the slides admin views, the slides npm scripts and the KnoSlides-only root deps. Not blocking pipeline work; any time after M0. | 2026-09-10 | — |
 
 ## 7. `Archive/` (201 tracked files)
 
 | Path | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `Archive/**` | DECIDE (Q6) → expected REMOVE after M4 | Zero imports from any live tree (grep 2026-09-10). Git history preserves it. Its docs cause the `SHOWCASE.md` confusion above. | 2026-09-10 | — |
+| `Archive/**` | KEEP (until archiving activity, D6) | Zero imports from any live tree (grep 2026-09-10). Stays as-is until a dedicated archiving activity after this plan's milestones; do not remove opportunistically. Root docs that point into it (`SHOWCASE.md` etc.) are still `REMOVE` above. | 2026-09-10 | — |
 
 ## 8. Remote branches
 
