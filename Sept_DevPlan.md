@@ -4,6 +4,7 @@
 > Goal for this phase: **one pipeline run turns a source document into a narrated MP4 of decent quality.** Captions, personalisation, model training and a wider visual vocabulary come after that loop is closed.
 > Organised around four principles: **Pipeline**, **Quality**, **Guardrails**, **Documentation**. Every item is tagged with the principle it serves.
 > Companion file: `RETAIN_ARTIFACTS.md` — the living keep/remove list that every PR in this plan must add to.
+> Scope decisions (TTS provider, KnoSlides, canon comps, desktop-only, LLM guide, Archive) were answered 2026-09-10 and are recorded in §5.
 
 ---
 
@@ -90,7 +91,7 @@ Each milestone ends with a runnable command and a visible result. Do not start t
 ### M1 — Timing becomes deterministic; TTS enters the pipeline
 *Principles: Pipeline, Quality*
 
-1. **Stage 5 TTS**: implement `generateTTS.ts` against one provider (ElevenLabs or OpenAI TTS — see open question Q1). One clip per scene. Store `audioPath`, measured `durationSeconds`, `wordTimings` where the provider returns them. Cache by hash of narration text so prompt iteration doesn't re-bill. Mock provider synthesises timings from word count (~2.5 wps) so offline runs and tests still work.
+1. **Stage 5 TTS**: implement `generateTTS.ts` against ElevenLabs (D1), using the with-timestamps endpoint so `wordTimings` are populated. One clip per scene. Store `audioPath`, measured `durationSeconds`, `wordTimings` where the provider returns them. Cache by hash of narration text so prompt iteration doesn't re-bill. Mock provider synthesises timings from word count (~2.5 wps) so offline runs and tests still work.
 2. **Stage 6 timing** (`pipeline/core/timing.ts`): pure function `computeSceneTiming(narration, tts | null, midSceneHints, fps)` → `{ durationInFrames, lineWindows[] }`. Duration = audio duration + entrance buffer + settle buffer before transition. Line/item windows come from word timings when present, else proportional word-count split. Same output shape either way, so swapping estimator for ground truth is a no-op downstream.
 3. **Stage 7 prompt rewrite**: timing stated as fixed input ("this scene is 172 frames; line 1 visible 0.4–3.1s"). Post-process overwrites any LLM-emitted `durationInFrames`/`beats` with computed values.
 4. Fix the two renderer timing leaks: per-scene transition duration in `calculateTransitionSeriesDuration`; read fps from `constraints.fpsFixed` in the seconds→frames coercion.
@@ -124,7 +125,7 @@ Layered so each check is cheap and deterministic. Order of implementation is top
 - TD-002 mask direction mapping; TD-001 top-left position contract for `heroText`; TD-003 theme-key colour resolution; TD-006 dead-code removals. One renderer PR, acceptance criteria already written in `TECH_DEBT.md`.
 - Install `@remotion/layout-utils@4.0.382`; apply `fitText` in `TextRevealSequence`, `ChecklistReveal` (replace the placeholder `autoFitText`), `BigNumberReveal`. Text that cannot fit shrinks rather than overflows; the text budget stops that from being needed often.
 
-**Acceptance:** a fixture set with one deliberately broken config per guardrail (off-screen text, oversized line, orphaned slot, out-of-range beat, mask+up, alias key) — every one is caught by validation or render-check and either repaired or ends `needs_review`. Zero blank slots or edge bleed on the two reference videos.
+**Acceptance:** a fixture set with one deliberately broken config per guardrail (off-screen text, oversized line, orphaned slot, out-of-range beat, mask+up, alias key) — every one is caught by validation or render-check and either repaired or ends `needs_review`. Zero blank slots or edge bleed on the two reference videos. Desktop only (D4); every check reads its geometry from the layout engine so mobile fixtures can be added without redesign.
 
 ### M3 — Documentation: one knowledge source for the pipeline
 *Principle: Documentation*
@@ -134,7 +135,7 @@ The pipeline's "knowledge" today is spread across the hand-maintained manifest, 
 1. Generate `capability-manifest.json` from the JSON schemas + `MID_SCENE_COMPONENTS` (TD-005). A CI check fails on drift.
 2. Add per-mid-scene `useWhen` / `avoidWhen` / `contentShapes` fields to the manifest. Stage 3 and Stage 7 prompts read these; nothing is hard-coded in prompt strings.
 3. **Worked examples as fixtures**: `knomotion-pipeline/pipeline/examples/<midScene>.json` — one complete, validated, rendered scene per mid-scene. Loaded into the Stage 7 prompt (2–3 per call, chosen by content shape) and run as tests (must pass validation and render-check). Examples that break when the engine changes fail CI instead of silently mis-teaching the model.
-4. `docs/reference-llm-guide.md` becomes generated from the same source or is retired; `docs/instructions-llm-guide.md` is retired (its content is the Stage 7 system prompt). Decision recorded in `RETAIN_ARTIFACTS.md`.
+4. `docs/reference-llm-guide.md`: give it one stated purpose — the authoring guide for humans and agents working *on* the repo, generated from the manifest + example fixtures — and uplift it to that, or retire it if the generated manifest and examples already serve every reader (D5). `docs/instructions-llm-guide.md` is retired (its content is the Stage 7 system prompt). Outcome recorded in `RETAIN_ARTIFACTS.md`.
 5. `pipeline_build.md` stays the single handoff doc: how to run, stage map, where knowledge lives, how to add a mid-scene so the pipeline picks it up.
 
 **Acceptance:** adding a mid-scene by following `pipeline_build.md` results in the pipeline being able to select and correctly author it with no prompt edits.
@@ -154,7 +155,12 @@ The pipeline's "knowledge" today is spread across the hand-maintained manifest, 
 - `keyTakeaway` and `processFlow` mid-scenes, each justified by a reference video that needs it.
 - Captions stage from stored `wordTimings` → `CaptionOverlay` (data already exists; small).
 - Variety rule (warn when >60% of a video is one mid-scene).
-- Second batch of `RETAIN_ARTIFACTS.md` removals (Archive/, canon compositions decision, KnoSlides dependency split).
+- Convert the canon compositions to JSON fixtures under `GenericVideoPlayer` (D3 — only once M4 output is judged satisfactory).
+- Mobile guardrail fixtures (D4).
+- `Archive/` is *not* in this milestone; it waits for the dedicated archiving activity (D6).
+
+### Parallel, unscheduled — KnoSlides exit (D2)
+Owner snapshots `KnoSlides/` locally. Then one PR removes `KnoSlides/`, the `SlidesPreview` / `SlideBuilder` views and their `npm run dev:slides-*` scripts, and the root dependencies used only by KnoSlides (`framer-motion`, `@xyflow/react`, `@tanstack/react-table`, `@dnd-kit/core`, `lottie-react` — confirm each has no video-side importer first). Can land any time after M0; touches nothing the pipeline depends on.
 
 ---
 
@@ -164,18 +170,18 @@ Multi-agent review, LLM-judges-LLM, vision QA, orchestration frameworks/queues, 
 
 ---
 
-## 5. Open questions and assumptions
+## 5. Decisions (answered 2026-09-10)
 
-Answers change scope; assumptions are what the plan proceeds on if unanswered.
-
-| # | Question | Assumption used here |
+| # | Question | Decision |
 |---|---|---|
-| Q1 | TTS provider preference? ElevenLabs (word timings, best voices, cost) vs OpenAI TTS (already have the SDK/key; no word timings → fall back to proportional split) vs Azure/Google (word-boundary events, cheap). | Start with whichever key exists as a Cloud Agent secret; design behind `TTSManifest` so the provider is swappable. Word timings are optional in the schema already. |
-| Q2 | Is `KnoSlides/` in scope for this repo's future, or a separate product that should move out? It shares root `node_modules` and the admin app. | Out of scope for the plan; **retain, do not touch**; decision captured in `RETAIN_ARTIFACTS.md`. |
-| Q3 | Are the 9 canon compositions (Knodovia/TikTok) still wanted as reference content, or can they become JSON fixtures under `GenericVideoPlayer`? | Retain until M4 produces pipeline references that are better; then decide. |
-| Q4 | Desktop first, or desktop and mobile both required for "decent"? Mobile doubles guardrail fixtures. | Desktop first; mobile guardrails in M5. |
-| Q5 | Should `docs/reference-llm-guide.md` survive as a human-readable authoring guide (generated) or be retired? | Generate it from the manifest + examples in M3. |
-| Q6 | `Archive/` — delete now (git history keeps it) or after M4? | After M4, as the first `RETAIN_ARTIFACTS.md` bulk removal. |
+| D1 | TTS provider | **ElevenLabs.** Chosen over OpenAI TTS because narration is a critical path and ElevenLabs returns word timings. Cost control is acknowledged but is not a current priority; the M1 narration-hash cache is the only cost measure in scope. Requires an `ELEVENLABS_API_KEY` Cloud Agent secret. Provider stays swappable behind `TTSManifest`. |
+| D2 | `KnoSlides/` | **Backlogged, out of scope.** It lives here because of an earlier assumption that slides and videos would share components; that overlap has not materialised. Plan: the owner snapshots the current state locally, then `KnoSlides/`, the two slides views in `admin/App.jsx`, and the root dependencies that exist only for it are removed from this repo (tracked in `RETAIN_ARTIFACTS.md` §2, §3, §6). Timing: any point after M0; it does not block pipeline work. |
+| D3 | Canon compositions (Knodovia/TikTok) | **Keep as-is until a pipeline-created video is judged satisfactory (M4 acceptance), then convert to JSON under `GenericVideoPlayer`.** Not before. |
+| D4 | Formats | **Desktop only** for this plan. Mobile is added later as new guardrail fixtures on the same approach; no design decision in M2 may assume desktop-only geometry constants are permanent (read them from `getViewportPadding` / `resolveSceneSlots`). |
+| D5 | `docs/reference-llm-guide.md` | It was the first attempt at orienting an LLM in the repo. **It stays only if it has one clear purpose, and it is uplifted to serve that purpose.** M3 defines that purpose as: the human- and agent-readable authoring guide *generated from* the same manifest + example fixtures the pipeline consumes, so it can never disagree with them. If M3 finds no reader that the manifest and examples don't already serve, it is retired. `docs/instructions-llm-guide.md` is retired in M3 regardless (its content is the Stage 7 system prompt). |
+| D6 | `Archive/` | **Lives on for now.** Removal happens in a dedicated archiving activity after this plan's milestones, not opportunistically. Status in `RETAIN_ARTIFACTS.md` is `KEEP (until archiving activity)`. |
+
+Backlog items created by these decisions (not scheduled): TTS cost controls (per-job budget, voice/model tiering); KnoSlides as a separate product; mobile guardrail fixtures; interactive formats (quizzes, slides) as future output types.
 
 ---
 
