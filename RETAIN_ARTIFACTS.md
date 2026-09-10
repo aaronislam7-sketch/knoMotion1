@@ -39,7 +39,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `audit/` (2 files, dated 2025-01) | REMOVE | Layout-engine audit results from the v5 era; layout engine has since been rewritten around `resolveSceneSlots`. | 2026-09-10 | — |
 | `dist/` (7 tracked files) | REMOVE | Vite build output; already in `.gitignore`. `git rm --cached dist/`. | 2026-09-10 | — |
 | `.gitignore` lines `package.json`, `package-lock.json`, `node_modules/.vite/...` | REMOVE (lines) | Nonsensical for a Node repo; currently inert because the files are tracked, but a trap for any future re-add. | 2026-09-10 | — |
-| `public/` (blush video, 4 lotties) | KEEP | Static assets served to the renderer; `public/pipeline-preview/` will be added (gitignored) by PR #72. | 2026-09-10 | — |
+| `public/` (blush video, 4 lotties) | KEEP | Static assets served to the renderer. Two gitignored runtime sub-dirs: `public/pipeline-preview/` (PR #72, staged config) and `public/pipeline-audio/<job>/<video>/` (PR #75, narration clips copied by assembly). | 2026-09-10 | #72, #75 |
 | `scripts/download-animated-emojis.sh`, `scripts/install-render-deps.sh` | VERIFY | Not referenced by `.devcontainer/setup.sh` or any doc (grep 2026-09-10). Read each; `install-render-deps.sh` may be worth folding into TD-008's env setup, otherwise `REMOVE`. | 2026-09-10 | — |
 | `.devcontainer/` | KEEP | Codespaces setup; installs Chrome headless deps needed for render-check (M2) and render (M4). M1 needs an `ELEVENLABS_API_KEY` secret (D1) — document in `pipeline_build.md`, not here. | 2026-09-10 | — |
 | `index.html`, `vite.config.js`, `tailwind.config.js`, `postcss.config.cjs`, `remotion.config.ts`, `tsconfig.json` | KEEP | Root build config for the admin app and Remotion. | 2026-09-10 | — |
@@ -81,10 +81,10 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `sdk/animations/animations.js` | VERIFY | Imported by `sdk/components/components.jsx` for `fadeSlide`, `pulse`. Redirect that import to `animations/index.js`, then `REMOVE`. | 2026-09-10 | — |
 | Shims (2-line `export *`): `sdk/fontSystem.ts`, `sdk/lottiePresets.js`, `sdk/lottieIntegration.tsx`, `sdk/SceneIdContext.jsx`, `sdk/StyleTokensProvider.tsx`, `sdk/broadcastEffects.tsx`, `sdk/microDelights.jsx` | VERIFY | All confirmed to be backward-compat shims (read 2026-09-10). Grep each shim path for importers; redirect and `REMOVE`. | 2026-09-10 | — |
 | `sdk/transitions.ts` (8-line shim) + `sdk/core/transitions.ts` | KEEP | Merges both transition layers; `core/transitions.ts` defines `TransitionSeriesBridge` still in use (deletion-plan §11). Re-verify when M1 touches `sdk/transitions/index.ts`. | 2026-09-10 | — |
-| `sdk/transitions/index.ts` | KEEP | Live `@remotion/transitions` layer; M1 fixes per-scene transition duration here. | 2026-09-10 | — |
-| `sdk/utils/ttsToBeatAlignment.ts` | KEEP | Dead today, but it is the designed word-timing → beats interface. M1 `timing.ts` either wires it or replaces it; flip to `REMOVE` only if replaced. | 2026-09-10 | — |
+| `sdk/transitions/index.ts` | KEEP | Live `@remotion/transitions` layer; per-scene transition duration fixed in `calculateTransitionSeriesDuration` (PR #75, covered by `renderer-timing.test.ts`). | 2026-09-10 | #75 |
+| `sdk/utils/ttsToBeatAlignment.ts` | REMOVE | Replaced: PR #75 puts word-timing → beats in `knomotion-pipeline/pipeline/core/timing.ts` (pipeline side, where the audio lives). Still zero importers in the renderer. Delete in the next renderer PR after #75 merges. | 2026-09-10 | #75 |
 | `sdk/utils/beats.ts` | KEEP | `resolveBeats` defaults (0.5s start, 1.6s hold) used by every mid-scene. | 2026-09-10 | — |
-| `sdk/audio/*` (AudioLayer, CaptionOverlay, SafeAudio, audioSchema, testFixtures) | KEEP | M1 assembly feeds `AudioLayer`; captions (M5) feed `CaptionOverlay`. | 2026-09-10 | — |
+| `sdk/audio/*` (AudioLayer, CaptionOverlay, SafeAudio, audioSchema, testFixtures) | KEEP | Assembly (PR #75) feeds `AudioLayer` with public-relative `src`; `SafeAudio` resolves it via `staticFile()`, `audioSchema.ts` accepts URL-or-relative-path. Captions (M5) feed `CaptionOverlay`. | 2026-09-10 | #75 |
 | `sdk/elements/*` (16 atoms, 11 compositions, `index.js`) | KEEP | Powers the mid-scenes. `ELEMENT_RULES.md`, `PROP_SCHEMA.md`, `MIGRATION_GUIDE.md`, `README.md` inside — VERIFY whether the migration guide is still relevant. | 2026-09-10 | — |
 | `sdk/components/mid-level/FlowDiagram.jsx` | KEEP | Basis for the M5 `processFlow` mid-scene. | 2026-09-10 | — |
 | `sdk/components/heroRegistry.jsx` | KEEP | Imported by `mid-scenes/HeroTextEntranceExit.jsx` (grep 2026-09-10). | 2026-09-10 | — |
@@ -113,11 +113,14 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 
 | Path | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `pipeline/orchestrator.ts`, `cli.ts`, `core/*`, `schemas/*`, `prompts/*`, `stages/*` (implemented 0–7) | KEEP | The pipeline. Write-back fix and `preview` command arrive with PR #72. | 2026-09-10 | — |
-| `stages/{tts,captions,beat-alignment,assembly,render}` stubs + `stages/_stub.ts` | KEEP | Replaced by real implementations in M1/M4/M5; `beat-alignment` is absorbed into `core/timing.ts` in M1 — flip that stub to `REMOVE` then. | 2026-09-10 | — |
+| `pipeline/orchestrator.ts`, `cli.ts`, `core/*`, `schemas/*`, `prompts/*`, `stages/*` (implemented 0–7) | KEEP | The pipeline. Write-back fix and `preview` command landed with PR #72. | 2026-09-10 | #72 |
+| `core/timing.ts`, `core/fps.ts`, `core/tts/{index,provider,elevenlabs,mock}.ts`, `stages/tts/generateTTS.ts`, `stages/timing/computeTiming.ts`, `stages/assembly/buildRenderProps.ts`, `schemas/SceneTiming.ts` | KEEP | M1 (PR #75): TTS → timing → assembly. Timing is the single owner of `durationInFrames`/`beats` for pipeline output. | 2026-09-10 | #75 |
+| `stages/beat-alignment/alignBeats.ts` | REMOVED | Absorbed into `core/timing.ts`; stub deleted and `'beat-alignment'` dropped from `PipelineStageSchema`. | 2026-09-10 | #75 |
+| `stages/{captions,render}` stubs + `stages/_stub.ts` | KEEP | Replaced by real implementations in M4 (render) / M5 (captions). `render-check` (M2) has an enum slot but no file yet. | 2026-09-10 | #75 |
+| `pipeline/cache/` (gitignored) | KEEP | TTS response cache keyed by provider\|voice\|model\|text; safe to wipe any time (only costs a re-bill). | 2026-09-10 | #75 |
 | `schemas/QualityReport.ts` | KEEP | Gets its first producer in M2 render-check. | 2026-09-10 | — |
-| `schemas/CaptionsManifest.ts`, `schemas/RenderManifest.ts` | KEEP | Contracts for M5 and M4. | 2026-09-10 | — |
-| `__tests__/*` (4 files; +`repair-writeback.test.ts` from PR #72) | KEEP | Must stay green. | 2026-09-10 | — |
+| `schemas/CaptionsManifest.ts`, `schemas/RenderManifest.ts` | KEEP | `RenderManifest` now produced by assembly (PR #75); `CaptionsManifest` waits for M5. | 2026-09-10 | #75 |
+| `__tests__/*` (9 files after PR #75) | KEEP | Must stay green. `contract-drift.test.ts` and `renderer-timing.test.ts` import renderer modules by absolute path; they skip (not fail) if root deps are absent. | 2026-09-10 | #75 |
 | `pipeline/sources/worldcup.md`, `sources/README.md` | KEEP | Reference source R4; second reference doc added in M4. | 2026-09-10 | — |
 | `pipeline/artifacts/.gitkeep` | KEEP | Runtime output dir (gitignored). | 2026-09-10 | — |
 
