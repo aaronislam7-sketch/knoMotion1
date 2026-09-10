@@ -111,7 +111,7 @@ source text
 ### Supporting infrastructure (all built)
 
 - **Contracts (`schemas/`)** — Zod schema + TS type for every artifact, each wrapped in an `ArtifactMeta` envelope (jobId, stage, producedBy, model, promptVersion, inputs, createdAt). `KnoMotionVideoConfig.ts` is a faithful, standalone **mirror** of the renderer's `VideoConfigSchema` (kept in sync via comments), restricted to the **11 canonical mid-scene keys**.
-- **Orchestrator** — module→video fan-out, per-stage timing/manifest, `--stop-after`, and the validate→repair→re-validate loop (repairs every failing scene per attempt; `needs_review` after the cap).
+- **Orchestrator** — module→video fan-out, per-stage timing/manifest, `--stop-after`, and the validate→repair→re-validate loop (repairs every failing scene per attempt; `needs_review` after the cap). When any repair patch is applied, the repaired config is **written back to `05-knomotion-video-config.json`** (and recorded in `job.json`), so `configPath` always points at the final config — including best-effort repairs on `needs_review`.
 - **LLM client** — provider-agnostic. `MockLLMClient` (deterministic, input-aware, used offline + in tests). `OpenAIClient` (JSON mode, Zod-parse, corrective retries with exact-path feedback, **null-property pruning**, **temperature fallback** for gpt‑5.x). Factory in `core/llm/index.ts`.
 - **Capability bridge** — `renderer-capabilities.ts` loads the renderer manifest + 11 mid-scene JSON schemas at runtime and compiles them with `ajv` (Option A: one-directional data dependency, no drift). Overridable via `KNOMOTION_RENDERER_SDK_DIR`.
 - **Validation engine (`validate.ts`)** — rules: `midscene_name`, `midscene_config` (deep ajv), `layout_type`, `transition_type`, `slot_names`, `slots_filled`, `sidebyside_layout`, `duration_bounds`, `beat_timing`, `text_length`, `audio_url`, `lottie_key`. Severity policy: **error** = renders broken → blocks + triggers repair; **warning** = quality/uncertain.
@@ -206,7 +206,7 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 
 ## 8. What is NOT built yet (next targets)
 
-- **P4 — Studio preview harness** (planned, not built): an additive `KnoMotion-Videos/src/remotion/pipeline-preview.tsx` that reuses `GenericVideoPlayer` and loads a generated config, plus a `preview <jobId>` CLI command → one-click watch. (User already approved putting a preview file in the renderer tree.)
+- ~~**P4 — Studio preview harness**~~ **BUILT**: `npm run run -- preview <jobId>` (from `knomotion-pipeline/`; jobId optional → latest job, `--video <id>` to pick a video) stages the job's config to `public/pipeline-preview/config.json`; the `PipelinePreview` composition (`KnoMotion-Videos/src/remotion/PipelinePreview.tsx`, registered in `Root.tsx`) fetches it at metadata time and renders via `GenericVideoPlayer`. Shows an instructional placeholder when nothing is staged.
 - **Stages 8–12** (TTS, captions, beat-alignment, assembly, render) — stubs throwing `NotImplementedError`; contracts exist (`TTSManifest`, `CaptionsManifest`, `RenderManifest`).
 - **Full resume** (`--resume <jobId> --from <stage>`) — the artifact store already supports validated reads; only `--stop-after` is wired.
 - **QualityReport population** + creator-portal edit capture + fine-tuning dataset + personalised scene variants — scaffolded contracts only.
@@ -225,7 +225,7 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 
 ## 10. Suggested order for the next agent
 
-1. **P4 preview** (so you can *see* outputs quickly) — small, unblocks everything else.
+1. ~~**P4 preview**~~ **DONE** — see §8 (`preview <jobId>` CLI + `PipelinePreview` composition).
 2. **Quality pass** per §7.3: render-in-the-loop QA stage → timing rules → semantics-safe coercions → fix `TECH_DEBT` TD‑001/002/003 → text fitting.
 3. **Structured outputs** for planning stages (adherence).
 4. Then resume + the out-of-scope stages (TTS → captions → beat-alignment → assembly → render) as the audio/render track.

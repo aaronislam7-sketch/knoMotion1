@@ -24,7 +24,7 @@ import { makeJobId } from './core/ids';
 import type { PipelineStage } from './schemas/common';
 import type { ContentMap } from './schemas/ContentMap';
 import type { ModulePlan } from './schemas/ModulePlan';
-import type { KnoMotionVideoConfig } from './schemas/KnoMotionVideoConfig';
+import { KnoMotionVideoConfigSchema, type KnoMotionVideoConfig } from './schemas/KnoMotionVideoConfig';
 import type { ValidationReport } from './schemas/ValidationReport';
 import {
   intakeStage,
@@ -66,6 +66,9 @@ const STAGE_ORDER: PipelineStage[] = [
   'intake', 'content-analysis', 'module-planning', 'video-planning',
   'script-generation', 'scene-json-generation', 'validation', 'repair',
 ];
+
+/** The renderable deliverable for a video. Repair writes back to this file. */
+const CONFIG_ARTIFACT = '05-knomotion-video-config.json';
 
 export const runPipeline = async (input: IntakeInput, options: RunOptions = {}): Promise<RunResult> => {
   const config = loadConfig(options.config);
@@ -114,24 +117,23 @@ export const runPipeline = async (input: IntakeInput, options: RunOptions = {}):
 
     let config0 = await execute(
       ctx, sceneJsonGenerationStage, { videoPlan, narrationScript },
-      path.join(dir, '05-knomotion-video-config.json'),
+      path.join(dir, CONFIG_ARTIFACT),
     );
     if (shouldStop('scene-json-generation')) continue;
 
-    // Validate, then surgically repair failing scenes up to the cap.
-    const { report, config: finalConfig, repairAttempts } = await validateAndRepair(
-      ctx, brief.id, config0, dir,
-    );
+    // Validate, then surgically repair failing scenes up to the cap. When any
+    // repair patch is applied, validateAndRepair persists the repaired config
+    // back to CONFIG_ARTIFACT so configPath always points at the final config.
+    const { report, repairAttempts } = await validateAndRepair(ctx, brief.id, config0, dir);
 
     videos.push({
       videoId: brief.id,
       status: report.status,
       valid: report.valid,
-      configPath: path.join(store.jobDir, dir, '05-knomotion-video-config.json'),
+      configPath: path.join(store.jobDir, dir, CONFIG_ARTIFACT),
       validationPath: path.join(store.jobDir, dir, '06-validation-report.json'),
       repairAttempts,
     });
-    void finalConfig;
   }
 
   logger.info('Pipeline run complete', { videos: videos.length });
@@ -169,10 +171,11 @@ async function execute<In extends z.ZodTypeAny, Out extends z.ZodTypeAny>(
   }
 }
 
-async function validateAndRepair(
+export async function validateAndRepair(
   ctx: PipelineContext, videoId: string, config: KnoMotionVideoConfig, dir: string,
 ): Promise<{ report: ValidationReport; config: KnoMotionVideoConfig; repairAttempts: number }> {
   let working = config;
+  let anyScenePatched = false;
   let report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
   let attempts = 0;
 
@@ -195,6 +198,7 @@ async function validateAndRepair(
           path.join(dir, `07-repair-${sceneIndex}-${attempts}.json`),
         );
         working = { ...working, scenes: working.scenes.map((s, i) => (i === sceneIndex ? patch.patchedScene : s)) };
+        anyScenePatched = true;
       } catch (err) {
         ctx.logger.warn('Repair attempt errored for scene; leaving it for review', { videoId, sceneIndex, error: (err as Error).message });
       }
@@ -208,6 +212,22 @@ async function validateAndRepair(
     report = { ...report, status: 'needs_review', repairAttempts: attempts };
     await ctx.store.writeArtifact(path.join(dir, '06-validation-report.json'), validationStage.outputSchema, report);
   }
+
+  // Persist the repaired config back over the Stage-5 artifact so the file on
+  // disk is always the config the final validation report describes. Without
+  // this, repair patches only exist as 07-* artifacts and the deliverable
+  // silently remains the broken pre-repair config. Written even on
+  // needs_review: best-effort repairs belong in the deliverable too.
+  if (anyScenePatched) {
+    const relPath = path.join(dir, CONFIG_ARTIFACT);
+    await ctx.store.writeArtifact(relPath, KnoMotionVideoConfigSchema, working);
+    await ctx.store.appendManifest({
+      stage: 'repair', artifact: CONFIG_ARTIFACT, path: relPath, status: 'ok',
+      producedBy: 'llm', at: ctx.now().toISOString(),
+    });
+    ctx.logger.info('Repaired config written back', { videoId, relPath, repairAttempts: attempts });
+  }
+
   return { report, config: working, repairAttempts: attempts };
 }
 
