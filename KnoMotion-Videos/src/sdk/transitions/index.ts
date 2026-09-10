@@ -99,14 +99,19 @@ export function resolveTransitionTiming(
  * Total = sum(scene durations) - sum(transition overlaps)
  *
  * When springTiming is called with a fixed durationInFrames, the overlap
- * equals exactly that value per transition.
+ * equals exactly that value per transition. The transition INTO scene i
+ * (i >= 1) is `scenes[i].transition`, which is what GenericVideoPlayer
+ * renders; a per-scene `durationInFrames` override must therefore be
+ * honoured here too or the composition length drifts from the timeline.
  */
 export function calculateTransitionSeriesDuration(
   scenes: Array<{ durationInFrames: number; transition?: SceneTransition }>,
   defaultTransitionFrames: number = DEFAULT_TRANSITION_FRAMES,
 ): number {
   const totalSceneFrames = scenes.reduce((sum, s) => sum + s.durationInFrames, 0);
-  const transitionCount = Math.max(0, scenes.length - 1);
+  const overlapFrames = scenes
+    .slice(1)
+    .reduce((sum, s) => sum + (s.transition?.durationInFrames ?? defaultTransitionFrames), 0);
 
-  return totalSceneFrames - transitionCount * defaultTransitionFrames;
+  return totalSceneFrames - overlapFrames;
 }
