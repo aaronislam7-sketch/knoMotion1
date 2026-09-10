@@ -1,46 +1,52 @@
 /**
- * Stage 8 — TTS Generation (deterministic API call). OUT OF SCOPE — STUB.
+ * Stage 5 — TTS Generation (deterministic provider call).
  *
  * Input:  NarrationScript.json
- * Output: TTSManifest.json + audio files
+ * Output: 04a-tts-manifest.json + audio files under videos/<id>/audio/
  *
- * Called per scene narration so retries stay surgical and costs predictable.
- * The contract is defined now so downstream stages (captions, beat alignment,
- * assembly) can be wired against a stable shape; the handler is not yet built.
+ * One clip per scene narration so retries stay surgical and costs predictable.
+ * Runs BEFORE scene JSON so real audio durations drive scene timing (Stage 6)
+ * instead of the LLM guessing them.
  */
 
 import { z } from 'zod';
 import { withMeta } from './common';
 
-export const TTSClipStatusSchema = z.enum(['pending', 'generated', 'failed']);
+/**
+ * - generated: real audio exists at `audioPath`, timings measured by the provider
+ * - estimated: no audio; `durationSeconds`/`wordTimings` synthesised from word count (mock provider)
+ * - failed:    provider call failed; downstream falls back to the script estimate
+ */
+export const TTSClipStatusSchema = z.enum(['pending', 'generated', 'estimated', 'failed']);
 export type TTSClipStatus = z.infer<typeof TTSClipStatusSchema>;
+
+export const WordTimingSchema = z.object({
+  word: z.string(),
+  startMs: z.number().min(0),
+  endMs: z.number().min(0),
+});
+export type WordTiming = z.infer<typeof WordTimingSchema>;
 
 /** One synthesized narration clip, per scene. */
 export const TTSClipSchema = z.object({
   sceneId: z.string().min(1).describe('Scene this clip narrates'),
   narrationText: z.string().min(1).describe('Exact text sent to the TTS provider'),
   status: TTSClipStatusSchema.describe('Generation status for this clip'),
-  audioPath: z.string().optional().describe('Local path to the generated audio file in the job directory'),
-  audioUrl: z.string().url().optional().describe('Hosted URL once uploaded (used by the renderer audio block)'),
-  durationSeconds: z.number().min(0).optional().describe('Real measured audio duration (feeds Stage 10)'),
+  audioPath: z.string().optional().describe('Path to the audio file, relative to the job directory'),
+  audioUrl: z.string().url().optional().describe('Hosted URL once uploaded (not used yet)'),
+  durationSeconds: z.number().min(0).optional().describe('Measured (generated) or estimated audio duration'),
   voiceId: z.string().optional().describe('Provider voice id used'),
-  wordTimings: z
-    .array(
-      z.object({
-        word: z.string(),
-        startMs: z.number().min(0),
-        endMs: z.number().min(0),
-      }),
-    )
-    .optional()
-    .describe('Word-level timings if the provider returns them (feeds Stage 9 captions)'),
+  cacheHit: z.boolean().optional().describe('True when the clip was served from the local TTS cache'),
+  error: z.string().optional().describe('Provider error message when status = failed'),
+  wordTimings: z.array(WordTimingSchema).optional().describe('Word-level timings (feeds Stage 6 timing and, later, captions)'),
 });
 export type TTSClip = z.infer<typeof TTSClipSchema>;
 
 export const TTSManifestSchema = withMeta({
   videoId: z.string().min(1).describe('Video these clips belong to'),
-  provider: z.string().optional().describe('TTS provider identifier, e.g. "elevenlabs"'),
+  provider: z.string().describe('TTS provider identifier: "elevenlabs" | "mock"'),
   defaultVoiceId: z.string().optional().describe('Default voice used across clips'),
-  clips: z.array(TTSClipSchema).min(1).describe('One clip per scene narration'),
+  modelId: z.string().optional().describe('Provider model id, when applicable'),
+  clips: z.array(TTSClipSchema).min(1).describe('One clip per scene narration, in scene order'),
 });
 export type TTSManifest = z.infer<typeof TTSManifestSchema>;

@@ -1,5 +1,5 @@
 /**
- * Stage 7 — Targeted Repair Loop (LLM, only on validation failure).
+ * Stage 10 — Targeted Repair Loop (LLM, only on validation failure).
  *
  * Input:  failed scene fragment + validation errors
  * Output: RepairPatch.json (a patched scene fragment)
