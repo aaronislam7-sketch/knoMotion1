@@ -1,5 +1,7 @@
 # July Development Plan — KnoMotion
 
+> **SUPERSEDED (2026-09-10) by `Sept_DevPlan.md`.** Kept for the root-cause analysis in §3 and the repository audit in §8, both of which were re-verified in September and still hold. Do not use §5–§6 or §10 for sequencing; the Sept plan reorders them (TTS before scene JSON, guardrails as a track, vocabulary expansion deferred). A1 and A2 from §10 are implemented in PR #72.
+
 > A review of the repository as of 2026-07-20 (`main` @ `d30e9453`, post PR #69) and a practical plan for the next phase of work.
 > Written for someone returning to the codebase after a break. Every claim below is marked as **[code]** (verified in source), **[doc]** (stated in documentation, not independently verified), or **[inference]** (reasoned judgement). Where something is unknown, it is flagged with the smallest investigation needed to resolve it.
 
