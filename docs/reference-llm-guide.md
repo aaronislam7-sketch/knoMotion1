@@ -652,7 +652,7 @@ Dramatic reveal of large statistics.
     emphasis: 'high',  // 'high' | 'normal' | 'low'
     animation: 'countUp',  // 'pop' | 'countUp' | 'typewriter' | 'fade'
     countFrom: 0,  // starting value for countUp
-    color: '#FF6B35',  // optional. CSS color only (hex/rgb/hsl) — theme keys are NOT resolved for bigNumber
+    color: 'primary',  // optional. Theme key (primary, accentGreen, …) or a CSS color (hex/rgb/hsl)
     beats: { start: 0.5, exit: 5.0 }
   }
 }
@@ -680,7 +680,7 @@ Animated number counting up/down.
     prefix: '$',  // e.g., "$100"
     suffix: '%',  // e.g., "100%"
     label: 'completion rate',  // label below number
-    color: '#FF6B35',  // optional. CSS color only (hex/rgb/hsl) — theme keys are NOT resolved for animatedCounter
+    color: 'accentBlue',  // optional. Theme key (primary, accentGreen, …) or a CSS color (hex/rgb/hsl)
     beats: { start: 0.5 }
   }
 }

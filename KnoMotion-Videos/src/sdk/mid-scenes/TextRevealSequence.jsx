@@ -16,6 +16,7 @@ import { Text } from '../elements/atoms/Text';
 import { ARRANGEMENT_TYPES, calculateItemPositions } from '../layout/layoutEngine';
 import { positionToCSS as positionToCSSWithTransform } from '../layout/positionSystem';
 import { fadeIn, slideIn, typewriter, getMaskReveal } from '../animations/index';
+import { fitFontSizeForAll } from '../utils/fitFontSize';
 import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 import { resolveStylePreset } from '../theme/stylePresets';
@@ -108,6 +109,12 @@ const BITS_REVEAL_TYPES = new Set([
 const isBitsRevealType = (revealType) => BITS_REVEAL_TYPES.has(revealType);
 
 /**
+ * slide-vocabulary → mask-vocabulary. getMaskReveal's `top` grows the visible
+ * area upward from the bottom edge (a wipe that travels up), `bottom` travels down.
+ */
+const MASK_DIRECTION = { up: 'top', down: 'bottom' };
+
+/**
  * Get animation style based on reveal type (standard KnoMotion reveals)
  */
 const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, direction = 'up', text = '', showCursor = true) => {
@@ -133,10 +140,14 @@ const getRevealAnimationStyle = (revealType, frame, startFrame, durationFrames, 
       };
     
     case 'mask':
+      // The shared `direction` prop speaks slide vocabulary (up/down); the mask
+      // helper speaks inset vocabulary (top/bottom). Without this mapping the
+      // helper returns an empty clip-path and the reveal never animates (TD-002).
+      const maskDirection = MASK_DIRECTION[direction] ?? direction;
       const maskReveal = getMaskReveal(frame, {
         start: startFrame / 30,
         duration: durationFrames / 30,
-        direction,
+        direction: maskDirection,
         textBounds: { x: 0, y: 0, width: 800, height: 100 },
       }, 30);
       return {
@@ -343,9 +354,25 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
   // Desktop (landscape): generous sizing
   const isMobile = height > width;
   const baseDesktopSize = 64; // Up from 48
-  const baseFontSize = isMobile 
+  const preferredFontSize = isMobile 
     ? Math.round(baseDesktopSize * 1.15) // 15% larger on mobile
     : baseDesktopSize;
+  // Shrink-to-fit (M2): lines are positioned individually and do not wrap, so
+  // every line must fit the slot width on ONE line. The longest line decides
+  // the shared size; the stack never scales below 60% of the preferred size.
+  const slotWidth = position?.width || width;
+  const lineFontFamily = preset.textVariant === 'body' ? KNODE_THEME.fonts.body : KNODE_THEME.fonts.header;
+  const baseFontSize = fitFontSizeForAll(
+    lines.map((l) => (typeof l === 'string' ? l : l?.text)),
+    {
+      maxWidth: slotWidth * 0.9,
+      baseSize: preferredFontSize,
+      minSize: Math.round(preferredFontSize * 0.6),
+      fontFamily: lineFontFamily,
+      fontWeight: 700,
+      maxLines: 1,
+    },
+  );
   const lineHeight = baseFontSize * lineSpacingValue;
 
   // Calculate positions using layout engine (STACKED_VERTICAL)
@@ -368,6 +395,7 @@ export const TextRevealSequence = ({ config, stylePreset }) => {
         const itemBeats = resolveBeats(line.beats, {
           start: sequenceBeats.start + index * staggerDelay,
           holdDuration: animationDuration,
+          exit: sequenceBeats.exit,
         });
         const lineStartFrame = toFrames(itemBeats.start, fps);
 

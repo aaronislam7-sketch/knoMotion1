@@ -223,13 +223,10 @@ test('accepts all active and legacy transition types', () => {
 
 // ─── Test 8: All mid-scene keys accepted ────────────────────────────────
 
-test('accepts all registered midScene keys', () => {
+test('accepts all canonical midScene keys', () => {
   const keys = [
     'textReveal', 'heroText', 'gridCards', 'checklist', 'bubbleCallout',
-    'sideBySide', 'iconGrid', 'cardSequence', 'bigNumber', 'animatedCounter',
-    'textRevealSequence', 'heroTextEntranceExit', 'checklistReveal',
-    'bubbleCalloutSequence', 'callouts', 'sideBySideCompare', 'compare',
-    'gridCardReveal', 'cardGrid', 'bigNumberReveal',
+    'sideBySide', 'iconGrid', 'cardSequence', 'bigNumber', 'animatedCounter', 'codeBlock',
   ] as const;
 
   for (const key of keys) {
@@ -245,6 +242,22 @@ test('accepts all registered midScene keys', () => {
       ],
     });
     assert(result.success, `midScene key "${key}" should be accepted`);
+  }
+});
+
+// Registry aliases are NOT resolved by SceneRenderer (they used to render an
+// empty slot — TD-004). The schema now rejects them so the failure is loud.
+test('rejects registry alias midScene keys', () => {
+  const aliases = [
+    'textRevealSequence', 'heroTextEntranceExit', 'checklistReveal',
+    'bubbleCalloutSequence', 'callouts', 'sideBySideCompare', 'compare',
+    'gridCardReveal', 'cardGrid', 'bigNumberReveal', 'codeBlockScene', 'code',
+  ];
+  for (const key of aliases) {
+    const result = VideoConfigSchema.safeParse({
+      scenes: [{ id: `alias-${key}`, durationInFrames: 90, config: { slots: { full: { midScene: key, config: {} } } } }],
+    });
+    assert(!result.success, `alias midScene "${key}" should be rejected`);
   }
 });
 

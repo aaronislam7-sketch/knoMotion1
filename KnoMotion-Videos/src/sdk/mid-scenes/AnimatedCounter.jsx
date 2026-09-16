@@ -84,12 +84,8 @@ export const AnimatedCounter = ({ config, stylePreset }) => {
   
   const displayValue = `${prefix}${formatWithCommas(currentValue)}${suffix}`;
   
-  // Determine color
-  const emphasisColors = {
-    high: color || KNODE_THEME.colors.primary,
-    normal: color || KNODE_THEME.colors.textMain,
-  };
-  const numberColor = emphasisColors.high;
+  // Color: an explicit `color` may be a theme key or a literal CSS color (TD-003).
+  const numberColor = color ? (KNODE_THEME.colors[color] || color) : KNODE_THEME.colors.primary;
   
   // Sizing
   const baseFontSize = isMobile ? 120 : 100;
