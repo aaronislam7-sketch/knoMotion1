@@ -176,7 +176,7 @@ export const checkTextBudget = (
 /** One-line, prompt-friendly rendering of a budget: "textReveal in full (1800×860px): ≤6 lines; lines[].text ≤ 92 chars". */
 export const describeBudget = (slotName: string, b: SlotTextBudget): string => {
   const parts: string[] = [];
-  if (b.countPath && b.maxCount !== undefined) parts.push(`≤${b.maxCount} ${b.countPath}`);
+  if (b.countPath && b.maxCount !== undefined) parts.push(`≤${b.maxCount} ${b.countPath === 'code' ? 'code lines' : b.countPath}`);
   for (const f of b.fields) parts.push(`${f.path} ≤ ${f.maxChars} chars`);
   return `${b.midScene} in ${slotName} (${b.slot.width}×${b.slot.height}px): ${parts.join('; ')}`;
 };

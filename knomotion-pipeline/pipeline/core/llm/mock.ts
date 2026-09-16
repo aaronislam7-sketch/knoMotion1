@@ -81,9 +81,9 @@ export const DEFAULT_BUILDERS: Record<string, Builder> = {
       difficulty: brief.difficulty ?? 'beginner',
       targetDurationSeconds: brief.estimatedDurationSeconds ?? 20,
       scenes: [
-        { id: `${videoId}-s1`, order: 0, purpose: 'hook', title: 'Why this matters', beat: 'Open with a hook.', keyPoints: ['This matters because...'], visualIntent: 'Bold animated title', suggestedMidScenes: ['textReveal'], suggestedLayout: 'full', suggestedStylePreset: 'playful', estimatedDurationSeconds: 5 },
-        { id: `${videoId}-s2`, order: 1, purpose: 'concept', title: 'The core idea', beat: 'Explain the core idea in steps.', keyPoints: ['First point', 'Second point', 'Third point'], visualIntent: 'A checklist building up', suggestedMidScenes: ['checklist'], suggestedLayout: 'full', suggestedStylePreset: 'educational', estimatedDurationSeconds: 10 },
-        { id: `${videoId}-s3`, order: 2, purpose: 'summary', title: 'Takeaway', beat: 'Recap the takeaway.', keyPoints: ['Remember this'], visualIntent: 'Single bold takeaway', suggestedMidScenes: ['textReveal'], suggestedLayout: 'full', suggestedStylePreset: 'mentor', estimatedDurationSeconds: 5 },
+        { id: `${videoId}-s1`, order: 0, purpose: 'hook', contentShape: 'statement', title: 'Why this matters', beat: 'Open with a hook.', keyPoints: ['This matters because...'], visualIntent: 'Bold animated title', suggestedMidScenes: ['textReveal'], suggestedLayout: 'full', suggestedStylePreset: 'playful', estimatedDurationSeconds: 5 },
+        { id: `${videoId}-s2`, order: 1, purpose: 'concept', contentShape: 'sequence', title: 'The core idea', beat: 'Explain the core idea in steps.', keyPoints: ['First point', 'Second point', 'Third point'], visualIntent: 'A checklist building up', suggestedMidScenes: ['checklist'], suggestedLayout: 'full', suggestedStylePreset: 'educational', estimatedDurationSeconds: 10 },
+        { id: `${videoId}-s3`, order: 2, purpose: 'summary', contentShape: 'statement', title: 'Takeaway', beat: 'Recap the takeaway.', keyPoints: ['Remember this'], visualIntent: 'Single bold takeaway', suggestedMidScenes: ['textReveal'], suggestedLayout: 'full', suggestedStylePreset: 'mentor', estimatedDurationSeconds: 5 },
       ],
     };
   },

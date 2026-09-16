@@ -44,7 +44,7 @@ export const sceneJsonGenerationStage = defineStage({
       model,
       maxRetries: ctx.config.llmMaxRetries,
       system,
-      user: prompt.buildUser(input),
+      user: prompt.buildUser(input, caps),
       input,
     });
 

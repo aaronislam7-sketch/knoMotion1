@@ -1,7 +1,7 @@
 /** Stage 3 prompt — Video Narrative Planning (one video). Planning object, NOT KnoMotion JSON. */
 
 export const videoPlanningPrompt = {
-  version: '1.0',
+  version: '1.1',
   system: [
     'You design the teaching flow for ONE short learning video. Output a PLAN, not KnoMotion scene JSON.',
     '',
@@ -9,10 +9,19 @@ export const videoPlanningPrompt = {
     '- `narrativeArc`: the through-line that ties the scenes together.',
     '- `scenes`: an ordered list. Each scene: stable kebab-case `id`, `order` (0-based),',
     '  `purpose` (hook|context|concept|example|comparison|demonstration|summary|cta),',
-    '  short `title`, `beat` (what happens narratively), `keyPoints` (concrete points to convey),',
-    '  `visualIntent` (plain-language description of what should be on screen),',
+    '  `contentShape` (see below), short `title`, `beat` (what happens narratively),',
+    '  `keyPoints` (concrete points to convey), `visualIntent` (plain-language description of what should be on screen),',
     '  `suggestedMidScenes` (advisory; from the canonical set below), `suggestedLayout`,',
     '  `suggestedStylePreset`, and `estimatedDurationSeconds`.',
+    '',
+    'contentShape is the SHAPE of what the scene teaches. It decides which visuals are allowed later, so pick it from the content, not from habit:',
+    '- statement  — one claim, definition, quote or takeaway (visuals: textReveal, heroText, bubbleCallout)',
+    '- sequence   — ordered steps, a process, a list that builds (visuals: checklist, cardSequence, textReveal)',
+    '- comparison — two or more things contrasted (visuals: sideBySide, gridCards)',
+    '- quantity   — a number, statistic or count is the point (visuals: bigNumber, animatedCounter)',
+    '- structure  — parts of a whole, categories, an overview map (visuals: gridCards, iconGrid, cardSequence, bubbleCallout)',
+    '- code       — source code or a command is shown (visuals: codeBlock)',
+    'Vary the shapes across the video: a video whose scenes are all "statement" or all "sequence" reads as a slideshow.',
     '',
     'Canonical mid-scenes (advisory): textReveal, heroText, gridCards, checklist, bubbleCallout,',
     'sideBySide, iconGrid, cardSequence, bigNumber, animatedCounter, codeBlock.',
@@ -27,6 +36,7 @@ export const videoPlanningPrompt = {
     '  "difficulty": "beginner"|"intermediate"|"advanced", "targetDurationSeconds": number,',
     '  "scenes": [{ "id": kebab-case string, "order": integer from 0,',
     '    "purpose": "hook"|"context"|"concept"|"example"|"comparison"|"demonstration"|"summary"|"cta",',
+    '    "contentShape": "statement"|"sequence"|"comparison"|"quantity"|"structure"|"code",',
     '    "title": string, "beat": string, "keyPoints": string[], "conceptIds": string[],',
     '    "visualIntent": string, "suggestedMidScenes": string[], "suggestedLayout": string,',
     '    "suggestedStylePreset": string, "estimatedDurationSeconds": number }]',
