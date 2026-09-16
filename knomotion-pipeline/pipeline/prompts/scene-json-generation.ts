@@ -14,6 +14,52 @@
 
 import type { RendererCapabilities } from '../core/capabilities/renderer-capabilities';
 import type { SceneTimingArtifact } from '../schemas/SceneTiming';
+import { resolveSlots } from '../core/geometry';
+import { computeTextBudget, describeBudget, effectiveColumns, metricsFor } from '../core/text-budget';
+import { allowedMidScenesFor } from '../core/content-shapes';
+
+/**
+ * Text budgets for the slots the model most often uses (full, a 2-column
+ * column, a 2-row row, header), derived from the manifest's geometry + font
+ * metrics. Stage 8 enforces the exact budget for whatever layout is chosen.
+ */
+export const summariseTextBudgets = (caps: RendererCapabilities, format: 'desktop' | 'mobile' = 'desktop'): string => {
+  if (!caps.textMetrics) return '';
+  const g = caps.layoutGeometry;
+  const slotsFull = resolveSlots({ type: 'full' }, format, g);
+  const slotsCol = resolveSlots({ type: 'columnSplit', options: { columns: 2 } }, format, g);
+  const slotsRow = resolveSlots({ type: 'rowStack', options: { rows: 2 } }, format, g);
+  const limits: Record<string, number> = { ...caps.constraints };
+  const lines: string[] = [];
+  lines.push('TEXT BUDGETS (hard limits — Stage 8 rejects anything longer; write short, then shorter):');
+  for (const key of caps.canonicalMidSceneKeys) {
+    const m = metricsFor(caps.textMetrics, key);
+    if (!m) continue;
+    // Grids are budgeted at their typical column count (6 items → 3 columns for gridCards, 4 for iconGrid).
+    const cols = (slot: { width: number; height: number; left: number; top: number }) => effectiveColumns(key, {}, slot, 6);
+    lines.push(`- ${describeBudget('full', computeTextBudget(key, slotsFull.full, m, limits, caps.textMetrics, cols(slotsFull.full)))}`);
+    lines.push(`  ${describeBudget('col1/col2', computeTextBudget(key, slotsCol.col1, m, limits, caps.textMetrics, cols(slotsCol.col1)))}`);
+    lines.push(`  ${describeBudget('row1/row2', computeTextBudget(key, slotsRow.row1, m, limits, caps.textMetrics, cols(slotsRow.row1)))}`);
+  }
+  const headerMetrics = metricsFor(caps.textMetrics, 'textReveal');
+  if (headerMetrics) {
+    lines.push(`- header slot (title strip, ${Math.round(slotsFull.header.width)}×${Math.round(slotsFull.header.height)}px): ONE textReveal line ≤ ${computeTextBudget('textReveal', slotsFull.header, headerMetrics, limits, caps.textMetrics).fields[0].maxChars} chars, or leave it out.`);
+  }
+  return lines.join('\n');
+};
+
+/** Per-scene "you may use these mid-scenes" block from the plan's contentShape tags. */
+export const summariseShapes = (videoPlan: unknown, caps: RendererCapabilities): string => {
+  const scenes: any[] = (videoPlan as any)?.scenes ?? [];
+  const out: string[] = [];
+  for (const s of scenes) {
+    const allowed = allowedMidScenesFor(s?.contentShape, caps);
+    if (!allowed) continue;
+    out.push(`scene "${s.id}": contentShape=${s.contentShape} → content slots may ONLY use: ${allowed.join(' | ')}`);
+  }
+  if (!out.length) return '';
+  return ['ALLOWED MID-SCENES PER SCENE (from the plan; the header slot may always be a one-line textReveal title):', ...out].join('\n');
+};
 
 /** Builds a compact, model-friendly capability summary from the renderer manifest. */
 export const summariseCapabilities = (caps: RendererCapabilities): string => {
@@ -36,6 +82,11 @@ export const summariseCapabilities = (caps: RendererCapabilities): string => {
     `LIMITS: maxTextLines ${caps.constraints.maxTextLines}, maxChecklistItems ${caps.constraints.maxChecklistItems}, ` +
       `maxCardsInGrid ${caps.constraints.maxCardsInGrid}, maxCallouts ${caps.constraints.maxCallouts}, fps ${caps.constraints.fpsFixed}`,
   );
+  const budgets = summariseTextBudgets(caps);
+  if (budgets) {
+    lines.push('');
+    lines.push(budgets);
+  }
   return lines.join('\n');
 };
 
@@ -53,7 +104,7 @@ export const summariseTiming = (timing: SceneTimingArtifact): string => {
 };
 
 export const sceneJsonGenerationPrompt = {
-  version: '2.0',
+  version: '2.1',
   system: [
     'You are a COMPILER, not a writer. Translate the approved VideoPlan + NarrationScript into VALID KnoMotion',
     'scene JSON. Do not invent components, add new content, or rewrite the lesson.',
@@ -67,6 +118,13 @@ export const sceneJsonGenerationPrompt = {
     '- TIMING IS FIXED. The SceneTiming block gives each scene\'s durationInFrames and each line\'s visible window.',
     '  Copy those values exactly into `durationInFrames` and `beats.start` / `beats.exit`. Do not choose your own.',
     '  (Anything you write for timing is overwritten by the computed values anyway.)',
+    '- CONTENT SHAPE IS FIXED. Each scene\'s allowed mid-scenes are listed in the user message; choose the best fit',
+    '  from that subset for every content slot (header may be a one-line textReveal title). Anything else is rejected.',
+    '- TEXT BUDGETS ARE HARD LIMITS. Every string must fit the budget for its slot (see TEXT BUDGETS). Split or',
+    '  shorten long lines; never exceed the count of lines/items/cards for the slot.',
+    '- LAYOUT OPTIONS ARE REQUIRED. rowStack needs options.rows, columnSplit/headerRowColumns need options.columns,',
+    '  gridSlots needs both. Declare only slot names that layout produces (e.g. columns: 2 → col1, col2), and fill',
+    '  every one of them.',
     '- heroText: beats need entrance and exit; heroRef must be a listed lottie key or a URL.',
     '- sideBySide MUST use layout { "type": "full" } (it makes its own columns). Fill every declared slot.',
     '- Do NOT include an `audio` block. Narration audio is attached by the assembly stage after validation.',
@@ -118,11 +176,15 @@ export const sceneJsonGenerationPrompt = {
     return this.system.replace('{{CAPABILITIES}}', capabilitySummary);
   },
 
-  buildUser(input: { videoPlan: unknown; narrationScript: unknown; sceneTiming?: SceneTimingArtifact }): string {
+  buildUser(input: { videoPlan: unknown; narrationScript: unknown; sceneTiming?: SceneTimingArtifact }, caps?: RendererCapabilities): string {
     const parts = [
       `VideoPlan:\n${JSON.stringify(input.videoPlan, null, 2)}`,
       `NarrationScript:\n${JSON.stringify(input.narrationScript, null, 2)}`,
     ];
+    if (caps) {
+      const shapes = summariseShapes(input.videoPlan, caps);
+      if (shapes) parts.push(shapes);
+    }
     if (input.sceneTiming) parts.push(`SceneTiming (FIXED — copy these values):\n${summariseTiming(input.sceneTiming)}`);
     return parts.join('\n\n');
   },

@@ -138,6 +138,14 @@ Layered so each check is cheap and deterministic. Order of implementation is top
 
 **Acceptance:** a fixture set with one deliberately broken config per guardrail (off-screen text, oversized line, orphaned slot, out-of-range beat, mask+up, alias key) — every one is caught by validation or render-check and either repaired or ends `needs_review`. Zero blank slots or edge bleed on the two reference videos. Desktop only (D4); every check reads its geometry from the layout engine so mobile fixtures can be added without redesign.
 
+**M2 status (2026-09-16, branch `cursor/m2-guardrails-b054`) — built, awaiting owner acceptance.** Every item above is implemented; `pipeline_build.md` §3 has the rule-by-rule and knob-by-knob detail, `TECH_DEBT.md` the engine fixes (plus TD-009, found during calibration: sequenced items exited ~0.8s after entering — the largest single cause of "checklist appears then the scene goes blank").
+
+*Fixture half of the acceptance — met.* `knomotion-pipeline/pipeline/__tests__/render-check.test.ts` holds the set: oversized line → `text_budget`; orphaned slot → `slot_layout_reconcile`; out-of-range beat → `beat_timing`; alias key → rejected by the contract (TD-004a); off-screen text (ten checklist items in a half-height column) → `edge_bleed`; bad `heroRef` (lottie key or image URL) and content that only appears at the end → `blank_slot`; mask+up → renders visibly (TD-002). The rendered half runs with `KNOMOTION_RENDER_TESTS=1` (~15s). A blank slot that passes every rule is routed through repair and the repaired video passes — asserted end to end.
+
+*Reference-video half — pending the owner's real run.* The mock `worldcup` run reports `render-check=passed` (0 blank slots, 0 edge bleed across 18 stills). Run `npm run run -- --source worldcup --provider openai --tts elevenlabs`, then `npm run run -- render-check` and open `videos/<video>/render-check/*.png`; the second reference source arrives in M4.
+
+*Deliberately not done:* the optional LLM-vision pass (§7.3 item 1 of `pipeline_build.md`) — the two deterministic pixel checks caught every fixture, and a vision judge would make a gate non-deterministic; the M3 `useWhen`/`avoidWhen` manifest fields (M3 owns them; `contentShape` restricts the subset today); mobile fixtures (D4).
+
 ### M3 — Documentation: one knowledge source for the pipeline
 *Principle: Documentation*
 

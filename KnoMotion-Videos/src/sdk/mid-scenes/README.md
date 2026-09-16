@@ -9,6 +9,7 @@ Mid-scenes are pre-built, JSON-configurable components designed for LLM JSON gen
 ## 📚 Table of Contents
 
 1. [What Are Mid-Scenes?](#what-are-mid-scenes)
+1a. [Engine contracts every mid-scene honours](#engine-contracts-every-mid-scene-honours-sept-m2)
 2. [Current Mid-Scenes](#current-mid-scenes)
 3. [Usage Guide](#usage-guide)
 4. [Architecture & Best Practices](#architecture--best-practices)
@@ -45,6 +46,21 @@ Enable LLMs to generate complete video scenes by providing JSON configuration. N
   }
 }
 ```
+
+---
+
+## Engine contracts every mid-scene honours (Sept M2)
+
+> Read this before adding or editing a mid-scene. The pipeline's Stage 9 render-check renders stills of every scene and fails a config whose slot renders nothing (`blank_slot`) or whose content enters the outer 60px/40px safe band (`edge_bleed`) — so a mid-scene that breaks one of these contracts fails the pipeline, not just the eye test. Full detail: `TECH_DEBT.md` (resolved items are kept as regression notes) and `pipeline_build.md` §3.
+
+- **Keys.** `SceneRenderer` resolves the 11 canonical keys only (`textReveal, heroText, gridCards, checklist, bubbleCallout, sideBySide, iconGrid, cardSequence, bigNumber, animatedCounter, codeBlock`). The renderer Zod schema and the pipeline both reject registry aliases such as `textRevealSequence` (TD-004a).
+- **Position.** `config.position` is always the top-left slot area `{ left: 0, top: 0, width, height }` injected by `SceneRenderer`; components centre themselves inside it. Never read it as a centre point (TD-001).
+- **Item timing.** Items inside a sequence (`lines`, `items`, `cards`, `callouts`, `icons`) must stay up until their container exits unless they carry their own `beats.exit`: pass `exit: sequenceBeats.exit` in the item's `resolveBeats` defaults (TD-009). Without it items faded out ~1.9s after entering and left slots blank mid-narration.
+- **Text fits the slot.** Use `fitFontSize` / `fitFontSizeForAll` (`sdk/utils/fitFontSize.js`, `@remotion/layout-utils`) so long strings shrink instead of overflowing; `textReveal`, `checklist` and `bigNumber` do. The pipeline also budgets characters/items per slot from `capability-manifest.json` → `textMetrics` — update that entry when you change a base font size or family.
+- **Directions.** Shared `direction` values are `up | down | left | right`; helpers that take insets (`getMaskReveal`) need `top | bottom` — map them (TD-002).
+- **Colours.** Accept theme keys *and* literal CSS: `KNODE_THEME.colors[color] ?? color` (TD-003).
+- **Manifest + schema.** Every prop lives in `schemas/<Component>.schema.json` and `sdk/capability-manifest.json`; if a shape (`statement | sequence | comparison | quantity | structure | code`) should be allowed to use the mid-scene, add it under `contentShapes` there. Hand-maintained until M3 generates it (TD-005).
+- **Debugging a finding.** `npm run run -- preview <jobId> --debug-safe-zones` (from `knomotion-pipeline/`) draws the safe band and every slot rect over the staged video; `npm run run -- render-check <jobId>` prints per-slot coverage and writes the stills.
 
 ---
 

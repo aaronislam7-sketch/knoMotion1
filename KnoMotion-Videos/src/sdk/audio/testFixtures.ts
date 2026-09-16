@@ -1,12 +1,12 @@
 /**
  * Audio Layer Test Fixtures — P4
  *
- * Sample scene payloads for testing AudioLayer, CaptionOverlay, and
- * ttsToBeatAlignment(). These fixtures are used for:
+ * Sample scene payloads for testing AudioLayer and CaptionOverlay.
+ * These fixtures are used for:
  *
  *   1. Remotion Studio preview — paste the test scenes into KnoMotionVideo props
  *   2. CLI render test — pass as --props to npx remotion render
- *   3. alignTTSToBeats() validation — sample captions + expected alignment
+ *   3. Caption alignment checks (word-timing → beats now lives in knomotion-pipeline/pipeline/core/timing.ts)
  *
  * IMPORTANT: Audio URLs are placeholders. For actual audio playback testing,
  * replace with real accessible URLs (e.g. from a public CDN or staticFile()).
@@ -58,7 +58,7 @@ export const sampleCaptionsScene2: Caption[] = [
 ];
 
 /**
- * All captions combined (for alignTTSToBeats testing).
+ * All captions combined (for caption-alignment testing).
  */
 export const allSampleCaptions: Caption[] = [
   ...sampleCaptions,
@@ -226,7 +226,7 @@ export const testScenesWithAudio = {
 };
 
 /**
- * Sample input for alignTTSToBeats() testing.
+ * Sample input for caption-alignment testing.
  *
  * Expected: scene 1 gets captions at 0.2s–3.7s relative,
  * scene 2 gets captions at scene-relative offsets.

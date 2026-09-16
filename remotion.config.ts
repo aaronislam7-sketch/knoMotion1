@@ -1,34 +1,15 @@
 /**
  * Remotion Configuration
- * 
- * This file configures the Remotion bundler (webpack) to properly resolve
- * module imports without explicit file extensions.
+ *
+ * Configures the Remotion CLI bundler (webpack). The override itself lives in
+ * KnoMotion-Videos/src/remotion/webpackOverride.ts so the pipeline's
+ * programmatic bundle() (render-check, render) uses the exact same settings.
  */
 
 import { Config } from '@remotion/cli/config';
+import { webpackOverride } from './KnoMotion-Videos/src/remotion/webpackOverride';
 
-Config.overrideWebpackConfig((currentConfiguration) => {
-  return {
-    ...currentConfiguration,
-    resolve: {
-      ...currentConfiguration.resolve,
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.mjs'],
-    },
-    module: {
-      ...currentConfiguration.module,
-      rules: [
-        // Disable fullySpecified for all JS/TS files to allow extension-less imports
-        {
-          test: /\.m?js/,
-          resolve: {
-            fullySpecified: false,
-          },
-        },
-        ...(currentConfiguration.module?.rules ?? []),
-      ],
-    },
-  };
-});
+Config.overrideWebpackConfig(webpackOverride);
 
 // Set the entry point
 Config.setEntryPoint('./KnoMotion-Videos/src/remotion/index.ts');

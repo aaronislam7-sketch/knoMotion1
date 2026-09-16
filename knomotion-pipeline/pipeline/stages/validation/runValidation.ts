@@ -18,6 +18,12 @@ import { validateConfig, rulesChecked } from './validate';
 export const ValidationInputSchema = z.object({
   videoId: z.string().min(1),
   config: KnoMotionVideoConfigSchema,
+  /**
+   * sceneId -> planned contentShape (Sept M2). When supplied, the
+   * `content_shape` rule checks each content slot's mid-scene against the
+   * shape's allowed subset. Hand-authored configs validate without it.
+   */
+  contentShapes: z.record(z.string()).optional(),
 });
 
 export const validationStage = defineStage({
@@ -27,7 +33,7 @@ export const validationStage = defineStage({
   outputSchema: ValidationReportSchema,
   async run(input, ctx) {
     const caps = await loadRendererCapabilities();
-    const issues = validateConfig(input.config, caps);
+    const issues = validateConfig(input.config, caps, { contentShapes: input.contentShapes });
 
     const errors = issues.filter((i) => i.severity === 'error');
     const warnings = issues.filter((i) => i.severity === 'warning');

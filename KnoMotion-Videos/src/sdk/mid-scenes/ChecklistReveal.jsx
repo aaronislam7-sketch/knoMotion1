@@ -23,6 +23,7 @@ import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 import { resolveStylePreset } from '../theme/stylePresets';
 import { resolveBeats } from '../utils/beats';
+import { fitFontSize } from '../utils/fitFontSize';
 
 /**
  * Icon presets for checklist items
@@ -114,26 +115,24 @@ const isLottieIcon = (icon) => {
 };
 
 /**
- * Calculate auto-fit font size based on text length and available width
- * 
+ * Auto-fit font size: measures the real glyphs (@remotion/layout-utils) so an
+ * item shrinks — never below 60% — only when it truly would not fit its row.
+ *
  * @param {string} text - Text content
  * @param {number} availableWidth - Available width in pixels
  * @param {number} baseFontSize - Base font size
+ * @param {number} fontWeight - Weight the item renders at
  * @returns {number} Adjusted font size
  */
-const calculateAutoFitFontSize = (text, availableWidth, baseFontSize = 36) => {
-  if (!text) return baseFontSize;
-  
-  // Approximate character width (varies by font)
-  const avgCharWidth = baseFontSize * 0.55;
-  const textWidth = text.length * avgCharWidth;
-  
-  if (textWidth <= availableWidth) return baseFontSize;
-  
-  // Scale down proportionally, with minimum of 60%
-  const scaleFactor = Math.max(0.6, availableWidth / textWidth);
-  return Math.floor(baseFontSize * scaleFactor);
-};
+const calculateAutoFitFontSize = (text, availableWidth, baseFontSize = 36, fontWeight = 600) =>
+  fitFontSize({
+    text,
+    maxWidth: availableWidth,
+    baseSize: baseFontSize,
+    minSize: Math.floor(baseFontSize * 0.6),
+    fontFamily: KNODE_THEME.fonts.body,
+    fontWeight,
+  });
 
 /**
  * Get animation style with smooth easing for checklist items
@@ -327,8 +326,6 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
   // Calculate dimensions from position or viewport
   const slotWidth = position?.width || width;
   const slotHeight = position?.height || height;
-  const slotLeft = position?.left || 0;
-  const slotTop = position?.top || 0;
 
   // Calculate layout parameters - BOOSTED for visibility
   const isMobile = slotHeight > slotWidth;
@@ -380,7 +377,7 @@ export const ChecklistReveal = ({ config, stylePreset }) => {
     const itemIconColor = resolveColor(item.color || iconColor);
 
     const fontSize = autoFitText
-      ? calculateAutoFitFontSize(itemText, textWidth, baseFontSize)
+      ? calculateAutoFitFontSize(itemText, textWidth, baseFontSize, itemChecked ? 600 : 400)
       : baseFontSize;
 
     const itemBeats = resolveBeats(item.beats, {

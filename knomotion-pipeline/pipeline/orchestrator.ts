@@ -9,7 +9,8 @@
  *   intake -> content-analysis -> module-planning
  *   then, per VideoBrief (fan-out):
  *     video-planning -> script-generation -> tts -> timing -> scene-json-generation
- *       -> validation -> (repair -> re-time -> re-validate)*<=maxRepairAttempts
+ *       -> validation -> render-check (stills, when validation passes)
+ *       -> (repair -> re-time -> re-validate -> re-render-check)*<=maxRepairAttempts
  *       -> assembly (audio merged into the config)
  */
 
@@ -28,6 +29,7 @@ import type { ContentMap } from './schemas/ContentMap';
 import type { ModulePlan } from './schemas/ModulePlan';
 import { KnoMotionVideoConfigSchema, type KnoMotionVideoConfig } from './schemas/KnoMotionVideoConfig';
 import type { ValidationReport } from './schemas/ValidationReport';
+import type { QualityReport, RenderCheckStatus } from './schemas/QualityReport';
 import type { SceneTimingArtifact } from './schemas/SceneTiming';
 import {
   intakeStage,
@@ -39,6 +41,8 @@ import {
   timingStage,
   sceneJsonGenerationStage,
   validationStage,
+  renderCheckStage,
+  RENDER_CHECK_RULES,
   repairStage,
   assemblyStage,
 } from './stages';
@@ -58,6 +62,9 @@ export interface VideoResult {
   valid: boolean;
   configPath: string;
   validationPath: string;
+  /** Stage 9 outcome: not_run when the loop never reached it (validation still failing, or stopped before). */
+  renderCheck: RenderCheckStatus | 'not_run';
+  qualityPath: string;
   repairAttempts: number;
   /** Scenes with narration audio attached by assembly (0 for the mock TTS provider). */
   narrationClips: number;
@@ -74,14 +81,18 @@ export interface RunResult {
 
 const STAGE_ORDER: PipelineStage[] = [
   'intake', 'content-analysis', 'module-planning', 'video-planning',
-  'script-generation', 'tts', 'timing', 'scene-json-generation', 'validation', 'repair', 'assembly',
+  'script-generation', 'tts', 'timing', 'scene-json-generation', 'validation', 'render-check', 'repair', 'assembly',
 ];
 
 /** The renderable deliverable for a video. Repair and assembly write back to this file. */
 const CONFIG_ARTIFACT = '05-knomotion-video-config.json';
 const TTS_ARTIFACT = '04a-tts-manifest.json';
 const TIMING_ARTIFACT = '04b-scene-timing.json';
+const VALIDATION_ARTIFACT = '06-validation-report.json';
 const RENDER_MANIFEST_ARTIFACT = '08-render-manifest.json';
+export const QUALITY_ARTIFACT = '09-quality-report.json';
+/** Job-relative (under the video dir) folder where render-check keeps the content stills. */
+export const STILLS_DIR = 'render-check';
 
 export const runPipeline = async (input: IntakeInput, options: RunOptions = {}): Promise<RunResult> => {
   const config = loadConfig(options.config);
@@ -143,12 +154,17 @@ export const runPipeline = async (input: IntakeInput, options: RunOptions = {}):
     );
     if (shouldStop('scene-json-generation')) continue;
 
-    // Validate, then surgically repair failing scenes up to the cap. When any
-    // repair patch is applied, validateAndRepair persists the repaired config
-    // back to CONFIG_ARTIFACT so configPath always points at the final config.
-    const { report, repairAttempts, config: validated } = await validateAndRepair(ctx, brief.id, config0, dir, sceneTiming);
-    if (shouldStop('validation') || shouldStop('repair')) {
-      videos.push(videoResult(store.jobDir, dir, brief.id, report, repairAttempts, 0, sceneTiming.totalDurationInFrames));
+    // Validate (rules, then rendered stills), then surgically repair failing
+    // scenes up to the cap. When any repair patch is applied, validateAndRepair
+    // persists the repaired config back to CONFIG_ARTIFACT so configPath always
+    // points at the final config. --stop-after validation skips render-check.
+    const contentShapes = Object.fromEntries(videoPlan.scenes.map((s) => [s.id, s.contentShape]));
+    const renderCheck = config.renderCheck !== 'off' && options.stopAfter !== 'validation';
+    const { report, repairAttempts, config: validated, renderCheckStatus } = await validateAndRepair(
+      ctx, brief.id, config0, dir, sceneTiming, contentShapes, { renderCheck },
+    );
+    if (shouldStop('validation') || shouldStop('render-check') || shouldStop('repair')) {
+      videos.push(videoResult(store.jobDir, dir, brief.id, report, renderCheckStatus, repairAttempts, 0, sceneTiming.totalDurationInFrames));
       continue;
     }
 
@@ -165,11 +181,45 @@ export const runPipeline = async (input: IntakeInput, options: RunOptions = {}):
     });
     const narrationClips = renderManifest.props.scenes.filter((s) => s.audio?.narration?.src).length;
 
-    videos.push(videoResult(store.jobDir, dir, brief.id, report, repairAttempts, narrationClips, sceneTiming.totalDurationInFrames));
+    videos.push(videoResult(store.jobDir, dir, brief.id, report, renderCheckStatus, repairAttempts, narrationClips, sceneTiming.totalDurationInFrames));
   }
 
   logger.info('Pipeline run complete', { videos: videos.length });
   return summarize(jobId, store.jobDir, modulePlan.moduleTitle, videos);
+};
+
+// ---------------------------------------------------------------------------
+// Standalone render-check (CLI: render-check <jobId>)
+// ---------------------------------------------------------------------------
+
+export interface RenderCheckJobOptions {
+  jobId: string;
+  videoId: string;
+  config?: Partial<PipelineConfig>;
+  framesPerScene?: number;
+  scale?: number;
+}
+
+/**
+ * Re-runs Stage 9 on an existing job's config artifact (the post-repair,
+ * post-assembly deliverable) and rewrites 09-quality-report.json plus the
+ * stills. Does not touch the validation report or the config.
+ */
+export const renderCheckJob = async (opts: RenderCheckJobOptions): Promise<{ report: QualityReport; qualityPath: string; stillsDir: string }> => {
+  const config = loadConfig({ ...opts.config, renderCheck: 'on' });
+  const logger = createLogger(config.logLevel, { jobId: opts.jobId });
+  const store = new ArtifactStore(config.artifactsDir, opts.jobId);
+  const llm = createLLMClient({ ...config, provider: 'mock' }, logger);
+  const ctx = createContext({ jobId: opts.jobId, config, logger, store, llm });
+
+  const dir = store.videoDir(opts.videoId);
+  const videoConfig = await store.readArtifact(path.join(dir, CONFIG_ARTIFACT), KnoMotionVideoConfigSchema);
+  const report = await execute(
+    ctx, renderCheckStage,
+    { videoId: opts.videoId, config: videoConfig, stillsDir: path.join(dir, STILLS_DIR), framesPerScene: opts.framesPerScene, scale: opts.scale },
+    path.join(dir, QUALITY_ARTIFACT),
+  );
+  return { report, qualityPath: path.join(store.jobDir, dir, QUALITY_ARTIFACT), stillsDir: path.join(store.jobDir, dir, STILLS_DIR) };
 };
 
 // ---------------------------------------------------------------------------
@@ -203,19 +253,50 @@ async function execute<In extends z.ZodTypeAny, Out extends z.ZodTypeAny>(
   }
 }
 
+export interface ValidateAndRepairOptions {
+  /** Run Stage 9 render-check whenever the rule validation passes (default false). */
+  renderCheck?: boolean;
+}
+
 /**
  * Validates `config`, repairing failing scenes up to the cap. When `timing` is
  * supplied, every repaired scene has its computed timing re-applied before
  * re-validation, so the repair LLM can never re-introduce timing drift.
+ *
+ * With `renderCheck` on, a config that clears the rules is rendered (Stage 9)
+ * and any blank_slot / edge_bleed findings are merged into the validation
+ * report as errors, so the repair loop treats "renders nothing" exactly like a
+ * broken rule. The merged report is what lands in 06-validation-report.json.
  */
 export async function validateAndRepair(
   ctx: PipelineContext, videoId: string, config: KnoMotionVideoConfig, dir: string, timing?: SceneTimingArtifact,
-): Promise<{ report: ValidationReport; config: KnoMotionVideoConfig; repairAttempts: number }> {
+  contentShapes?: Record<string, string>, options: ValidateAndRepairOptions = {},
+): Promise<{ report: ValidationReport; config: KnoMotionVideoConfig; repairAttempts: number; renderCheckStatus: VideoResult['renderCheck'] }> {
   let working = config;
   let anyScenePatched = false;
+  let renderCheckStatus: VideoResult['renderCheck'] = 'not_run';
   const timingFor = (sceneId: string, index: number) =>
     timing?.scenes.find((t) => t.sceneId === sceneId) ?? timing?.scenes[index];
-  let report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
+  const validateInput = () => ({ videoId, config: working, contentShapes });
+  const validationPath = path.join(dir, VALIDATION_ARTIFACT);
+
+  // Rules first; stills only once the rules pass (rendering a config with
+  // known structural errors would just report the same problems twice).
+  const assess = async (): Promise<ValidationReport> => {
+    let report = await execute(ctx, validationStage, validateInput(), validationPath);
+    if (!report.valid || !options.renderCheck) return report;
+    const quality = await execute(
+      ctx, renderCheckStage,
+      { videoId, config: working, stillsDir: path.join(dir, STILLS_DIR) },
+      path.join(dir, QUALITY_ARTIFACT),
+    );
+    renderCheckStatus = quality.renderCheck?.status ?? 'skipped';
+    report = mergeRenderCheck(report, quality);
+    if (!report.valid) await ctx.store.writeArtifact(validationPath, validationStage.outputSchema, report);
+    return report;
+  };
+
+  let report = await assess();
   let attempts = 0;
 
   while (!report.valid && attempts < ctx.config.maxRepairAttempts) {
@@ -245,13 +326,12 @@ export async function validateAndRepair(
       }
     }
 
-    report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
-    report = { ...report, repairAttempts: attempts };
+    report = { ...(await assess()), repairAttempts: attempts };
   }
 
   if (!report.valid && attempts >= ctx.config.maxRepairAttempts) {
     report = { ...report, status: 'needs_review', repairAttempts: attempts };
-    await ctx.store.writeArtifact(path.join(dir, '06-validation-report.json'), validationStage.outputSchema, report);
+    await ctx.store.writeArtifact(validationPath, validationStage.outputSchema, report);
   }
 
   // Persist the repaired config back over the Stage-5 artifact so the file on
@@ -269,18 +349,37 @@ export async function validateAndRepair(
     ctx.logger.info('Repaired config written back', { videoId, relPath, repairAttempts: attempts });
   }
 
-  return { report, config: working, repairAttempts: attempts };
+  return { report, config: working, repairAttempts: attempts, renderCheckStatus };
 }
 
+/** Folds Stage 9 findings into the validation report so repair sees one issue list. */
+export const mergeRenderCheck = (report: ValidationReport, quality: QualityReport): ValidationReport => {
+  const rc = quality.renderCheck;
+  if (!rc || rc.status === 'skipped') return report;
+  const errors = [...report.errors, ...rc.issues.filter((i) => i.severity === 'error')];
+  const warnings = [...report.warnings, ...rc.issues.filter((i) => i.severity === 'warning')];
+  const valid = errors.length === 0;
+  return {
+    ...report,
+    rulesChecked: [...new Set([...report.rulesChecked, ...RENDER_CHECK_RULES])],
+    errors,
+    warnings,
+    valid,
+    status: valid ? 'passed' : 'failed',
+  };
+};
+
 const videoResult = (
-  jobDir: string, dir: string, videoId: string, report: ValidationReport, repairAttempts: number,
-  narrationClips: number, durationInFrames: number,
+  jobDir: string, dir: string, videoId: string, report: ValidationReport, renderCheck: VideoResult['renderCheck'],
+  repairAttempts: number, narrationClips: number, durationInFrames: number,
 ): VideoResult => ({
   videoId,
   status: report.status,
   valid: report.valid,
   configPath: path.join(jobDir, dir, CONFIG_ARTIFACT),
-  validationPath: path.join(jobDir, dir, '06-validation-report.json'),
+  validationPath: path.join(jobDir, dir, VALIDATION_ARTIFACT),
+  renderCheck,
+  qualityPath: path.join(jobDir, dir, QUALITY_ARTIFACT),
   repairAttempts,
   narrationClips,
   durationInFrames,

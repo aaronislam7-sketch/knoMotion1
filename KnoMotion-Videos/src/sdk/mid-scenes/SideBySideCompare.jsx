@@ -489,7 +489,7 @@ const BeforeAfterCompare = ({
  * @param {string} [props.config.dividerType='vs'] - Divider type: 'none' | 'line' | 'dashed' | 'vs'
  * @param {string} [props.config.dividerLabel='VS'] - Label for VS badge
  * @param {string} [props.config.dividerColor='primary'] - Divider color
- * @param {string} [props.config.alignment='center'] - Content alignment: 'center' | 'inner'
+ * @param {string} [props.config.alignment='center'] - Content alignment: 'center' | 'inner' (a side may override with its own `alignment`)
  * @param {Object} props.config.beats - Beat timings
  * @param {number} props.config.beats.start - Start time in seconds (required)
  * @param {Object} [props.config.position] - Slot position from layout resolver
@@ -594,7 +594,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
       >
         {/* Left side (or Top on mobile) */}
         <ComparisonSide
-          config={{ ...left, alignment: isMobile ? 'center' : alignment }}
+          config={{ ...left, alignment: isMobile ? 'center' : (left.alignment || alignment) }}
           side={isMobile ? 'top' : 'left'}
           animStyle={leftAnimStyle}
           baseFontSize={baseFontSize}
@@ -605,7 +605,7 @@ export const SideBySideCompare = ({ config, stylePreset }) => {
 
         {/* Right side (or Bottom on mobile) */}
         <ComparisonSide
-          config={{ ...right, alignment: isMobile ? 'center' : alignment }}
+          config={{ ...right, alignment: isMobile ? 'center' : (right.alignment || alignment) }}
           side={isMobile ? 'bottom' : 'right'}
           animStyle={rightAnimStyle}
           baseFontSize={baseFontSize}

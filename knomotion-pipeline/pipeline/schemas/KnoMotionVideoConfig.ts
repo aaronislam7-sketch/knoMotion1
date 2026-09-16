@@ -197,16 +197,28 @@ export const LayoutSchema = z
   .preprocess(
     // Tolerate `layout: "full"` → `{ type: "full" }`, and fold layout synonyms /
     // mis-used mid-scene names (e.g. "sideBySide", "twoColumn") onto a valid type.
+    // When the fold changes the layout FAMILY (not just the spelling), record the
+    // original under `_coercedFrom` so Stage 8 `slot_layout_reconcile` can tell
+    // whether the model's slots still make sense (Sept M2: coercion is only safe
+    // when it is syntactic; a family change that orphans slots must be an error).
     (v) => {
       let obj: any = typeof v === 'string' ? { type: v } : v;
       if (obj && typeof obj === 'object' && typeof obj.type === 'string') {
-        obj = { ...obj, type: coerceLayoutType(obj.type) };
+        const original: string = obj.type;
+        const coerced = coerceLayoutType(original);
+        obj = { ...obj, type: coerced };
+        // Spelling-only folds ("columnsplit", "ColumnSplit") stay silent; anything else is recorded.
+        if (original !== coerced && original.toLowerCase().replace(/[^a-z]/g, '') !== coerced.toLowerCase()) {
+          obj._coercedFrom = original;
+        }
       }
       return obj;
     },
     z.object({
       type: LayoutTypeSchema,
       options: LayoutOptionsSchema,
+      /** Pipeline-internal: the layout string the model wrote before vocabulary folding. Stripped by the renderer's schema. */
+      _coercedFrom: z.string().optional(),
     }),
   )
   .optional();

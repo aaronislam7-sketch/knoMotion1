@@ -9,6 +9,7 @@ export { ttsStage, TTSInputSchema } from './tts/generateTTS';
 export { timingStage, TimingInputSchema } from './timing/computeTiming';
 export { sceneJsonGenerationStage, SceneJsonInputSchema } from './scene-json-generation/runSceneJsonGeneration';
 export { validationStage, ValidationInputSchema } from './validation/runValidation';
+export { renderCheckStage, RenderCheckInputSchema, RENDER_CHECK_RULES } from './render-check/runRenderCheck';
 export { repairStage, RepairInputSchema } from './repair/runRepair';
 export { assemblyStage, AssemblyInputSchema, PUBLIC_AUDIO_DIR } from './assembly/buildRenderProps';
 

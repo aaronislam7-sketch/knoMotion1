@@ -123,19 +123,9 @@ const MidSceneKeys = z.enum([
   'bigNumber',
   'animatedCounter',
   'codeBlock',
-  // Registry aliases
-  'textRevealSequence',
-  'heroTextEntranceExit',
-  'checklistReveal',
-  'bubbleCalloutSequence',
-  'callouts',
-  'sideBySideCompare',
-  'compare',
-  'gridCardReveal',
-  'cardGrid',
-  'bigNumberReveal',
-  'codeBlockScene',
-  'code',
+  // Only the 11 canonical keys: these are exactly what SceneRenderer's
+  // MID_SCENE_COMPONENTS resolves. Registry aliases used to be accepted here
+  // and rendered an empty slot (TD-004); an alias now fails validation.
 ]);
 
 const StylePresetSchema = z
@@ -211,6 +201,10 @@ export const VideoConfigSchema = z.object({
     .optional()
     .default('desktop')
     .describe('Video format: desktop (1920×1080) or mobile (1080×1920)'),
+  debugSafeZones: z
+    .boolean()
+    .optional()
+    .describe('Dev aid: overlay the safe band and layout slot bounds on every scene (toggle in Studio props)'),
 });
 
 export type VideoConfig = z.infer<typeof VideoConfigSchema>;

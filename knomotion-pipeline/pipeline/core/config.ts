@@ -12,6 +12,9 @@ export type LLMProvider = z.infer<typeof LLMProviderSchema>;
 export const TTSProviderSchema = z.enum(['elevenlabs', 'mock']);
 export type TTSProvider = z.infer<typeof TTSProviderSchema>;
 
+export const RenderCheckModeSchema = z.enum(['auto', 'on', 'off']);
+export type RenderCheckMode = z.infer<typeof RenderCheckModeSchema>;
+
 /** ElevenLabs premade voice "Rachel" — a neutral narration default; override per run. */
 export const DEFAULT_ELEVENLABS_VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
 export const DEFAULT_ELEVENLABS_MODEL_ID = 'eleven_multilingual_v2';
@@ -39,6 +42,13 @@ export const PipelineConfigSchema = z.object({
   elevenLabsModelId: z.string().default(DEFAULT_ELEVENLABS_MODEL_ID).describe('ElevenLabs model id (env ELEVENLABS_MODEL_ID)'),
   ttsCacheDir: z.string().default('pipeline/cache/tts').describe('Clips are cached by hash of provider|voice|model|text so prompt iteration does not re-bill'),
 
+  // --- Render-check (Stage 9) ----------------------------------------------
+  renderCheck: RenderCheckModeSchema
+    .default('auto')
+    .describe('auto: run when @remotion/renderer is installed, else skip; on: required (fail if unavailable); off: never render stills'),
+  renderCheckScale: z.number().positive().max(1).default(0.5).describe('Still render scale (0.5 = 960×540 for desktop); pixel thresholds are scale-aware'),
+  renderCheckFramesPerScene: z.number().int().min(1).max(3).default(3).describe('Stills per scene: settled / midpoint / pre-exit'),
+
   // --- Assembly (Stage 11) -------------------------------------------------
   publicDir: z
     .string()
@@ -62,6 +72,7 @@ export const loadConfig = (overrides: Partial<PipelineConfig> = {}): PipelineCon
     elevenLabsModelId: process.env.ELEVENLABS_MODEL_ID || undefined,
     ttsCacheDir: process.env.KNOMOTION_TTS_CACHE_DIR || undefined,
     publicDir: process.env.KNOMOTION_PUBLIC_DIR || undefined,
+    renderCheck: (process.env.KNOMOTION_RENDER_CHECK as RenderCheckMode) || undefined,
   };
   const merged = {
     ...stripUndefined(fromEnv),

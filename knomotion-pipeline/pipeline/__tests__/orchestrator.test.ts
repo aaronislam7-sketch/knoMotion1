@@ -9,7 +9,9 @@ const tmpRoot = path.join(os.tmpdir(), `km-run-${Date.now()}`);
 const publicDir = path.join(tmpRoot, 'public');
 afterAll(async () => { await fs.rm(tmpRoot, { recursive: true, force: true }); });
 
-const baseConfig = { provider: 'mock' as const, artifactsDir: tmpRoot, logLevel: 'error' as const, publicDir, ttsCacheDir: path.join(tmpRoot, 'cache') };
+// renderCheck off: this suite proves the artifact chain without a browser. The
+// rendered-stills path is covered by render-check.test.ts (KNOMOTION_RENDER_TESTS=1).
+const baseConfig = { provider: 'mock' as const, artifactsDir: tmpRoot, logLevel: 'error' as const, publicDir, ttsCacheDir: path.join(tmpRoot, 'cache'), renderCheck: 'off' as const };
 
 describe('runPipeline (mock provider, end-to-end)', () => {
   it('runs intake -> ... -> assembly and produces a renderable, passing video timed from narration', async () => {
@@ -23,6 +25,7 @@ describe('runPipeline (mock provider, end-to-end)', () => {
     expect(v.valid).toBe(true);
     expect(v.status).toBe('passed');
     expect(v.narrationClips).toBe(0); // mock TTS produces no audio
+    expect(v.renderCheck).toBe('not_run');
 
     // Full artifact trail exists, including the M1 stages.
     for (const f of ['00-source-bundle.json', '01-content-map.json', '02-module-plan.json', 'job.json']) {

@@ -7,6 +7,8 @@
  *   tsx pipeline/cli.ts --input s.md --provider openai
  *   tsx pipeline/cli.ts --input s.md --stop-after validation
  *   tsx pipeline/cli.ts preview [jobId]         # stage a generated config for Studio preview
+ *   tsx pipeline/cli.ts preview [jobId] --debug-safe-zones   # ... with slot bounds + safe band drawn
+ *   tsx pipeline/cli.ts render-check [jobId]    # re-run Stage 9 pixel checks on a job's config
  *
  * Flags:
  *   --input <file>        Read source material from a file
@@ -15,21 +17,29 @@
  *   --format <fmt>        desktop | mobile (default desktop)
  *   --provider <p>        mock | openai (default mock)
  *   --tts <p>             mock | elevenlabs (default mock; elevenlabs needs ELEVENLABS_API_KEY)
+ *   --render-check <m>    auto | on | off (default auto: render stills when @remotion/renderer is installed)
  *   --out <dir>           Artifacts root dir (default pipeline/artifacts)
- *   --stop-after <stage>  Halt after a stage (e.g. validation)
+ *   --stop-after <stage>  Halt after a stage (e.g. validation — also skips render-check)
  *   --log-level <lvl>     debug | info | warn | error
- *   --video <videoId>     (preview) Which video of the job to stage (default: first)
+ *   --video <videoId>     (preview, render-check) Which video of the job (default: first)
+ *   --debug-safe-zones    (preview) Overlay layout slots and the outer safe band on every scene
+ *   --frames <n>          (render-check) Stills per scene, 1–3 (default 3)
+ *   --scale <s>           (render-check) Still render scale, 0–1 (default 0.5)
  *
  * The `preview` command copies a job's 05-knomotion-video-config.json to
  * <repo root>/public/pipeline-preview/config.json, where the PipelinePreview
  * Remotion composition picks it up. With no jobId it uses the most recent job.
+ *
+ * The `render-check` command renders stills of every scene of a job's config,
+ * runs the blank-slot and edge-bleed pixel checks, writes 09-quality-report.json
+ * and keeps the stills under videos/<videoId>/render-check/ for review.
  */
 
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { runPipeline } from './orchestrator';
+import { renderCheckJob, runPipeline } from './orchestrator';
 import type { PipelineStage } from './schemas/common';
 import type { PipelineConfig } from './core/config';
 import { KnoMotionVideoConfigSchema } from './schemas/KnoMotionVideoConfig';
@@ -55,11 +65,25 @@ const main = async () => {
       video: { type: 'string' },
       'stop-after': { type: 'string' },
       'log-level': { type: 'string' },
+      'debug-safe-zones': { type: 'boolean' },
+      'render-check': { type: 'string' },
+      frames: { type: 'string' },
+      scale: { type: 'string' },
     },
   });
 
   if (positionals[0] === 'preview') {
-    await runPreview(positionals[1], values.out, values.video);
+    await runPreview(positionals[1], values.out, values.video, values['debug-safe-zones'] === true);
+    return;
+  }
+  if (positionals[0] === 'render-check') {
+    await runRenderCheck(positionals[1], {
+      outDir: values.out,
+      videoId: values.video,
+      frames: values.frames ? Number(values.frames) : undefined,
+      scale: values.scale ? Number(values.scale) : undefined,
+      logLevel: values['log-level'] as PipelineConfig['logLevel'] | undefined,
+    });
     return;
   }
 
@@ -92,6 +116,7 @@ const main = async () => {
   const config: Partial<PipelineConfig> = {};
   if (values.provider) config.provider = values.provider as PipelineConfig['provider'];
   if (values.tts) config.ttsProvider = values.tts as PipelineConfig['ttsProvider'];
+  if (values['render-check']) config.renderCheck = values['render-check'] as PipelineConfig['renderCheck'];
   if (values.out) config.artifactsDir = values.out;
   if (values['log-level']) config.logLevel = values['log-level'] as PipelineConfig['logLevel'];
 
@@ -110,8 +135,12 @@ const main = async () => {
   console.log(`module: ${result.moduleTitle}`);
   for (const v of result.videos) {
     const seconds = (v.durationInFrames / 30).toFixed(1);
-    console.log(`  video ${v.videoId}: ${v.status} (valid=${v.valid}, repairs=${v.repairAttempts}, ${seconds}s, narration clips=${v.narrationClips})`);
+    console.log(`  video ${v.videoId}: ${v.status} (valid=${v.valid}, repairs=${v.repairAttempts}, render-check=${v.renderCheck}, ${seconds}s, narration clips=${v.narrationClips})`);
     console.log(`    config: ${v.configPath}`);
+    if (v.renderCheck !== 'not_run') console.log(`    quality: ${v.qualityPath}`);
+  }
+  if (result.videos.some((v) => v.renderCheck === 'skipped')) {
+    console.log('\n(render-check skipped — install the renderer deps at the monorepo root to enable pixel checks, or pass --render-check off to silence this)');
   }
   if (result.videos.length && result.videos.every((v) => v.narrationClips === 0)) {
     console.log('\n(no narration audio attached — run with --tts elevenlabs and ELEVENLABS_API_KEY set to hear the video)');
@@ -125,7 +154,8 @@ const main = async () => {
 // preview <jobId?> — stage a generated config for the PipelinePreview composition
 // ---------------------------------------------------------------------------
 
-const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId?: string) => {
+/** Resolves <jobId, videoId> for the job commands: latest job by default, first video with a config by default. */
+const resolveJobVideo = async (jobIdArg: string | undefined, outDir: string | undefined, videoId: string | undefined) => {
   const artifactsDir = path.resolve(outDir ?? process.env.KNOMOTION_ARTIFACTS_DIR ?? 'pipeline/artifacts');
 
   const jobId = jobIdArg ?? (await latestJobId(artifactsDir));
@@ -151,7 +181,7 @@ const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId
     process.exit(1);
   }
   if (candidates.length === 0) {
-    console.error(`Job ${jobId} has no ${CONFIG_ARTIFACT} artifacts to preview.`);
+    console.error(`Job ${jobId} has no ${CONFIG_ARTIFACT} artifacts.`);
     process.exit(1);
   }
 
@@ -160,9 +190,13 @@ const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId
     console.error(`Video "${chosen}" not found in job ${jobId}. Available: ${candidates.join(', ')}`);
     process.exit(1);
   }
+  return { artifactsDir, jobId, jobDir, chosen, candidates, sourcePath: path.join(videosDir, chosen, CONFIG_ARTIFACT) };
+};
+
+const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId?: string, debugSafeZones = false) => {
+  const { jobId, chosen, candidates, sourcePath } = await resolveJobVideo(jobIdArg, outDir, videoId);
 
   // Validate before staging so a broken artifact fails here, not in Studio.
-  const sourcePath = path.join(videosDir, chosen, CONFIG_ARTIFACT);
   const parsed = KnoMotionVideoConfigSchema.safeParse(JSON.parse(await fs.readFile(sourcePath, 'utf8')));
   if (!parsed.success) {
     console.error(`Config at ${sourcePath} failed its contract:\n${JSON.stringify(parsed.error.flatten(), null, 2)}`);
@@ -170,7 +204,9 @@ const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId
   }
 
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
-  await fs.writeFile(path.join(PREVIEW_DIR, 'config.json'), JSON.stringify(parsed.data, null, 2) + '\n', 'utf8');
+  // debugSafeZones is a renderer-only prop (GenericVideoPlayer), not part of the pipeline contract.
+  const staged = debugSafeZones ? { ...parsed.data, debugSafeZones: true } : parsed.data;
+  await fs.writeFile(path.join(PREVIEW_DIR, 'config.json'), JSON.stringify(staged, null, 2) + '\n', 'utf8');
   await fs.writeFile(
     path.join(PREVIEW_DIR, 'meta.json'),
     JSON.stringify({ jobId, videoId: chosen, sourcePath, stagedAt: new Date().toISOString() }, null, 2) + '\n',
@@ -181,10 +217,47 @@ const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId
   console.log(`job:    ${jobId}`);
   console.log(`video:  ${chosen}${candidates.length > 1 ? `   (others: ${candidates.filter((c) => c !== chosen).join(', ')} — use --video <id>)` : ''}`);
   console.log(`scenes: ${parsed.data.scenes.length}, format: ${parsed.data.format ?? 'desktop'}`);
-  console.log(`staged: ${path.join(PREVIEW_DIR, 'config.json')}`);
+  console.log(`staged: ${path.join(PREVIEW_DIR, 'config.json')}${debugSafeZones ? '   (debugSafeZones on: slot bounds + safe band drawn)' : ''}`);
   console.log('\nWatch it (from the repo root):');
   console.log('  npx remotion studio KnoMotion-Videos/src/remotion/index.ts');
   console.log('  → select the "PipelinePreview" composition (refresh if Studio is already open)');
+};
+
+// ---------------------------------------------------------------------------
+// render-check <jobId?> — Stage 9 pixel checks on an existing job's config
+// ---------------------------------------------------------------------------
+
+const runRenderCheck = async (
+  jobIdArg: string | undefined,
+  opts: { outDir?: string; videoId?: string; frames?: number; scale?: number; logLevel?: PipelineConfig['logLevel'] },
+) => {
+  const { artifactsDir, jobId, chosen, candidates } = await resolveJobVideo(jobIdArg, opts.outDir, opts.videoId);
+  console.log(`=== render-check: job ${jobId}, video ${chosen}${candidates.length > 1 ? ` (others: ${candidates.filter((c) => c !== chosen).join(', ')} — use --video <id>)` : ''} ===`);
+  console.log('(first run bundles the Remotion project; expect ~30–60s before stills start)\n');
+
+  const { report, qualityPath, stillsDir } = await renderCheckJob({
+    jobId, videoId: chosen, framesPerScene: opts.frames, scale: opts.scale,
+    config: { artifactsDir, ...(opts.logLevel ? { logLevel: opts.logLevel } : {}) },
+  });
+  const rc = report.renderCheck!;
+
+  for (const scene of rc.scenes) {
+    const sceneIssues = rc.issues.filter((i) => i.sceneIndex === scene.sceneIndex);
+    const flag = sceneIssues.some((i) => i.severity === 'error') ? 'FAIL' : sceneIssues.length ? 'warn' : ' ok ';
+    console.log(`[${flag}] scene ${scene.sceneIndex} "${scene.sceneId}"`);
+    for (const f of scene.frames) {
+      const slots = f.slots.map((s) => `${s.slot}=${(s.coverage * 100).toFixed(2)}%${s.blank ? ' BLANK' : ''}`).join('  ');
+      const bleed = f.edges.filter((e) => e.bleed).map((e) => `${e.edge} ${(e.coverage * 100).toFixed(2)}%`).join(', ');
+      console.log(`       ${f.label.padEnd(8)} @${f.timeSec.toFixed(2)}s  ${slots}${bleed ? `  BLEED: ${bleed}` : ''}`);
+    }
+    for (const i of sceneIssues) console.log(`       ${i.severity.toUpperCase()} ${i.rule}: ${i.message}`);
+  }
+
+  const errors = rc.issues.filter((i) => i.severity === 'error').length;
+  console.log(`\nresult:  ${rc.status} (${errors} error${errors === 1 ? '' : 's'}, ${rc.issues.length - errors} warning${rc.issues.length - errors === 1 ? '' : 's'}, ${rc.scenes.length} scenes, ${rc.durationMs ?? 0}ms)`);
+  console.log(`report:  ${qualityPath}`);
+  console.log(`stills:  ${stillsDir}/`);
+  process.exit(rc.status === 'failed' ? 2 : 0);
 };
 
 /** Most recently modified job directory under the artifacts root, if any. */

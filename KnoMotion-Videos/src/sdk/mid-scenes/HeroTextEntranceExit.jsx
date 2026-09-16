@@ -64,7 +64,7 @@ const getAnimationStyle = (animationType, frame, startFrame, durationFrames, dir
  * @param {Object} props.config.beats - Beat timings
  * @param {number} props.config.beats.entrance - Entrance beat in seconds (required)
  * @param {number} props.config.beats.exit - Exit beat in seconds (required)
- * @param {Object} props.config.position - Optional position override (uses layout engine)
+ * @param {Object} props.config.position - Slot area in top-left form { left, top, width, height } (set by SceneRenderer)
  * @param {Object} props.config.style - Optional style overrides
  */
 export const HeroTextEntranceExit = ({ config, stylePreset }) => {
@@ -165,11 +165,17 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
     fps
   );
 
-  // Position handling - use layout engine if position provided, otherwise center
-  // Use wrapper approach for proper centering with animations
+  // Position handling. `position` is the slot area SceneRenderer passes in
+  // top-left form ({ left, top, width, height }) — the same contract as every
+  // other mid-scene (TD-001). Content is centred INSIDE that area with flex so
+  // the hero sits in the middle of its slot, not pinned to its corner.
   const wrapperStyle = position
     ? {
-        ...positionToCSS(position),
+        ...positionToCSS(position, { useTopLeft: true }),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxSizing: 'border-box',
       }
     : {
         position: 'absolute',
@@ -190,6 +196,8 @@ export const HeroTextEntranceExit = ({ config, stylePreset }) => {
     justifyContent: 'center',
     gap: contentGap,
     width: '100%',
+    // Keep the text column readable inside wide slots (matches the centred fallback's cap).
+    maxWidth: position ? Math.max(320, slotWidth * 0.85) : undefined,
     ...style.container,
   };
 

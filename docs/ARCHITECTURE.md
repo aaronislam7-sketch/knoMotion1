@@ -344,7 +344,6 @@ The audio layer (P4) adds narration, background music, sound effects, and animat
 | `CaptionOverlay` | `sdk/audio/CaptionOverlay.jsx` | Renders animated word-level captions |
 | `SafeAudio` | `sdk/audio/SafeAudio.jsx` | Graceful `<Html5Audio>` wrapper (P4e) |
 | `audioSchema` | `sdk/audio/audioSchema.ts` | Zod schemas for audio/caption config |
-| `alignTTSToBeats` | `sdk/utils/ttsToBeatAlignment.ts` | Converts TTS timestamps to scene beats |
 
 ### Audio Channels
 
@@ -401,7 +400,7 @@ KnoMotion-Videos/src/
 │   ├── effects/               # Backgrounds, particles
 │   ├── lottie/                # Animation registry
 │   ├── scene-layout/          # Slot resolution
-│   ├── utils/                 # ttsToBeatAlignment, beats, etc.
+│   ├── utils/                 # beats, etc. (word-timing → beats lives in knomotion-pipeline/pipeline/core/timing.ts)
 │   ├── animations/            # Animation helpers
 │   └── capability-manifest.json  # Machine-readable engine capabilities (S4)
 ├── admin/                     # Preview tools

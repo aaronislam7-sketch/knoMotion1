@@ -446,22 +446,7 @@ const captions = CaptionsConfigSchema.parse(sceneCaptionsData);
 
 ### TTS-to-Beat Alignment
 
-Bridge function for the pipeline: converts TTS word-level timestamps to KnoMotion beats.
-
-```typescript
-import { alignTTSToBeats, computeSceneTimeline } from '../sdk/utils/ttsToBeatAlignment';
-import type { Caption } from '@remotion/captions';
-
-const alignment = alignTTSToBeats(captions, scenes, {
-  fps: 30,
-  bufferSeconds: 0.5,
-  emphasisWords: ['neural network', 'learning'],
-  wordsPerLine: 6,
-});
-
-// alignment.scenes[0].beats → { start: 0.2, exit: 3.7 }
-// alignment.scenes[0].lines → [{ text: '...', beats: { start, exit, emphasis? } }]
-```
+Removed (Sept M2). Word-timing → beats now lives in the pipeline, where the audio is: `knomotion-pipeline/pipeline/core/timing.ts` (Stage 6). The renderer only consumes the resulting `beats`.
 
 ---
 

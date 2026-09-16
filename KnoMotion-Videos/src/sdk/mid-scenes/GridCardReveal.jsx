@@ -138,7 +138,6 @@ const getVariantForPreset = (stylePreset, cardVariant) => {
  * @param {string} props.config.cards[].variant - Card variant override
  * @param {boolean} props.config.cards[].wrapLabel - Allow label text to wrap (default: false)
  * @param {number} props.config.columns - Number of columns (default: auto-calculated)
- * @param {number} props.config.rows - Number of rows (optional, calculated from cards)
  * @param {string} props.config.animation - Animation type: 'fade' | 'slide' | 'scale' | 'bounce' | 'flip' | 'mask' | 'cascade' (default: 'cascade')
  * @param {string} props.config.direction - Direction for slide animation: 'up' | 'down' | 'left' | 'right' (default: 'up')
  * @param {number} props.config.staggerDelay - Delay between cards in seconds (default: 0.1)
@@ -337,6 +336,7 @@ export const GridCardReveal = ({ config, stylePreset }) => {
             const itemBeats = resolveBeats(card.beats, {
               start: sequenceBeats.start + index * staggerDelay,
               holdDuration: animationDuration,
+              exit: sequenceBeats.exit,
             });
             const baseStartFrame = toFrames(itemBeats.start, fps);
 

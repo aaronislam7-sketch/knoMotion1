@@ -11,7 +11,7 @@ export class PipelineError extends Error {
   }
 }
 
-/** Thrown by stage stubs that have a named slot but no handler yet (captions, render-check, render). */
+/** Thrown by stage stubs that have a named slot but no handler yet (captions, render). */
 export class NotImplementedError extends PipelineError {
   constructor(stage: string) {
     super(`Stage "${stage}" is not implemented yet.`, 'NOT_IMPLEMENTED', { stage });

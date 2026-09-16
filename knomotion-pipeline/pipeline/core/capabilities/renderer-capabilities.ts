@@ -15,6 +15,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv, { type ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
+import { DEFAULT_LAYOUT_GEOMETRY, type LayoutGeometry } from '../geometry';
+import type { TextMetricsTable } from '../text-budget';
 
 /** canonical midScene key -> component schema file basename */
 export const MIDSCENE_COMPONENT: Record<string, string> = {
@@ -47,6 +49,12 @@ export interface RendererCapabilities {
     maxCallouts: number;
     fpsFixed: number;
   };
+  /** Viewport / padding / title-strip numbers the renderer carves slots from (manifest `layoutGeometry`). */
+  layoutGeometry: LayoutGeometry;
+  /** Per-mid-scene font metrics for text budgets (manifest `textMetrics`); undefined when the manifest predates M2. */
+  textMetrics?: TextMetricsTable;
+  /** contentShape -> allowed mid-scene subset (manifest `contentShapes`). Empty when absent. */
+  contentShapes: Record<string, string[]>;
   /** Compiled per-mid-scene validators, keyed by canonical midScene key. */
   midSceneValidators: Record<string, ValidateFunction>;
   /** Raw mid-scene schemas (for shallow unknown-key checks), keyed by canonical key. */
@@ -97,6 +105,13 @@ export const loadRendererCapabilities = async (sdkDir = defaultSdkDir(), useCach
       maxCallouts: c.maxCallouts ?? 10,
       fpsFixed: c.fpsFixed ?? 30,
     },
+    layoutGeometry: manifest.layoutGeometry
+      ? { ...DEFAULT_LAYOUT_GEOMETRY, ...manifest.layoutGeometry }
+      : DEFAULT_LAYOUT_GEOMETRY,
+    textMetrics: manifest.textMetrics,
+    contentShapes: Object.fromEntries(
+      Object.entries(manifest.contentShapes ?? {}).filter(([, v]) => Array.isArray(v)),
+    ) as Record<string, string[]>,
     midSceneValidators,
     midSceneSchemas,
     raw: manifest,

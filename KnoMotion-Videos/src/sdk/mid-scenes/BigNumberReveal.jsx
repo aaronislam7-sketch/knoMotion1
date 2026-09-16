@@ -16,6 +16,7 @@ import { toFrames } from '../core/time';
 import { KNODE_THEME } from '../theme/knodeTheme';
 import { resolveStylePreset } from '../theme/stylePresets';
 import { resolveBeats } from '../utils/beats';
+import { fitFontSize } from '../utils/fitFontSize';
 
 /**
  * Parse a number string to get numeric value and format info
@@ -159,17 +160,15 @@ export const BigNumberReveal = ({ config, stylePreset }) => {
     };
   }
   
-  // Color based on emphasis
+  // Color: an explicit `color` may be a theme key or a literal CSS color (TD-003);
+  // otherwise the emphasis tier picks the theme color.
+  const resolvedColor = color ? (KNODE_THEME.colors[color] || color) : undefined;
   const emphasisColors = {
-    high: color || KNODE_THEME.colors.primary,
-    normal: color || KNODE_THEME.colors.textMain,
-    low: color || KNODE_THEME.colors.textSoft,
+    high: resolvedColor || KNODE_THEME.colors.primary,
+    normal: resolvedColor || KNODE_THEME.colors.textMain,
+    low: resolvedColor || KNODE_THEME.colors.textSoft,
   };
   const numberColor = emphasisColors[emphasis] || emphasisColors.high;
-  
-  // Sizing
-  const baseFontSize = isMobile ? 120 : 100;
-  const labelFontSize = isMobile ? 32 : 28;
   
   // Position
   const slot = {
@@ -178,6 +177,30 @@ export const BigNumberReveal = ({ config, stylePreset }) => {
     left: position?.left || 0,
     top: position?.top || 0,
   };
+
+  // Sizing — shrink-to-fit (M2): the number must stay on ONE line inside the
+  // slot; the label may wrap to two lines before it scales down. Measured on
+  // the full (un-typed) value so typewriter/countUp never resize mid-animation.
+  const preferredNumberSize = isMobile ? 120 : 100;
+  const baseFontSize = fitFontSize({
+    text: parsed.original,
+    maxWidth: slot.width * 0.9,
+    baseSize: preferredNumberSize,
+    minSize: Math.round(preferredNumberSize * 0.5),
+    fontFamily: KNODE_THEME.fonts.marker,
+    fontWeight: 700,
+    letterSpacing: '-0.02em',
+  });
+  const preferredLabelSize = isMobile ? 32 : 28;
+  const labelFontSize = fitFontSize({
+    text: label,
+    maxWidth: slot.width * 0.8,
+    baseSize: preferredLabelSize,
+    minSize: Math.round(preferredLabelSize * 0.7),
+    fontFamily: KNODE_THEME.fonts.body,
+    fontWeight: 400,
+    maxLines: 2,
+  });
 
   return (
     <AbsoluteFill>

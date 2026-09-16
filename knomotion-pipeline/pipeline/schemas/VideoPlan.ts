@@ -13,6 +13,7 @@
 
 import { z } from 'zod';
 import {
+  ContentShapeSchema,
   DifficultySchema,
   LayoutTypeSchema,
   MidSceneKeySchema,
@@ -21,12 +22,29 @@ import {
   VideoFormatSchema,
   withMeta,
 } from './common';
+import { inferContentShape, normalizeContentShape, CONTENT_SHAPES } from '../core/content-shapes';
 
 /** A single planned scene in the teaching flow (not yet KnoMotion JSON). */
-export const ScenePlanSchema = z.object({
+export const ScenePlanSchema = z.preprocess(
+  // The planner should always tag a contentShape (Sept M2). When it omits or
+  // garbles one, derive it deterministically so downstream stages always have
+  // a shape to constrain Stage 7 with — the artifact on disk never lacks it.
+  (v) => {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return v;
+    const o = { ...(v as Record<string, unknown>) };
+    const normalized = normalizeContentShape(o.contentShape);
+    if (typeof normalized !== 'string' || !(CONTENT_SHAPES as readonly string[]).includes(normalized)) {
+      o.contentShape = inferContentShape(o as { purpose?: string; suggestedMidScenes?: string[] });
+    }
+    return o;
+  },
+  z.object({
   id: z.string().min(1).describe('Stable scene id (kebab-case); flows through to NarrationScript and scene JSON'),
   order: z.number().int().min(0).describe('Position of this scene within the video'),
   purpose: ScenePurposeSchema.describe('Narrative role this scene plays'),
+  contentShape: ContentShapeSchema.describe(
+    'Shape of what the scene teaches: statement | sequence | comparison | quantity | structure | code. Bounds which mid-scenes Stage 7 may use.',
+  ),
   title: z.string().min(1).describe('Short working title for the scene'),
   beat: z
     .string()
@@ -54,7 +72,8 @@ export const ScenePlanSchema = z.object({
     .number()
     .min(0.5)
     .describe('Estimated scene runtime in seconds; reconciled with TTS later'),
-});
+  }),
+);
 export type ScenePlan = z.infer<typeof ScenePlanSchema>;
 
 export const VideoPlanSchema = withMeta({

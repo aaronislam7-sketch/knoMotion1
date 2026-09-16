@@ -32,8 +32,7 @@
     },
     "color": {
       "type": "string",
-      "pattern": "^(#[0-9a-fA-F]{3,8}|(rgb|rgba|hsl|hsla)\\([^)]*\\))$",
-      "description": "Optional color override. Must be a literal CSS color (hex like #FF6B35, or rgb()/rgba()/hsl()/hsla()). NOTE: unlike other mid-scenes, this component does NOT resolve theme keys (e.g. 'primary') — those will not apply. Prefer leaving this unset and relying on global theming."
+      "description": "Optional number color: a theme key (primary, secondary, accentGreen, accentBlue, textMain, …) or a literal CSS color (hex/rgb/hsl). Theme keys are resolved through KNODE_THEME.colors."
     },
     "beats": {
       "type": "object",

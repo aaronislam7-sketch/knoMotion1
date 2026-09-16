@@ -124,6 +124,7 @@ export const CardSequence = ({ config }) => {
         const itemBeats = resolveBeats(card.beats, {
           start: sequenceBeats.start + index * staggerDelay,
           holdDuration: animationDuration,
+          exit: sequenceBeats.exit,
         });
         const cardStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getAnimationStyle(

@@ -11,6 +11,7 @@
  */
 
 import { z } from 'zod';
+import { CONTENT_SHAPES, normalizeContentShape } from '../core/content-shapes';
 
 // ---------------------------------------------------------------------------
 // Pipeline stage identity
@@ -141,6 +142,17 @@ export const ScenePurposeSchema = z.enum([
   'cta',
 ]);
 export type ScenePurpose = z.infer<typeof ScenePurposeSchema>;
+
+/**
+ * The SHAPE of what a scene teaches (Sept M2). Chosen by Stage 3, it bounds
+ * the mid-scenes Stage 7 may use for that scene (see core/content-shapes.ts
+ * and the manifest's `contentShapes`). Tolerant of common synonyms.
+ */
+export const ContentShapeSchema = z.preprocess(
+  normalizeContentShape,
+  z.enum(CONTENT_SHAPES),
+);
+export type ContentShape = z.infer<typeof ContentShapeSchema>;
 
 /** Output video format, mirrored from the renderer's `format` prop. */
 export const VideoFormatSchema = z.enum(['desktop', 'mobile']);

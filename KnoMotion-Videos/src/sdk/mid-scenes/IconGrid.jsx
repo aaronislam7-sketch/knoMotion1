@@ -147,6 +147,7 @@ export const IconGrid = ({ config }) => {
         const itemBeats = resolveBeats(icon.beats, {
           start: sequenceBeats.start + index * staggerDelay,
           holdDuration: animationDuration,
+          exit: sequenceBeats.exit,
         });
         const iconStartFrame = animation === 'cascade' 
           ? toFrames(itemBeats.start, fps) // Cascade handles delay internally

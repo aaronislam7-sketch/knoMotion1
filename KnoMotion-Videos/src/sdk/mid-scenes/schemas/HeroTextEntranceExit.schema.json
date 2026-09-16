@@ -56,10 +56,10 @@
     },
     "position": {
       "type": "object",
-      "description": "Optional position override (uses layout engine)",
+      "description": "Slot area in top-left form { left, top, width, height } — the same contract as every other mid-scene. Set by SceneRenderer; authors normally omit it.",
       "properties": {
-        "x": { "type": "number" },
-        "y": { "type": "number" },
+        "left": { "type": "number" },
+        "top": { "type": "number" },
         "width": { "type": "number" },
         "height": { "type": "number" }
       }

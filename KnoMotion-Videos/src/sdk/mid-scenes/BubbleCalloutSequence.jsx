@@ -266,6 +266,7 @@ export const BubbleCalloutSequence = ({ config, stylePreset }) => {
         const itemBeats = resolveBeats(calloutData.beats, {
           start: sequenceBeats.start + index * staggerDelay,
           holdDuration: animationDuration,
+          exit: sequenceBeats.exit,
         });
         const calloutStartFrame = toFrames(itemBeats.start, fps);
         const animStyle = getBubbleAnimationStyle(
