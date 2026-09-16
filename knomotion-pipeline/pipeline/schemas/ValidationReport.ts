@@ -22,14 +22,19 @@ export const ValidationRuleSchema = z.enum([
   'layout_type', // layout.type is supported
   'slot_names', // slot names match the declared layout
   'slots_filled', // all declared slots are filled
+  'slot_layout_reconcile', // (M2) layout options present; every slot name is one the layout really produces; vocabulary folds did not orphan slots
   'sidebyside_layout', // sideBySide must use layout: full
   'midscene_config', // per-mid-scene config validates against its JSON schema (ajv)
+  'content_shape', // (M2) mid-scene is within the planned contentShape's allowed subset
   'duration_bounds', // durationInFrames within sane bounds
-  'beat_timing', // beats in seconds, start < exit, within duration
-  'text_length', // text/line/item counts within manifest limits
+  'beat_timing', // beats in seconds, start < exit, within [0, duration], minimum visible time, content persists to near the end
+  'text_length', // text/line/item counts within manifest limits (warning)
+  'text_budget', // (M2) strings and counts fit the slot's geometry-derived budget (error)
   'audio_url', // audio src values are valid, non-placeholder URLs
   'lottie_key', // heroRef lottie keys exist in the registry
   'transition_type', // transition.type is supported
+  'blank_slot', // (M2, render-check) a configured slot rendered no visible content
+  'edge_bleed', // (M2, render-check) content pixels inside the outer safe band
 ]);
 export type ValidationRule = z.infer<typeof ValidationRuleSchema>;
 

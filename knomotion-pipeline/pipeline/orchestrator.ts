@@ -146,7 +146,8 @@ export const runPipeline = async (input: IntakeInput, options: RunOptions = {}):
     // Validate, then surgically repair failing scenes up to the cap. When any
     // repair patch is applied, validateAndRepair persists the repaired config
     // back to CONFIG_ARTIFACT so configPath always points at the final config.
-    const { report, repairAttempts, config: validated } = await validateAndRepair(ctx, brief.id, config0, dir, sceneTiming);
+    const contentShapes = Object.fromEntries(videoPlan.scenes.map((s) => [s.id, s.contentShape]));
+    const { report, repairAttempts, config: validated } = await validateAndRepair(ctx, brief.id, config0, dir, sceneTiming, contentShapes);
     if (shouldStop('validation') || shouldStop('repair')) {
       videos.push(videoResult(store.jobDir, dir, brief.id, report, repairAttempts, 0, sceneTiming.totalDurationInFrames));
       continue;
@@ -210,12 +211,14 @@ async function execute<In extends z.ZodTypeAny, Out extends z.ZodTypeAny>(
  */
 export async function validateAndRepair(
   ctx: PipelineContext, videoId: string, config: KnoMotionVideoConfig, dir: string, timing?: SceneTimingArtifact,
+  contentShapes?: Record<string, string>,
 ): Promise<{ report: ValidationReport; config: KnoMotionVideoConfig; repairAttempts: number }> {
   let working = config;
   let anyScenePatched = false;
   const timingFor = (sceneId: string, index: number) =>
     timing?.scenes.find((t) => t.sceneId === sceneId) ?? timing?.scenes[index];
-  let report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
+  const validateInput = () => ({ videoId, config: working, contentShapes });
+  let report = await execute(ctx, validationStage, validateInput(), path.join(dir, '06-validation-report.json'));
   let attempts = 0;
 
   while (!report.valid && attempts < ctx.config.maxRepairAttempts) {
@@ -245,7 +248,7 @@ export async function validateAndRepair(
       }
     }
 
-    report = await execute(ctx, validationStage, { videoId, config: working }, path.join(dir, '06-validation-report.json'));
+    report = await execute(ctx, validationStage, validateInput(), path.join(dir, '06-validation-report.json'));
     report = { ...report, repairAttempts: attempts };
   }
 
