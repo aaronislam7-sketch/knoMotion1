@@ -1,16 +1,22 @@
 /**
- * Stage 5 — Scene JSON Generation (LLM, heavily constrained).
- * { VideoPlan + NarrationScript (+ capability manifest in P3) } -> KnoMotionVideoConfig.
+ * Stage 7 — Scene JSON Generation (LLM, heavily constrained).
+ * { VideoPlan + NarrationScript + SceneTiming + capability manifest } -> KnoMotionVideoConfig.
  *
  * Output is the renderer coupling point — the ONLY artifact without a meta envelope.
- * NOTE (P0): the capability-manifest constraint and the strict compiler prompt land in P3.
+ *
+ * The LLM decides WHAT is on screen; timing is a fixed input. After the model
+ * responds, applyTimingToConfig overwrites `durationInFrames` and every `beats`
+ * block with the Stage-6 values, so the artifact on disk is deterministic in
+ * time regardless of what the model wrote.
  */
 
 import { z } from 'zod';
 import { defineStage } from '../../core/stage';
 import { modelForStage } from '../../core/config';
+import { applyTimingToConfig } from '../../core/timing';
 import { VideoPlanSchema } from '../../schemas/VideoPlan';
 import { NarrationScriptSchema } from '../../schemas/NarrationScript';
+import { SceneTimingArtifactSchema } from '../../schemas/SceneTiming';
 import { KnoMotionVideoConfigSchema } from '../../schemas/KnoMotionVideoConfig';
 import { loadRendererCapabilities } from '../../core/capabilities/renderer-capabilities';
 import { sceneJsonGenerationPrompt as prompt, summariseCapabilities } from '../../prompts/scene-json-generation';
@@ -18,6 +24,8 @@ import { sceneJsonGenerationPrompt as prompt, summariseCapabilities } from '../.
 export const SceneJsonInputSchema = z.object({
   videoPlan: VideoPlanSchema,
   narrationScript: NarrationScriptSchema,
+  /** Optional so the stage can still be exercised standalone; the orchestrator always supplies it. */
+  sceneTiming: SceneTimingArtifactSchema.optional(),
 });
 
 export const sceneJsonGenerationStage = defineStage({
@@ -40,7 +48,10 @@ export const sceneJsonGenerationStage = defineStage({
       input,
     });
 
-    // KnoMotionVideoConfig has no meta envelope — it is the renderer's props shape.
-    return data;
+    if (!input.sceneTiming) return data;
+
+    const timed = applyTimingToConfig(data, input.sceneTiming.scenes, { fps: input.sceneTiming.fps });
+    // Re-parse so the artifact is exactly what the contract accepts after the overwrite.
+    return KnoMotionVideoConfigSchema.parse(timed);
   },
 });

@@ -1,5 +1,5 @@
 /**
- * Stage 7 — Targeted Repair (LLM, only on validation failure).
+ * Stage 10 — Targeted Repair (LLM, only on validation failure).
  * { failed scene fragment + its validation issues } -> RepairPatch (patched scene).
  * Surgical: one scene, max 2 attempts (enforced by the orchestrator), then needs_review.
  */

@@ -89,7 +89,7 @@ Each milestone ends with a runnable command and a visible result. Do not start t
 **Acceptance:** `npm run run -- --source worldcup && npm run run -- preview` shows the generated video in Studio from a clean `main` checkout, following the docs verbatim.
 
 ### M1 — Timing becomes deterministic; TTS enters the pipeline
-*Principles: Pipeline, Quality* — **code complete in PR #75; acceptance run pending an `ELEVENLABS_API_KEY` secret**
+*Principles: Pipeline, Quality* — **ACCEPTED 2026-09-15 (PR #75).** Owner ran `--provider openai --tts elevenlabs` end to end: audio played in the preview, an MP4 rendered, both integrations worked, narration alignment and beats judged good. Feedback recorded below.
 
 1. **Stage 5 TTS**: implement `generateTTS.ts` against ElevenLabs (D1), using the with-timestamps endpoint so `wordTimings` are populated. One clip per scene. Store `audioPath`, measured `durationSeconds`, `wordTimings` where the provider returns them. Cache by hash of narration text so prompt iteration doesn't re-bill. Mock provider synthesises timings from word count (~2.5 wps) so offline runs and tests still work. — **done (#75)**; a failed clip degrades that scene to an estimate rather than failing the run.
 2. **Stage 6 timing** (`pipeline/core/timing.ts`): pure function `computeSceneTiming(narration, tts | null, midSceneHints, fps)` → `{ durationInFrames, lineWindows[] }`. Duration = audio duration + entrance buffer + settle buffer before transition. Line/item windows come from word timings when present, else proportional word-count split. Same output shape either way, so swapping estimator for ground truth is a no-op downstream. — **done (#75)**; `midSceneHints` was not needed — `applySceneTiming` reads the mid-scene key from the config instead. Constants: 0.4s lead-in, 0.9s tail, 3s minimum scene.
@@ -97,7 +97,18 @@ Each milestone ends with a runnable command and a visible result. Do not start t
 4. Fix the two renderer timing leaks: per-scene transition duration in `calculateTransitionSeriesDuration`; read fps from `constraints.fpsFixed` in the seconds→frames coercion. — **done (#75)**; fps lives in `core/fps.ts` with a test asserting equality with the manifest (Zod preprocessors are synchronous, so it cannot read the manifest directly).
 5. Stage 11 assembly wires `audioPath` into each scene's `audio.narration` block; remove the "do NOT include an audio block" prompt rule once assembly owns it. — **done (#75)**; clips are copied to `public/pipeline-audio/<job>/<video>/` and referenced by public-relative `src` (both schemas relaxed from `.url()`; `SafeAudio` resolves via `staticFile()`).
 
-**Acceptance:** `--source worldcup --provider openai` produces a config where every scene's duration is derived from its audio, every beat sits inside its scene, and the preview plays with synchronised narration. Mock run passes the same tests offline. — *Mock half met (54 tests, e2e asserts duration/beats derive from the timing artifact). Real half: run `npm run run -- --source worldcup --provider openai --tts elevenlabs && npm run run -- preview` once the secret exists.*
+**Acceptance:** `--source worldcup --provider openai` produces a config where every scene's duration is derived from its audio, every beat sits inside its scene, and the preview plays with synchronised narration. Mock run passes the same tests offline. — **Met 2026-09-15.** Mock half: 54 tests, e2e asserts duration/beats derive from the timing artifact. Real half: owner run with OpenAI + ElevenLabs, MP4 rendered, "audio very well aligned, beats doing their job".
+
+**M1 acceptance feedback (owner, 2026-09-15) and where each item lands**
+
+| Observation | Status | Handled by |
+|---|---|---|
+| Audio plays, MP4 renders, OpenAI + ElevenLabs integrations work, alignment and beats good. | PASS | — (M1 goal) |
+| **Some scenes render no visuals** with real content. | Known, out of M1 scope. Root causes are catalogued in `pipeline_build.md` §7.2 items 2, 3, 5 and 6 (layout→slot coercion orphaning slots, unfilled slots, TD-001/002/003, bad `heroRef`). | **M2** — `slot_layout_reconcile` and `slots_filled` as errors, the `render-check` blank-slot pixel check (so this can never pass silently again), and the engine-time TD fixes. Priority order inside M2 is unchanged; this confirms it. |
+| **Visual vocabulary not polished** (mid-scenes, elements) and it **restricts storytelling** — videos read as text + checklist. | Known in part (`pipeline_build.md` §7.2 item 6 "thin, low-variety configs"), now confirmed on a real run. | **M3** items 2–3 (`useWhen`/`avoidWhen`/`contentShapes` in the manifest + worked example fixtures so Stage 7 picks the right mid-scene, not the safest one); **M5** (`keyTakeaway`, `processFlow`, variety rule). The M4 reference-set scoring adds *variety* and *visual relevance to shape* as explicit criteria so this is measured, not felt. |
+| **Content loose, not very detailed** — planning/script output is shallow (source doc was also thin). | New. Not a Stage 7 problem: it is the depth of Stages 1–4 (content-analysis → script). | **M4** item 6 (added below): a planning/script depth pass judged on the two reference docs, one of them deliberately detailed so source thinness and prompt shallowness can be told apart. |
+
+Items 2–4 are not blockers for M1 and are not to be fixed in PR #75; they set the emphasis for the next session.
 
 ### M2 — Guardrails
 *Principle: Guardrails (Quality)*
@@ -148,6 +159,7 @@ The pipeline's "knowledge" today is spread across the hand-maintained manifest, 
 3. `--resume <jobId> --from <stage>` (artifact store already validates on read).
 4. Reference set: `worldcup.md` + one new short process doc (e.g. "how a pull request gets merged"), one of them as PDF. Store config + MP4 + a one-line-per-criterion score under `knomotion-pipeline/reference-outputs/<date>/`. Criteria: accuracy, clarity, visual relevance to shape, pacing, narration sync, variety, nothing off-screen.
 5. Model-routing experiment: scene-json on mini vs escalation model, judged on the two references. Config-table change only.
+6. **Planning/script depth pass** (from M1 feedback): the second reference doc must be detailed enough that shallow output can be blamed on the prompts, not the source. Then tune the Stage 1–4 prompts (content-analysis → script) for specificity — concrete facts, examples and numbers from the source in every scene, `keyPoints` that are claims rather than topics — and re-score. Prompt edits only; no new stages.
 
 **Acceptance:** `npm run run -- --input lesson.pdf --provider openai --render` yields an MP4 with synchronised narration where both reference videos score no criterion below 3/5.
 

@@ -9,16 +9,21 @@
 
 import type { LLMClient, LLMRequest, LLMResult } from './client';
 import { LLMResponseError } from '../errors';
+import { secondsToFrames } from '../fps';
 
 type Builder = (input: any) => unknown;
 
-const round30 = (seconds: number) => Math.max(1, Math.round(seconds * 30));
-
-const buildSlot = (scene: any, durSec: number) => {
+/**
+ * Builds one slot for a planned scene. Like the real Stage-7 model it mirrors
+ * the narration's onScreenText into the visuals in order; the beats it writes
+ * are placeholders that the stage's timing post-process overwrites.
+ */
+const buildSlot = (scene: any, onScreenText: string[] | undefined, durSec: number) => {
   const mid = (scene?.suggestedMidScenes && scene.suggestedMidScenes[0]) || 'textReveal';
   const exit = Math.max(0.6, durSec - 0.3);
+  const texts: string[] = onScreenText?.length ? onScreenText : scene?.keyPoints?.length ? scene.keyPoints : [scene?.title ?? 'Title'];
   if (mid === 'checklist') {
-    const items = (scene?.keyPoints ?? ['Point']).map((t: string) => ({ text: t, checked: true }));
+    const items = texts.map((t: string) => ({ text: t, checked: true }));
     return {
       midScene: 'checklist',
       stylePreset: 'educational',
@@ -29,7 +34,7 @@ const buildSlot = (scene: any, durSec: number) => {
     midScene: 'textReveal',
     stylePreset: 'educational',
     config: {
-      lines: [{ text: scene?.title ?? 'Title', emphasis: 'high', beats: { start: 0.3, exit } }],
+      lines: texts.map((t, i) => ({ text: t, emphasis: i === 0 ? 'high' : 'normal', beats: { start: 0.3 + i * 0.4, exit } })),
       revealType: 'fade',
       beats: { start: 0.3, exit },
     },
@@ -104,17 +109,24 @@ export const DEFAULT_BUILDERS: Record<string, Builder> = {
   // NOTE: scene-json output is the renderer config (no meta envelope).
   KnoMotionVideoConfig: (input) => {
     const vp = input?.videoPlan ?? {};
+    const narrationByScene = new Map<string, any>((input?.narrationScript?.scenes ?? []).map((n: any) => [n.sceneId, n]));
+    const timingByScene = new Map<string, any>((input?.sceneTiming?.scenes ?? []).map((t: any) => [t.sceneId, t]));
     const scenes = (vp.scenes ?? []).map((s: any, i: number) => {
-      const durSec = s.estimatedDurationSeconds ?? 5;
+      const timing = timingByScene.get(s.id);
+      const durSec = timing?.durationSeconds ?? s.estimatedDurationSeconds ?? 5;
       return {
         id: s.id ?? `scene-${i + 1}`,
-        durationInFrames: round30(durSec),
+        durationInFrames: timing?.durationInFrames ?? secondsToFrames(durSec),
         transition: i === 0 ? undefined : { type: 'fade' },
-        config: { background: { preset: 'sunriseGradient' }, layout: { type: 'full' }, slots: { full: buildSlot(s, durSec) } },
+        config: {
+          background: { preset: 'sunriseGradient' },
+          layout: { type: 'full' },
+          slots: { full: buildSlot(s, narrationByScene.get(s.id)?.onScreenText, durSec) },
+        },
       };
     });
     return {
-      scenes: scenes.length ? scenes : [{ id: 'scene-1', durationInFrames: 150, config: { background: { preset: 'cleanCard' }, layout: { type: 'full' }, slots: { full: buildSlot({ title: 'Hello' }, 5) } } }],
+      scenes: scenes.length ? scenes : [{ id: 'scene-1', durationInFrames: 150, config: { background: { preset: 'cleanCard' }, layout: { type: 'full' }, slots: { full: buildSlot({ title: 'Hello' }, undefined, 5) } } }],
       format: vp?.format ?? input?.format ?? 'desktop',
     };
   },

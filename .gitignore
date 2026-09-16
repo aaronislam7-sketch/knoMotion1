@@ -16,3 +16,6 @@ package-lock.json
 
 # Staged pipeline preview config (written by `npm run run -- preview <jobId>`)
 public/pipeline-preview/
+
+# Narration audio copied into public/ by the pipeline assembly stage
+public/pipeline-audio/

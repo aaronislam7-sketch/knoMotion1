@@ -10,8 +10,26 @@
 
 import { z } from 'zod';
 
+/**
+ * Audio sources are either absolute URLs or paths relative to public/ (resolved
+ * by SafeAudio with staticFile()). Relative paths may not be rooted or traverse
+ * upwards. Mirrored in knomotion-pipeline/pipeline/schemas/KnoMotionVideoConfig.ts.
+ */
+const RELATIVE_ASSET_PATH = /^(?!\/)(?!.*(^|\/)\.\.(\/|$))[^\s]+\.[A-Za-z0-9]+$/;
+
+export const AudioSrcSchema = z
+  .string()
+  .min(1)
+  .refine(
+    (s) =>
+      /^(https?:|data:|blob:)/.test(s)
+        ? z.string().url().safeParse(s).success || /^(data|blob):/.test(s)
+        : RELATIVE_ASSET_PATH.test(s),
+    { message: 'audio src must be an absolute URL or a public-dir-relative asset path (no leading "/", no "..")' },
+  );
+
 export const NarrationSchema = z.object({
-  src: z.string().url().describe('URL to the TTS audio file'),
+  src: AudioSrcSchema.describe('URL or public-dir-relative path to the TTS audio file'),
   startFromSeconds: z
     .number()
     .min(0)
@@ -26,7 +44,7 @@ export const NarrationSchema = z.object({
 });
 
 export const MusicSchema = z.object({
-  src: z.string().url().describe('URL to background music file'),
+  src: AudioSrcSchema.describe('URL or public-dir-relative path to background music file'),
   volume: z
     .number()
     .min(0)
@@ -50,7 +68,7 @@ export const MusicSchema = z.object({
 });
 
 export const SfxItemSchema = z.object({
-  src: z.string().url().describe('URL to sound effect file'),
+  src: AudioSrcSchema.describe('URL or public-dir-relative path to sound effect file'),
   atSecond: z
     .number()
     .min(0)

@@ -11,11 +11,19 @@ export class PipelineError extends Error {
   }
 }
 
-/** Thrown by out-of-scope stage stubs (TTS, captions, beat-align, assembly, render). */
+/** Thrown by stage stubs that have a named slot but no handler yet (captions, render-check, render). */
 export class NotImplementedError extends PipelineError {
   constructor(stage: string) {
-    super(`Stage "${stage}" is not implemented (out of MVP scope).`, 'NOT_IMPLEMENTED', { stage });
+    super(`Stage "${stage}" is not implemented yet.`, 'NOT_IMPLEMENTED', { stage });
     this.name = 'NotImplementedError';
+  }
+}
+
+/** Thrown when a TTS provider call fails (network, auth, malformed response). */
+export class TTSProviderError extends PipelineError {
+  constructor(message: string, details?: unknown) {
+    super(message, 'TTS_PROVIDER', details);
+    this.name = 'TTSProviderError';
   }
 }
 

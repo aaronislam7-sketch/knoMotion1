@@ -5,21 +5,21 @@
  * schema. Stages import the contracts they need from here; the orchestrator
  * uses these to validate every artifact before and after each handoff.
  *
- * Stage → artifact mapping:
- *   0  intake                → SourceBundle
- *   1  content-analysis      → ContentMap
- *   2  module-planning       → ModulePlan
- *   3  video-planning        → VideoPlan
- *   4  script-generation     → NarrationScript
- *   5  scene-json-generation → KnoMotionVideoConfig   (renderer coupling point)
- *   6  validation            → ValidationReport
- *   7  repair                → RepairPatch
- *   8  tts                   → TTSManifest            (stub)
- *   9  captions              → CaptionsManifest       (stub)
- *   10 beat-alignment        → (updates KnoMotionVideoConfig beats) (stub)
- *   11 assembly              → RenderManifest          (stub)
- *   12 render                → rendered video          (stub)
- *   --  feedback/personalise → QualityReport           (stub)
+ * Stage → artifact mapping (file names as written in the job directory):
+ *   0  intake                → SourceBundle          00-source-bundle.json
+ *   1  content-analysis      → ContentMap            01-content-map.json
+ *   2  module-planning       → ModulePlan            02-module-plan.json
+ *   3  video-planning        → VideoPlan             videos/<id>/03-video-plan.json
+ *   4  script-generation     → NarrationScript       videos/<id>/04-narration-script.json
+ *   5  tts                   → TTSManifest           videos/<id>/04a-tts-manifest.json (+ audio/)
+ *   6  timing                → SceneTimingArtifact   videos/<id>/04b-scene-timing.json
+ *   7  scene-json-generation → KnoMotionVideoConfig  videos/<id>/05-knomotion-video-config.json (renderer coupling point)
+ *   8  validation            → ValidationReport      videos/<id>/06-validation-report.json
+ *   9  render-check          → QualityReport         (stub; M2)
+ *   10 repair                → RepairPatch           videos/<id>/07-repair-<scene>-<attempt>.json
+ *   11 assembly              → RenderManifest        videos/<id>/08-render-manifest.json (+ writes audio back into 05)
+ *   12 render                → rendered video        (stub; M4)
+ *   -- captions              → CaptionsManifest      (stub; M5)
  */
 
 export * from './common';
@@ -32,6 +32,7 @@ export * from './KnoMotionVideoConfig';
 export * from './ValidationReport';
 export * from './RepairPatch';
 export * from './TTSManifest';
+export * from './SceneTiming';
 export * from './CaptionsManifest';
 export * from './RenderManifest';
 export * from './QualityReport';

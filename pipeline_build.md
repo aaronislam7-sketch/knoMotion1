@@ -75,15 +75,20 @@ source text
   → [1 content-analysis]  ContentMap.json          (LLM)
   → [2 module-planning]   ModulePlan.json          (LLM)   → N VideoBriefs
   for each VideoBrief (fan-out):
-    → [3 video-planning]  VideoPlan.json           (LLM)
-    → [4 script-gen]      NarrationScript.json     (LLM)
-    → [5 scene-json]      KnoMotionVideoConfig.json (LLM, constrained "compiler")  ← renderer coupling
-    → [6 validation]      ValidationReport.json    (deterministic; deep ajv + business rules)
-    → [7 repair]          RepairPatch.json × scenes (LLM, only on failure; ≤2 attempts → needs_review)
+    → [3 video-planning]  03-video-plan.json          (LLM)
+    → [4 script-gen]      04-narration-script.json    (LLM)
+    → [5 tts]             04a-tts-manifest.json       (provider call: elevenlabs | mock; + audio/<scene>.mp3)
+    → [6 timing]          04b-scene-timing.json       (deterministic: audio → durationInFrames + line windows)
+    → [7 scene-json]      05-knomotion-video-config.json (LLM "compiler"; timing injected + re-applied)  ← renderer coupling
+    → [8 validation]      06-validation-report.json   (deterministic; deep ajv + business rules)
+    → [10 repair]         07-repair-<i>-<n>.json      (LLM, only on failure; ≤2 attempts → needs_review; timing re-applied to each patch)
+    → [11 assembly]       08-render-manifest.json     (deterministic: narration audio wired into 05-…config.json)
+  stubs: [9 render-check] (M2), [12 render] (M4), [captions] (M5)
 ```
 
 - Every stage implements the same `Stage<In,Out>` interface. The orchestrator validates input, runs, then the artifact store validates + writes the output. Stages never call each other — they only consume/produce artifacts. This is what makes runs **replayable, auditable, and repairable**.
 - Artifacts land in `pipeline/artifacts/<jobId>/` with per-video nesting under `videos/<videoId>/`, plus a `job.json` run manifest (per-stage status, timing, model, promptVersion).
+- **Timing is deterministic, not authored (Sept M1).** `core/timing.ts` turns the narration audio (measured by TTS, or a ~2.5 wps estimate for the mock provider) into each scene's `durationInFrames` and per-line visibility windows. Stage 7 receives that as a fixed input and its post-process overwrites whatever the LLM wrote for `durationInFrames` / `beats`; repair patches are re-timed the same way. The LLM decides *what* is on screen, never *when*.
 
 ---
 
@@ -98,15 +103,18 @@ source text
 | 2 | Module Planning | LLM | ✅ | `stages/module-planning/…`, `prompts/module-planning.ts` |
 | 3 | Video Planning | LLM (per video) | ✅ (capped 3–6 scenes) | `stages/video-planning/…`, `prompts/video-planning.ts` |
 | 4 | Script Generation | LLM | ✅ | `stages/script-generation/…`, `prompts/script-generation.ts` |
-| 5 | Scene JSON (compiler) | LLM | ✅ | `stages/scene-json-generation/…`, `prompts/scene-json-generation.ts` |
-| 6 | Validation | deterministic | ✅ deep per-mid-scene (ajv) + business rules | `stages/validation/validate.ts`, `runValidation.ts` |
-| 7 | Repair | LLM | ✅ repairs all failing scenes, ≤2 attempts | `stages/repair/runRepair.ts`, `prompts/repair.ts` |
-| 8 | TTS | deterministic API | ⛔ stub (`NotImplementedError`) | `stages/tts/generateTTS.ts` |
-| 9 | Captions | deterministic | ⛔ stub | `stages/captions/generateCaptions.ts` |
-| 10 | Beat Alignment | deterministic | ⛔ stub | `stages/beat-alignment/alignBeats.ts` |
-| 11 | Assembly | deterministic | ⛔ stub | `stages/assembly/buildRenderProps.ts` |
-| 12 | Render | deterministic | ⛔ stub | `stages/render/triggerRender.ts` |
+| 5 | TTS | provider call | ✅ ElevenLabs (`with-timestamps` → word timings) or `mock` (estimated timings, no audio); one clip per scene; content-addressed cache; a failed clip degrades to an estimate, not a failed run | `stages/tts/generateTTS.ts`, `core/tts/{index,elevenlabs,mock,provider}.ts` |
+| 6 | Timing | deterministic | ✅ audio → `durationInFrames` + per-line windows; same shape from measured or estimated audio | `stages/timing/computeTiming.ts`, `core/timing.ts`, `schemas/SceneTiming.ts` |
+| 7 | Scene JSON (compiler) | LLM | ✅ timing injected into the prompt and re-applied after the response | `stages/scene-json-generation/…`, `prompts/scene-json-generation.ts` (v2.0) |
+| 8 | Validation | deterministic | ✅ deep per-mid-scene (ajv) + business rules | `stages/validation/validate.ts`, `runValidation.ts` |
+| 9 | Render-check | deterministic | ⛔ not started (Sept M2) | — |
+| 10 | Repair | LLM | ✅ repairs all failing scenes, ≤2 attempts; each patch is re-timed | `stages/repair/runRepair.ts`, `prompts/repair.ts` |
+| 11 | Assembly | deterministic | ✅ copies clips to `public/pipeline-audio/<job>/<video>/`, writes `audio.narration` (public-relative `src`, `startFromSeconds` = lead-in) back into `05-…config.json`; `08-render-manifest.json` | `stages/assembly/buildRenderProps.ts` |
+| 12 | Render | deterministic | ⛔ stub (Sept M4) | `stages/render/triggerRender.ts` |
+| — | Captions | deterministic | ⛔ stub (Sept M5; word timings are already stored in the TTS manifest) | `stages/captions/generateCaptions.ts` |
 | — | QualityReport | — | ⛔ scaffold only (contract exists) | `schemas/QualityReport.ts` |
+
+**TTS / audio knobs (M1).** `--tts mock|elevenlabs` (default `mock`). Env: `ELEVENLABS_API_KEY` (required for `elevenlabs`), `ELEVENLABS_VOICE_ID` (default Rachel `21m00Tcm4TlvDq8ikWAM`), `ELEVENLABS_MODEL_ID` (default `eleven_multilingual_v2`), `KNOMOTION_TTS_CACHE_DIR` (default `pipeline/cache/tts`, gitignored), `KNOMOTION_PUBLIC_DIR` (default `<repo>/public`). Renderer side: `sdk/audio/SafeAudio.jsx` resolves public-relative `src` via `staticFile()`; `sdk/audio/audioSchema.ts` and the pipeline mirror accept URLs *or* public-relative paths (no leading `/`, no `..`); `calculateTransitionSeriesDuration` now honours per-scene `transition.durationInFrames`; `core/fps.ts` is the one place the pipeline's `30` lives and `fps.test.ts` asserts it equals the manifest's `constraints.fpsFixed`.
 
 ### Supporting infrastructure (all built)
 
@@ -175,7 +183,9 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 
 ### 7.2 Concrete, known failure modes (root causes)
 
-1. **Beat/timing mistakes that pass validation.** Beats are in seconds and must fit the scene. The current `beat_timing` rule only checks `start < exit` and rough bounds. The LLM frequently sets beats that are technically legal but visually wrong: everything exiting at ~0.6s, `start` after most of the scene, per-line beats missing so lines collapse, or `exit` ≈ `start` so text flashes. **This is the #1 cause of "text not showing correctly."**
+> **Status after the M1 acceptance run (2026-09-15, OpenAI + ElevenLabs, MP4 rendered):** items 1 and 7 are resolved by deterministic timing (PR #75) — the owner judged narration alignment and beats good. Items 2, 3, 5 and 6 were **confirmed on the real run**: some scenes rendered no visuals, and the visual vocabulary was thin enough to restrict the storytelling. Those are the M2/M3 targets. A new observation — planning/script output is loose and not very detailed — is tracked as Sept M4 item 6.
+
+1. ~~**Beat/timing mistakes that pass validation.**~~ **Resolved (M1, PR #75).** Timing is no longer authored by the LLM: `core/timing.ts` derives `durationInFrames` and every beat from the narration audio and overwrites whatever the model wrote (repairs included). The `beat_timing` rule still exists as a backstop; M2 tightens it for hand-authored configs.
 2. **Coercion that masks semantic breakage.** Our parse-time coercions make configs *valid* but can produce *wrong* scenes. The worst offender: `layout: "sideBySide" → "full"` while the model left `slots: { left, right }`. In a `full` layout only `full`/`header` slots resolve, so `left`/`right` **render nothing** → blank scene. Same class: coercing an unknown layout to `full` when the slots were for columns. **This is a real cause of "mid-scenes not working."** Coercions should either (a) reconcile slots when they change layout, or (b) downgrade from silent coercion to a validation error that repair must fix, so the fix is *semantic*, not cosmetic.
 3. **Slot/layout mismatch & unfilled slots.** `columnSplit` with `col2` empty, or slot names that don't match the layout → missing content. `slots_filled` exists but should be an error everywhere and feed repair.
 4. **Text overflow / no text-fitting.** Long strings overflow slots; the renderer has no auto-fit yet (`BUILD_STATUS` flags `@remotion/layout-utils`). The `charByChar` reveal has a known line-spacing/wrap bug. Long `lines`/`items` look broken even when "valid".
@@ -183,8 +193,9 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
    - **TD‑002:** `textReveal` `revealType:"mask"` + `direction: up/down` → **empty clip-path → invisible text.** Direct quality hit.
    - **TD‑001:** `heroText` position contract inconsistency → hero mis-placed/hidden.
    - **TD‑003:** `bigNumber`/`animatedCounter` ignore theme color keys → wrong/low-contrast colours.
-6. **Thin, low-variety configs.** The compiler leans on `textReveal`/`checklist` with minimal styling; even when correct, videos feel flat. Mid-scenes like `heroText`, `gridCards`, `bigNumber` are under-used or mis-configured (e.g. `heroText` with a `heroRef` that isn't a real lottie key → nothing renders).
-7. **Duration vs content.** `durationInFrames` too short for the beats/animation → content cut off before it reads.
+6. **Thin, low-variety configs.** The compiler leans on `textReveal`/`checklist` with minimal styling; even when correct, videos feel flat. Mid-scenes like `heroText`, `gridCards`, `bigNumber` are under-used or mis-configured (e.g. `heroText` with a `heroRef` that isn't a real lottie key → nothing renders). *Owner feedback 2026-09-15: "visual vocabulary not polished enough (mid-scenes, elements) and restricted the storytelling aspects of the video."* → Sept M3 (manifest `useWhen`/`avoidWhen` + example fixtures) and M5 (new mid-scenes, variety rule).
+7. ~~**Duration vs content.**~~ **Resolved (M1, PR #75).** Scene length is now lead-in + measured narration + tail, so content can no longer be cut off by a too-short `durationInFrames`.
+8. **Shallow planning/script content.** *Owner feedback 2026-09-15:* the generated narrative was loose and not very detailed (the `worldcup.md` source is itself brief, so source thinness and prompt shallowness are confounded). Stage 7 cannot fix this — it is the depth of Stages 1–4. → Sept M4 item 6: a detailed second reference doc, then a prompt depth pass on content-analysis → script.
 
 ### 7.3 Recommended plan to raise quality (in priority order)
 
@@ -207,7 +218,7 @@ Closing this "validation ↔ appearance" gap is the core of the quality work.
 ## 8. What is NOT built yet (next targets)
 
 - ~~**P4 — Studio preview harness**~~ **BUILT**: `npm run run -- preview <jobId>` (from `knomotion-pipeline/`; jobId optional → latest job, `--video <id>` to pick a video) stages the job's config to `public/pipeline-preview/config.json`; the `PipelinePreview` composition (`KnoMotion-Videos/src/remotion/PipelinePreview.tsx`, registered in `Root.tsx`) fetches it at metadata time and renders via `GenericVideoPlayer`. Shows an instructional placeholder when nothing is staged.
-- **Stages 8–12** (TTS, captions, beat-alignment, assembly, render) — stubs throwing `NotImplementedError`; contracts exist (`TTSManifest`, `CaptionsManifest`, `RenderManifest`).
+- **Render-check (9), render (12), captions** — stubs throwing `NotImplementedError` (render-check has no file yet); contracts exist (`CaptionsManifest`, `QualityReport`). TTS, timing and assembly landed in Sept M1; the old `beat-alignment` stub was removed (timing owns beats).
 - **Full resume** (`--resume <jobId> --from <stage>`) — the artifact store already supports validated reads; only `--stop-after` is wired.
 - **QualityReport population** + creator-portal edit capture + fine-tuning dataset + personalised scene variants — scaffolded contracts only.
 - **OpenAI structured outputs** — see §7.3 #7.

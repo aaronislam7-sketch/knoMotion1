@@ -15,13 +15,20 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { KnoMotionVideoConfigSchema } from '../schemas/KnoMotionVideoConfig';
 
 let rendererSchema: { safeParse: (v: unknown) => { success: boolean } } | undefined;
 try {
   // Variable specifier so the type-checker doesn't follow into the renderer
   // package (whose deps may not be installed here). Resolved at runtime only.
-  const spec = '../../../KnoMotion-Videos/src/sdk/schemas/videoConfig.schema';
+  // Absolute path: vite resolves bare relative specifiers against its own root,
+  // not this file, which made the test silently skip.
+  const spec = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../KnoMotion-Videos/src/sdk/schemas/videoConfig.schema',
+  );
   const mod = await import(/* @vite-ignore */ spec);
   rendererSchema = (mod as any).VideoConfigSchema;
 } catch {
@@ -39,10 +46,18 @@ const baseScene = (midScene: string, transitionType = 'fade') => ({
   },
 });
 
+const withNarration = (src: string) => ({
+  ...baseScene('textReveal'),
+  audio: { narration: { src, startFromSeconds: 0.4, volume: 1 } },
+});
+
 const fixtures = {
   validCanonical: { scenes: [baseScene('textReveal')], format: 'desktop' },
   aliasKey: { scenes: [baseScene('gridCardReveal')], format: 'desktop' }, // pipeline rejects, renderer accepts
   invalidTransition: { scenes: [baseScene('textReveal', 'warp')], format: 'desktop' }, // both reject
+  // Assembly writes public-dir-relative narration paths (M1); both schemas must accept them.
+  relativeNarration: { scenes: [withNarration('pipeline-audio/job-1/video-1/s1.mp3')], format: 'desktop' },
+  absoluteNarration: { scenes: [withNarration('https://cdn.example.net/s1.mp3')], format: 'desktop' },
 };
 
 describe('contract drift: pipeline-valid => renderer-valid', () => {
@@ -61,5 +76,19 @@ describe('contract drift: pipeline-valid => renderer-valid', () => {
     expect(rendererSchema!.safeParse(fixtures.validCanonical).success).toBe(true);
     // alias rejected by pipeline (canonical-only) even though renderer allows it
     expect(KnoMotionVideoConfigSchema.safeParse(fixtures.aliasKey).success).toBe(false);
+  });
+
+  it.skipIf(!rendererSchema)('relative narration paths written by assembly are accepted by both', () => {
+    expect(KnoMotionVideoConfigSchema.safeParse(fixtures.relativeNarration).success).toBe(true);
+    expect(rendererSchema!.safeParse(fixtures.relativeNarration).success).toBe(true);
+  });
+});
+
+describe('audio src contract (pipeline side)', () => {
+  it('accepts absolute URLs and public-dir-relative paths, rejects traversal and rooted paths', () => {
+    const ok = ['https://x.test/a.mp3', 'pipeline-audio/j/v/s1.mp3', 'audio/clip.wav'];
+    const bad = ['/etc/passwd.mp3', '../secret.mp3', 'a/../b.mp3', 'no extension', ''];
+    for (const src of ok) expect(KnoMotionVideoConfigSchema.safeParse({ scenes: [withNarration(src)] }).success, src).toBe(true);
+    for (const src of bad) expect(KnoMotionVideoConfigSchema.safeParse({ scenes: [withNarration(src)] }).success, src).toBe(false);
   });
 });

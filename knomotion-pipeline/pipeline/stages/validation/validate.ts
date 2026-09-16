@@ -1,5 +1,5 @@
 /**
- * Stage 6 rule engine (deterministic).
+ * Stage 8 rule engine (deterministic).
  *
  * Runs the deterministic business rules that make "valid == renderable (no
  * broken scenes)" true. Structural Zod validation happens upstream (the config
@@ -211,7 +211,7 @@ export const validateConfig = (config: KnoMotionVideoConfig, caps: RendererCapab
       }
     });
 
-    // audio_url (schema already enforces .url(); flag placeholders)
+    // audio_url (schema already enforces URL-or-public-relative-path shape; flag placeholder hosts)
     const srcs: { src?: string; where: string }[] = [];
     if (scene.audio?.narration?.src) srcs.push({ src: scene.audio.narration.src, where: `scenes[${si}].audio.narration.src` });
     if (scene.audio?.music?.src) srcs.push({ src: scene.audio.music.src, where: `scenes[${si}].audio.music.src` });

@@ -6,7 +6,7 @@
  *
  * Creates the teaching flow for a single video: narrative arc, scene sequence,
  * suggested mid-scene types, and visual intent. This is a PLANNING object —
- * not final KnoMotion JSON. The `suggested*` fields are advisory; Stage 5 is
+ * not final KnoMotion JSON. The `suggested*` fields are advisory; Stage 7 is
  * the only stage allowed to emit binding KnoMotion config, and it must stay
  * within the capability manifest regardless of what was suggested here.
  */
@@ -47,7 +47,7 @@ export const ScenePlanSchema = z.object({
   suggestedMidScenes: z
     .array(MidSceneKeySchema)
     .optional()
-    .describe('Advisory mid-scene types; Stage 5 decides the binding choice'),
+    .describe('Advisory mid-scene types; Stage 7 decides the binding choice'),
   suggestedLayout: LayoutTypeSchema.optional().describe('Advisory layout type'),
   suggestedStylePreset: StylePresetSchema.optional().describe('Advisory style preset'),
   estimatedDurationSeconds: z

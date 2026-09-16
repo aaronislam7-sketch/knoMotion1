@@ -14,6 +14,7 @@
  *   --title <string>      Optional source title
  *   --format <fmt>        desktop | mobile (default desktop)
  *   --provider <p>        mock | openai (default mock)
+ *   --tts <p>             mock | elevenlabs (default mock; elevenlabs needs ELEVENLABS_API_KEY)
  *   --out <dir>           Artifacts root dir (default pipeline/artifacts)
  *   --stop-after <stage>  Halt after a stage (e.g. validation)
  *   --log-level <lvl>     debug | info | warn | error
@@ -49,6 +50,7 @@ const main = async () => {
       title: { type: 'string' },
       format: { type: 'string' },
       provider: { type: 'string' },
+      tts: { type: 'string' },
       out: { type: 'string' },
       video: { type: 'string' },
       'stop-after': { type: 'string' },
@@ -89,6 +91,7 @@ const main = async () => {
 
   const config: Partial<PipelineConfig> = {};
   if (values.provider) config.provider = values.provider as PipelineConfig['provider'];
+  if (values.tts) config.ttsProvider = values.tts as PipelineConfig['ttsProvider'];
   if (values.out) config.artifactsDir = values.out;
   if (values['log-level']) config.logLevel = values['log-level'] as PipelineConfig['logLevel'];
 
@@ -106,8 +109,12 @@ const main = async () => {
   console.log(`dir:    ${result.jobDir}`);
   console.log(`module: ${result.moduleTitle}`);
   for (const v of result.videos) {
-    console.log(`  video ${v.videoId}: ${v.status} (valid=${v.valid}, repairs=${v.repairAttempts})`);
+    const seconds = (v.durationInFrames / 30).toFixed(1);
+    console.log(`  video ${v.videoId}: ${v.status} (valid=${v.valid}, repairs=${v.repairAttempts}, ${seconds}s, narration clips=${v.narrationClips})`);
     console.log(`    config: ${v.configPath}`);
+  }
+  if (result.videos.length && result.videos.every((v) => v.narrationClips === 0)) {
+    console.log('\n(no narration audio attached — run with --tts elevenlabs and ELEVENLABS_API_KEY set to hear the video)');
   }
   const anyFailed = result.videos.some((v) => !v.valid);
   console.log(`\nPreview the first video with:  npm run run -- preview ${result.jobId}`);

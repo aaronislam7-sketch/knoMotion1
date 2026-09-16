@@ -17,24 +17,25 @@ import { z } from 'zod';
 // ---------------------------------------------------------------------------
 
 /**
- * Canonical stage identifiers, ordered 0–12. Used in artifact metadata and
- * in the orchestrator to key stage handlers. Out-of-scope stages (0, 8–12)
- * are present so the scaffold has named slots to grow into.
+ * Canonical stage identifiers. Used in artifact metadata and in the
+ * orchestrator to key stage handlers. Listed in execution order (see
+ * Sept_DevPlan.md §2). Stages marked (stub) have a named slot but no handler.
  */
 export const PipelineStageSchema = z.enum([
-  'intake', // Stage 0 — deterministic (stub)
-  'content-analysis', // Stage 1 — LLM
-  'module-planning', // Stage 2 — LLM
-  'video-planning', // Stage 3 — LLM (per video)
-  'script-generation', // Stage 4 — LLM
-  'scene-json-generation', // Stage 5 — LLM (constrained)
-  'validation', // Stage 6 — deterministic
-  'repair', // Stage 7 — LLM (on failure only)
-  'tts', // Stage 8 — deterministic API (stub)
-  'captions', // Stage 9 — deterministic (stub)
-  'beat-alignment', // Stage 10 — deterministic (stub)
-  'assembly', // Stage 11 — deterministic (stub)
-  'render', // Stage 12 — deterministic (stub)
+  'intake', // 0 — deterministic
+  'content-analysis', // 1 — LLM
+  'module-planning', // 2 — LLM
+  'video-planning', // 3 — LLM (per video)
+  'script-generation', // 4 — LLM
+  'tts', // 5 — deterministic provider call (mock | elevenlabs)
+  'timing', // 6 — deterministic (audio -> scene durations + beat windows)
+  'scene-json-generation', // 7 — LLM (constrained; timing injected)
+  'validation', // 8 — deterministic
+  'render-check', // 9 — deterministic (stub; M2)
+  'repair', // 10 — LLM (on failure only)
+  'assembly', // 11 — deterministic (audio wired into the config)
+  'render', // 12 — deterministic (stub; M4)
+  'captions', // deferred — deterministic (stub; M5)
 ]);
 export type PipelineStage = z.infer<typeof PipelineStageSchema>;
 

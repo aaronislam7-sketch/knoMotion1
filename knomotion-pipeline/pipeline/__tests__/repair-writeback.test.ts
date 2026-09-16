@@ -105,6 +105,29 @@ describe('validateAndRepair — repaired config write-back', () => {
     expect(Array.isArray(onDisk.scenes)).toBe(true);
   });
 
+  it('re-applies computed timing to every repaired scene so repair cannot re-introduce timing drift', async () => {
+    // The repair "fixes" the beats but also invents its own duration and beat values.
+    const driftedScene = { ...fixedScene(), durationInFrames: 4321 };
+    (driftedScene.config.slots.full.config as any).lines[0].beats = { start: 1.1, exit: 3.3 };
+    const ctx = makeCtx('job-retime', () => ({ patchedScene: driftedScene, notes: 'fixed but drifted' }));
+    const dir = ctx.store.videoDir('video-1');
+    const timing = {
+      meta: ctx.makeMeta('timing', 'SceneTiming', { producedBy: 'deterministic' }),
+      videoId: 'video-1', fps: 30, totalDurationInFrames: 180,
+      scenes: [{ sceneId: 's1', source: 'estimate' as const, durationInFrames: 180, durationSeconds: 6, narrationStart: 0.4, narrationEnd: 5.1, contentExit: 5.5, lineWindows: [{ text: 'Hello', start: 0.4, exit: 5.5 }] }],
+    };
+
+    const { report, config } = await validateAndRepair(ctx, 'video-1', brokenConfig(), dir, timing);
+
+    expect(report.valid).toBe(true);
+    expect(config.scenes[0].durationInFrames).toBe(180);
+    const slot = (config.scenes[0].config.slots as any).full.config;
+    expect(slot.beats).toEqual({ start: 0.4, exit: 5.5 });
+    expect(slot.lines[0].beats).toEqual({ start: 0.4, exit: 5.5 });
+    const onDisk = JSON.parse(await fs.readFile(path.join(ctx.store.jobDir, dir, CONFIG_ARTIFACT), 'utf8'));
+    expect(onDisk.scenes[0].durationInFrames).toBe(180);
+  });
+
   it('does not create the Stage-5 artifact when validation passes with no repair', async () => {
     const valid = KnoMotionVideoConfigSchema.parse({
       ...brokenConfig(),

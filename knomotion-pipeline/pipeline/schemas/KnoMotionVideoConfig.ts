@@ -1,8 +1,8 @@
 /**
- * Stage 5 — Scene JSON Generation (LLM, heavily constrained).
+ * Stage 7 — Scene JSON Generation (LLM, heavily constrained).
  *
- * Input:  VideoPlan.json, NarrationScript.json, capability manifest
- * Output: KnoMotionVideoConfig.json
+ * Input:  VideoPlan.json, NarrationScript.json, SceneTiming.json, capability manifest
+ * Output: KnoMotionVideoConfig.json (05-knomotion-video-config.json)
  *
  * THE ONLY COUPLING POINT between the pipeline and the renderer.
  *
@@ -18,7 +18,7 @@
  *   KnoMotion-Videos/src/sdk/capability-manifest.json
  *
  * Note: this file defines the *structural* contract (what the renderer
- * accepts). Stage 6 (validation) layers additional deterministic business
+ * accepts). Stage 8 (validation) layers additional deterministic business
  * rules on top — strict unknown-key rejection, slot-name/layout matching,
  * the `sideBySide` layout rule, duration/beat bounds, and audio-URL validity —
  * see ValidationReport.ts.
@@ -26,6 +26,7 @@
 
 import { z } from 'zod';
 import { LayoutTypeSchema, MidSceneKeySchema, StylePresetSchema, VideoFormatSchema } from './common';
+import { secondsToFrames } from '../core/fps';
 
 // ---------------------------------------------------------------------------
 // Controlled-vocabulary coercions
@@ -34,7 +35,7 @@ import { LayoutTypeSchema, MidSceneKeySchema, StylePresetSchema, VideoFormatSche
 // vs style presets vs layout types vs mid-scenes) or invent near-miss values.
 // These maps fold the common confusions back onto valid values so a near-miss
 // renders rather than hard-failing. Genuinely meaningful mistakes still surface
-// elsewhere (e.g. an unsupported mid-scene is caught by Stage 6).
+// elsewhere (e.g. an unsupported mid-scene is caught by Stage 8).
 
 const BACKGROUND_PRESETS = ['notebookSoft', 'sunriseGradient', 'cleanCard', 'chalkboardGradient', 'spotlight', 'custom'];
 const BACKGROUND_ALIASES: Record<string, string> = {
@@ -220,7 +221,7 @@ export const LayoutSchema = z
 // 'code'), but SceneRenderer.jsx resolves midScene via a direct
 // MID_SCENE_COMPONENTS[midScene] lookup with NO alias normalisation — so those
 // aliases pass validation yet render an EMPTY slot. To guarantee renderable
-// output, the pipeline restricts Stage 5 to canonical keys only.
+// output, the pipeline restricts Stage 7 to canonical keys only.
 // See capability-manifest.json -> knownIssues: "midscene-aliases-not-resolved".
 
 export const SlotConfigSchema = z.object({
@@ -229,7 +230,7 @@ export const SlotConfigSchema = z.object({
   config: z
     .record(z.unknown())
     .optional()
-    .describe('Mid-scene config. Per-mid-scene validation handled by Stage 6 business rules.'),
+    .describe('Mid-scene config. Per-mid-scene validation handled by Stage 8 business rules.'),
 });
 export type SlotConfig = z.infer<typeof SlotConfigSchema>;
 
@@ -257,18 +258,30 @@ export const SceneContentConfigSchema = z
 // ---------------------------------------------------------------------------
 // Audio & captions (mirror of sdk/audio/audioSchema.ts)
 // ---------------------------------------------------------------------------
-// Audio URLs MUST be valid. If no real audio is available, omit the `audio`
-// block entirely — never emit placeholder URLs. This is enforced both by the
-// `.url()` checks below and by Stage 6 business rules.
+// Audio sources are either absolute URLs or paths relative to the renderer's
+// public/ dir (resolved with Remotion's staticFile()). Only Stage 11 (assembly)
+// writes audio blocks — the scene-JSON LLM never does, and Stage 8 rejects
+// placeholder hosts.
+
+const RELATIVE_ASSET_PATH = /^(?!\/)(?!.*(^|\/)\.\.(\/|$))[^\s]+\.[A-Za-z0-9]+$/;
+
+/** Absolute http(s)/data URL, or a public-dir-relative path like "pipeline-audio/job/scene.mp3". */
+export const AudioSrcSchema = z
+  .string()
+  .min(1)
+  .refine(
+    (s) => /^(https?:|data:|blob:)/.test(s) ? z.string().url().safeParse(s).success || /^(data|blob):/.test(s) : RELATIVE_ASSET_PATH.test(s),
+    { message: 'audio src must be an absolute URL or a public-dir-relative asset path (no leading "/", no "..")' },
+  );
 
 export const NarrationSchema = z.object({
-  src: z.string().url().describe('URL to the TTS audio file'),
+  src: AudioSrcSchema.describe('URL or public-dir-relative path to the TTS audio file'),
   startFromSeconds: z.number().min(0).optional(),
   volume: z.number().min(0).max(1).optional(),
 });
 
 export const MusicSchema = z.object({
-  src: z.string().url().describe('URL to background music file'),
+  src: AudioSrcSchema.describe('URL or public-dir-relative path to background music file'),
   volume: z.number().min(0).max(1).optional(),
   fadeIn: z.number().min(0).optional(),
   fadeOut: z.number().min(0).optional(),
@@ -276,7 +289,7 @@ export const MusicSchema = z.object({
 });
 
 export const SfxItemSchema = z.object({
-  src: z.string().url().describe('URL to sound effect file'),
+  src: AudioSrcSchema.describe('URL or public-dir-relative path to sound effect file'),
   atSecond: z.number().min(0),
   volume: z.number().min(0).max(1).optional(),
 });
@@ -320,7 +333,7 @@ export const SceneItemSchema = z.preprocess(
     // Coerce a seconds-based duration into frames if durationInFrames is absent.
     if (o.durationInFrames == null) {
       const secs = o.durationSeconds ?? o.durationInSeconds ?? o.duration;
-      if (typeof secs === 'number') o.durationInFrames = Math.max(1, Math.round(secs * 30));
+      if (typeof secs === 'number') o.durationInFrames = secondsToFrames(secs);
     }
     return o;
   },
