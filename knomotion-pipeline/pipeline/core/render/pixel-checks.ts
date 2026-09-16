@@ -32,9 +32,10 @@ export interface RenderCheckThresholds {
   /** Per-channel |a−b| above which a pixel counts as "different from background". */
   pixelTolerance: number;
   /**
-   * A slot with fewer differing pixels than this (native px) is blank. 400px is
-   * well under a single short word at the smallest body size (~2,000px) and
-   * far above anti-aliasing noise on a deterministic render (0).
+   * A slot with fewer differing pixels than this (native px) is blank.
+   * Calibrated on real stills: a broken <img> shows ~780px of alt text, the
+   * shortest legitimate content (a 4-letter header title) ~2,300px, one body
+   * line ~14,000px; a deterministic render's noise is 0.
    */
   blankMinPixels: number;
   /**
@@ -47,7 +48,7 @@ export interface RenderCheckThresholds {
 
 export const DEFAULT_THRESHOLDS: RenderCheckThresholds = {
   pixelTolerance: 28,
-  blankMinPixels: 400,
+  blankMinPixels: 1500,
   edgeBleedMaxCoverage: 0.002,
 };
 
