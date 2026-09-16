@@ -3,6 +3,8 @@
 > Curated, pre-investigated tech-debt items so a fresh agent can go straight to the fix.
 > Each item is self-contained: exact files, evidence, impact, recommended fix, and acceptance criteria.
 > Line numbers are approximate (code shifts) — search the quoted symbols/strings to locate.
+>
+> **Status 2026-09-16 (Sept M2):** TD-001, 002, 003, 004(a), 006 and 009 are RESOLVED (marked in place, acceptance criteria kept as regression notes). Open: TD-004b (alias normalisation, optional), TD-005 (manifest generation → M3), TD-007 (codeBlock deep-dive), TD-008 (env setup).
 
 **Source of these findings:** a full audit of the 11 mid-scene components against their JSON Schemas, the capability manifest, and `docs/reference-llm-guide.md`, performed while building the KnoMotion pipeline. The schema/manifest reconciliation itself is already done (see PRs #61/#62). The items below are the things deliberately **left untouched** because they need engine-logic changes or product intent — not just schema edits.
 
@@ -19,6 +21,8 @@
 ---
 
 ## TD-001 — `heroText` position contract is inconsistent (schema vs renderer vs layout engine)
+
+> **RESOLVED — Sept M2 (2026-09-16), branch `cursor/m2-guardrails-b054`.** `HeroTextEntranceExit.jsx` now treats `config.position` as the top-left `{ left, top, width, height }` slot area SceneRenderer injects (`positionToCSS(..., { useTopLeft: true })`) and centres its content with flexbox; `containerStyle` gains a `maxWidth` so text in a wide slot wraps instead of running edge to edge. `HeroTextEntranceExit.schema.json` `position` documents `left`/`top`. Verified on a rendered still (`heroText` centred, no `NaNpx`). Kept for the acceptance criteria.
 
 **Severity:** Medium · **Area:** engine / layout · **Type:** correctness
 
@@ -49,6 +53,8 @@ Net effect: hero positioning is governed by accidental fallbacks rather than a d
 
 ## TD-002 — `textReveal` `revealType: "mask"` with `direction: up`/`down` produces an empty clip-path
 
+> **RESOLVED — Sept M2 (2026-09-16), branch `cursor/m2-guardrails-b054`.** `TextRevealSequence.jsx` maps slide directions to mask insets before calling `getMaskReveal` (`MASK_DIRECTION = { up: 'top', down: 'bottom' }`; `left`/`right`/`center` pass through). The `mask-up` fixture in `knomotion-pipeline/pipeline/__tests__/render-check.test.ts` renders visibly under Stage 9 render-check (`blank: false` in all three sampled frames). Manifest note for `textReveal.direction` updated.
+
 **Severity:** Medium · **Area:** engine / animation · **Type:** correctness (invisible content)
 
 **Files**
@@ -71,6 +77,8 @@ The schema/manifest now *document* this (PR #62), but the engine still mis-handl
 ---
 
 ## TD-003 — `bigNumber` and `animatedCounter` ignore theme color keys
+
+> **RESOLVED — Sept M2 (2026-09-16), branch `cursor/m2-guardrails-b054`.** Both components resolve `color` through `KNODE_THEME.colors[color]` and fall back to the literal string, so `"primary"` and `"#ff6b35"` both work. The PR #62 interim `pattern` restriction was removed from `BigNumberReveal.schema.json` / `AnimatedCounter.schema.json`; manifest notes and `docs/reference-llm-guide.md` updated. `BigNumberReveal` also shrinks number and label to fit via `fitFontSize`.
 
 **Severity:** Medium · **Area:** engine / theming · **Type:** consistency
 
@@ -96,6 +104,8 @@ Every other mid-scene resolves a color via `KNODE_THEME.colors[colorKey] ?? colo
 ---
 
 ## TD-004 — Renderer Zod schema accepts mid-scene alias keys that render nothing
+
+> **RESOLVED — Sept M2 (2026-09-16), branch `cursor/m2-guardrails-b054`.** Option **(a)**: `MidSceneKeys` in `videoConfig.schema.ts` is the 11 canonical keys; `videoConfig.test.ts` asserts every canonical key parses and every registry alias is rejected. Manifest `knownIssues.midscene-aliases-not-resolved` is `status: resolved`. Option (b) (alias normalisation in `SceneRenderer`) was not done — `MID_SCENE_REGISTRY` aliases remain for JS callers only; if a public alias surface is ever wanted, that is the remaining half (TD-004b).
 
 **Severity:** Medium · **Area:** engine / validation · **Type:** correctness (silent blank slots)
 
@@ -144,6 +154,8 @@ The manifest had multiple wrong entries (e.g. `bubbleCallout` shapes/patterns, `
 
 ## TD-006 — Minor dead code in mid-scenes (low priority observations)
 
+> **RESOLVED — Sept M2 (2026-09-16), branch `cursor/m2-guardrails-b054`.** All four items done in the M2 engine commit: `AnimatedCounter` dead `normal` branch removed (colour now theme-resolved, TD-003); `ChecklistReveal` `slotLeft`/`slotTop` reads removed; `SideBySideCompare` honours a side's own `alignment` and falls back to the top-level one (the read was made live rather than deleted); `GridCardReveal` `rows` JSDoc removed. No behaviour change except the now-honoured per-side alignment.
+
 **Severity:** Low · **Area:** engine · **Type:** cleanup. Pre-verified; bundle together in one cleanup PR.
 
 - **AnimatedCounter dead `normal` color branch** — `AnimatedCounter.jsx` (~lines 88–92): `emphasisColors.normal` is defined but `numberColor` always uses `.high`. There is no `emphasis` prop on this component. Remove the dead branch (or wire an `emphasis` prop if desired; coordinate with TD-003).
@@ -175,6 +187,28 @@ The manifest had multiple wrong entries (e.g. `bubbleCallout` shapes/patterns, `
 **Acceptance criteria**
 - Confirmed `codeBlock` renders in all 4 reveal modes.
 - Documented list of languages that actually highlight (or explicit decision to keep `language` unvalidated).
+
+---
+
+## TD-009 — Items inside sequenced mid-scenes exited ~0.8s after entering (`resolveBeats` ignored the container's exit)
+
+> **RESOLVED — Sept M2 (2026-09-16), found while calibrating render-check.** Kept as a regression note: this was the single biggest cause of "the checklist appears and then the scene goes blank".
+
+**Severity:** High · **Area:** engine / timing · **Type:** correctness (content disappears)
+
+**Files**
+- `KnoMotion-Videos/src/sdk/utils/beats.ts` — `resolveBeats(beats, defaults)`
+- `ChecklistReveal.jsx`, `BubbleCalloutSequence.jsx`, `CardSequence.jsx`, `GridCardReveal.jsx`, `TextRevealSequence.jsx`, `IconGrid.jsx` — per-item `resolveBeats` calls
+
+**Problem**
+Each item (checklist row, callout, card, line, icon) resolved its own beats with `resolveBeats(item.beats, { start: containerStart + i * stagger })`. `BeatDefaults` had no `exit`, so an item without its own `beats.exit` fell to `hold + exitOffset` = start + 1.6 + 0.3 s and faded out ~1.9 s after it appeared — long before the container's `beats.exit` and the narration. A config could be perfectly valid, pass every rule, and show an empty slot for most of the scene.
+
+**Fix (shipped)**
+`BeatDefaults.exit?: number`; `resolveBeats` uses `beats.exit ?? defaults.exit ?? hold + exitOffset`. Every container passes `exit: sequenceBeats.exit` in its item defaults, so items stay up until their parent exits unless they carry their own exit. Pipeline-side, `beat_timing` now errors when a slot item lacks `beats.exit`, and Stage 9 render-check reports a slot that is blank at the scene midpoint as `blank_slot`, so this class of failure cannot pass silently again.
+
+**Acceptance criteria (met)**
+- The mock `worldcup` run's checklist scene shows all items at the midpoint still (coverage ~1.2% of the `full` slot, previously ~0%).
+- `render-check.test.ts` `healthy` fixture: `blank: false` in settled / midpoint / pre-exit.
 
 ---
 

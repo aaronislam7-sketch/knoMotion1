@@ -26,7 +26,7 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `Sept_DevPlan.md` | KEEP | Current plan. | 2026-09-10 | — |
 | `RETAIN_ARTIFACTS.md` | KEEP | This file. | 2026-09-10 | — |
 | `pipeline_build.md` | KEEP | Single pipeline handoff doc; §1 branch instructions stale — fix in M0. | 2026-09-10 | — |
-| `TECH_DEBT.md` | KEEP | TD-001…TD-008 all still open; M2 consumes it. Delete items as they resolve. | 2026-09-10 | — |
+| `TECH_DEBT.md` | KEEP | M2 resolved TD-001/002/003/004a/006/009 (marked in place, not deleted — the acceptance criteria double as regression notes). TD-004b/005/007 open for M3. | 2026-09-16 | M2 PR |
 | `July_DevPlan.md` | KEEP (historical) | Superseded by `Sept_DevPlan.md`; keep for the §3 root-cause analysis it contains. Add an "ARCHIVED" header in M0. Move to `Archive/docs/` during the archiving activity (D6). | 2026-09-10 | — |
 | `BUILD_STATUS.md` | VERIFY | Renderer roadmap through Chunk 7 (May). Useful for the architecture-decisions section only; the "10/10 engine alignment" claim is contradicted by TD-001…004. Check: does anything other than the kickstart prompt reference it? Likely fold decisions into `docs/ARCHITECTURE.md` and archive. | 2026-09-10 | — |
 | `deletion-plan.md` | REMOVE (after M0) | Analysis-only; every item is carried into this file below. | 2026-09-10 | — |
@@ -55,7 +55,8 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `@dnd-kit/sortable` | REMOVE | Zero imports (July §8). | 2026-09-10 | — |
 | `framer-motion`, `@xyflow/react`, `@tanstack/react-table`, `@dnd-kit/core`, `lottie-react` | REMOVE (with KnoSlides exit) | Used only by `KnoSlides/` (deletion-plan §9). KnoSlides is backlogged and leaving the repo (Sept plan D2). Grep each for a video-side importer in the removal PR before deleting. | 2026-09-10 | — |
 | `remotion`, `@remotion/{transitions,captions,lottie,google-fonts,player,bundler,cli,renderer}` @ 4.0.382, `remotion-bits`, `zod`, `roughjs`, `daisyui`, `tailwindcss` | KEEP | Live renderer/admin dependencies. `@remotion/renderer` becomes load-bearing for M2 render-check and M4 render. | 2026-09-10 | — |
-| `@remotion/layout-utils@4.0.382` | KEEP (to add) | Required by M2 text fitting. Not yet installed. | 2026-09-10 | — |
+| `@remotion/layout-utils@4.0.382` | KEEP | Installed in M2; `sdk/utils/fitFontSize.js` wraps `fitText` for `textReveal`, `checklist`, `bigNumber`. | 2026-09-16 | M2 PR |
+| `knomotion-pipeline` → `pngjs@7` (+ `@types/pngjs`) | KEEP | M2: PNG decode for the render-check pixel diffs (pure JS, no native build). Pipeline `package.json`, not root. | 2026-09-16 | M2 PR |
 
 ## 3. Renderer — `KnoMotion-Videos/src/`
 
@@ -67,8 +68,8 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | `compositions/CanonShowerVideo.jsx` | KEEP (for now) | Imported by `admin/ShowcasePreview.jsx`; unregistered in `Root.tsx`. Candidate source for a reference video. | 2026-09-10 | — |
 | `sdk/mid-scenes/*.jsx` (11) + `sdk/mid-scenes/schemas/*.json` (11) + `sdk/mid-scenes/index.js` | KEEP | The visual vocabulary; schemas are loaded by the pipeline at runtime. | 2026-09-10 | — |
 | `sdk/mid-scenes/README.md` | KEEP | Contains the "future mid-scene ideas" list used to choose M5 additions. | 2026-09-10 | — |
-| `sdk/capability-manifest.json` | KEEP (becomes generated in M3) | Read by pipeline `renderer-capabilities.ts`. Hand-maintained today (TD-005). | 2026-09-10 | — |
-| `sdk/schemas/videoConfig.schema.ts` | KEEP | Renderer Zod schema registered on `KnoMotionVideo`; `MidSceneKeys` to be tightened to 11 keys in M2. | 2026-09-10 | — |
+| `sdk/capability-manifest.json` | KEEP (becomes generated in M3) | Read by pipeline `renderer-capabilities.ts`. Hand-maintained today (TD-005). M2 (v1.2) added `layoutGeometry`, `textMetrics`, `contentShapes` — the geometry/metrics the pipeline mirrors; M3's generator must keep emitting them. | 2026-09-16 | M2 PR |
+| `sdk/schemas/videoConfig.schema.ts` | KEEP | Renderer Zod schema registered on `KnoMotionVideo`; `MidSceneKeys` tightened to the 11 canonical keys in M2 (TD-004a); `debugSafeZones` prop added. | 2026-09-16 | M2 PR |
 | `sdk/schemas/videoConfig.test.ts` | VERIFY | Manual `npx tsx` script, not in any runner. Either wire into a test runner or delete once pipeline `contract-drift.test.ts` covers it. | 2026-09-10 | — |
 | `sdk/scene-layout/`, `sdk/layout/layoutEngine.js`, `sdk/layout/viewportPresets.js`, `sdk/layout/positionSystem.js` | KEEP | `resolveSceneSlots` + `getViewportPadding` (60/40px) are the geometry source for M2 text budget and safe-band checks. | 2026-09-10 | — |
 | `sdk/layout/mobileRenderingGuide.js` (634 lines) | VERIFY | Only importer is the `sdk/index.js` barrel (grep 2026-09-10). Likely documentation-as-code; `REMOVE` with the barrel prune unless a live path uses it. | 2026-09-10 | — |
@@ -82,8 +83,11 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 | Shims (2-line `export *`): `sdk/fontSystem.ts`, `sdk/lottiePresets.js`, `sdk/lottieIntegration.tsx`, `sdk/SceneIdContext.jsx`, `sdk/StyleTokensProvider.tsx`, `sdk/broadcastEffects.tsx`, `sdk/microDelights.jsx` | VERIFY | All confirmed to be backward-compat shims (read 2026-09-10). Grep each shim path for importers; redirect and `REMOVE`. | 2026-09-10 | — |
 | `sdk/transitions.ts` (8-line shim) + `sdk/core/transitions.ts` | KEEP | Merges both transition layers; `core/transitions.ts` defines `TransitionSeriesBridge` still in use (deletion-plan §11). Re-verify when M1 touches `sdk/transitions/index.ts`. | 2026-09-10 | — |
 | `sdk/transitions/index.ts` | KEEP | Live `@remotion/transitions` layer; per-scene transition duration fixed in `calculateTransitionSeriesDuration` (PR #75, covered by `renderer-timing.test.ts`). | 2026-09-10 | #75 |
-| `sdk/utils/ttsToBeatAlignment.ts` | REMOVE | Replaced: PR #75 puts word-timing → beats in `knomotion-pipeline/pipeline/core/timing.ts` (pipeline side, where the audio lives). Still zero importers in the renderer. Delete in the next renderer PR after #75 merges. | 2026-09-10 | #75 |
-| `sdk/utils/beats.ts` | KEEP | `resolveBeats` defaults (0.5s start, 1.6s hold) used by every mid-scene. | 2026-09-10 | — |
+| `sdk/utils/ttsToBeatAlignment.ts` | REMOVED | Deleted in M2 (engine commit); replacement is `knomotion-pipeline/pipeline/core/timing.ts`. `SDK.md`, `docs/ARCHITECTURE.md`, `sdk/audio/testFixtures.ts` references updated. | 2026-09-16 | M2 PR |
+| `sdk/utils/beats.ts` | KEEP | `resolveBeats` defaults (0.5s start, 1.6s hold) used by every mid-scene. M2 added `defaults.exit` so items inherit their container's exit (TD-009). | 2026-09-16 | M2 PR |
+| `sdk/utils/fitFontSize.js` | KEEP | M2: shrink-to-fit via `@remotion/layout-utils` (`fitFontSize`, `fitFontSizeForAll`); used by `textReveal`, `checklist`, `bigNumber`. | 2026-09-16 | M2 PR |
+| `compositions/SafeZoneOverlay.jsx` | KEEP | M2: `debugSafeZones` overlay (safe band + `resolveSceneSlots` rects with labels) on `GenericVideoPlayer`; toggled by `preview --debug-safe-zones`. Debug aid for `blank_slot`/`edge_bleed` findings. | 2026-09-16 | M2 PR |
+| `remotion/webpackOverride.ts` | KEEP | M2: the one webpack override, imported by root `remotion.config.ts` (Studio/CLI) and by the pipeline's `core/render/still-renderer.ts` (`bundle()`), so both render identically. | 2026-09-16 | M2 PR |
 | `sdk/audio/*` (AudioLayer, CaptionOverlay, SafeAudio, audioSchema, testFixtures) | KEEP | Assembly (PR #75) feeds `AudioLayer` with public-relative `src`; `SafeAudio` resolves it via `staticFile()`, `audioSchema.ts` accepts URL-or-relative-path. Captions (M5) feed `CaptionOverlay`. | 2026-09-10 | #75 |
 | `sdk/elements/*` (16 atoms, 11 compositions, `index.js`) | KEEP | Powers the mid-scenes. `ELEMENT_RULES.md`, `PROP_SCHEMA.md`, `MIGRATION_GUIDE.md`, `README.md` inside — VERIFY whether the migration guide is still relevant. | 2026-09-10 | — |
 | `sdk/components/mid-level/FlowDiagram.jsx` | KEEP | Basis for the M5 `processFlow` mid-scene. | 2026-09-10 | — |
@@ -113,14 +117,16 @@ Path (or glob) · Status · Evidence (what you checked, one line) · Date · PR.
 
 | Path | Status | Evidence | Date | PR |
 |---|---|---|---|---|
-| `pipeline/orchestrator.ts`, `cli.ts`, `core/*`, `schemas/*`, `prompts/*`, `stages/*` (implemented 0–7) | KEEP | The pipeline. Write-back fix and `preview` command landed with PR #72. | 2026-09-10 | #72 |
+| `pipeline/orchestrator.ts`, `cli.ts`, `core/*`, `schemas/*`, `prompts/*`, `stages/*` (implemented 0–11) | KEEP | The pipeline. Write-back fix and `preview` command landed with PR #72; M2 added the validate→render-check→repair loop, `renderCheckJob()` and the `render-check` command. | 2026-09-16 | #72, M2 PR |
+| `core/geometry.ts`, `core/text-budget.ts`, `core/content-shapes.ts` | KEEP | M2: pipeline-side mirror of slot carving (from manifest `layoutGeometry`), per-slot text budgets, contentShape → allowed mid-scenes. `geometry.test.ts` fails on drift against the renderer's `resolveSceneSlots()`. | 2026-09-16 | M2 PR |
+| `core/render/{still-renderer,frame-plan,pixel-checks}.ts`, `stages/render-check/runRenderCheck.ts` | KEEP | M2 Stage 9: bundle once + `renderStill()` (lazy `@remotion/*` imports → `skipped` when absent), 3 frames/scene from beats, blank-slot/edge-bleed diffs vs a background baseline (`pngjs`). M4 render reuses `still-renderer.ts`. | 2026-09-16 | M2 PR |
 | `core/timing.ts`, `core/fps.ts`, `core/tts/{index,provider,elevenlabs,mock}.ts`, `stages/tts/generateTTS.ts`, `stages/timing/computeTiming.ts`, `stages/assembly/buildRenderProps.ts`, `schemas/SceneTiming.ts` | KEEP | M1 (PR #75): TTS → timing → assembly. Timing is the single owner of `durationInFrames`/`beats` for pipeline output. | 2026-09-10 | #75 |
 | `stages/beat-alignment/alignBeats.ts` | REMOVED | Absorbed into `core/timing.ts`; stub deleted and `'beat-alignment'` dropped from `PipelineStageSchema`. | 2026-09-10 | #75 |
-| `stages/{captions,render}` stubs + `stages/_stub.ts` | KEEP | Replaced by real implementations in M4 (render) / M5 (captions). `render-check` (M2) has an enum slot but no file yet. | 2026-09-10 | #75 |
+| `stages/{captions,render}` stubs + `stages/_stub.ts` | KEEP | Replaced by real implementations in M4 (render) / M5 (captions). | 2026-09-16 | #75 |
 | `pipeline/cache/` (gitignored) | KEEP | TTS response cache keyed by provider\|voice\|model\|text; safe to wipe any time (only costs a re-bill). | 2026-09-10 | #75 |
-| `schemas/QualityReport.ts` | KEEP | Gets its first producer in M2 render-check. | 2026-09-10 | — |
+| `schemas/QualityReport.ts` | KEEP | Produced by Stage 9 (`09-quality-report.json`): `renderCheck` section + `scores.blankSlotRate/edgeBleedRate`. `humanEdits`/variants still scaffold. | 2026-09-16 | M2 PR |
 | `schemas/CaptionsManifest.ts`, `schemas/RenderManifest.ts` | KEEP | `RenderManifest` now produced by assembly (PR #75); `CaptionsManifest` waits for M5. | 2026-09-10 | #75 |
-| `__tests__/*` (9 files after PR #75) | KEEP | Must stay green. `contract-drift.test.ts` and `renderer-timing.test.ts` import renderer modules by absolute path; they skip (not fail) if root deps are absent. | 2026-09-10 | #75 |
+| `__tests__/*` (12 files after M2) | KEEP | Must stay green. `contract-drift.test.ts`, `renderer-timing.test.ts`, `geometry.test.ts` import renderer modules by absolute path and skip (not fail) if root deps are absent; `render-check.test.ts` renders real stills only with `KNOMOTION_RENDER_TESTS=1`. | 2026-09-16 | #75, M2 PR |
 | `pipeline/sources/worldcup.md`, `sources/README.md` | KEEP | Reference source R4; second reference doc added in M4. | 2026-09-10 | — |
 | `pipeline/artifacts/.gitkeep` | KEEP | Runtime output dir (gitignored). | 2026-09-10 | — |
 
