@@ -13,10 +13,16 @@ import { loadFont as loadCabinSketch } from '@remotion/google-fonts/CabinSketch'
 import { loadFont as loadPermanentMarker } from '@remotion/google-fonts/PermanentMarker';
 import { loadFont as loadInter } from '@remotion/google-fonts/Inter';
 
-// Initialize fonts at module level (required for Remotion rendering)
+// Initialize fonts at module level (required for Remotion rendering).
+// Inter is loaded for the weights/subsets the SDK actually uses (400–800 in
+// theme/mid-scenes, italic only in TestimonialCard). Loading every weight ×
+// subset × style made 126 network requests per page load and tripped
+// @remotion/google-fonts' "too many requests" warning on every still that
+// render-check / render produce; Remotion v5 will require this anyway.
 loadCabinSketch();
 loadPermanentMarker();
-loadInter();
+loadInter('normal', { weights: ['300', '400', '500', '600', '700', '800', '900'], subsets: ['latin', 'latin-ext'] });
+loadInter('italic', { weights: ['400'], subsets: ['latin'] });
 
 // Generic Parameterized Composition (S2) + Zod Schema (S1)
 import { GenericVideoPlayer } from '../compositions/GenericVideoPlayer';
