@@ -23,10 +23,15 @@ import {
 } from '../sdk/transitions';
 import { AudioLayer } from '../sdk/audio/AudioLayer';
 import { CaptionOverlay } from '../sdk/audio/CaptionOverlay';
+import { SafeZoneOverlay } from './SafeZoneOverlay';
 
 const TRANSITION_FRAMES = 20;
 
-export const GenericVideoPlayer = ({ scenes = [], format }) => {
+/**
+ * @param {boolean} [debugSafeZones] Draw the safe band and every layout slot over each
+ *   scene (dev aid for judging blank slots / edge bleed). Never on in production renders.
+ */
+export const GenericVideoPlayer = ({ scenes = [], format, debugSafeZones = false }) => {
   const { width, height } = useVideoConfig();
   const viewport = { width, height };
 
@@ -74,6 +79,13 @@ export const GenericVideoPlayer = ({ scenes = [], format }) => {
                 durationInFrames={scene.durationInFrames}
               >
                 <SceneFromConfig config={sceneConfig} />
+                {debugSafeZones && (
+                  <SafeZoneOverlay
+                    layout={sceneConfig.layout}
+                    configuredSlots={sceneConfig.slots}
+                    viewport={viewport}
+                  />
+                )}
                 {scene.audio && (
                   <AudioLayer
                     audio={scene.audio}

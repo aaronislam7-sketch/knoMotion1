@@ -201,6 +201,10 @@ export const VideoConfigSchema = z.object({
     .optional()
     .default('desktop')
     .describe('Video format: desktop (1920×1080) or mobile (1080×1920)'),
+  debugSafeZones: z
+    .boolean()
+    .optional()
+    .describe('Dev aid: overlay the safe band and layout slot bounds on every scene (toggle in Studio props)'),
 });
 
 export type VideoConfig = z.infer<typeof VideoConfigSchema>;

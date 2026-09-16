@@ -7,6 +7,7 @@
  *   tsx pipeline/cli.ts --input s.md --provider openai
  *   tsx pipeline/cli.ts --input s.md --stop-after validation
  *   tsx pipeline/cli.ts preview [jobId]         # stage a generated config for Studio preview
+ *   tsx pipeline/cli.ts preview [jobId] --debug-safe-zones   # ... with slot bounds + safe band drawn
  *
  * Flags:
  *   --input <file>        Read source material from a file
@@ -19,6 +20,7 @@
  *   --stop-after <stage>  Halt after a stage (e.g. validation)
  *   --log-level <lvl>     debug | info | warn | error
  *   --video <videoId>     (preview) Which video of the job to stage (default: first)
+ *   --debug-safe-zones    (preview) Overlay layout slots and the outer safe band on every scene
  *
  * The `preview` command copies a job's 05-knomotion-video-config.json to
  * <repo root>/public/pipeline-preview/config.json, where the PipelinePreview
@@ -55,11 +57,12 @@ const main = async () => {
       video: { type: 'string' },
       'stop-after': { type: 'string' },
       'log-level': { type: 'string' },
+      'debug-safe-zones': { type: 'boolean' },
     },
   });
 
   if (positionals[0] === 'preview') {
-    await runPreview(positionals[1], values.out, values.video);
+    await runPreview(positionals[1], values.out, values.video, values['debug-safe-zones'] === true);
     return;
   }
 
@@ -125,7 +128,7 @@ const main = async () => {
 // preview <jobId?> — stage a generated config for the PipelinePreview composition
 // ---------------------------------------------------------------------------
 
-const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId?: string) => {
+const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId?: string, debugSafeZones = false) => {
   const artifactsDir = path.resolve(outDir ?? process.env.KNOMOTION_ARTIFACTS_DIR ?? 'pipeline/artifacts');
 
   const jobId = jobIdArg ?? (await latestJobId(artifactsDir));
@@ -170,7 +173,9 @@ const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId
   }
 
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
-  await fs.writeFile(path.join(PREVIEW_DIR, 'config.json'), JSON.stringify(parsed.data, null, 2) + '\n', 'utf8');
+  // debugSafeZones is a renderer-only prop (GenericVideoPlayer), not part of the pipeline contract.
+  const staged = debugSafeZones ? { ...parsed.data, debugSafeZones: true } : parsed.data;
+  await fs.writeFile(path.join(PREVIEW_DIR, 'config.json'), JSON.stringify(staged, null, 2) + '\n', 'utf8');
   await fs.writeFile(
     path.join(PREVIEW_DIR, 'meta.json'),
     JSON.stringify({ jobId, videoId: chosen, sourcePath, stagedAt: new Date().toISOString() }, null, 2) + '\n',
@@ -181,7 +186,7 @@ const runPreview = async (jobIdArg: string | undefined, outDir?: string, videoId
   console.log(`job:    ${jobId}`);
   console.log(`video:  ${chosen}${candidates.length > 1 ? `   (others: ${candidates.filter((c) => c !== chosen).join(', ')} — use --video <id>)` : ''}`);
   console.log(`scenes: ${parsed.data.scenes.length}, format: ${parsed.data.format ?? 'desktop'}`);
-  console.log(`staged: ${path.join(PREVIEW_DIR, 'config.json')}`);
+  console.log(`staged: ${path.join(PREVIEW_DIR, 'config.json')}${debugSafeZones ? '   (debugSafeZones on: slot bounds + safe band drawn)' : ''}`);
   console.log('\nWatch it (from the repo root):');
   console.log('  npx remotion studio KnoMotion-Videos/src/remotion/index.ts');
   console.log('  → select the "PipelinePreview" composition (refresh if Studio is already open)');
